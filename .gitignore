@@ -10,3 +10,7 @@ __pycache__/
 
 streamlit/.cache/
 streamlit/*.log
+streamlit_v2/.cache/
+streamlit_v2/*.log
+
+chroma_db/
