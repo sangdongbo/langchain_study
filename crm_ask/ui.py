@@ -5,7 +5,7 @@ from textwrap import dedent
 
 import streamlit as st
 
-from ai_companion.chat_store import ChatMessage, ConversationStore
+from common.chat_store import ChatMessage, ConversationStore
 from erp_ask.config import DEFAULT_PERSONA, DEFAULT_TITLE
 
 

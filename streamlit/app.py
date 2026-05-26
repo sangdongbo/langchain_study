@@ -10,14 +10,14 @@ from dotenv import load_dotenv
 
 # 这个文件是通过 `streamlit run streamlit/app.py` 启动的。
 # Streamlit 会把脚本所在目录 `streamlit/` 放到导入路径前面，
-# 这样直接导入项目根目录下的 `ai_companion` 包时可能找不到。
+# 这样直接导入项目根目录下的 `common` 包时可能找不到。
 # 所以这里手动把项目根目录加入 `sys.path`，保证本地模块能稳定导入。
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from ai_companion.chat_store import ChatMessage, ConversationStore
-from ai_companion.llm import stream_deepseek
+from common.chat_store import ChatMessage, ConversationStore
+from common.llm import stream_deepseek
 
 
 APP_DIR = Path(__file__).resolve().parent

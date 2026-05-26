@@ -7,10 +7,10 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_deepseek import ChatDeepSeek
 from openai import APIConnectionError, APIStatusError, APITimeoutError
 
-from ai_companion.chat_store import ChatMessage
+from common.chat_store import ChatMessage
 
 
-"""原始 Streamlit 聊天助手的 DeepSeek 调用封装。
+"""共享的 DeepSeek 调用封装。
 
 页面层只关心“给我一段流式文本”，不直接处理 API Key、模型参数或异常。
 这些细节集中放在这里，后续换模型时只改这个模块即可。

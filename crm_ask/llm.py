@@ -8,11 +8,11 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, Tool
 from langchain_deepseek import ChatDeepSeek
 from openai import APIConnectionError, APIStatusError, APITimeoutError
 
-from ai_companion.chat_store import ChatMessage
+from common.chat_store import ChatMessage
 from erp_ask.tools.registry import get_tool, list_tools
 
 
-# v2 使用自己的 LLM 配置和系统 prompt，不复用 ai_companion.llm。
+# v2 使用自己的 LLM 配置和系统 prompt，不复用 common.llm。
 # 这样 ERP Agent 的提示词可以独立演进，不影响原始聊天示例。
 def build_llm() -> ChatDeepSeek:
     """根据环境变量创建 DeepSeek 聊天模型。"""

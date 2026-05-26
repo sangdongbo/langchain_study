@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from ai_companion.chat_store import ChatMessage, ConversationStore
+from common.chat_store import ChatMessage, ConversationStore
 from erp_ask.agent.erp_agent import ERPFlowState, handle_erp_message
 from erp_ask.config import CACHE_PATH, DEFAULT_PERSONA, DEFAULT_TITLE
 from erp_ask.llm import stream_deepseek
