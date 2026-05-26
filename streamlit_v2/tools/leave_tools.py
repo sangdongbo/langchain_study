@@ -5,7 +5,14 @@ from typing import Any
 
 from langchain_core.tools import tool
 
-from streamlit_v2.tools.mock_data import MOCK_USERS
+from erp_ask.tools.mock_data import MOCK_USERS
+
+
+"""请假相关 LangChain tools。
+
+这里模拟 ERP 后端接口：查询假期余额、创建请假申请。
+页面和 Agent 都不直接读 MOCK_USERS，而是通过工具函数访问数据。
+"""
 
 
 @tool("get_leave_balance")
@@ -17,6 +24,7 @@ def get_leave_balance(user_id: str = "U001") -> dict[str, Any]:
     """
 
     user = MOCK_USERS[user_id]
+    # 统一返回 source/data 结构，方便测试和页面层处理。
     return {
         "source": "mock",
         "data": {
@@ -45,6 +53,7 @@ def create_leave_request(
         user_id: 员工 ID。演示环境默认使用 U001。
     """
 
+    # 真实系统中 request_id 应该由后端数据库生成。
     request_id = "LR-" + datetime.now().strftime("%Y%m%d%H%M%S")
     return {
         "source": "mock",

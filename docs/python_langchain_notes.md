@@ -2,6 +2,13 @@
 
 本文档用于快速复习 Python 基础语法、AI 应用开发基础，以及 LangChain 中常用的模型、提示词、链、工具、智能体、记忆和 RAG 知识点。内容按功能重新整理：相同主题集中在一起，先 Python，后大模型，再 LangChain，最后 RAG 项目实战。
 
+整理原则：
+
+- 按功能模块组织，而不是按课程截图出现顺序组织。
+- 功能相同的内容合并到同一章，例如 Prompt、RAG、向量库、记忆等。
+- 保留学习笔记需要的细节：概念说明、常用 API、示例代码、注意点和排查方法。
+- LangChain 版本变化较快，示例以当前常见写法为主，遇到导入路径差异时优先查看官方文档。
+
 ## 一、Python 基础语法
 
 ### 1. 字面量、变量与数据类型
@@ -116,6 +123,36 @@ if score >= 60 and score <= 100:
     print("成绩有效")
 ```
 
+常见布尔判断：
+
+```python
+if name:
+    print("name 不是空字符串")
+
+if items:
+    print("列表不为空")
+
+if value is None:
+    print("value 是空值")
+```
+
+Python 中这些值通常会被当作 `False`：
+
+| 值 | 说明 |
+| --- | --- |
+| `False` | 布尔假 |
+| `None` | 空值 |
+| `0` / `0.0` | 数字零 |
+| `""` | 空字符串 |
+| `[]` / `{}` / `set()` / `()` | 空容器 |
+
+本阶段小结：
+
+- 变量保存的是对象引用，变量名只是指向数据的名字。
+- 字符串是最常用的数据类型之一，建议熟练掌握 f-string。
+- `input()` 的结果永远是字符串，需要手动转换。
+- 判断空值时，`is None` 比 `== None` 更推荐。
+
 ## 二、流程控制
 
 ### 1. if 条件判断
@@ -216,6 +253,40 @@ range(1, 10, 2) # 1, 3, 5, 7, 9
 for i in range(1, 6):
     print(i)
 ```
+
+循环常见模式：
+
+```python
+# 遍历列表
+for item in items:
+    print(item)
+
+# 遍历下标
+for i in range(len(items)):
+    print(i, items[i])
+
+# 同时获取下标和值，更推荐
+for i, item in enumerate(items):
+    print(i, item)
+```
+
+嵌套循环：
+
+```python
+for i in range(3):
+    for j in range(2):
+        print(i, j)
+```
+
+注意：嵌套循环会增加执行次数。外层循环 3 次、内层循环 2 次，总共执行 6 次。
+
+本阶段小结：
+
+- `if` 解决分支选择。
+- `for` 适合遍历已知序列。
+- `while` 适合“不确定循环次数，但知道停止条件”的场景。
+- `break` 结束循环，`continue` 跳过本轮。
+- `range()` 常和 `for` 配合生成数字序列。
 
 ## 三、容器数据结构
 
@@ -360,6 +431,44 @@ print(values)  # ["new"]
 | 去重、集合运算 | `set` |
 | 文本内容 | `str` |
 
+容器通用操作：
+
+```python
+len(items)          # 长度
+"Python" in items   # 是否包含
+for item in items:  # 遍历
+    print(item)
+```
+
+排序与反转：
+
+```python
+nums = [3, 1, 2]
+
+print(sorted(nums))  # 返回新列表
+nums.sort()          # 原地排序
+nums.reverse()       # 原地反转
+```
+
+浅拷贝：
+
+```python
+a = [1, 2, 3]
+b = a.copy()
+b.append(4)
+
+print(a)  # [1, 2, 3]
+print(b)  # [1, 2, 3, 4]
+```
+
+本阶段小结：
+
+- 列表适合保存一组有顺序的数据。
+- 字典适合保存对象属性、接口响应、配置等结构化数据。
+- 元组常用于固定结构和函数多返回值。
+- 集合适合去重和集合运算。
+- 切片、推导式和字典遍历是 Python 高频写法。
+
 ## 四、函数、模块与面向对象
 
 ### 1. 函数
@@ -379,6 +488,31 @@ print(message)
 ```python
 def create_user(name, age=18):
     return {"name": name, "age": age}
+```
+
+可变默认参数要避免：
+
+```python
+# 不推荐
+def add_item_bad(item, items=[]):
+    items.append(item)
+    return items
+
+# 推荐
+def add_item(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+```
+
+函数返回多个值时，本质上返回的是元组：
+
+```python
+def get_user():
+    return "Alice", 18
+
+name, age = get_user()
 ```
 
 ### 2. 类型注解
@@ -431,6 +565,24 @@ else:
 finally:
     print("无论是否异常都会执行")
 ```
+
+常见异常：
+
+| 异常 | 常见原因 |
+| --- | --- |
+| `ValueError` | 类型转换失败，例如 `int("abc")` |
+| `KeyError` | 字典 key 不存在 |
+| `IndexError` | 列表下标越界 |
+| `FileNotFoundError` | 文件不存在 |
+| `TypeError` | 类型不匹配 |
+
+本阶段小结：
+
+- 函数用于封装复用逻辑，参数和返回值要尽量清晰。
+- 类型注解不是强制运行检查，但能显著提升可读性。
+- `dataclass` 适合保存结构化数据。
+- 模块导入能让代码拆分得更清楚。
+- 异常处理用于处理可预期失败，不要用裸 `except` 吞掉所有错误。
 
 ## 五、文件、环境变量与 JSON
 
@@ -490,6 +642,30 @@ path.write_text(json.dumps(user, ensure_ascii=False, indent=2), encoding="utf-8"
 
 loaded = json.loads(path.read_text(encoding="utf-8"))
 ```
+
+JSON 和 Python 类型对应关系：
+
+| JSON | Python |
+| --- | --- |
+| object | `dict` |
+| array | `list` |
+| string | `str` |
+| number | `int` / `float` |
+| true / false | `True` / `False` |
+| null | `None` |
+
+常见坑：
+
+- `json.dumps()` 默认会把中文转义，保存中文时加 `ensure_ascii=False`。
+- JSON 的 key 必须是字符串。
+- JSON 文件中不能写 Python 的 `True`、`False`、`None`，要写 `true`、`false`、`null`。
+
+本阶段小结：
+
+- 路径处理优先用 `pathlib.Path`。
+- 密钥、Token、模型配置不要硬编码。
+- JSON 是大模型应用里非常常见的数据交换格式。
+- 文件读写要指定 `encoding="utf-8"`。
 
 ## 六、AI 应用与大模型基础
 
@@ -566,6 +742,52 @@ Few-shot：给几个示例后再让模型完成任务。
 ```
 
 Few-shot 通常能提升格式稳定性和任务理解效果。
+
+### 6. 提示词常见结构
+
+一个稳定的提示词通常包含这些部分：
+
+```text
+角色：你是谁
+任务：你要做什么
+背景：你可以参考什么信息
+约束：不能做什么
+输出格式：必须怎么输出
+示例：给出 1 到 3 个参考样例
+```
+
+示例：
+
+```text
+你是一个 Python 教学助手。
+请用初学者能理解的方式解释下面的概念。
+要求：
+1. 先给一句话解释
+2. 再给一个代码示例
+3. 不要使用太多术语
+
+概念：列表推导式
+```
+
+### 7. 大模型应用常见流程
+
+```text
+用户输入 -> Prompt 组装 -> 模型调用 -> 输出解析 -> 业务处理 -> 返回结果
+```
+
+如果接入外部知识或工具，流程会变成：
+
+```text
+用户输入 -> 检索/工具调用 -> Prompt 组装 -> 模型调用 -> 解析结果 -> 返回
+```
+
+本阶段小结：
+
+- 云端 API 接入快，本地模型数据更可控。
+- HTTP API 调用要考虑超时、重试和异常处理。
+- Prompt 要明确角色、任务、约束和输出格式。
+- Few-shot 可以让模型更容易模仿你想要的输出。
+- RAG、Agent、工具调用都建立在“模型调用 + 上下文组织”的基础上。
 
 ## 七、LangChain 基础与模型调用
 
@@ -669,6 +891,21 @@ print(response.content)
 | Rerank Model | 检索结果重排 | 提升 RAG 命中质量 |
 | Image / Multimodal Model | 图像理解或生成 | 图片问答、多模态应用 |
 
+模型调用常见注意点：
+
+- `temperature=0` 更稳定，适合知识问答、代码生成、结构化输出。
+- `temperature` 较高时更发散，适合创意写作。
+- 聊天模型返回的通常是消息对象，真正文本在 `.content` 中。
+- 不同供应商的模型名称、鉴权环境变量、上下文长度不同。
+- 生产项目要记录请求耗时、错误信息和模型返回状态，但不要把 API Key 写入日志。
+
+本阶段小结：
+
+- LangChain 把模型、Prompt、工具、检索器等统一成可组合组件。
+- Chat Model 负责生成回答，Embedding Model 负责文本向量化。
+- `SystemMessage` 用于设定角色和约束，`HumanMessage` 表示用户问题。
+- 初始化模型时重点关注模型名、温度、超时和密钥配置。
+
 ## 八、Prompt 模板与输出解析
 
 ### 1. PromptTemplate
@@ -761,6 +998,79 @@ print(answer)
 ```
 
 如果需要 JSON 或结构化对象，可以使用结构化输出或对应解析器。
+
+### 6. Prompt 变量与格式化
+
+Prompt 中的 `{变量名}` 必须在调用时传入。
+
+```python
+prompt = ChatPromptTemplate.from_template("请把{topic}解释给{audience}听")
+
+value = prompt.invoke(
+    {
+        "topic": "RAG",
+        "audience": "Python 初学者",
+    }
+)
+```
+
+如果变量名写错，会在格式化或调用时报错。
+
+```python
+# 模板中需要 topic，但调用时传了 question
+prompt.invoke({"question": "RAG"})
+```
+
+### 7. 结构化输出思路
+
+当你希望模型返回固定字段时，可以在提示词中明确 JSON 格式。
+
+```python
+prompt = ChatPromptTemplate.from_template(
+    """请从文本中抽取商品信息，并返回 JSON。
+字段包括：name、price、features。
+
+文本：{text}
+"""
+)
+```
+
+更可靠的做法是使用模型或 LangChain 提供的结构化输出能力，让返回结果符合 Pydantic 模型或 JSON Schema。
+
+Pydantic 示例：
+
+```python
+from pydantic import BaseModel, Field
+
+
+class ProductInfo(BaseModel):
+    name: str = Field(description="商品名称")
+    price: float | None = Field(description="商品价格，如果没有则为 None")
+    features: list[str] = Field(description="商品特点列表")
+
+
+structured_model = model.with_structured_output(ProductInfo)
+
+result = structured_model.invoke("商品A售价199元，适合秋冬穿，保暖性好。")
+print(result.name)
+print(result.features)
+```
+
+结构化输出适合：
+
+- 信息抽取。
+- 文本分类。
+- 表单填写。
+- 多字段分析报告。
+- 后续要被程序继续处理的模型结果。
+
+本阶段小结：
+
+- `PromptTemplate` 偏普通文本，`ChatPromptTemplate` 偏聊天消息。
+- `MessagesPlaceholder` 用于插入历史消息。
+- Few-shot 用示例约束模型输出。
+- Output Parser 用于把模型结果转换成字符串、JSON 或业务对象。
+- Prompt 变量名要和调用参数保持一致。
 
 ## 九、LCEL、Runnable 与链式调用
 
@@ -863,6 +1173,52 @@ chain = retriever | format_docs | prompt | model | StrOutputParser()
 
 如果需要更明确的 Runnable 行为，可以使用 `RunnableLambda`。
 
+### 6. assign 与并行输入思路
+
+LCEL 经常需要把一个输入扩展成多个字段，例如 RAG 中把问题同时变成 `context` 和 `question`。
+
+```python
+rag_inputs = {
+    "context": retriever | format_docs,
+    "question": RunnablePassthrough(),
+}
+```
+
+这个字典表示并行构造多个输入字段：
+
+- `context` 来自检索器结果。
+- `question` 保留用户原始输入。
+
+### 7. 链式调用的调试方法
+
+链越长，越需要观察中间结果。
+
+```python
+from langchain_core.runnables import RunnableLambda
+
+def inspect_value(value):
+    print("中间值：", value)
+    return value
+
+chain = prompt | RunnableLambda(inspect_value) | model | StrOutputParser()
+```
+
+如果某一步报错，可以把链拆开单独执行：
+
+```python
+prompt_value = prompt.invoke({"question": "什么是 RAG？"})
+model_result = model.invoke(prompt_value)
+text = StrOutputParser().invoke(model_result)
+```
+
+本阶段小结：
+
+- LCEL 的 `|` 表示上一步输出传给下一步。
+- Runnable 统一了 `invoke`、`batch`、`stream` 等调用方式。
+- `RunnableLambda` 适合把自定义函数放入链。
+- `RunnablePassthrough` 适合保留原始输入。
+- 调试复杂链时，把链拆开逐步检查最稳。
+
 ## 十、工具调用与 Agent
 
 ### 1. Tool 工具
@@ -954,6 +1310,211 @@ Runtime Context 可用于把运行时信息传给工具或 Agent，例如用户 
 
 结构化输出用于让模型按固定格式返回结果，例如 Pydantic 模型、JSON 字段等。适合分类、抽取、表单生成等场景。
 
+### 7. Agent 和普通 Chain 的区别
+
+| 对比项 | Chain | Agent |
+| --- | --- | --- |
+| 执行流程 | 开发者固定编排 | 模型动态决定步骤 |
+| 是否调用工具 | 通常固定 | 根据问题自主选择 |
+| 可控性 | 更强 | 更灵活但更难控 |
+| 适合场景 | RAG、固定问答、格式转换 | 多工具任务、复杂问题拆解 |
+
+简单说：如果流程明确，用 Chain；如果需要模型自己判断下一步，用 Agent。
+
+### 8. Agent 的核心理解
+
+Agent 可以理解为让大模型从“只会回答”升级为“会做事”的组件。它通常由几部分组成：
+
+```text
+Agent = 大语言模型 + 工具集 + 决策逻辑 + 记忆/状态
+```
+
+没有 Agent 时，LLM 只能根据自身训练数据和输入上下文回答问题；遇到实时数据、复杂计算、外部系统调用时容易卡住。
+
+有了 Agent 后，LLM 更像一个“调度者”：
+
+```text
+理解任务 -> 判断是否需要工具 -> 选择工具 -> 执行工具 -> 观察结果 -> 决定下一步 -> 生成最终答案
+```
+
+核心特点：
+
+- **目标驱动**：围绕用户的具体任务目标展开工作。
+- **工具调用能力**：通过外部工具弥补 LLM 自身能力边界。
+- **自主决策与迭代**：根据工具返回结果决定继续调用工具还是直接回答。
+- **可接入记忆**：结合历史消息和状态做多轮任务。
+
+### 9. ReAct 工作范式
+
+ReAct 是 Agent 常见的思考与行动框架，全称可以理解为 Reasoning + Acting，即“推理 + 行动”。
+
+它的典型循环是：
+
+```text
+思考 Reasoning -> 行动 Action -> 观察 Observation -> 再思考 -> 再行动 -> ... -> 结束
+```
+
+含义：
+
+| 阶段 | 作用 |
+| --- | --- |
+| Reasoning | 分析问题，判断已有信息是否足够，决定下一步 |
+| Action | 调用工具或执行某个动作 |
+| Observation | 获取工具返回结果，提取有效信息 |
+| Finish | 信息足够后生成最终答案 |
+
+ReAct 的价值是让 Agent 不再直接“拍脑袋回答”，而是通过自然语言思考过程引导工具调用，逐步解决复杂问题。它适合智能客服、报告生成、任务规划、需要多步工具协作的场景。
+
+示意代码：
+
+```python
+from langchain.agents import create_agent
+from langchain_core.tools import tool
+
+
+@tool(description="获取体重，返回值是整数，单位千克")
+def get_weight() -> int:
+    return 90
+
+
+@tool(description="获取身高，返回值是整数，单位厘米")
+def get_height() -> int:
+    return 172
+
+
+agent = create_agent(
+    model=model,
+    tools=[get_weight, get_height],
+    system_prompt=(
+        "你是遵循 ReAct 思路的智能体。"
+        "遇到需要工具的数据时，先思考，再选择工具，"
+        "根据观察结果继续推理，最后给出答案。"
+    ),
+)
+
+for chunk in agent.stream(
+    {"messages": [{"role": "user", "content": "计算我的 BMI"}]},
+    stream_mode="values",
+):
+    latest_message = chunk["messages"][-1]
+    if latest_message.content:
+        print(latest_message.content)
+```
+
+注意：不同 LangChain 版本对 Agent 输出、流式事件和中间步骤展示方式可能不同，项目里要以当前依赖版本为准。
+
+### 10. Agent Middleware 中间件
+
+Middleware 的作用是对 Agent 的每一步执行进行控制、自定义和拦截。可以把它理解为 Agent 执行过程中的钩子。
+
+常见用途：
+
+- 日志记录、分析、调试。
+- 转换提示词、调整工具选择。
+- 重试、备用模型、提前终止。
+- 安全防护、身份校验、权限控制。
+- 监控工具调用参数和结果。
+
+常见钩子：
+
+| 钩子 | 作用 |
+| --- | --- |
+| `before_agent` | Agent 执行前拦截 |
+| `after_agent` | Agent 执行后拦截 |
+| `before_model` | 模型调用前拦截 |
+| `after_model` | 模型调用后拦截 |
+| `wrap_model_call` | 包装每次模型调用 |
+| `wrap_tool_call` | 包装每次工具调用 |
+
+示意代码：
+
+```python
+from langchain.agents import create_agent
+
+
+def log_before_agent(state, runtime) -> None:
+    print(f"[before_agent] messages: {len(state['messages'])}")
+
+
+def log_after_agent(state, runtime) -> None:
+    print(f"[after_agent] messages: {len(state['messages'])}")
+
+
+def log_before_model(state, runtime) -> None:
+    print(f"[before_model] about to call model")
+
+
+def log_after_model(state, runtime) -> None:
+    print("[after_model]", state["messages"][-1].content)
+
+
+agent = create_agent(
+    model=model,
+    tools=[get_weather],
+    middleware=[
+        log_before_agent,
+        log_before_model,
+        log_after_model,
+        log_after_agent,
+    ],
+)
+```
+
+包装工具调用的思路：
+
+```python
+def monitor_tool(request, handler):
+    print("调用工具：", request.tool_call["name"])
+    print("工具参数：", request.tool_call["args"])
+    result = handler(request)
+    print("工具调用完成")
+    return result
+```
+
+包装模型调用时可以做重试：
+
+```python
+def retry_on_error(request, handler):
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            return handler(request)
+        except Exception:
+            if attempt == max_retries - 1:
+                raise
+```
+
+中间件能提升可观测性和可控性，但也会增加调试复杂度。学习阶段先理解“在哪些节点可以拦截”，项目阶段再按需要加入日志、重试、安全控制等能力。
+
+### 11. 工具设计建议
+
+工具函数要让模型“看得懂、用得对”。
+
+```python
+@tool
+def search_product(keyword: str) -> str:
+    """根据商品关键词查询商品资料。keyword 应该是商品名称、品类或属性。"""
+    return "查询结果..."
+```
+
+建议：
+
+- 工具名使用动词加名词，例如 `search_product`、`get_weather`。
+- docstring 写清楚什么时候用、参数是什么、返回什么。
+- 参数不要太复杂。
+- 工具返回内容尽量短而结构化。
+- 涉及写入、删除、支付、发消息等操作时，要加人工确认。
+
+本阶段小结：
+
+- Tool 是模型可调用的外部能力。
+- Agent 适合多工具和不确定步骤的任务。
+- ReAct 是常见 Agent 工作范式：思考、行动、观察、再思考。
+- Middleware 可以对 Agent、模型和工具调用过程做日志、调试、重试和安全控制。
+- `system_prompt` 是约束 Agent 行为的重要位置。
+- 工具说明越清楚，模型越容易正确调用。
+- Agent 更灵活，但调试和安全控制也更重要。
+
 ## 十一、记忆与聊天历史
 
 ### 1. 临时记忆
@@ -1004,6 +1565,22 @@ result = chain_with_history.invoke(
 
 长期记忆可以保存到文件、Redis、数据库或其他持久化存储。学习阶段可以用文件保存。
 
+自定义长期记忆类时，核心是继承 `BaseChatMessageHistory`，并实现会话历史需要的几个同步接口。
+
+| 方法/属性 | 作用 |
+| --- | --- |
+| `messages` | 获取当前会话的历史消息 |
+| `add_messages()` | 追加一批新消息 |
+| `clear()` | 清空当前会话消息 |
+
+文件版实现思路：
+
+```text
+session_id -> 文件名 -> 该会话的消息列表
+```
+
+也就是说，不同 `session_id` 会写入不同文件，互不影响。
+
 ```python
 import json
 from pathlib import Path
@@ -1042,11 +1619,49 @@ class FileChatMessageHistory(BaseChatMessageHistory):
         self.file_path.write_text("[]", encoding="utf-8")
 ```
 
+这个类的关键流程：
+
+1. 读取历史时，如果文件不存在，返回空列表。
+2. 追加消息时，先读取旧消息，再合并新消息。
+3. 写入文件前，把 LangChain 消息对象转成可 JSON 序列化的字典。
+4. 清空历史时，把文件内容写成空数组 `[]`。
+
+如果后续要切换到 Redis 或数据库，通常只需要把 `get_session_history()` 返回的历史对象换掉，链的其它部分可以不变。
+
 生产环境注意：
 
 - 历史记录不能无限增长，需要窗口截断、摘要压缩或长期/短期记忆分层。
 - 历史记录可能包含隐私数据，要考虑权限、加密、脱敏和清理策略。
 - 多机器或高并发场景应使用 Redis、数据库或专门的会话存储。
+
+### 4. 记忆设计常见方案
+
+| 方案 | 特点 | 适合场景 |
+| --- | --- | --- |
+| 内存历史 | 简单，重启丢失 | Demo、单次脚本 |
+| 文件历史 | 易理解，可持久化 | 本地学习、小工具 |
+| Redis 历史 | 读写快，支持过期 | Web 应用、多会话 |
+| 数据库历史 | 易查询和审计 | 正式业务系统 |
+| 摘要记忆 | 压缩长对话 | 长周期对话 |
+
+### 5. session_id 的意义
+
+`session_id` 用来区分不同用户或不同会话。
+
+```text
+user-1 -> history/user-1.json
+user-2 -> history/user-2.json
+```
+
+如果 `session_id` 混用，用户之间的历史可能串在一起；如果每次都生成新的 `session_id`，模型就无法记住前文。
+
+本阶段小结：
+
+- 临时记忆适合演示，长期记忆需要持久化。
+- 多轮对话的关键是把历史消息重新传给模型。
+- `RunnableWithMessageHistory` 通过 `session_id` 管理不同会话。
+- 记忆不能无限增长，需要截断、摘要或分层。
+- 会话历史可能包含隐私，生产环境要谨慎保存。
 
 ## 十二、RAG 核心概念
 
@@ -1102,6 +1717,39 @@ RAG 适合：
 | `temperature` | 模型随机性 | 知识问答通常设低 |
 | `score_threshold` | 相似度阈值 | 用于过滤低相关结果 |
 
+### 5. RAG 标准流程
+
+完整 RAG 可以拆成 8 步：
+
+1. 准备本地知识文件。
+2. 使用 Loader 加载为 `Document`。
+3. 使用 TextSplitter 切分为 chunk。
+4. 使用 Embedding 模型向量化。
+5. 存入 VectorStore。
+6. 用户提问时检索相关 chunk。
+7. 把检索结果和问题放进 Prompt。
+8. 调用 LLM 生成答案。
+
+### 6. RAG Prompt 的基本要求
+
+RAG Prompt 应明确限制模型“只根据资料回答”。
+
+```text
+请只根据参考资料回答。
+资料不足时不要猜测。
+如果参考资料中没有答案，请回答“资料中没有相关信息”。
+回答时尽量指出依据。
+```
+
+如果不加约束，模型可能会根据常识补全内容，导致答案看起来流畅但不可信。
+
+本阶段小结：
+
+- RAG 的核心是“先检索，再生成”。
+- 离线流程负责建库，在线流程负责问答。
+- RAG 更适合知识频繁更新的场景，微调更适合改变模型行为。
+- chunk、Embedding、Top-k、Prompt 都会影响最终效果。
+
 ## 十三、文档加载与文本切分
 
 ### 1. Document 对象
@@ -1128,10 +1776,39 @@ doc = Document(
 
 文档加载器负责把不同格式的数据读取成 `Document` 对象。
 
+LangChain 内置了很多文档加载器，它们可能有不同的初始化参数，但通常都遵循统一接口：
+
 | 方法 | 作用 |
 | --- | --- |
 | `load()` | 一次性加载全部文档，返回 `list[Document]` |
 | `lazy_load()` | 延迟加载，逐个返回文档，适合大文件 |
+
+选择建议：
+
+- 小文件直接用 `load()`，简单清晰。
+- 大文件或大量文件优先考虑 `lazy_load()`，避免内存占用过高。
+- 加载后先抽样打印 `page_content` 和 `metadata`，确认内容和来源没问题。
+
+```python
+docs = loader.load()
+print(len(docs))
+print(docs[0].page_content[:200])
+print(docs[0].metadata)
+```
+
+`load()` 与 `lazy_load()` 的区别：
+
+| 方法 | 返回形式 | 优点 | 注意点 |
+| --- | --- | --- | --- |
+| `load()` | `list[Document]` | 简单直接 | 大文件可能一次性占用较多内存 |
+| `lazy_load()` | 迭代器/生成器 | 分批读取，节省内存 | 使用时需要循环消费 |
+
+```python
+for document in loader.lazy_load():
+    print(document.page_content[:100])
+```
+
+文档加载器一般继承自基础 Loader 类，并最终返回 `Document` 类型对象。RAG 项目里，不管原始文件是 CSV、JSON、TXT 还是 PDF，进入后续流程时都应该统一成 `Document`。
 
 ### 3. CSVLoader
 
@@ -1165,9 +1842,34 @@ loader = CSVLoader(
 
 如果 CSV 文件本身有表头，不要随便设置 `fieldnames`，否则第一行表头可能会被当成普通数据。
 
+常用参数说明：
+
+| 参数 | 说明 |
+| --- | --- |
+| `file_path` | CSV 文件路径 |
+| `encoding` | 文件编码，例如 `utf-8` |
+| `source_column` | 指定哪一列作为来源信息写入 `metadata` |
+| `csv_args` | 传给 Python `csv` 模块的解析参数 |
+
+`csv_args` 常见字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `delimiter` | 分隔符，例如逗号、制表符 |
+| `quotechar` | 字符串包裹符号 |
+| `fieldnames` | 字段列表，无表头 CSV 才常用 |
+
+如果数据中有“来源列”，建议配置 `source_column`。这样后续 RAG 回答时可以告诉用户答案来自哪条资料。
+
 ### 4. JSONLoader
 
 `JSONLoader` 用于把 JSON 或 JSON Lines 数据加载成 `Document`。它依赖 `jq` 语法抽取字段。
+
+使用前通常需要安装 `jq` 相关依赖：
+
+```powershell
+pip install jq
+```
 
 常见 jq 规则：
 
@@ -1203,7 +1905,25 @@ loader = JSONLoader(
 )
 ```
 
+主要参数：
+
+| 参数 | 说明 |
+| --- | --- |
+| `file_path` | JSON 文件路径，必填 |
+| `jq_schema` | jq 抽取语法，必填 |
+| `text_content` | 抽取结果是否必须是字符串，默认 `True` |
+| `json_lines` | 是否为 JSON Lines 文件，默认 `False` |
+
+`text_content` 的选择：
+
+- 抽取结果是普通字符串时，可以用 `text_content=True`。
+- 抽取结果是对象、数组、数字等非字符串时，通常用 `text_content=False`。
+
+JSON Lines 文件的特点是：每一行都是一个独立 JSON 对象，不是整个文件一个大数组。
+
 ### 5. TextLoader
+
+`TextLoader` 是最基础的文本加载器，用于读取 `.txt`、`.md` 等纯文本文件，并把文件内容放进一个 `Document`。
 
 ```python
 from langchain_community.document_loaders import TextLoader
@@ -1214,9 +1934,23 @@ docs = loader.load()
 
 一般会把整个文本文件内容放入一个 `Document`，后续通常要切分。
 
+常见检查：
+
+```python
+print(len(docs))                 # 通常为 1
+print(docs[0].page_content[:200])
+print(docs[0].metadata)
+```
+
 ### 6. PyPDFLoader
 
 `PyPDFLoader` 用于读取 PDF 文件，依赖 `pypdf`。
+
+依赖安装命令：
+
+```powershell
+pip install pypdf
+```
 
 ```python
 from langchain_community.document_loaders import PyPDFLoader
@@ -1240,9 +1974,15 @@ docs = loader.load()
 
 扫描版 PDF 可能需要 OCR，表格、分栏、页眉页脚也可能影响文本质量。
 
+PDF 加载后一定要抽样检查，因为 PDF 的文字顺序、页眉页脚、表格结构经常会影响后续检索效果。
+
 ### 7. RecursiveCharacterTextSplitter
 
 文档加载后通常要切成多个 chunk，便于向量检索和控制上下文长度。
+
+`RecursiveCharacterTextSplitter` 是常用的递归字符文本分割器，主要用于按自然段落切分大文档。它会按分隔符优先级逐层尝试切分，在保持上下文完整性和控制片段大小之间取得平衡。
+
+它适合作为 RAG 入门阶段的默认文本切分器，开箱即用效果通常不错。
 
 ```python
 from langchain_community.document_loaders import TextLoader
@@ -1271,6 +2011,38 @@ split_docs = splitter.split_documents(docs)
 | `length_function` | 长度计算函数 |
 
 中文文档可以把 `。`、`！`、`？`、`，` 放进分隔符，切分后要抽样检查语义是否完整。
+
+参数理解：
+
+- `chunk_size=500` 表示每个片段尽量不超过 500 个字符。
+- `chunk_overlap=50` 表示相邻片段允许重叠 50 个字符，减少上下文断裂。
+- `separators` 越靠前优先级越高，通常先按段落、换行、句号切，再按空格或字符兜底。
+- `length_function=len` 表示用 Python 的 `len()` 计算长度。
+
+切分效果检查：
+
+```python
+for i, doc in enumerate(split_docs[:3]):
+    print("chunk", i)
+    print(doc.page_content)
+    print(doc.metadata)
+    print("-" * 20)
+```
+
+切分经验：
+
+- chunk 太小：语义不完整，模型回答容易缺上下文。
+- chunk 太大：检索不精准，还会占用更多上下文窗口。
+- overlap 太小：跨段信息可能断裂。
+- overlap 太大：重复内容多，检索结果容易冗余。
+
+本阶段小结：
+
+- Loader 把各种格式文件变成 `Document`。
+- `page_content` 是正文，`metadata` 是来源和附加信息。
+- CSV、JSON、TXT、PDF 都有对应加载器。
+- `load()` 简单，`lazy_load()` 更适合大文件。
+- 文本切分是 RAG 效果的重要影响因素。
 
 ## 十四、向量、Embedding 与向量存储
 
@@ -1302,6 +2074,19 @@ def cosine_similarity(a, b):
     return dot / (norm_a * norm_b)
 ```
 
+向量可以粗略理解为“方向 + 长度”：
+
+- 方向更接近，语义通常更相似。
+- 长度有时包含强度信息，但文本检索中更常关注方向。
+- 余弦相似度的范围通常在 `-1` 到 `1` 之间，越接近 `1` 越相似。
+
+示例：
+
+```text
+"Python 入门" 和 "Python 基础教程" 的方向可能很接近。
+"Python 入门" 和 "今天吃什么" 的方向通常差别很大。
+```
+
 ### 3. LangChain Embeddings
 
 ```python
@@ -1312,6 +2097,15 @@ def cosine_similarity(a, b):
 vector = embeddings.embed_query("Python 是不是简单易学？")
 vectors = embeddings.embed_documents(["Python 入门", "LangChain RAG"])
 ```
+
+`embed_query()` 和 `embed_documents()` 的区别：
+
+| 方法 | 输入 | 用途 |
+| --- | --- | --- |
+| `embed_query()` | 单个问题字符串 | 查询向量化 |
+| `embed_documents()` | 多个文档字符串 | 文档批量向量化 |
+
+在 RAG 中，文档和问题最好使用同一个 Embedding 模型，否则向量空间可能不一致。
 
 ### 4. Vector Stores
 
@@ -1332,6 +2126,23 @@ vectors = embeddings.embed_documents(["Python 入门", "LangChain RAG"])
 | `similarity_search()` | 相似度搜索 |
 | `as_retriever()` | 转为检索器 |
 
+典型向量存储流程：
+
+```text
+索引阶段：
+Documents -> Embedding model -> Embedding vectors -> Vector Store
+
+查询阶段：
+Query text -> Embedding model -> Query vector -> Similarity Search -> Top-k results
+```
+
+也就是：
+
+- 建库时，把文档转成向量并存起来。
+- 查询时，把用户问题也转成向量。
+- 用问题向量和文档向量做相似度匹配。
+- 返回最相关的前 `k` 条文档。
+
 ### 5. InMemoryVectorStore
 
 内存向量存储适合学习和临时演示。
@@ -1350,6 +2161,24 @@ results = vector_store.similarity_search("Python 是不是简单易学？", k=3)
 ```
 
 数据只在内存中，程序结束就丢失，不适合生产知识库。
+
+常见操作：
+
+```python
+# 添加文档，并指定 id
+vector_store.add_documents(
+    documents=[doc1, doc2],
+    ids=["id1", "id2"],
+)
+
+# 删除文档
+vector_store.delete(ids=["id1"])
+
+# 相似度搜索
+similar_docs = vector_store.similarity_search("your query here", k=4)
+```
+
+`ids` 是后续更新和删除的关键。学习时可以用 `id1`、`id2`，项目中建议使用业务 ID。
 
 ### 6. Chroma 向量存储
 
@@ -1377,6 +2206,86 @@ results = vector_store.similarity_search("怎么学习 Python？", k=3)
 - `persist_directory` 表示本地持久化目录。
 - 不同 collection 可以隔离不同知识库。
 - 真实项目要设计文档 ID、更新策略、删除策略和元数据过滤。
+
+Chroma 与内存向量库的区别：
+
+| 对比项 | InMemoryVectorStore | Chroma |
+| --- | --- | --- |
+| 存储位置 | 内存 | 本地目录或外部服务 |
+| 程序重启后数据 | 丢失 | 可持久化 |
+| 适合场景 | 学习、Demo、临时测试 | 本地知识库、原型项目 |
+| 配置重点 | Embedding 模型 | collection、embedding、persist_directory |
+
+注意：如果更换了 Embedding 模型，已有 Chroma 数据通常需要重建，否则新旧向量可能不在同一语义空间中。
+
+### 7. add_texts 与 add_documents
+
+如果已经有 `Document`，用 `add_documents()` 更方便保留元数据。
+
+```python
+vector_store.add_documents(documents=split_docs, ids=ids)
+```
+
+如果只有字符串列表，可以用 `add_texts()`。
+
+```python
+vector_store.add_texts(
+    texts=[
+        "减肥需要少吃多练。",
+        "运动期间要控制饮食并保持规律作息。",
+    ],
+    metadatas=[
+        {"source": "health-1"},
+        {"source": "health-2"},
+    ],
+    ids=["text-1", "text-2"],
+)
+```
+
+### 8. Retriever 检索器
+
+向量库可以转为 Retriever，方便接入 RAG 链。
+
+```python
+retriever = vector_store.as_retriever(
+    search_kwargs={"k": 3}
+)
+
+docs = retriever.invoke("Python 怎么学习？")
+```
+
+Retriever 的输出通常是 `list[Document]`。
+
+### 9. 检索参数选择
+
+常见检索参数：
+
+| 参数 | 说明 |
+| --- | --- |
+| `k` | 返回最相似的前几条 |
+| `score_threshold` | 过滤低相似度结果 |
+| `filter` | 按元数据过滤，例如分类、用户权限、文件来源 |
+
+示例：
+
+```python
+retriever = vector_store.as_retriever(
+    search_kwargs={
+        "k": 5,
+        "filter": {"category": "product"},
+    }
+)
+```
+
+如果检索结果太少，可以增大 `k`；如果上下文太杂，可以减小 `k` 或增加过滤条件。
+
+本阶段小结：
+
+- Embedding 把文本转成向量。
+- 向量库负责存储向量并做相似度搜索。
+- `InMemoryVectorStore` 适合演示，Chroma 适合本地持久化。
+- `add_documents()` 能保留 `Document.metadata`。
+- `as_retriever()` 是向量库接入 RAG 链的常见入口。
 
 ## 十五、RAG 链与项目实战
 
@@ -1568,6 +2477,205 @@ print("检索结果：", [doc.metadata for doc in retrieved_docs])
 print("Prompt上下文：", context[:1000])
 ```
 
+### 10. RAG 项目文件结构建议
+
+一个简单 RAG 项目可以这样组织：
+
+```text
+project/
+  data/
+    products.csv
+    manuals/
+  vector_db/
+  app.py
+  ingest.py
+  rag_chain.py
+  settings.py
+```
+
+职责拆分：
+
+| 文件 | 作用 |
+| --- | --- |
+| `ingest.py` | 加载文件、切分文本、写入向量库 |
+| `rag_chain.py` | 构建 Retriever、Prompt 和问答链 |
+| `app.py` | 命令行、Web 页面或 API 入口 |
+| `settings.py` | 模型名、路径、Top-k 等配置 |
+
+### 11. RAG 服务拆分思路
+
+当 RAG 项目从脚本变成应用时，建议按职责拆成几个服务类。
+
+离线入库侧可以拆成：
+
+| 模块/类 | 作用 |
+| --- | --- |
+| `app_file_upload.py` | Streamlit 上传页面，接收用户上传文件 |
+| `KnowledgeBaseService` | 处理文件内容、去重、切分、入库 |
+| `check_md5()` | 判断文件是否已上传过 |
+| `save_md5()` | 保存文件指纹，避免重复入库 |
+| `upload_by_str()` | 把文本内容切分后写入向量库 |
+| `Chroma` | 保存知识向量 |
+
+离线流程可以理解为：
+
+```text
+用户上传文件
+-> st.file_uploader()
+-> uploader_file.get_value()
+-> KnowledgeBaseService
+-> 文本切分
+-> Chroma 向量库
+```
+
+为了避免重复上传同一个文件，可以对文件内容计算 md5：
+
+```python
+import hashlib
+
+
+def get_string_md5(text: str) -> str:
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+```
+
+注意：md5 不是安全加密，只适合做文件内容指纹和重复检测，不适合保存密码。
+
+在线问答侧可以拆成：
+
+| 模块/类 | 作用 |
+| --- | --- |
+| `VectorStoreService` | 管理向量库和 Retriever |
+| `get_retriever()` | 返回检索器，供 RAG 链使用 |
+| `RagService` | 组装 Prompt、模型、Retriever 和执行链 |
+| `_get_chain()` | 创建或返回 RAG 执行链 |
+| `FileChatMessageHistory` | 保存聊天历史 |
+| `app_qa.py` | Streamlit 聊天 UI |
+
+在线流程可以理解为：
+
+```text
+用户在页面提问
+-> app_qa.py
+-> RagService.chain.invoke()
+-> VectorStoreService.get_retriever()
+-> Chroma 检索相关文档
+-> Prompt + ChatModel 生成答案
+-> FileChatMessageHistory 保存消息
+-> 页面展示答案
+```
+
+服务拆分的好处：
+
+- 上传入库和在线问答互不干扰。
+- 向量库逻辑集中在 `VectorStoreService`，方便替换 Chroma。
+- Prompt、模型和链集中在 `RagService`，方便调试。
+- 聊天历史单独封装，方便从文件切换到 Redis 或数据库。
+
+### 12. 离线流程和在线流程分开写
+
+离线入库脚本只在知识更新时运行：
+
+```python
+def build_knowledge_base():
+    docs = loader.load()
+    split_docs = splitter.split_documents(docs)
+    vector_store.add_documents(split_docs, ids=ids)
+```
+
+在线问答逻辑每次用户提问都会运行：
+
+```python
+def answer_question(question: str) -> dict:
+    docs = retriever.invoke(question)
+    context = format_docs(docs)
+    answer = chain.invoke({"context": context, "question": question})
+    return {
+        "answer": answer,
+        "sources": [doc.metadata.get("source") for doc in docs],
+    }
+```
+
+不要每次用户提问都重新加载全部文件并重建向量库，否则速度会很慢。
+
+### 13. Prompt 约束模板
+
+商品知识库、制度问答、课程资料问答都可以使用类似约束。
+
+```text
+你是一个基于本地知识库回答问题的助手。
+规则：
+1. 只能根据参考资料回答。
+2. 参考资料没有的信息，回答“资料中没有相关信息”。
+3. 不要编造商品属性、价格、库存、政策。
+4. 如果资料之间有冲突，请说明冲突。
+5. 回答后列出参考来源。
+```
+
+### 14. 智能体项目结构示例
+
+如果项目进一步升级为 Agent 应用，可以按“工具、RAG、模型、配置、工具函数、页面入口”拆分。
+
+```text
+agent_project/
+  agent/
+    tools/
+      agent_tools.py
+    middleware.py
+    react_agent.py
+  config/
+  data/
+  model/
+    factory.py
+  prompts/
+  rag/
+    rag_service.py
+    vector_store.py
+  utils/
+    chain_debug.py
+    config_handler.py
+    file_handler.py
+    logger_handler.py
+    path_tools.py
+    prompt_loader.py
+  app.py
+```
+
+典型职责：
+
+| 模块 | 作用 |
+| --- | --- |
+| `agent_tools.py` | 定义 Agent 可调用工具，例如天气、位置、用户信息、RAG 总结 |
+| `middleware.py` | 定义日志、模型调用、工具调用等中间件 |
+| `react_agent.py` | 创建 Agent，执行流式输出 |
+| `rag_service.py` | RAG 摘要、文档检索、Prompt 加载 |
+| `vector_store.py` | 文档加载、文本切分、Retriever 管理 |
+| `factory.py` | 创建聊天模型和 Embedding 模型 |
+| `prompt_loader.py` | 统一加载 Prompt 文本 |
+| `app.py` | Streamlit 或其他 Web 入口 |
+
+一个智能体项目的调用关系可以概括为：
+
+```text
+app.py
+-> ReactAgent
+-> agent_tools / middleware
+-> RagSummarizeService
+-> VectorStoreService
+-> model factory
+```
+
+也就是说，Agent 负责调度，工具提供能力，RAG 提供知识，模型工厂提供模型实例，页面只负责交互。
+
+本阶段小结：
+
+- RAG 项目要把建库和问答分开。
+- 项目变大后，建议拆分 `KnowledgeBaseService`、`VectorStoreService`、`RagService` 等服务。
+- 商品知识库需要稳定的文档 ID 和来源字段。
+- 用户答案最好返回来源，便于排查和追溯。
+- 更新知识时要考虑新增、删除、重建和 collection 切换。
+- Prompt 约束是降低幻觉的重要手段。
+- Agent 项目应把工具、中间件、RAG、模型工厂、页面入口分层组织。
+
 ## 十六、Streamlit + LangChain 常见模式
 
 Streamlit 适合快速做大模型应用页面。
@@ -1595,6 +2703,50 @@ if question:
 - 模型调用要加 loading 提示。
 - API Key 不要写死在页面代码里。
 - RAG 应用最好展示引用来源。
+
+### 1. session_state 保存聊天记录
+
+```python
+import streamlit as st
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+question = st.chat_input("请输入问题")
+
+if question:
+    st.session_state.messages.append({"role": "user", "content": question})
+    answer = rag_chain.invoke(question)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    st.rerun()
+```
+
+### 2. 展示 RAG 来源
+
+如果后端返回结构是 `{"answer": "...", "sources": [...]}`，页面可以这样展示：
+
+```python
+result = answer_question(question)
+
+st.write(result["answer"])
+
+with st.expander("参考来源"):
+    for source in result["sources"]:
+        st.write(source)
+```
+
+### 3. Streamlit 常见坑
+
+| 问题 | 原因 | 处理方式 |
+| --- | --- | --- |
+| 页面每次交互都重新执行 | Streamlit 运行机制如此 | 用 `st.session_state` 保存状态 |
+| 聊天记录丢失 | 没有保存到 session_state | 初始化并追加 messages |
+| 页面卡住 | 模型调用耗时 | 使用 `st.spinner()` |
+| 密钥泄露 | API Key 写在代码里 | 使用环境变量或 secrets |
 
 ## 十七、常见错误与排查
 
@@ -1642,6 +2794,39 @@ if question:
 3. Embedding 是否适合中文或当前领域。
 4. 检索 Top-k 是否拿到了正确资料。
 5. Prompt 是否明确限制只能基于资料回答。
+
+### 7. 依赖或导入路径报错
+
+LangChain 拆包后，很多类的导入路径发生过变化。
+
+处理思路：
+
+1. 先看报错中提示的新导入路径。
+2. 检查当前项目安装的包版本。
+3. 优先查看官方文档。
+4. 尽量使用当前项目已有的导入风格。
+
+常见包：
+
+```text
+langchain-core
+langchain-community
+langchain-openai
+langchain-text-splitters
+langchain-chroma
+```
+
+### 8. 向量库结果和预期不一致
+
+排查方向：
+
+- 是否连接了正确的 `persist_directory`。
+- 是否使用了正确的 `collection_name`。
+- 文档是否重复入库。
+- 删除旧文档时 ID 是否一致。
+- Embedding 模型是否前后更换过。
+
+Embedding 模型更换后，旧向量通常应该重建，否则新旧向量不在同一语义空间中。
 
 ## 十八、学习路线与小抄
 

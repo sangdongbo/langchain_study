@@ -14,3 +14,10 @@ streamlit_v2/.cache/
 streamlit_v2/*.log
 
 chroma_db/
+rag_demo/chroma_db/
+rag_demo/.cache/
+rag_demo/*.log
+
+agent_demo/chroma_db/
+agent_demo/logs/
+agent_demo/.cache/

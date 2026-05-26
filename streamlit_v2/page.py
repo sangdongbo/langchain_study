@@ -3,10 +3,10 @@ from __future__ import annotations
 import streamlit as st
 
 from ai_companion.chat_store import ChatMessage, ConversationStore
-from streamlit_v2.agent.erp_agent import ERPFlowState, handle_erp_message
-from streamlit_v2.config import CACHE_PATH, DEFAULT_PERSONA, DEFAULT_TITLE
-from streamlit_v2.llm import stream_deepseek
-from streamlit_v2.ui import chat_shell_html, inject_styles, sidebar, stream_shell_html
+from erp_ask.agent.erp_agent import ERPFlowState, handle_erp_message
+from erp_ask.config import CACHE_PATH, DEFAULT_PERSONA, DEFAULT_TITLE
+from erp_ask.llm import stream_deepseek
+from erp_ask.ui import chat_shell_html, inject_styles, sidebar, stream_shell_html
 
 
 # page.py 负责把 UI、会话存储、ERP agent、LLM 串起来。

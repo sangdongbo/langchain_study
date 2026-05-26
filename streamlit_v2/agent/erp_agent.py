@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from streamlit_v2.tools.registry import run_tool
+from erp_ask.tools.registry import run_tool
 
 
 # Agent 层只负责判断意图、维护多轮状态、决定调用哪个 LangChain tool。

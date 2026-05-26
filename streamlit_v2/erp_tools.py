@@ -1,7 +1,12 @@
 from __future__ import annotations
 
-# 兼容旧导入路径。新代码请优先使用 streamlit_v2.tools.registry。
-from streamlit_v2.tools.registry import get_tool, list_tools, run_tool
+"""ERP tools 的兼容导入文件。
+
+工具注册表已经移动到 `streamlit_v2.tools.registry`。
+这里保留旧路径转发，方便学习阶段逐步重构，不让旧 import 直接报错。
+"""
+
+from erp_ask.tools.registry import get_tool, list_tools, run_tool
 
 
 __all__ = ["get_tool", "list_tools", "run_tool"]

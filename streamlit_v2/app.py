@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from streamlit_v2.page import run_app
+from erp_ask.page import run_app
 
 
 st.set_page_config(page_title="AI智能助手", page_icon="🤖", layout="wide")

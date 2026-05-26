@@ -10,7 +10,16 @@ from openai import APIConnectionError, APIStatusError, APITimeoutError
 from ai_companion.chat_store import ChatMessage
 
 
+"""原始 Streamlit 聊天助手的 DeepSeek 调用封装。
+
+页面层只关心“给我一段流式文本”，不直接处理 API Key、模型参数或异常。
+这些细节集中放在这里，后续换模型时只改这个模块即可。
+"""
+
+
 def build_llm() -> ChatDeepSeek:
+    """根据 `.env` 创建 DeepSeek 聊天模型对象。"""
+
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
         raise RuntimeError("请先在 .env 中配置 DEEPSEEK_API_KEY，再发送消息。")
@@ -26,6 +35,8 @@ def build_llm() -> ChatDeepSeek:
 def build_prompt_messages(
     title: str, persona: str, messages: list[ChatMessage]
 ) -> list[SystemMessage | HumanMessage | AIMessage]:
+    """把本地 ChatMessage 转成 LangChain 模型需要的消息对象。"""
+
     assistant_name = title.strip() or "小黑"
     prompt_messages: list[SystemMessage | HumanMessage | AIMessage] = [
         SystemMessage(
@@ -40,6 +51,7 @@ def build_prompt_messages(
         )
     ]
     for message in messages[-12:]:
+        # 只带最近 12 条消息，避免上下文无限增长导致请求变慢或超限。
         if message.role == "user":
             prompt_messages.append(HumanMessage(content=message.content))
         elif message.role == "assistant":
@@ -48,6 +60,11 @@ def build_prompt_messages(
 
 
 def stream_deepseek(title: str, persona: str, messages: list[ChatMessage]) -> Iterator[str]:
+    """流式调用 DeepSeek。
+
+    yield 会一段一段返回文本，Streamlit 页面可以边收到边刷新显示。
+    """
+
     llm = build_llm()
     prompt_messages = build_prompt_messages(title, persona, messages)
     try:

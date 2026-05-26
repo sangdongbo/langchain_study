@@ -6,7 +6,7 @@ from textwrap import dedent
 import streamlit as st
 
 from ai_companion.chat_store import ChatMessage, ConversationStore
-from streamlit_v2.config import DEFAULT_PERSONA, DEFAULT_TITLE
+from erp_ask.config import DEFAULT_PERSONA, DEFAULT_TITLE
 
 
 def inject_styles() -> None:

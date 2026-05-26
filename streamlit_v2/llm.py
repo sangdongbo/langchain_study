@@ -9,7 +9,7 @@ from langchain_deepseek import ChatDeepSeek
 from openai import APIConnectionError, APIStatusError, APITimeoutError
 
 from ai_companion.chat_store import ChatMessage
-from streamlit_v2.tools.registry import get_tool, list_tools
+from erp_ask.tools.registry import get_tool, list_tools
 
 
 # v2 使用自己的 LLM 配置和系统 prompt，不复用 ai_companion.llm。
