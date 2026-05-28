@@ -669,7 +669,39 @@ JSON 和 Python 类型对应关系：
 
 ## 六、AI 应用与大模型基础
 
-### 1. 大模型部署方案
+### 1. 大模型应用是什么
+
+大模型应用不是“只把问题丢给模型”，而是把传统程序的确定性控制和大模型的推理、分析、生成能力结合起来。可以把它理解为一种 Hybrid AI 应用：
+
+```text
+传统程序：负责输入校验、权限、业务流程、数据读写、合规检查
+大模型：负责理解自然语言、推理、生成、总结、分类、抽取
+```
+
+常见调用方式是：传统应用通过 HTTP API 调用大模型服务，大模型返回文本、结构化数据或工具调用请求，应用再继续做业务处理。
+
+典型流程：
+
+```text
+用户提问
+  -> 传统应用接收输入
+  -> 预处理、权限校验、合规检查
+  -> 通过 HTTP API 调用大模型
+  -> 大模型理解、推理、生成
+  -> 应用解析结果、再次做合规检查
+  -> 返回给用户
+```
+
+一个容易混淆的概念：
+
+| 名称 | 含义 |
+| --- | --- |
+| GPT | 底层语言模型，负责理解和生成语言 |
+| ChatGPT | 基于 GPT 等模型构建的聊天产品或应用 |
+
+所以我们用 LangChain、FastAPI、Streamlit 等做的应用，本质上也可以理解为“基于大模型能力封装出来的产品”。
+
+### 2. 大模型部署方案
 
 常见部署方式：
 
@@ -679,7 +711,7 @@ JSON 和 Python 类型对应关系：
 | 本地模型 | 数据可控，无需外部 API | 学习、内网、隐私场景 |
 | 私有化部署 | 可控性强，成本和运维更高 | 企业内部系统 |
 
-### 2. Ollama 本地模型
+### 3. Ollama 本地模型
 
 Ollama 可用于本地运行模型。
 
@@ -693,7 +725,7 @@ ollama list
 
 在 LangChain 中调用 Ollama 时，通常使用对应集成包或 `init_chat_model` 统一初始化。
 
-### 3. HTTP API 与大模型交互
+### 4. HTTP API 与大模型交互
 
 很多模型服务本质上都是 HTTP API。
 
@@ -712,7 +744,7 @@ print(response.json())
 
 真实项目要注意超时、重试、异常处理和日志脱敏。
 
-### 4. 提示词工程
+### 5. 提示词工程
 
 提示词工程的目标是让模型更稳定地完成任务。
 
@@ -724,7 +756,7 @@ print(response.json())
 - 明确输出格式：例如 JSON、表格、列表。
 - 提供示例：减少模型理解偏差。
 
-### 5. Zero-shot 与 Few-shot
+### 6. Zero-shot 与 Few-shot
 
 Zero-shot：不给示例，直接让模型完成任务。
 
@@ -743,7 +775,7 @@ Few-shot：给几个示例后再让模型完成任务。
 
 Few-shot 通常能提升格式稳定性和任务理解效果。
 
-### 6. 提示词常见结构
+### 7. 提示词常见结构
 
 一个稳定的提示词通常包含这些部分：
 
@@ -769,7 +801,7 @@ Few-shot 通常能提升格式稳定性和任务理解效果。
 概念：列表推导式
 ```
 
-### 7. 大模型应用常见流程
+### 8. 大模型应用常见流程
 
 ```text
 用户输入 -> Prompt 组装 -> 模型调用 -> 输出解析 -> 业务处理 -> 返回结果
@@ -783,6 +815,7 @@ Few-shot 通常能提升格式稳定性和任务理解效果。
 
 本阶段小结：
 
+- 大模型应用通常是“传统程序 + 大模型能力”的组合，不是完全交给模型自由发挥。
 - 云端 API 接入快，本地模型数据更可控。
 - HTTP API 调用要考虑超时、重试和异常处理。
 - Prompt 要明确角色、任务、约束和输出格式。
@@ -859,7 +892,7 @@ print(response.content)
 
 ### 4. 消息格式
 
-聊天模型通常接收消息列表。
+聊天模型通常接收消息列表。在 LangChain 中，发给模型和模型返回的聊天消息通常会被包装成 `BaseMessage` 及其子类，而不是单纯的字符串。
 
 ```python
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -875,12 +908,25 @@ print(response.content)
 
 常见消息类型：
 
-| 类型 | 说明 |
-| --- | --- |
-| `SystemMessage` | 系统角色、约束、背景 |
-| `HumanMessage` | 用户输入 |
-| `AIMessage` | 模型回复 |
-| `ToolMessage` | 工具执行结果 |
+| 类型 | 对应角色 | 说明 |
+| --- | --- | --- |
+| `SystemMessage` | system | 设置模型角色、背景、行为边界和任务规则 |
+| `HumanMessage` | user | 用户输入的问题、指令或补充信息 |
+| `AIMessage` | assistant | 模型回复，可能包含文本、工具调用、响应元数据 |
+| `ToolMessage` | tool | 工具执行后的返回结果，通常传回给模型继续推理 |
+
+也可以用字典形式传消息，LangChain 会在内部转换：
+
+```python
+messages = [
+    {"role": "system", "content": "你是一个严谨的 Python 老师。"},
+    {"role": "user", "content": "解释一下 list 和 tuple 的区别。"},
+]
+
+response = model.invoke(messages)
+```
+
+理解消息对象很重要，因为后面的 `Agent`、`MessagesPlaceholder`、`RunnableWithMessageHistory` 都是在围绕消息列表组织上下文。
 
 ### 5. 模型类型选择
 
@@ -903,7 +949,8 @@ print(response.content)
 
 - LangChain 把模型、Prompt、工具、检索器等统一成可组合组件。
 - Chat Model 负责生成回答，Embedding Model 负责文本向量化。
-- `SystemMessage` 用于设定角色和约束，`HumanMessage` 表示用户问题。
+- LangChain 的聊天上下文主要由 `BaseMessage` 子类组成。
+- `SystemMessage` 用于设定角色和约束，`HumanMessage` 表示用户问题，`ToolMessage` 表示工具结果。
 - 初始化模型时重点关注模型名、温度、超时和密钥配置。
 
 ## 八、Prompt 模板与输出解析
@@ -985,7 +1032,61 @@ prompt = FewShotPromptTemplate(
 )
 ```
 
-### 5. 输出解析器 Output Parser
+Few-shot 的重点不是“示例越多越好”，而是让示例和真实任务足够接近，模型能模仿你的判断逻辑和输出格式。
+
+### 5. Prompt 工程常用结构
+
+Prompt 会影响模型的角色、聊天背景、任务理解、输出格式和安全边界。稳定的 Prompt 通常包含下面几类信息：
+
+| 组成 | 作用 | 示例 |
+| --- | --- | --- |
+| Identity | 指定模型身份和视角 | 你是一个资深 Python 教学助手 |
+| Instructions | 说明任务和步骤 | 先解释概念，再给代码，再总结注意点 |
+| Examples | 给出示例让模型模仿 | 输入 A 输出 B，输入 C 输出 D |
+| Context | 提供背景资料或检索内容 | 以下是商品资料、用户历史、知识库片段 |
+| Output Format | 约束输出格式 | 返回 JSON，字段包括 answer、reason |
+
+Markdown 标题、列表、代码块能让提示词结构更清楚：
+
+```text
+# 角色
+你是一个严谨的代码审查助手。
+
+# 任务
+检查下面代码是否存在 bug。
+
+# 输出格式
+- 问题：
+- 原因：
+- 修改建议：
+
+# 代码
+{code}
+```
+
+XML 风格标签适合明确分隔上下文，尤其是 RAG 或长文本任务：
+
+```text
+<context>
+{retrieved_docs}
+</context>
+
+<question>
+{question}
+</question>
+
+请只根据 <context> 中的信息回答。
+```
+
+Prompt 编写建议：
+
+- 重要规则放在靠前位置，并写得具体。
+- 输出要给字段名、格式、示例，减少模型自由发挥。
+- 对不能做的事要明确，例如“没有依据时回答不知道”。
+- 长上下文要用标签、标题或分隔符隔开，避免模型混淆。
+- Few-shot 示例要覆盖常见边界情况，例如空值、格式错误、无法判断。
+
+### 6. 输出解析器 Output Parser
 
 模型输出默认是消息对象或文本。输出解析器用于把结果转换成需要的格式。
 
@@ -999,7 +1100,7 @@ print(answer)
 
 如果需要 JSON 或结构化对象，可以使用结构化输出或对应解析器。
 
-### 6. Prompt 变量与格式化
+### 7. Prompt 变量与格式化
 
 Prompt 中的 `{变量名}` 必须在调用时传入。
 
@@ -1021,7 +1122,7 @@ value = prompt.invoke(
 prompt.invoke({"question": "RAG"})
 ```
 
-### 7. 结构化输出思路
+### 8. 结构化输出思路
 
 当你希望模型返回固定字段时，可以在提示词中明确 JSON 格式。
 
@@ -1034,6 +1135,8 @@ prompt = ChatPromptTemplate.from_template(
 """
 )
 ```
+
+这种方式简单，但模型可能返回多余文本、字段缺失或 JSON 不合法。适合学习和轻量脚本。
 
 更可靠的做法是使用模型或 LangChain 提供的结构化输出能力，让返回结果符合 Pydantic 模型或 JSON Schema。
 
@@ -1056,6 +1159,33 @@ print(result.name)
 print(result.features)
 ```
 
+城市信息示例：
+
+```python
+from pydantic import BaseModel, Field
+
+
+class CapitalInfo(BaseModel):
+    name: str = Field(description="首都名称")
+    location: str = Field(description="所在国家或地区")
+    vibe: str = Field(description="城市气质或特点")
+    economy: str = Field(description="经济特点")
+
+
+structured_model = model.with_structured_output(CapitalInfo)
+result = structured_model.invoke("请介绍一下法国首都巴黎。")
+
+print(result.name)
+print(result.location)
+```
+
+两种结构化方式对比：
+
+| 方式 | 优点 | 风险 |
+| --- | --- | --- |
+| Prompt 中要求 JSON | 简单、通用、容易理解 | 可能输出不合法 JSON，需要额外解析和兜底 |
+| Pydantic / JSON Schema | 字段约束更强，程序更好接 | 需要模型或供应商支持结构化输出能力 |
+
 结构化输出适合：
 
 - 信息抽取。
@@ -1069,6 +1199,7 @@ print(result.features)
 - `PromptTemplate` 偏普通文本，`ChatPromptTemplate` 偏聊天消息。
 - `MessagesPlaceholder` 用于插入历史消息。
 - Few-shot 用示例约束模型输出。
+- 好的 Prompt 通常由身份、指令、示例、上下文和输出格式组成。
 - Output Parser 用于把模型结果转换成字符串、JSON 或业务对象。
 - Prompt 变量名要和调用参数保持一致。
 
@@ -1244,7 +1375,87 @@ def get_weather(city: str) -> str:
     return f"{city} 今天晴。"
 ```
 
-工具说明要写清楚，因为模型会根据名称、参数和 docstring 判断什么时候调用。
+工具说明要写清楚，因为模型会根据名称、参数和 docstring 判断什么时候调用。可以把模型理解为 Agent 的“大脑”，工具就是 Agent 的“手和脚”：模型负责判断要做什么，工具负责连接外部世界并返回结果。
+
+一个工具至少要让模型知道三件事：
+
+| 信息 | 作用 |
+| --- | --- |
+| 工具名称 | 模型用它来判断工具能力，例如 `get_weather`、`web_search` |
+| 工具用途 | 描述什么时候应该调用这个工具 |
+| 参数说明 | 告诉模型需要传什么参数、参数含义是什么 |
+
+`@tool` 可以显式指定名称和描述：
+
+```python
+from langchain_core.tools import tool
+
+
+@tool("square_root", description="Calculate the square root of a number")
+def calculate_square_root(number: float) -> float:
+    return number ** 0.5
+```
+
+如果不显式指定，LangChain 通常会根据函数自动推断：
+
+| 信息 | 默认来源 |
+| --- | --- |
+| 工具名称 | 函数名 |
+| 参数 | 函数参数和类型注解 |
+| 工具描述 | 函数 docstring |
+
+所以函数命名、类型注解和 docstring 不是装饰，它们会直接影响模型是否能正确使用工具。
+
+带默认参数的工具示例：
+
+```python
+from langchain_core.tools import tool
+
+
+@tool
+def get_weather(
+    location: str,
+    units: str = "celsius",
+    include_forecast: bool = False,
+) -> str:
+    """Get current weather for a location.
+
+    Args:
+        location: City name or coordinates.
+        units: Temperature unit, celsius or fahrenheit.
+        include_forecast: Whether to include a short forecast.
+    """
+    return f"{location} 当前温度 22 度，单位：{units}"
+```
+
+复杂参数可以用 Pydantic 模型描述，这样字段说明更清楚：
+
+```python
+from typing import Literal
+
+from langchain_core.tools import tool
+from pydantic import BaseModel, Field
+
+
+class WeatherInput(BaseModel):
+    location: str = Field(description="City name or coordinates")
+    units: Literal["celsius", "fahrenheit"] = Field(
+        default="celsius",
+        description="Temperature unit preference",
+    )
+    include_forecast: bool = Field(
+        default=False,
+        description="Include 5-day forecast",
+    )
+
+
+@tool(args_schema=WeatherInput)
+def get_weather(location: str, units: str = "celsius", include_forecast: bool = False) -> str:
+    """Get weather information for a location."""
+    return f"{location} weather, units={units}, forecast={include_forecast}"
+```
+
+字段越清楚，模型越容易构造正确参数。
 
 ### 2. 手动执行工具
 
@@ -1262,7 +1473,7 @@ print(result)
 
 ### 3. Agent 智能体
 
-Agent 会让模型根据任务自行选择工具、决定步骤并生成最终回答。
+Agent 是能够感知输入、进行推理、自主决策并采取行动的智能系统。在 LangChain 中，Agent 会让模型根据任务自行选择工具、决定步骤并生成最终回答。
 
 ```python
 from langchain.agents import create_agent
@@ -1277,6 +1488,16 @@ result = agent.invoke(
     {"messages": [{"role": "user", "content": "上海天气怎么样？"}]}
 )
 ```
+
+Agent 和普通聊天机器人最大的区别是：普通 LLM 更像“回答问题”，Agent 更像“为了目标去执行任务”。
+
+| 对比项 | 传统聊天机器人 / LLM | AI Agent |
+| --- | --- | --- |
+| 交互方式 | 被动问答 | 目标驱动，可以主动规划步骤 |
+| 能力边界 | 主要生成文本 | 可以调用工具、搜索网页、操作软件、发起业务请求 |
+| 人类输入 | 需要人把步骤说清楚 | 用户给最终目标，Agent 自己拆解路径 |
+| 决策方式 | 直接根据上下文回答 | 判断是否需要工具、选择工具、观察结果再继续 |
+| 适合任务 | 简单问答、写作、总结 | 多步骤任务、实时查询、外部系统操作 |
 
 ### 4. system_prompt
 
@@ -1486,7 +1707,74 @@ def retry_on_error(request, handler):
 
 中间件能提升可观测性和可控性，但也会增加调试复杂度。学习阶段先理解“在哪些节点可以拦截”，项目阶段再按需要加入日志、重试、安全控制等能力。
 
-### 11. 工具设计建议
+### 11. 预置工具：Tavily 网页搜索
+
+Tavily 是 LangChain 中常见的联网搜索工具，适合让 Agent 获取实时信息、新闻、网页资料或参考链接。
+
+使用前通常需要：
+
+```powershell
+# 1. 注册 Tavily 账号并创建 API Key
+# 2. 配置环境变量
+$env:TAVILY_API_KEY="你的 Tavily API Key"
+
+# 3. 安装依赖
+uv add langchain-tavily
+```
+
+基础用法：
+
+```python
+from langchain_tavily import TavilySearch
+
+search_tool = TavilySearch(
+    max_results=5,
+    topic="general",
+)
+
+result = search_tool.invoke({"query": "LangChain Agent memory"})
+print(result)
+```
+
+也可以封装成自己的工具，让名称和描述更贴近业务：
+
+```python
+from langchain_core.tools import tool
+from langchain_tavily import TavilySearch
+
+tavily = TavilySearch(max_results=5, topic="general")
+
+
+@tool
+def web_search(query: str) -> str:
+    """Search the web for recent information and references."""
+    return tavily.invoke({"query": query})
+```
+
+如果希望模型最终返回答案和参考链接，可以配合结构化输出：
+
+```python
+from pydantic import BaseModel, Field
+
+
+class Reference(BaseModel):
+    title: str = Field(description="参考资料标题")
+    url: str = Field(description="参考资料链接")
+
+
+class AnswerInfo(BaseModel):
+    answer: str = Field(description="基于搜索结果生成的回答")
+    reference: list[Reference] = Field(description="引用来源列表")
+```
+
+Tavily 使用建议：
+
+- 查询实时信息、网页资料时使用；普通计算和内部知识问答不一定需要。
+- 搜索结果要让模型引用来源，避免只给一个没有出处的结论。
+- 生产环境要限制搜索次数、超时时间和最大返回结果数。
+- 搜索结果不等于真相，重要场景要结合来源可信度和多来源交叉验证。
+
+### 12. 工具设计建议
 
 工具函数要让模型“看得懂、用得对”。
 
@@ -1508,16 +1796,54 @@ def search_product(keyword: str) -> str:
 本阶段小结：
 
 - Tool 是模型可调用的外部能力。
+- 工具的名称、参数类型、docstring 和 Pydantic 字段说明会影响模型调用质量。
 - Agent 适合多工具和不确定步骤的任务。
+- Agent 和普通聊天机器人不同，Agent 更强调目标、决策、行动和观察结果。
 - ReAct 是常见 Agent 工作范式：思考、行动、观察、再思考。
 - Middleware 可以对 Agent、模型和工具调用过程做日志、调试、重试和安全控制。
+- Tavily 这类预置工具可以让 Agent 获取联网搜索能力。
 - `system_prompt` 是约束 Agent 行为的重要位置。
 - 工具说明越清楚，模型越容易正确调用。
 - Agent 更灵活，但调试和安全控制也更重要。
 
 ## 十一、记忆与聊天历史
 
-### 1. 临时记忆
+### 1. Agent 记忆类型
+
+Agent 的记忆通常分为短期记忆和长期记忆。
+
+| 类型 | 说明 | 常见内容 |
+| --- | --- | --- |
+| 短期记忆 | 当前任务或当前会话内的上下文 | 本轮对话消息、工具调用结果、临时状态 |
+| 长期记忆 | 跨任务、跨会话保留的信息 | 用户偏好、历史经验、知识沉淀、长期档案 |
+
+短期记忆解决的是“这次对话前面说了什么”；长期记忆解决的是“以前发生过什么、用户长期偏好是什么”。
+
+在 LangChain Agent 中，短期记忆通常体现在 `AgentState` 里，`messages` 是其中最核心的部分：
+
+```text
+AgentState
+  -> messages: 当前会话消息列表
+  -> 其它运行时状态：工具结果、中间步骤、自定义字段等
+```
+
+调用 Agent 时传入历史消息，就是在给它当前任务的短期记忆：
+
+```python
+result = agent.invoke(
+    {
+        "messages": [
+            {"role": "user", "content": "我叫小明"},
+            {"role": "assistant", "content": "你好，小明。"},
+            {"role": "user", "content": "我叫什么？"},
+        ]
+    }
+)
+```
+
+如果没有把历史消息传回去，模型通常不会知道前文。正式项目中，短期记忆还需要考虑消息窗口、摘要压缩和隐私清理。
+
+### 2. 临时记忆
 
 `InMemoryChatMessageHistory` 适合学习和演示，数据只存在内存中，程序重启就丢失。
 
@@ -1531,7 +1857,7 @@ history.add_ai_message("你好，有什么可以帮你？")
 print(history.messages)
 ```
 
-### 2. RunnableWithMessageHistory
+### 3. RunnableWithMessageHistory
 
 `RunnableWithMessageHistory` 可以给链增加历史对话能力。
 
@@ -1561,7 +1887,7 @@ result = chain_with_history.invoke(
 
 核心是用 `session_id` 区分不同会话。
 
-### 3. 长期会话记忆
+### 4. 长期会话记忆
 
 长期记忆可以保存到文件、Redis、数据库或其他持久化存储。学习阶段可以用文件保存。
 
@@ -1634,7 +1960,7 @@ class FileChatMessageHistory(BaseChatMessageHistory):
 - 历史记录可能包含隐私数据，要考虑权限、加密、脱敏和清理策略。
 - 多机器或高并发场景应使用 Redis、数据库或专门的会话存储。
 
-### 4. 记忆设计常见方案
+### 5. 记忆设计常见方案
 
 | 方案 | 特点 | 适合场景 |
 | --- | --- | --- |
@@ -1644,7 +1970,7 @@ class FileChatMessageHistory(BaseChatMessageHistory):
 | 数据库历史 | 易查询和审计 | 正式业务系统 |
 | 摘要记忆 | 压缩长对话 | 长周期对话 |
 
-### 5. session_id 的意义
+### 6. session_id 的意义
 
 `session_id` 用来区分不同用户或不同会话。
 
@@ -1657,6 +1983,8 @@ user-2 -> history/user-2.json
 
 本阶段小结：
 
+- Agent 记忆可分为短期记忆和长期记忆。
+- LangChain Agent 的短期上下文通常通过 `AgentState` 中的 `messages` 维护。
 - 临时记忆适合演示，长期记忆需要持久化。
 - 多轮对话的关键是把历史消息重新传给模型。
 - `RunnableWithMessageHistory` 通过 `session_id` 管理不同会话。
@@ -2914,5 +3242,6 @@ LangChain 版本迭代较快，遇到 API 差异时优先查看官方文档：
 - RunnableWithMessageHistory API: <https://api.python.langchain.com/en/latest/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html>
 - Agents: <https://docs.langchain.com/oss/python/langchain/agents>
 - Tools: <https://docs.langchain.com/oss/python/langchain/tools>
+- Tavily Search Tool: <https://docs.langchain.com/oss/python/integrations/tools/tavily_search>
 - Structured Output: <https://docs.langchain.com/oss/python/langchain/structured-output>
 - Ollama Docs: <https://docs.ollama.com/>
