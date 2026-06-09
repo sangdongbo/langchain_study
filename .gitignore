@@ -7,6 +7,7 @@ __pycache__/
 *.py[cod]
 
 .idea/
+.claude/
 
 streamlit/.cache/
 streamlit/*.log
@@ -21,3 +22,5 @@ rag_demo/*.log
 agent_demo/chroma_db/
 agent_demo/logs/
 agent_demo/.cache/
+
+volumes/

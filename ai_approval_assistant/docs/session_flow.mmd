@@ -1,0 +1,36 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD
+    start([用户发送消息]) --> load[加载 session 状态和 CRM 模板]
+    load --> classify{识别意图和审批类型}
+    classify --> review{有界决策复核}
+
+    review -->|复核通过: 新审批/修改| collect[按当前审批模板收集字段]
+    review -->|复核通过: 取消| cancel[取消当前审批状态]
+    review -->|复核通过: 确认提交| submit_guard{是否已预览且明确确认}
+    review -->|复核不确定或超过上限| clarify[追问要办理哪类审批]
+
+    collect --> missing{是否还有缺失字段}
+    missing -->|有| ask[追问下一个缺失字段]
+    ask --> wait_user([等待用户下一轮回复])
+    wait_user --> start
+
+    missing -->|无| validate[调用 CRM 预校验]
+    validate --> valid{校验是否通过}
+    valid -->|不通过| fix[返回错误并要求补充或修改]
+    fix --> wait_user
+
+    valid -->|通过| preview[生成审批预览]
+    preview --> wait_confirm([等待用户确认、修改或取消])
+    wait_confirm --> start
+
+    submit_guard -->|未满足| clarify_confirm[要求明确回复确认提交]
+    clarify_confirm --> wait_user
+    submit_guard -->|满足| submit[调用 CRM 创建审批]
+    submit --> submitted([返回申请编号和审批节点])
+
+    cancel --> cancelled([返回未提交])
+    clarify --> wait_user
