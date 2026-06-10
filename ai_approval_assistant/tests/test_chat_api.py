@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 os.environ["AI_APPROVAL_USE_LLM"] = "false"
 
 from ai_approval_assistant.app.main import app  # noqa: E402
-from ai_approval_assistant.app.schemas.approval import ApprovalTemplate  # noqa: E402
+from ai_approval_assistant.app.schemas.approval import ApprovalAssignee, ApprovalNode, ApprovalTemplate  # noqa: E402
 from ai_approval_assistant.app.services.session_state_service import session_state_service  # noqa: E402
 from ai_approval_assistant.app.services.model_service import model_service  # noqa: E402
 
@@ -285,6 +285,331 @@ def test_chat_can_use_remote_approval_list_credentials(monkeypatch) -> None:
     body = response.json()
     assert body["approval_type"] == "remote_6408"
     assert body["status"] == "collecting"
+
+
+def test_flow_asks_assignee_selection_before_preview(monkeypatch) -> None:
+    session_state_service.clear("S-assignee-selection")
+
+    def fake_list_available_templates(user):
+        return [
+            ApprovalTemplate(
+                template_id="5904",
+                approval_type="remote_5904",
+                title="请假-审批编辑",
+                category="测试",
+                aliases=["请假"],
+                intent_keywords=["请假"],
+                fields=[
+                        {
+                            "name": "reason",
+                            "label": "请假原因",
+                            "type": "text",
+                            "required": True,
+                            "aliases": ["原因"],
+                            "extract_patterns": ["原因是(.+)"],
+                            "question": "请输入请假原因。",
+                        }
+                ],
+            )
+        ]
+
+    def fake_get_template_detail(approval_type, user):
+        return fake_list_available_templates(user)[0]
+
+    def fake_get_approval_nodes(approval_set_id, form_value, user):
+        assert approval_set_id == "5904"
+        assert form_value == [{"field_key": "reason", "value": "家中有事"}]
+        return [
+            ApprovalNode(
+                node_id="12204",
+                node_name="办理",
+                node_type="conduct",
+                level=3,
+                handle_type="submitter_choice",
+                requires_selection=True,
+                candidate_assignees=[
+                    ApprovalAssignee(uid="864", name="张三"),
+                    ApprovalAssignee(uid="865", name="李四"),
+                ],
+            )
+        ]
+
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        fake_list_available_templates,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        fake_get_template_detail,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        fake_get_approval_nodes,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        lambda approval_type, slots, user: type(
+            "Validation",
+            (),
+            {
+                "valid": True,
+                "errors": [],
+                "field_errors": [],
+                "warnings": [],
+                "approval_node": None,
+            },
+        )(),
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-assignee-selection",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假，原因是家中有事",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "awaiting_assignee_selection"
+    assert body["approval_type"] == "remote_5904"
+    assert body["awaiting_field"] == "assignee:12204"
+    assert "请选择办理审批人" in body["assistant_message"]
+    assert "张三" in body["assistant_message"]
+    assert "李四" in body["assistant_message"]
+    assert "assignee" in body["trace"]
+
+
+def test_flow_accepts_assignee_selection_then_previews(monkeypatch) -> None:
+    session_state_service.clear("S-assignee-selected")
+
+    template = ApprovalTemplate(
+        template_id="5904",
+        approval_type="remote_5904",
+        title="请假-审批编辑",
+        category="测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "reason",
+                "label": "请假原因",
+                "type": "text",
+                "required": True,
+                "aliases": ["原因"],
+                "extract_patterns": ["原因是(.+)"],
+                "question": "请输入请假原因。",
+            }
+        ],
+    )
+    nodes = [
+        ApprovalNode(
+            node_id="12204",
+            node_name="办理",
+            node_type="conduct",
+            level=3,
+            handle_type="submitter_choice",
+            requires_selection=True,
+            candidate_assignees=[
+                ApprovalAssignee(uid="864", name="张三"),
+                ApprovalAssignee(uid="865", name="李四"),
+            ],
+        )
+    ]
+
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        lambda approval_set_id, form_value, user: nodes,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        lambda approval_type, slots, user: type(
+            "Validation",
+            (),
+            {
+                "valid": True,
+                "errors": [],
+                "field_errors": [],
+                "warnings": [],
+                "approval_node": None,
+            },
+        )(),
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-assignee-selected",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假，原因是家中有事",
+        },
+    )
+    assert response.json()["status"] == "awaiting_assignee_selection"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-assignee-selected",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "选张三",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "awaiting_confirmation"
+    assert body["awaiting_field"] is None
+    assert "确认提交" in body["assistant_message"]
+    assert "张三" in body["assistant_message"]
+
+
+def test_remote_confirmation_passes_nodes_to_submit(monkeypatch) -> None:
+    session_state_service.clear("S-remote-submit")
+    submitted: dict[str, object] = {}
+
+    template = ApprovalTemplate(
+        template_id="5904",
+        approval_type="remote_5904",
+        title="请假-审批编辑",
+        category="测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "reason",
+                "label": "请假原因",
+                "type": "text",
+                "required": True,
+                "aliases": ["原因"],
+                "extract_patterns": ["原因是(.+)"],
+                "question": "请输入请假原因。",
+            }
+        ],
+    )
+    nodes = [
+        ApprovalNode(
+            node_id="12204",
+            node_name="办理",
+            node_type="conduct",
+            level=3,
+            handle_type="submitter_choice",
+            requires_selection=True,
+            candidate_assignees=[ApprovalAssignee(uid="864", name="张三")],
+        )
+    ]
+
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        lambda approval_set_id, form_value, user: nodes,
+    )
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        lambda approval_type, slots, user: type(
+            "Validation",
+            (),
+            {
+                "valid": True,
+                "errors": [],
+                "field_errors": [],
+                "warnings": [],
+                "approval_node": None,
+            },
+        )(),
+    )
+
+    def fake_submit_approval(
+        approval_type,
+        slots,
+        user,
+        idempotency_key,
+        approval_set_id=None,
+        approval_nodes=None,
+        selected_assignees=None,
+    ):
+        submitted.update(
+            {
+                "approval_type": approval_type,
+                "approval_set_id": approval_set_id,
+                "approval_nodes": approval_nodes,
+                "selected_assignees": selected_assignees,
+            }
+        )
+        return type(
+            "Submit",
+            (),
+            {
+                "request_id": "AP202606100001",
+                "status": "待审批",
+                "approval_node": "CRM审批流",
+                "idempotency_key": None,
+            },
+        )()
+
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.submit_approval",
+        fake_submit_approval,
+    )
+
+    client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-submit",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假，原因是家中有事",
+        },
+    )
+    client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-submit",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "选张三",
+        },
+    )
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-submit",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "确认提交",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "submitted"
+    assert submitted["approval_type"] == "remote_5904"
+    assert submitted["approval_set_id"] == "5904"
+    assert submitted["selected_assignees"] == {"12204": ["864"]}
+    assert submitted["approval_nodes"][0]["node_id"] == "12204"
 
 
 def test_validation_returns_field_errors() -> None:

@@ -11,7 +11,12 @@ from ai_approval_assistant.app.graph.extractors import (
     is_switch_message,
 )
 from ai_approval_assistant.app.graph.state import ApprovalState, initial_state
-from ai_approval_assistant.app.schemas.approval import ApprovalTemplate, UserContext
+from ai_approval_assistant.app.schemas.approval import (
+    ApprovalAssignee,
+    ApprovalNode,
+    ApprovalTemplate,
+    UserContext,
+)
 from ai_approval_assistant.app.schemas.chat import (
     ApprovalPreview,
     ChatRequest,
@@ -53,6 +58,7 @@ def create_workflow():
     builder.add_node("decision_review", decision_review_node)
     builder.add_node("collect", collect_node)
     builder.add_node("validate", validate_node)
+    builder.add_node("assignee", assignee_node)
     builder.add_node("preview", preview_node)
     builder.add_node("submit", submit_node)
     builder.add_node("already_submitted", already_submitted_node)
@@ -73,14 +79,14 @@ def create_workflow():
             "review": "decision_review",
             "already_submitted": "already_submitted",
             "general_chat": "general_chat",
+            "assignee": "assignee",
         },
     )
     builder.add_conditional_edges(
         "collect", _route, {"validate": "validate", "end": END}
     )
-    builder.add_conditional_edges(
-        "validate", _route, {"preview": "preview", "end": END}
-    )
+    builder.add_conditional_edges("validate", _route, {"assignee": "assignee", "end": END})
+    builder.add_conditional_edges("assignee", _route, {"preview": "preview", "end": END})
     builder.add_edge("preview", END)
     builder.add_edge("submit", END)
     builder.add_edge("already_submitted", END)
@@ -126,8 +132,14 @@ def classify_node(state: ApprovalState) -> ApprovalState:
     status = state.get("status", "idle")
     if status == "submitted":
         return {**state, "trace": trace, "_route": "already_submitted"}
-    if status in {"collecting", "awaiting_confirmation"} and is_cancel_message(text):
+    if status in {
+        "collecting",
+        "awaiting_confirmation",
+        "awaiting_assignee_selection",
+    } and is_cancel_message(text):
         return {**state, "trace": trace, "_route": "cancel"}
+    if status == "awaiting_assignee_selection":
+        return {**state, "trace": trace, "_route": "assignee"}
     if status == "awaiting_confirmation":
         if is_confirm_message(text):
             return {**state, "confirmed": True, "trace": trace, "_route": "submit"}
@@ -329,6 +341,64 @@ def validate_node(state: ApprovalState) -> ApprovalState:
         "approval_node": result.approval_node,
         "_validation_warnings": result.warnings,
         "trace": trace,
+        "_route": "assignee",
+    }
+
+
+def assignee_node(state: ApprovalState) -> ApprovalState:
+    """获取审批节点，并在需要发起人选人时暂停追问。"""
+    trace = [*state.get("trace", []), "assignee"]
+    user = _user_from_state(state)
+    approval_type = state.get("approval_type")
+    if not approval_type:
+        return {**state, "trace": trace, "_route": "preview"}
+    template = crm_approval_service.get_template_detail(approval_type, user)
+    if not template.template_id or not approval_type.startswith("remote_"):
+        return {**state, "trace": trace, "_route": "preview"}
+
+    nodes = _nodes_from_state(state)
+    if not nodes:
+        nodes = crm_approval_service.get_approval_nodes(
+            approval_set_id=template.template_id,
+            form_value=_form_value_from_slots(state.get("collected_slots", {})),
+            user=user,
+        )
+    selected_assignees = dict(state.get("selected_assignees", {}))
+    if state.get("status") == "awaiting_assignee_selection":
+        node_id = _awaiting_assignee_node_id(state.get("awaiting_field"))
+        current_node = next((node for node in nodes if node.node_id == node_id), None)
+        if current_node:
+            selected = _select_assignees_from_message(current_node, state.get("user_message", ""))
+            if selected:
+                selected_assignees[current_node.node_id] = [assignee.uid for assignee in selected]
+            else:
+                return {
+                    **state,
+                    "status": "awaiting_assignee_selection",
+                    "approval_nodes": [node.model_dump() for node in nodes],
+                    "selected_assignees": selected_assignees,
+                    "assistant_message": _assignee_selection_message(current_node),
+                    "trace": trace,
+                    "_route": "end",
+                }
+    awaiting_node = _first_unselected_node(nodes, selected_assignees)
+    if awaiting_node:
+        return {
+            **state,
+            "status": "awaiting_assignee_selection",
+            "approval_nodes": [node.model_dump() for node in nodes],
+            "selected_assignees": selected_assignees,
+            "awaiting_field": f"assignee:{awaiting_node.node_id}",
+            "assistant_message": _assignee_selection_message(awaiting_node),
+            "trace": trace,
+            "_route": "end",
+        }
+    return {
+        **state,
+        "approval_nodes": [node.model_dump() for node in nodes],
+        "selected_assignees": selected_assignees,
+        "awaiting_field": None,
+        "trace": trace,
         "_route": "preview",
     }
 
@@ -342,6 +412,9 @@ def preview_node(state: ApprovalState) -> ApprovalState:
     preview = _build_preview(
         template, state.get("collected_slots", {}), state.get("approval_node"), warnings
     )
+    nodes = _nodes_from_state(state)
+    selected_assignees = dict(state.get("selected_assignees", {}))
+    preview.fields.extend(_assignee_preview_fields(nodes, selected_assignees))
     lines = [f"请确认是否提交{template.title}：", ""]
     for field in preview.fields:
         lines.append(f"- {field.label}：{field.value}")
@@ -374,12 +447,16 @@ def submit_node(state: ApprovalState) -> ApprovalState:
             "_route": "clarify",
         }
     user = _user_from_state(state)
+    template = crm_approval_service.get_template_detail(state["approval_type"], user)
     idempotency_key = state.get("idempotency_key") or _build_idempotency_key(state)
     result = crm_approval_service.submit_approval(
         state["approval_type"],
         state.get("collected_slots", {}),
         user,
         idempotency_key=idempotency_key,
+        approval_set_id=template.template_id,
+        approval_nodes=state.get("approval_nodes", []),
+        selected_assignees=state.get("selected_assignees", {}),
     )
     return {
         **state,
@@ -473,6 +550,90 @@ def _first_missing_field(
     return None
 
 
+def _form_value_from_slots(slots: dict[str, str]) -> list[dict[str, str]]:
+    """将已收集字段转换为 getNodes 需要的 form_value。"""
+    return [{"field_key": key, "value": value} for key, value in slots.items()]
+
+
+def _nodes_from_state(state: ApprovalState) -> list[ApprovalNode]:
+    """从状态中反序列化审批节点。"""
+    return [ApprovalNode(**item) for item in state.get("approval_nodes", [])]
+
+
+def _awaiting_assignee_node_id(awaiting_field: str | None) -> str | None:
+    """从等待字段标记中解析审批节点 ID。"""
+    if not awaiting_field or not awaiting_field.startswith("assignee:"):
+        return None
+    return awaiting_field.split(":", 1)[1]
+
+
+def _select_assignees_from_message(
+    node: ApprovalNode,
+    message: str,
+) -> list[ApprovalAssignee]:
+    """根据用户消息从候选审批人中选择匹配项。"""
+    selected = [
+        assignee
+        for assignee in node.candidate_assignees
+        if assignee.name and assignee.name in message
+    ]
+    if not selected:
+        selected = [
+            assignee
+            for assignee in node.candidate_assignees
+            if assignee.uid and assignee.uid in message
+        ]
+    if selected and not node.multiple:
+        return selected[:1]
+    return selected
+
+
+def _first_unselected_node(
+    nodes: list[ApprovalNode],
+    selected_assignees: dict[str, list[str]],
+) -> ApprovalNode | None:
+    """返回第一个需要用户选择且尚未选择审批人的节点。"""
+    for node in nodes:
+        if node.requires_selection and not selected_assignees.get(node.node_id):
+            return node
+    return None
+
+
+def _assignee_selection_message(node: ApprovalNode) -> str:
+    """构建审批人选择追问文案。"""
+    names = "、".join(assignee.name for assignee in node.candidate_assignees)
+    if names:
+        return f"请选择{node.node_name}审批人，可选：{names}。"
+    return f"请选择{node.node_name}审批人。"
+
+
+def _assignee_preview_fields(
+    nodes: list[ApprovalNode],
+    selected_assignees: dict[str, list[str]],
+) -> list[PreviewField]:
+    """构建审批人预览字段。"""
+    fields: list[PreviewField] = []
+    for node in nodes:
+        selected_uids = set(selected_assignees.get(node.node_id, []))
+        if selected_uids:
+            names = [
+                assignee.name
+                for assignee in node.candidate_assignees
+                if assignee.uid in selected_uids
+            ]
+        else:
+            names = [assignee.name for assignee in node.selected_assignees]
+        if names:
+            fields.append(
+                PreviewField(
+                    name=f"assignee:{node.node_id}",
+                    label=f"{node.node_name}审批人",
+                    value="、".join(names),
+                )
+            )
+    return fields
+
+
 def _build_preview(
     template: ApprovalTemplate,
     slots: dict[str, str],
@@ -538,7 +699,7 @@ def _to_response(state: ApprovalState) -> ChatResponse:
 
 def _actions_for_status(status: str) -> list[str]:
     """根据当前审批状态返回 UI 动作提示。"""
-    if status == "collecting":
+    if status in {"collecting", "awaiting_assignee_selection"}:
         return ["reply", "cancel"]
     if status == "awaiting_confirmation":
         return ["confirm", "modify", "cancel"]

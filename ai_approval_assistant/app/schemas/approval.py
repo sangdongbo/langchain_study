@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Literal
+from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 FieldType = Literal["text", "number", "date", "enum"]
@@ -63,6 +63,29 @@ class ValidationResult(BaseModel):
     field_errors: list[FieldError] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     approval_node: str | None = None
+
+
+class ApprovalAssignee(BaseModel):
+    """审批节点上的可选或已选审批人。"""
+
+    uid: str
+    name: str
+    avatar: str | None = None
+
+
+class ApprovalNode(BaseModel):
+    """CRM 返回的审批流程节点。"""
+
+    node_id: str
+    node_name: str
+    node_type: str
+    level: int = 0
+    handle_type: str | None = None
+    multiple: bool = False
+    requires_selection: bool = False
+    candidate_assignees: list[ApprovalAssignee] = Field(default_factory=list)
+    selected_assignees: list[ApprovalAssignee] = Field(default_factory=list)
+    raw_node: dict[str, Any] = Field(default_factory=dict)
 
 
 class SubmitResult(BaseModel):

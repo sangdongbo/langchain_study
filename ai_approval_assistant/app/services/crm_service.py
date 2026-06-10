@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 from datetime import datetime
 import logging
 import os
@@ -9,6 +10,8 @@ from ai_approval_assistant.app.mock_data.approval_templates import (
     USERS,
 )
 from ai_approval_assistant.app.schemas.approval import (
+    ApprovalAssignee,
+    ApprovalNode,
     ApprovalTemplate,
     FieldError,
     SubmitResult,
@@ -19,6 +22,8 @@ from ai_approval_assistant.app.schemas.approval import (
 logger = logging.getLogger("ai_approval_assistant.crm")
 DEFAULT_APPROVAL_LIST_URL = "https://dev2.lanerp.com/api/approval/list"
 DEFAULT_FORM_FIELDS_URL = "https://dev2.lanerp.com/api/field/formFields"
+DEFAULT_GET_NODES_URL = "https://dev2.lanerp.com/api/approval/getNodes"
+DEFAULT_ADD_APPROVAL_URL = "https://dev2.lanerp.com/api/approval/add"
 
 
 class CrmApprovalService:
@@ -33,6 +38,8 @@ class CrmApprovalService:
         http_client: httpx.Client | None = None,
         approval_list_url: str | None = None,
         form_fields_url: str | None = None,
+        get_nodes_url: str | None = None,
+        add_approval_url: str | None = None,
     ) -> None:
         """初始化 CRM 适配器地址、HTTP 客户端和模拟提交缓存。"""
         self._submitted_by_key: dict[str, SubmitResult] = {}
@@ -42,6 +49,12 @@ class CrmApprovalService:
         )
         self._form_fields_url = form_fields_url or os.getenv(
             "AI_APPROVAL_FORM_FIELDS_URL", DEFAULT_FORM_FIELDS_URL
+        )
+        self._get_nodes_url = get_nodes_url or os.getenv(
+            "AI_APPROVAL_GET_NODES_URL", DEFAULT_GET_NODES_URL
+        )
+        self._add_approval_url = add_approval_url or os.getenv(
+            "AI_APPROVAL_ADD_URL", DEFAULT_ADD_APPROVAL_URL
         )
 
     def get_user_context(
@@ -136,7 +149,7 @@ class CrmApprovalService:
         return ApprovalTemplate(**data)
 
     def validate_approval(
-        self, approval_type: str, slots: dict[str, str], user: UserContext
+        self, approval_type: str, slots: dict[str, Any], user: UserContext
     ) -> ValidationResult:
         """在预览或提交前校验已收集的审批字段。"""
         template = self.get_template_detail(approval_type, user)
@@ -179,14 +192,53 @@ class CrmApprovalService:
             approval_node=approval_node,
         )
 
+    def get_approval_nodes(
+        self,
+        approval_set_id: str,
+        form_value: list[dict[str, Any]],
+        user: UserContext,
+    ) -> list[ApprovalNode]:
+        """根据审批模板和表单值获取 CRM 审批流程节点。"""
+        if not user.authorization or not user.uid:
+            return []
+        response = self._http_client.post(
+            self._get_nodes_url,
+            headers={
+                "Accept": "application/json, text/plain, */*",
+                "Content-Type": "application/json;charset=UTF-8",
+                "Authorization": user.authorization or "",
+                "UID": user.uid or "",
+            },
+            json={
+                "approval_set_id": int(approval_set_id),
+                "form_value": form_value,
+            },
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("code") != 200:
+            raise ValueError(f"approval nodes returned code {payload.get('code')}")
+        return _nodes_from_remote_payload(payload)
+
     def submit_approval(
         self,
         approval_type: str,
-        slots: dict[str, str],
+        slots: dict[str, Any],
         user: UserContext,
         idempotency_key: str,
+        approval_set_id: str | None = None,
+        approval_nodes: list[dict[str, Any]] | None = None,
+        selected_assignees: dict[str, list[str]] | None = None,
     ) -> SubmitResult:
-        """将审批申请提交到模拟提交存储。"""
+        """提交审批申请；远程模板调用 ERP，其他模板使用模拟存储。"""
+        if approval_type.startswith("remote_") and approval_set_id and user.authorization and user.uid:
+            return self._submit_remote_approval(
+                slots=slots,
+                user=user,
+                approval_set_id=approval_set_id,
+                approval_nodes=approval_nodes or [],
+                selected_assignees=selected_assignees or {},
+            )
         if idempotency_key in self._submitted_by_key:
             return self._submitted_by_key[idempotency_key]
         prefix = {"leave": "LR", "expense": "EX", "purchase": "PR", "seal": "SE"}.get(
@@ -200,6 +252,43 @@ class CrmApprovalService:
         )
         self._submitted_by_key[idempotency_key] = result
         return result
+
+    def _submit_remote_approval(
+        self,
+        slots: dict[str, Any],
+        user: UserContext,
+        approval_set_id: str,
+        approval_nodes: list[dict[str, Any]],
+        selected_assignees: dict[str, list[str]],
+    ) -> SubmitResult:
+        """调用 ERP 创建审批接口。"""
+        body = {
+            "approval_set_id": int(approval_set_id),
+            "node_list": _remote_submit_nodes(approval_nodes, selected_assignees),
+            "form_data": _remote_form_data(slots),
+        }
+        response = self._http_client.post(
+            self._add_approval_url,
+            headers={
+                "Accept": "application/json, text/plain, */*",
+                "Content-Type": "application/json;charset=UTF-8",
+                "Authorization": user.authorization or "",
+                "UID": user.uid or "",
+            },
+            json=body,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("code") != 200:
+            raise ValueError(f"approval add returned code {payload.get('code')}")
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+        request_id = str(data.get("request_id") or data.get("id") or "")
+        return SubmitResult(
+            request_id=request_id,
+            status=str(data.get("status") or "待审批"),
+            approval_node="CRM审批流",
+            idempotency_key=None,
+        )
 
 
 def _approval_node(approval_type: str, slots: dict[str, str]) -> str:
@@ -229,7 +318,13 @@ def _templates_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalTemp
             if not approval_id or not title:
                 continue
             raw_type = str(item.get("approval_type") or item.get("type") or "").strip()
-            approval_type = raw_type or f"remote_{approval_id}"
+            approval_type = f"remote_{approval_id}"
+            aliases = _remote_aliases(title)
+            if raw_type:
+                aliases.append(raw_type)
+            intent_keywords = _remote_intent_keywords(title)
+            if raw_type:
+                intent_keywords.append(raw_type)
             templates.append(
                 ApprovalTemplate(
                     template_id=approval_id,
@@ -237,8 +332,8 @@ def _templates_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalTemp
                     title=title,
                     category=category,
                     group_name=category,
-                    aliases=_remote_aliases(title),
-                    intent_keywords=_remote_intent_keywords(title),
+                    aliases=list(dict.fromkeys(aliases)),
+                    intent_keywords=list(dict.fromkeys(intent_keywords)),
                     is_common=bool(
                         item.get("is_common")
                         or item.get("is_dynamic_common")
@@ -286,6 +381,118 @@ def _fields_from_remote_payload(payload: dict[str, Any]) -> list[dict[str, Any]]
             }
         )
     return mapped_fields
+
+
+def _nodes_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalNode]:
+    """将 ERP 审批节点响应映射为内部节点模型。"""
+    nodes: list[ApprovalNode] = []
+    for item in payload.get("data") or []:
+        if not isinstance(item, dict):
+            continue
+        handle = item.get("handle") if isinstance(item.get("handle"), dict) else {}
+        handle_type = str(handle.get("type") or "").strip() or None
+        candidates = _assignees_from_remote(handle.get("relate_user") or [])
+        requires_selection = handle_type == "submitter_choice"
+        selected = [] if requires_selection else candidates
+        nodes.append(
+            ApprovalNode(
+                node_id=str(item.get("id") or ""),
+                node_name=str(item.get("name") or ""),
+                node_type=str(item.get("type") or ""),
+                level=int(item.get("level") or 0),
+                handle_type=handle_type,
+                multiple=int(handle.get("is_single") or 0) != 1,
+                requires_selection=requires_selection,
+                candidate_assignees=candidates,
+                selected_assignees=selected,
+                raw_node=deepcopy(item),
+            )
+        )
+    return nodes
+
+
+def _remote_submit_nodes(
+    approval_nodes: list[dict[str, Any]],
+    selected_assignees: dict[str, list[str]],
+) -> list[dict[str, Any]]:
+    """构建创建审批接口需要的 node_list。"""
+    nodes = [ApprovalNode(**item) for item in approval_nodes]
+    submit_nodes: list[dict[str, Any]] = []
+    for node in nodes:
+        selected_uids = selected_assignees.get(node.node_id, [])
+        if selected_uids:
+            users = [
+                user
+                for user in node.candidate_assignees
+                if user.uid in set(selected_uids)
+            ]
+        else:
+            users = node.selected_assignees
+        submit_node = _base_submit_node(node)
+        submit_node["handle_uids"] = [_int_uid(user.uid) for user in users]
+        submit_node["handle_uids_info"] = [
+            {
+                "uid": _int_uid(user.uid),
+                "name": user.name,
+                "avatar": user.avatar,
+            }
+            for user in users
+        ]
+        submit_node.setdefault("cc_uid_types", [])
+        submit_node.setdefault("cc_uids_info", [])
+        submit_node.setdefault("cc_uids", [])
+        submit_node.setdefault("cc_handle_uids", [])
+        submit_node.setdefault("assign_users", [])
+        submit_nodes.append(submit_node)
+    return submit_nodes
+
+
+def _base_submit_node(node: ApprovalNode) -> dict[str, Any]:
+    """基于 CRM 原始节点构建提交节点，避免丢失接口需要的字段。"""
+    if node.raw_node:
+        return deepcopy(node.raw_node)
+    return {
+        "id": int(node.node_id),
+        "type": node.node_type,
+        "name": node.node_name,
+        "level": node.level,
+    }
+
+
+def _remote_form_data(slots: dict[str, Any]) -> dict[str, Any]:
+    """构建创建审批接口需要的 form_data。"""
+    form_data: dict[str, Any] = {}
+    for key, value in slots.items():
+        if isinstance(value, (dict, list)):
+            form_data[key] = value
+        else:
+            form_data[key] = {"value": value}
+    return form_data
+
+
+def _int_uid(uid: str) -> int:
+    """将审批人 UID 转为创建接口使用的整数。"""
+    return int(uid)
+
+
+def _assignees_from_remote(items: list[Any]) -> list[ApprovalAssignee]:
+    """将 ERP 用户列表映射为审批人模型。"""
+    assignees: list[ApprovalAssignee] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        uid = str(item.get("uid") or "").strip()
+        name = str(item.get("display_name") or item.get("name") or "").strip()
+        if not uid or not name:
+            continue
+        assignees.append(
+            ApprovalAssignee(
+                uid=uid,
+                name=name,
+                avatar=str(item.get("avatar") or "").strip() or None,
+            )
+        )
+    return assignees
 
 
 def _flatten_remote_fields(items: list[Any]) -> list[dict[str, Any]]:

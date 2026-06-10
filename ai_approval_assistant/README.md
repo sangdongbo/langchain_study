@@ -293,6 +293,8 @@ https://dev2.lanerp.com/api/field/formFields
 ```text
 AI_APPROVAL_LIST_URL=https://dev2.lanerp.com/api/approval/list
 AI_APPROVAL_FORM_FIELDS_URL=https://dev2.lanerp.com/api/field/formFields
+AI_APPROVAL_GET_NODES_URL=https://dev2.lanerp.com/api/approval/getNodes
+AI_APPROVAL_ADD_URL=https://dev2.lanerp.com/api/approval/add
 ```
 
 响应核心字段：

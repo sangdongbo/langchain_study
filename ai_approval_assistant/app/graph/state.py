@@ -19,6 +19,8 @@ class ApprovalState(TypedDict, total=False):
     confirmed: bool
     request_id: str | None
     approval_node: str | None
+    approval_nodes: list[dict[str, Any]]
+    selected_assignees: dict[str, list[str]]
     assistant_message: str
     errors: list[str]
     field_errors: list[dict[str, Any]]
@@ -48,6 +50,8 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "confirmed": False,
         "request_id": None,
         "approval_node": None,
+        "approval_nodes": [],
+        "selected_assignees": {},
         "assistant_message": "",
         "errors": [],
         "field_errors": [],

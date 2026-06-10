@@ -4,7 +4,13 @@ from pydantic import BaseModel, Field
 from ai_approval_assistant.app.schemas.approval import FieldError
 
 ApprovalStatus = Literal[
-    "idle", "collecting", "awaiting_confirmation", "submitted", "cancelled", "error"
+    "idle",
+    "collecting",
+    "awaiting_assignee_selection",
+    "awaiting_confirmation",
+    "submitted",
+    "cancelled",
+    "error",
 ]
 
 
