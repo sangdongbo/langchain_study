@@ -97,6 +97,36 @@ Uvicorn running on http://127.0.0.1:8010
 uv run uvicorn ai_approval_assistant.app.main:app --host 127.0.0.1 --port 8010 --reload
 ```
 
+Windows PowerShell 推荐在项目根目录执行：
+
+```powershell
+.\start_ai_approval_windows.ps1
+```
+
+也可以直接运行 bat 包装器：
+
+```bat
+start_ai_approval_windows.bat
+```
+
+脚本会先执行 `uv sync` 安装/同步 `pyproject.toml` 和 `uv.lock` 里声明的依赖，然后用当前项目的 `.venv\Scripts\python.exe` 启动服务。默认地址仍然是：
+
+```text
+http://127.0.0.1:8010
+```
+
+如需修改端口：
+
+```powershell
+.\start_ai_approval_windows.ps1 -Port 8011
+```
+
+如果依赖已经安装好，只想直接启动：
+
+```powershell
+.\start_ai_approval_windows.ps1 -SkipSync
+```
+
 启用 DeepSeek：
 
 ```bash
@@ -222,6 +252,8 @@ POST /api/ai-approval/chat
 {
   "session_id": "S001",
   "user_id": "U001",
+  "uid": "863",
+  "authorization": "Bearer your_token_here",
   "message": "我要报销餐饮费 2000 元，客户招待，发票已提供"
 }
 ```
@@ -232,7 +264,36 @@ POST /api/ai-approval/chat
 |---|---|
 | `session_id` | 会话 ID，同一轮审批流程必须保持一致 |
 | `user_id` | 当前用户 ID，mock 数据里可用 `U001` |
+| `uid` | 可选，真实 ERP 用户 UID；传入后会作为 `UID` 请求头调用审批列表接口 |
+| `authorization` | 可选，真实 ERP 登录凭证；传入后会作为 `Authorization` 请求头调用审批列表接口 |
 | `message` | 用户本轮聊天内容 |
+
+传入 `uid` 和 `authorization` 后，后端会先调用真实 ERP 的审批列表接口：
+
+```text
+https://dev2.lanerp.com/api/approval/list
+```
+
+识别到具体审批模板后，会再调用字段接口获取当前模板字段：
+
+```text
+https://dev2.lanerp.com/api/field/formFields
+```
+
+字段接口请求体示例：
+
+```json
+{
+  "field_form": "approval_type_5911"
+}
+```
+
+如果需要切换地址，可以通过环境变量覆盖：
+
+```text
+AI_APPROVAL_LIST_URL=https://dev2.lanerp.com/api/approval/list
+AI_APPROVAL_FORM_FIELDS_URL=https://dev2.lanerp.com/api/field/formFields
+```
 
 响应核心字段：
 

@@ -1,11 +1,14 @@
 from __future__ import annotations
-
 from typing import Any, TypedDict
 
 
 class ApprovalState(TypedDict, total=False):
+    """单个审批聊天会话的可变 LangGraph 状态。"""
+
     session_id: str
     user_id: str
+    uid: str | None
+    authorization: str | None
     user_message: str
     status: str
     intent: str | None
@@ -29,9 +32,12 @@ class ApprovalState(TypedDict, total=False):
 
 
 def initial_state(session_id: str, user_id: str) -> ApprovalState:
+    """为新聊天会话创建初始内存状态。"""
     return {
         "session_id": session_id,
         "user_id": user_id,
+        "uid": None,
+        "authorization": None,
         "user_message": "",
         "status": "idle",
         "intent": None,

@@ -1,1 +1,1 @@
-"""AI approval assistant backend package."""
+"""AI 审批助手后端包。"""

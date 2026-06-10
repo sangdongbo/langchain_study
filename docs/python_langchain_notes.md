@@ -1417,7 +1417,191 @@ rag_inputs = {
 - `context` 来自检索器结果。
 - `question` 保留用户原始输入。
 
-### 7. 链式调用的调试方法
+### 7. RunnableParallel 并行节点
+
+`RunnableParallel` 可以让多个 Runnable 接收同一个输入，并行计算后合并成一个字典。字典写法本质上也会被转换成类似的并行结构。
+
+```python
+from langchain_core.runnables import RunnableLambda, RunnableParallel
+
+r1 = RunnableLambda(lambda x: x + 1)
+r2 = RunnableLambda(lambda x: x * 2)
+
+chain = RunnableParallel(r1=r1, r2=r2)
+
+print(chain.invoke(2))
+# {"r1": 3, "r2": 4}
+```
+
+RAG 中常见写法：
+
+```python
+rag_inputs = RunnableParallel(
+    context=retriever | format_docs,
+    question=RunnablePassthrough(),
+)
+
+rag_chain = rag_inputs | prompt | model | StrOutputParser()
+```
+
+适合场景：
+
+- 同一个输入要同时进入多个检索器。
+- 同一个问题既要保留原文，又要改写、分类或抽取关键词。
+- 多路计算之间没有依赖关系，可以并行提升效率。
+
+### 8. 合并输入和处理中间字典
+
+`RunnablePassthrough.assign()` 常用于在保留原输入字典的基础上新增字段。
+
+```python
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+
+def build_context(inputs: dict) -> str:
+    docs = retriever.invoke(inputs["question"])
+    return "\n\n".join(doc.page_content for doc in docs)
+
+chain = (
+    RunnablePassthrough.assign(context=RunnableLambda(build_context))
+    | prompt
+    | model
+    | StrOutputParser()
+)
+
+answer = chain.invoke({"question": "什么是 RAG？", "user_id": "u001"})
+```
+
+这类写法适合业务输入已经是字典的场景，例如：
+
+```text
+{"question": "...", "user_id": "...", "tenant_id": "..."}
+```
+
+`assign` 会保留已有字段，再新增 `context`。后续 prompt 可以同时使用 `question`、`tenant_id`、`context` 等变量。
+
+### 9. fallback、retry 与容错
+
+链在生产环境中可能因为模型超时、网络波动、解析失败而报错。LCEL 可以给 Runnable 增加 fallback 或 retry。
+
+`with_fallbacks()`：当前 Runnable 失败时，尝试备用 Runnable。
+
+```python
+primary_model = openai_model
+secondary_model = local_model
+
+safe_model = primary_model.with_fallbacks([secondary_model])
+
+chain = prompt | safe_model | StrOutputParser()
+```
+
+`with_retry()`：临时错误时自动重试。
+
+```python
+stable_chain = chain.with_retry(stop_after_attempt=3)
+```
+
+注意：
+
+- fallback 适合主模型不可用、主工具失败、解析器失败时兜底。
+- retry 适合偶发超时和网络错误，不适合业务逻辑错误。
+- 重试会增加延迟和成本，线上要设置超时和最大次数。
+- 如果工具有副作用，例如写文件、发消息、扣费，不要盲目重试。
+
+### 10. 条件路由
+
+LCEL 可以根据输入动态选择后续链路。简单场景可以用 `RunnableLambda` 返回不同 Runnable。
+
+```python
+from langchain_core.runnables import RunnableLambda
+
+math_chain = math_prompt | model | StrOutputParser()
+default_chain = default_prompt | model | StrOutputParser()
+
+def route(inputs: dict):
+    if "数学" in inputs["question"] or "计算" in inputs["question"]:
+        return math_chain.invoke(inputs)
+    return default_chain.invoke(inputs)
+
+chain = RunnableLambda(route)
+```
+
+更常见的工程结构是：先用一个分类链判断问题类型，再按类型选择知识库、工具或 prompt。
+
+```text
+用户问题
+-> 分类/路由
+-> 产品知识库 / 技术知识库 / 工具调用 / 默认回答
+-> 统一输出格式
+```
+
+路由适合：
+
+- 多知识库问答。
+- 不同问题走不同模型。
+- Agent 或 RAG 前置分类。
+- 简单问题直接回答，复杂问题进入检索。
+
+### 11. 生命周期监听
+
+`with_listeners()` 可以在 Runnable 开始、结束或报错时执行回调，适合记录日志、耗时、输入输出摘要。
+
+```python
+from langchain_core.tracers.schemas import Run
+
+def on_start(run_obj: Run):
+    print("链开始：", run_obj.start_time)
+
+def on_end(run_obj: Run):
+    print("链结束：", run_obj.end_time)
+
+chain_with_log = chain.with_listeners(
+    on_start=on_start,
+    on_end=on_end,
+)
+
+result = chain_with_log.invoke({"question": "什么是 LCEL？"})
+```
+
+使用建议：
+
+- 日志里不要直接打印 API Key、身份证号、手机号等敏感信息。
+- 线上日志建议记录 `run_id`、耗时、模型名、token 成本、检索文档 ID。
+- 如果需要完整链路追踪，可以接 LangSmith 或项目自己的日志系统。
+
+### 12. 生命周期管理和配置
+
+Runnable 调用时可以传 `config`，常见用途是控制并发、标签、元数据、会话 ID。
+
+```python
+result = chain.invoke(
+    {"question": "什么是 RAG？"},
+    config={
+        "tags": ["rag", "demo"],
+        "metadata": {"user_id": "u001"},
+        "max_concurrency": 3,
+    },
+)
+```
+
+常见配置：
+
+| 配置 | 作用 |
+| --- | --- |
+| `tags` | 给一次运行打标签，方便追踪 |
+| `metadata` | 附加业务信息 |
+| `max_concurrency` | 控制批量或并行调用的最大并发 |
+| `configurable` | 传入 session_id 等可配置字段 |
+
+`RunnableWithMessageHistory` 常用 `configurable.session_id` 区分不同用户会话。
+
+```python
+chain_with_history.invoke(
+    {"question": "继续解释一下"},
+    config={"configurable": {"session_id": "user-1"}},
+)
+```
+
+### 13. 链式调用的调试方法
 
 链越长，越需要观察中间结果。
 
@@ -1448,6 +1632,9 @@ text = StrOutputParser().invoke(model_result)
 - Runnable 统一了 `invoke`、`batch`、`stream` 等调用方式。
 - `RunnableLambda` 适合把自定义函数放入链。
 - `RunnablePassthrough` 适合保留原始输入。
+- `RunnableParallel` 适合把同一个输入并行加工成多个字段。
+- `assign` 适合在已有输入字典上追加中间结果。
+- `with_fallbacks`、`with_retry`、`with_listeners` 分别用于兜底、重试和日志监听。
 - 调试复杂链时，把链拆开逐步检查最稳。
 
 ## 十、工具调用与 Agent

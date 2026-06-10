@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 os.environ["AI_APPROVAL_USE_LLM"] = "false"
 
 from ai_approval_assistant.app.main import app  # noqa: E402
+from ai_approval_assistant.app.schemas.approval import ApprovalTemplate  # noqa: E402
 from ai_approval_assistant.app.services.session_state_service import session_state_service  # noqa: E402
 from ai_approval_assistant.app.services.model_service import model_service  # noqa: E402
 
@@ -118,6 +119,28 @@ def test_clarification_summarizes_categories_for_many_templates() -> None:
     assert "库存管理" in body["assistant_message"]
 
 
+def test_greeting_uses_general_chat_instead_of_approval_clarification(monkeypatch) -> None:
+    session_state_service.clear("S-general-greeting")
+    monkeypatch.setattr(model_service, "chat", lambda message: "你好，我可以帮你处理审批，也可以回答普通问题。")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-general-greeting",
+            "user_id": "U001",
+            "message": "你好",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "idle"
+    assert body["approval_type"] is None
+    assert body["assistant_message"] == "你好，我可以帮你处理审批，也可以回答普通问题。"
+    assert "审批模板" not in body["assistant_message"]
+    assert "general_chat" in body["trace"]
+
+
 def test_collecting_flow_can_cancel_without_submit() -> None:
     response = client.post(
         "/api/ai-approval/chat",
@@ -205,6 +228,62 @@ def test_llm_can_classify_when_rules_do_not_match(monkeypatch) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["approval_type"] == "seal"
+    assert body["status"] == "collecting"
+
+
+def test_chat_can_use_remote_approval_list_credentials(monkeypatch) -> None:
+    session_state_service.clear("S-remote-approval-list")
+
+    def fake_list_available_templates(user):
+        assert user.authorization == "Bearer test-token"
+        assert user.uid == "863"
+        return [
+            ApprovalTemplate(**{
+                "template_id": "6408",
+                "approval_type": "remote_6408",
+                "title": "zh-请假",
+                "category": "zh-测试",
+                "group_name": "zh-测试",
+                "aliases": ["请假"],
+                "intent_keywords": ["zh-请假", "请假"],
+                "visibility": "all",
+                "enabled": True,
+                "is_common": False,
+                "sort_order": 100,
+                "fields": [
+                    {
+                        "name": "description",
+                        "label": "审批说明",
+                        "type": "text",
+                        "required": True,
+                        "options": [],
+                        "aliases": ["说明", "原因"],
+                        "extract_patterns": [],
+                        "question": "请补充这条审批需要提交的说明。",
+                    }
+                ],
+            })
+        ]
+
+    monkeypatch.setattr(
+        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        fake_list_available_templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-approval-list",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要发起zh-请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approval_type"] == "remote_6408"
     assert body["status"] == "collecting"
 
 

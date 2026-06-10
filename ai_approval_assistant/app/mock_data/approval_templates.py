@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 USERS = {
     "U001": {
         "user_id": "U001",
@@ -44,7 +43,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["开始", "从", "起始时间"],
-                "extract_patterns": [r"(?:从|开始时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"],
+                "extract_patterns": [
+                    r"(?:从|开始时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"
+                ],
                 "question": "请告诉我请假的开始时间，例如 2026-06-01。",
             },
             {
@@ -54,7 +55,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["结束", "到", "截止时间"],
-                "extract_patterns": [r"(?:到|至|结束时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"],
+                "extract_patterns": [
+                    r"(?:到|至|结束时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"
+                ],
                 "question": "请告诉我请假的结束时间，例如 2026-06-03。",
             },
             {
@@ -76,7 +79,15 @@ APPROVAL_TEMPLATES = {
         "category": "财务",
         "group_name": "zh-测试",
         "aliases": ["测试报销", "审批编辑-报销控件组"],
-        "intent_keywords": ["报销", "发票", "差旅费", "餐饮费", "办公用品", "交通费", "住宿费"],
+        "intent_keywords": [
+            "报销",
+            "发票",
+            "差旅费",
+            "餐饮费",
+            "办公用品",
+            "交通费",
+            "住宿费",
+        ],
         "visibility": "all",
         "enabled": True,
         "is_common": True,
@@ -147,7 +158,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["物品", "采购物", "商品"],
-                "extract_patterns": [r"(?:采购|购买|购置|买)([\u4e00-\u9fa5A-Za-z0-9]+)"],
+                "extract_patterns": [
+                    r"(?:采购|购买|购置|买)([\u4e00-\u9fa5A-Za-z0-9]+)"
+                ],
                 "question": "请告诉我采购物品名称。",
             },
             {
@@ -212,7 +225,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["文件", "材料", "合同"],
-                "extract_patterns": [r"(?:文件|材料|合同)(?:名称)?是?([\u4e00-\u9fa5A-Za-z0-9《》_-]+)"],
+                "extract_patterns": [
+                    r"(?:文件|材料|合同)(?:名称)?是?([\u4e00-\u9fa5A-Za-z0-9《》_-]+)"
+                ],
                 "question": "请告诉我需要盖章的文件名称。",
             },
             {
@@ -267,7 +282,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["物品", "商品", "物料"],
-                "extract_patterns": [r"(?:出库|领用|领料)([\u4e00-\u9fa5A-Za-z0-9_-]+)"],
+                "extract_patterns": [
+                    r"(?:出库|领用|领料)([\u4e00-\u9fa5A-Za-z0-9_-]+)"
+                ],
                 "question": "请告诉我出库物品。",
             },
             {
@@ -357,7 +374,9 @@ APPROVAL_TEMPLATES = {
                 "required": True,
                 "options": [],
                 "aliases": ["开始", "从"],
-                "extract_patterns": [r"(?:从|开始时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"],
+                "extract_patterns": [
+                    r"(?:从|开始时间是?)(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)"
+                ],
                 "question": "请告诉我加班开始时间，例如 2026-06-01。",
             },
             {

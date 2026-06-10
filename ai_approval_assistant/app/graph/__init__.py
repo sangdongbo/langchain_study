@@ -1,1 +1,1 @@
-"""Approval workflow graph."""
+"""审批工作流图。"""

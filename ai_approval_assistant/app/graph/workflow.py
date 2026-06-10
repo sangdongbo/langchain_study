@@ -1,13 +1,11 @@
 from __future__ import annotations
-
 import hashlib
 import json
-
 from langgraph.graph import END, START, StateGraph
-
 from ai_approval_assistant.app.graph.extractors import (
     classify_approval_type,
     extract_slots,
+    has_approval_intent,
     is_cancel_message,
     is_confirm_message,
     is_switch_message,
@@ -22,20 +20,25 @@ from ai_approval_assistant.app.schemas.chat import (
 )
 from ai_approval_assistant.app.services.crm_service import crm_approval_service
 from ai_approval_assistant.app.services.model_service import model_service
-from ai_approval_assistant.app.services.session_state_service import session_state_service
-from ai_approval_assistant.app.services.template_candidate_service import select_template_candidates
-
+from ai_approval_assistant.app.services.session_state_service import (
+    session_state_service,
+)
+from ai_approval_assistant.app.services.template_candidate_service import (
+    select_template_candidates,
+)
 
 MAX_REVIEW_COUNT = 2
 
 
 def run_chat_turn(request: ChatRequest) -> ChatResponse:
+    """将单轮聊天请求放入审批工作流图执行。"""
     state = session_state_service.load(request.session_id, request.user_id)
     state["session_id"] = request.session_id
     state["user_id"] = request.user_id
+    state["uid"] = request.uid
+    state["authorization"] = request.authorization
     state["user_message"] = request.message.strip()
     state["trace"] = []
-
     graph = create_workflow()
     result = graph.invoke(state)
     session_state_service.save(result)
@@ -43,6 +46,7 @@ def run_chat_turn(request: ChatRequest) -> ChatResponse:
 
 
 def create_workflow():
+    """创建并编译 LangGraph 审批工作流。"""
     builder = StateGraph(ApprovalState)
     builder.add_node("load_context", load_context_node)
     builder.add_node("classify", classify_node)
@@ -54,7 +58,7 @@ def create_workflow():
     builder.add_node("already_submitted", already_submitted_node)
     builder.add_node("cancel", cancel_node)
     builder.add_node("clarify", clarify_node)
-
+    builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "load_context")
     builder.add_edge("load_context", "classify")
     builder.add_edge("classify", "decision_review")
@@ -68,22 +72,33 @@ def create_workflow():
             "clarify": "clarify",
             "review": "decision_review",
             "already_submitted": "already_submitted",
+            "general_chat": "general_chat",
         },
     )
-    builder.add_conditional_edges("collect", _route, {"validate": "validate", "end": END})
-    builder.add_conditional_edges("validate", _route, {"preview": "preview", "end": END})
+    builder.add_conditional_edges(
+        "collect", _route, {"validate": "validate", "end": END}
+    )
+    builder.add_conditional_edges(
+        "validate", _route, {"preview": "preview", "end": END}
+    )
     builder.add_edge("preview", END)
     builder.add_edge("submit", END)
     builder.add_edge("already_submitted", END)
     builder.add_edge("cancel", END)
     builder.add_edge("clarify", END)
+    builder.add_edge("general_chat", END)
     return builder.compile()
 
 
 def load_context_node(state: ApprovalState) -> ApprovalState:
+    """加载用户上下文和可用审批模板。"""
     trace = [*state.get("trace", []), "load_context"]
     try:
-        user = crm_approval_service.get_user_context(state["user_id"])
+        user = crm_approval_service.get_user_context(
+            state["user_id"],
+            uid=state.get("uid"),
+            authorization=state.get("authorization"),
+        )
         templates = crm_approval_service.list_available_templates(user)
     except ValueError as exc:
         return {
@@ -105,31 +120,37 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
 
 
 def classify_node(state: ApprovalState) -> ApprovalState:
+    """识别用户消息并选择下一步工作流路由。"""
     trace = [*state.get("trace", []), "classify"]
     text = state["user_message"]
     status = state.get("status", "idle")
-
     if status == "submitted":
         return {**state, "trace": trace, "_route": "already_submitted"}
-
     if status in {"collecting", "awaiting_confirmation"} and is_cancel_message(text):
         return {**state, "trace": trace, "_route": "cancel"}
-
     if status == "awaiting_confirmation":
         if is_confirm_message(text):
             return {**state, "confirmed": True, "trace": trace, "_route": "submit"}
         if state.get("approval_type"):
             return {**state, "confirmed": False, "trace": trace, "_route": "collect"}
         return {**state, "trace": trace, "_route": "clarify"}
-
     available_templates = _templates_from_state(state)
     candidate_templates = select_template_candidates(text, available_templates)
     detected_type = classify_approval_type(text, candidate_templates)
     if not detected_type:
         detected_type = model_service.classify_approval_type(text, candidate_templates)
-
+    if (
+        status == "idle"
+        and (not detected_type)
+        and (not has_approval_intent(text, available_templates))
+    ):
+        return {**state, "trace": trace, "_route": "general_chat"}
     if status == "collecting" and state.get("approval_type"):
-        if detected_type and detected_type != state.get("approval_type") and is_switch_message(text):
+        if (
+            detected_type
+            and detected_type != state.get("approval_type")
+            and is_switch_message(text)
+        ):
             return {
                 **state,
                 "approval_type": detected_type,
@@ -143,7 +164,6 @@ def classify_node(state: ApprovalState) -> ApprovalState:
                 "_route": "collect",
             }
         return {**state, "trace": trace, "_route": "collect"}
-
     if not detected_type:
         return {
             **state,
@@ -151,7 +171,6 @@ def classify_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "clarify",
         }
-
     return {
         **state,
         "approval_type": detected_type,
@@ -168,16 +187,14 @@ def classify_node(state: ApprovalState) -> ApprovalState:
 
 
 def decision_review_node(state: ApprovalState) -> ApprovalState:
-    """Bounded review before executing a business action.
+    """执行具体业务动作前进行有界复核。
 
-    This is the place to plug in an LLM-based reviewer later. It must stay
-    bounded so unclear routing turns into clarification instead of loops.
+    这里可以接入基于 LLM 的路由复核，但必须保持次数有界；
+    不明确的路由应转为澄清，而不是进入循环。
     """
-
     trace = [*state.get("trace", []), "decision_review"]
     review_count = state.get("review_count", 0) + 1
     route = state.get("_route", "clarify")
-
     if review_count > MAX_REVIEW_COUNT:
         return {
             **state,
@@ -186,9 +203,10 @@ def decision_review_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "clarify",
         }
-
     if route == "submit":
-        if state.get("status") != "awaiting_confirmation" or not state.get("approval_type"):
+        if state.get("status") != "awaiting_confirmation" or not state.get(
+            "approval_type"
+        ):
             return {
                 **state,
                 "review_count": 0,
@@ -198,8 +216,7 @@ def decision_review_node(state: ApprovalState) -> ApprovalState:
                 "_route": "clarify",
             }
         return {**state, "review_count": 0, "trace": trace, "_route": "submit"}
-
-    if route == "collect" and not state.get("approval_type"):
+    if route == "collect" and (not state.get("approval_type")):
         templates = _templates_from_state(state)
         return {
             **state,
@@ -208,10 +225,8 @@ def decision_review_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "clarify",
         }
-
     if route == "collect" and state.get("approval_type"):
         return {**state, "review_count": 0, "trace": trace, "_route": "collect"}
-
     templates = _templates_from_state(state)
     llm_review = model_service.review_decision(
         route=route,
@@ -240,20 +255,21 @@ def decision_review_node(state: ApprovalState) -> ApprovalState:
                 "_route": "clarify",
             }
         route = reviewed_route
-
     return {**state, "review_count": 0, "trace": trace, "_route": route}
 
 
 def collect_node(state: ApprovalState) -> ApprovalState:
+    """从当前消息中收集审批必填字段。"""
     trace = [*state.get("trace", []), "collect"]
     approval_type = state.get("approval_type")
     if not approval_type:
         return {**state, "trace": trace, "_route": "clarify"}
-
     user = _user_from_state(state)
     template = crm_approval_service.get_template_detail(approval_type, user)
     slots = dict(state.get("collected_slots", {}))
-    rule_slots = extract_slots(template, state["user_message"], state.get("awaiting_field"))
+    rule_slots = extract_slots(
+        template, state["user_message"], state.get("awaiting_field")
+    )
     slots.update(rule_slots)
     llm_slots = model_service.extract_slots(
         template=template,
@@ -263,10 +279,11 @@ def collect_node(state: ApprovalState) -> ApprovalState:
     )
     for key, value in llm_slots.items():
         slots.setdefault(key, value)
-
     missing_field = _first_missing_field(template, slots)
     if missing_field:
-        question = next(field.question for field in template.fields if field.name == missing_field)
+        question = next(
+            (field.question for field in template.fields if field.name == missing_field)
+        )
         return {
             **state,
             "status": "collecting",
@@ -277,7 +294,6 @@ def collect_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "end",
         }
-
     return {
         **state,
         "status": "collecting",
@@ -289,12 +305,12 @@ def collect_node(state: ApprovalState) -> ApprovalState:
 
 
 def validate_node(state: ApprovalState) -> ApprovalState:
+    """按 CRM 或模板规则校验已收集字段。"""
     trace = [*state.get("trace", []), "validate"]
     user = _user_from_state(state)
     approval_type = state["approval_type"]
     slots = state.get("collected_slots", {})
     result = crm_approval_service.validate_approval(approval_type, slots, user)
-
     if not result.valid:
         return {
             **state,
@@ -306,7 +322,6 @@ def validate_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "end",
         }
-
     return {
         **state,
         "errors": [],
@@ -319,12 +334,14 @@ def validate_node(state: ApprovalState) -> ApprovalState:
 
 
 def preview_node(state: ApprovalState) -> ApprovalState:
+    """生成审批预览并等待用户明确确认。"""
     trace = [*state.get("trace", []), "preview"]
     user = _user_from_state(state)
     template = crm_approval_service.get_template_detail(state["approval_type"], user)
     warnings = list(state.get("_validation_warnings", []))
-    preview = _build_preview(template, state.get("collected_slots", {}), state.get("approval_node"), warnings)
-
+    preview = _build_preview(
+        template, state.get("collected_slots", {}), state.get("approval_node"), warnings
+    )
     lines = [f"请确认是否提交{template.title}：", ""]
     for field in preview.fields:
         lines.append(f"- {field.label}：{field.value}")
@@ -332,8 +349,9 @@ def preview_node(state: ApprovalState) -> ApprovalState:
         lines.append(f"- 预计审批节点：{preview.approval_node}")
     for warning in warnings:
         lines.append(f"- 提示：{warning}")
-    lines.extend(["", "回复“确认提交”后我再提交申请。也可以继续说明要修改的字段，或回复“取消”。"])
-
+    lines.extend(
+        ["", "回复“确认提交”后我再提交申请。也可以继续说明要修改的字段，或回复“取消”。"]
+    )
     return {
         **state,
         "status": "awaiting_confirmation",
@@ -346,6 +364,7 @@ def preview_node(state: ApprovalState) -> ApprovalState:
 
 
 def submit_node(state: ApprovalState) -> ApprovalState:
+    """在确认守卫通过后提交审批。"""
     trace = [*state.get("trace", []), "submit"]
     if not state.get("confirmed"):
         return {
@@ -354,7 +373,6 @@ def submit_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "clarify",
         }
-
     user = _user_from_state(state)
     idempotency_key = state.get("idempotency_key") or _build_idempotency_key(state)
     result = crm_approval_service.submit_approval(
@@ -369,33 +387,26 @@ def submit_node(state: ApprovalState) -> ApprovalState:
         "request_id": result.request_id,
         "approval_node": result.approval_node,
         "idempotency_key": result.idempotency_key,
-        "assistant_message": (
-            "已提交审批申请。\n\n"
-            f"- 申请编号：{result.request_id}\n"
-            f"- 当前状态：{result.status}\n"
-            f"- 审批节点：{result.approval_node}"
-        ),
+        "assistant_message": f"已提交审批申请。\n\n- 申请编号：{result.request_id}\n- 当前状态：{result.status}\n- 审批节点：{result.approval_node}",
         "trace": trace,
         "_route": "end",
     }
 
 
 def already_submitted_node(state: ApprovalState) -> ApprovalState:
+    """对已提交会话返回之前的提交结果。"""
     trace = [*state.get("trace", []), "already_submitted"]
     return {
         **state,
         "status": "submitted",
-        "assistant_message": (
-            "这条审批申请已经提交过。\n\n"
-            f"- 申请编号：{state.get('request_id')}\n"
-            f"- 审批节点：{state.get('approval_node')}"
-        ),
+        "assistant_message": f"这条审批申请已经提交过。\n\n- 申请编号：{state.get('request_id')}\n- 审批节点：{state.get('approval_node')}",
         "trace": trace,
         "_route": "end",
     }
 
 
 def cancel_node(state: ApprovalState) -> ApprovalState:
+    """取消当前审批流程并重置会话状态。"""
     trace = [*state.get("trace", []), "cancel"]
     return {
         **initial_state(state["session_id"], state["user_id"]),
@@ -407,30 +418,57 @@ def cancel_node(state: ApprovalState) -> ApprovalState:
 
 
 def clarify_node(state: ApprovalState) -> ApprovalState:
+    """向用户返回当前澄清消息。"""
     trace = [*state.get("trace", []), "clarify"]
     templates = _templates_from_state(state)
     message = state.get("assistant_message") or _approval_type_clarification(templates)
     return {**state, "assistant_message": message, "trace": trace, "_route": "end"}
 
 
+def general_chat_node(state: ApprovalState) -> ApprovalState:
+    """使用通用聊天模型处理非审批消息。"""
+    trace = [*state.get("trace", []), "general_chat"]
+    return {
+        **state,
+        "status": "idle",
+        "approval_type": None,
+        "collected_slots": {},
+        "awaiting_field": None,
+        "preview": None,
+        "assistant_message": model_service.chat(state.get("user_message", "")),
+        "trace": trace,
+        "_route": "end",
+    }
+
+
 def _route(state: ApprovalState) -> str:
+    """从状态中读取下一步图路由。"""
     return state.get("_route", "end")
 
 
 def _templates_from_state(state: ApprovalState) -> list[ApprovalTemplate]:
+    """从图状态中反序列化可用模板。"""
     return [ApprovalTemplate(**item) for item in state.get("_available_templates", [])]
 
 
 def _user_from_state(state: ApprovalState) -> UserContext:
+    """从图状态中反序列化或重建用户上下文。"""
     user_data = state.get("_user_context")
     if not user_data:
-        return crm_approval_service.get_user_context(state["user_id"])
+        return crm_approval_service.get_user_context(
+            state["user_id"],
+            uid=state.get("uid"),
+            authorization=state.get("authorization"),
+        )
     return UserContext(**user_data)
 
 
-def _first_missing_field(template: ApprovalTemplate, slots: dict[str, str]) -> str | None:
+def _first_missing_field(
+    template: ApprovalTemplate, slots: dict[str, str]
+) -> str | None:
+    """返回第一个尚未收集的模板必填字段。"""
     for field in template.fields:
-        if field.required and not slots.get(field.name):
+        if field.required and (not slots.get(field.name)):
             return field.name
     return None
 
@@ -441,11 +479,14 @@ def _build_preview(
     approval_node: str | None,
     warnings: list[str],
 ) -> ApprovalPreview:
+    """构建结构化审批预览响应模型。"""
     return ApprovalPreview(
         approval_type=template.approval_type,
         title=template.title,
         fields=[
-            PreviewField(name=field.name, label=field.label, value=slots.get(field.name, ""))
+            PreviewField(
+                name=field.name, label=field.label, value=slots.get(field.name, "")
+            )
             for field in template.fields
         ],
         approval_node=approval_node,
@@ -454,13 +495,16 @@ def _build_preview(
 
 
 def _approval_type_clarification(templates: list[ApprovalTemplate]) -> str:
+    """构建列出可用审批分类的澄清消息。"""
     if not templates:
         return "当前没有可发起的审批模板。"
     common = [template.title for template in templates if template.is_common][:5]
     categories: dict[str, int] = {}
     for template in templates:
         categories[template.category] = categories.get(template.category, 0) + 1
-    category_text = "、".join(f"{name}({count})" for name, count in sorted(categories.items()))
+    category_text = "、".join(
+        (f"{name}({count})" for name, count in sorted(categories.items()))
+    )
     if common:
         common_text = "、".join(common)
         return f"请告诉我要办理哪类审批。常用审批包括：{common_text}。当前分类：{category_text}。"
@@ -468,6 +512,7 @@ def _approval_type_clarification(templates: list[ApprovalTemplate]) -> str:
 
 
 def _to_response(state: ApprovalState) -> ChatResponse:
+    """将图状态转换为对外聊天响应结构。"""
     preview_data = state.get("preview")
     preview = ApprovalPreview(**preview_data) if preview_data else None
     missing_fields: list[str] = []
@@ -492,6 +537,7 @@ def _to_response(state: ApprovalState) -> ChatResponse:
 
 
 def _actions_for_status(status: str) -> list[str]:
+    """根据当前审批状态返回 UI 动作提示。"""
     if status == "collecting":
         return ["reply", "cancel"]
     if status == "awaiting_confirmation":
@@ -502,6 +548,7 @@ def _actions_for_status(status: str) -> list[str]:
 
 
 def _build_idempotency_key(state: ApprovalState) -> str:
+    """构建用于模拟提交去重的确定性键。"""
     payload = {
         "session_id": state.get("session_id"),
         "user_id": state.get("user_id"),
