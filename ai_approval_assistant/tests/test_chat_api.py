@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 
 os.environ["AI_APPROVAL_USE_LLM"] = "false"
 
-from ai_approval_assistant.app.main import app  # noqa: E402
-from ai_approval_assistant.app.schemas.approval import ApprovalAssignee, ApprovalNode, ApprovalTemplate  # noqa: E402
-from ai_approval_assistant.app.services.session_state_service import session_state_service  # noqa: E402
-from ai_approval_assistant.app.services.model_service import model_service  # noqa: E402
+from app.main import app  # noqa: E402
+from app.schemas.approval import ApprovalAssignee, ApprovalNode, ApprovalTemplate  # noqa: E402
+from app.services.session_state_service import session_state_service  # noqa: E402
+from app.services.model_service import model_service  # noqa: E402
 
 
 client = TestClient(app)
@@ -82,7 +82,10 @@ def test_purchase_flow_asks_missing_fields() -> None:
     body = response.json()
     assert body["status"] == "collecting"
     assert body["approval_type"] == "purchase"
-    assert body["awaiting_field"] == "quantity"
+    assert body["awaiting_field"] == "数量"
+    assert body["awaiting_field_key"] == "quantity"
+    assert body["awaiting_field_label"] == "数量"
+    assert body["missing_field_labels"] == ["数量"]
     assert "数量" in body["assistant_message"]
 
 
@@ -266,7 +269,7 @@ def test_chat_can_use_remote_approval_list_credentials(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        "app.graph.workflow.crm_approval_service.list_available_templates",
         fake_list_available_templates,
     )
 
@@ -285,6 +288,450 @@ def test_chat_can_use_remote_approval_list_credentials(monkeypatch) -> None:
     body = response.json()
     assert body["approval_type"] == "remote_6408"
     assert body["status"] == "collecting"
+
+
+def test_remote_keyword_search_with_multiple_templates_asks_user_to_choose(monkeypatch) -> None:
+    session_state_service.clear("S-remote-template-choice")
+    searched_keywords: list[str] = []
+
+    templates = [
+        ApprovalTemplate(**{
+            "template_id": "5911",
+            "approval_type": "remote_5911",
+            "title": "测试外出",
+            "category": "zh-测试",
+            "group_name": "zh-测试",
+            "aliases": ["测试外出", "外出"],
+            "intent_keywords": ["测试外出", "外出"],
+            "fields": [
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        }),
+        ApprovalTemplate(**{
+            "template_id": "5912",
+            "approval_type": "remote_5912",
+            "title": "测试外出备用",
+            "category": "zh-测试",
+            "group_name": "zh-测试",
+            "aliases": ["测试外出备用", "外出"],
+            "intent_keywords": ["测试外出备用", "外出"],
+            "fields": [
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        }),
+    ]
+
+    def fake_search_available_templates(user, keyword):
+        searched_keywords.append(keyword)
+        return templates
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        fake_search_available_templates,
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: next(
+            template for template in templates if template.approval_type == approval_type
+        ),
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "测试外出",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert searched_keywords == ["测试外出"]
+    assert body["status"] == "idle"
+    assert body["approval_type"] is None
+    assert "找到多个审批模板" in body["assistant_message"]
+    assert "1. 测试外出" in body["assistant_message"]
+    assert "2. 测试外出备用" in body["assistant_message"]
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "1",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert searched_keywords == ["测试外出"]
+    assert body["approval_type"] == "remote_5911"
+    assert body["status"] == "collecting"
+    assert body["awaiting_field"] == "开始时间"
+    assert body["awaiting_field_key"] == "go_out_start_time"
+
+
+def test_remote_template_load_error_is_not_rewritten_as_empty_template_message(monkeypatch) -> None:
+    """远程模板加载失败时，应保留真实错误，避免误导为没有模板。"""
+    session_state_service.clear("S-remote-load-error")
+
+    def fake_list_available_templates(user):
+        raise ValueError("approval list returned code 401")
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        fake_list_available_templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-load-error",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer expired-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "error"
+    assert body["assistant_message"] == "CRM 登录已过期或授权无效，请刷新页面重新登录后再试。"
+    assert "当前没有可发起的审批模板" not in body["assistant_message"]
+
+
+def test_chat_can_use_remote_credentials_from_headers(monkeypatch) -> None:
+    session_state_service.clear("S-remote-headers")
+
+    def fake_list_available_templates(user):
+        assert user.authorization == "Bearer header-token"
+        assert user.uid == "863"
+        return [
+            ApprovalTemplate(**{
+                "template_id": "6408",
+                "approval_type": "remote_6408",
+                "title": "zh-请假",
+                "category": "zh-测试",
+                "group_name": "zh-测试",
+                "aliases": ["请假"],
+                "intent_keywords": ["zh-请假", "请假"],
+                "visibility": "all",
+                "enabled": True,
+                "is_common": False,
+                "sort_order": 100,
+                "fields": [
+                    {
+                        "name": "description",
+                        "label": "审批说明",
+                        "type": "text",
+                        "required": True,
+                        "options": [],
+                        "aliases": ["说明", "原因"],
+                        "extract_patterns": [],
+                        "question": "请补充这条审批需要提交的说明。",
+                    }
+                ],
+            })
+        ]
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        fake_list_available_templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        headers={"Authorization": "Bearer header-token", "UID": "863"},
+        json={
+            "session_id": "S-remote-headers",
+            "user_id": "863",
+            "message": "我要发起zh-请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approval_type"] == "remote_6408"
+    assert body["status"] == "collecting"
+
+
+def test_remote_credentials_reset_existing_local_mock_session(monkeypatch) -> None:
+    session_state_service.clear("S-local-to-remote")
+    first_response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-local-to-remote",
+            "user_id": "863",
+            "message": "我要请假",
+        },
+    )
+    assert first_response.status_code == 200
+    assert first_response.json()["approval_type"] == "leave"
+    assert first_response.json()["awaiting_field"] == "请假类型"
+    assert first_response.json()["awaiting_field_key"] == "leave_type"
+
+    def fake_list_available_templates(user):
+        assert user.authorization == "Bearer header-token"
+        assert user.uid == "863"
+        return [
+            ApprovalTemplate(**{
+                "template_id": "6408",
+                "approval_type": "remote_6408",
+                "title": "zh-请假",
+                "category": "zh-测试",
+                "group_name": "zh-测试",
+                "aliases": ["请假"],
+                "intent_keywords": ["zh-请假", "请假"],
+                "visibility": "all",
+                "enabled": True,
+                "is_common": False,
+                "sort_order": 100,
+                "fields": [
+                    {
+                        "name": "description",
+                        "label": "审批说明",
+                        "type": "text",
+                        "required": True,
+                        "options": [],
+                        "aliases": ["说明", "原因"],
+                        "extract_patterns": [],
+                        "question": "请补充这条审批需要提交的说明。",
+                    }
+                ],
+            })
+        ]
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        fake_list_available_templates,
+    )
+
+    second_response = client.post(
+        "/api/ai-approval/chat",
+        headers={"Authorization": "Bearer header-token", "UID": "863"},
+        json={
+            "session_id": "S-local-to-remote",
+            "user_id": "863",
+            "message": "我要发起zh-请假",
+        },
+    )
+
+    assert second_response.status_code == 200
+    body = second_response.json()
+    assert body["approval_type"] == "remote_6408"
+    assert body["awaiting_field"] == "审批说明"
+    assert body["awaiting_field_key"] == "description"
+    assert "leave_type" not in body["assistant_message"]
+
+
+def test_remote_waiting_field_exposes_label_for_display_and_key_for_program(monkeypatch) -> None:
+    """远程字段等待时，对用户展示中文名称，同时保留字段 key 供程序使用。"""
+    session_state_service.clear("S-remote-field-label-display")
+
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_holiday_rule_id",
+                "label": "请假类型",
+                "type": "enum",
+                "required": True,
+                "options": ["事假", "年假"],
+                "aliases": ["请假类型"],
+                "extract_patterns": [],
+                "question": "请选择请假类型",
+            }
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-field-label-display",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approval_type"] == "remote_6408"
+    assert body["awaiting_field"] == "请假类型"
+    assert body["missing_fields"] == ["请假类型"]
+    assert body["awaiting_field_key"] == "rest_holiday_rule_id"
+    assert body["missing_field_keys"] == ["rest_holiday_rule_id"]
+    assert body["awaiting_field_label"] == "请假类型"
+    assert body["missing_field_labels"] == ["请假类型"]
+
+
+def test_remote_waiting_field_uses_collected_template_label_if_detail_reload_fails(monkeypatch) -> None:
+    """响应阶段模板详情重载失败时，也不应把远程字段 key 暴露给用户。"""
+    session_state_service.clear("S-remote-field-label-cache")
+
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_holiday_rule_id",
+                "label": "请假类型",
+                "type": "enum",
+                "required": True,
+                "options": ["事假", "年假"],
+                "aliases": ["请假类型"],
+                "extract_patterns": [],
+                "question": "请选择请假类型",
+            }
+        ],
+    )
+    detail_calls = 0
+
+    def fake_get_template_detail(approval_type, user):
+        nonlocal detail_calls
+        detail_calls += 1
+        if detail_calls == 1:
+            return template
+        raise ValueError("form fields reload failed")
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        fake_get_template_detail,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-field-label-cache",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["assistant_message"] == "请选择请假类型"
+    assert body["awaiting_field"] == "请假类型"
+    assert body["missing_fields"] == ["请假类型"]
+    assert body["awaiting_field_key"] == "rest_holiday_rule_id"
+    assert body["awaiting_field_label"] == "请假类型"
+
+
+def test_remote_waiting_enum_field_without_options_accepts_current_reply(monkeypatch) -> None:
+    """远程枚举字段没有 options 时，用户回答当前等待字段也应被收集，避免反复追问。"""
+    session_state_service.clear("S-remote-enum-no-options")
+
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_holiday_rule_id",
+                "label": "请假类型",
+                "type": "enum",
+                "required": True,
+                "options": [],
+                "aliases": ["请假类型"],
+                "extract_patterns": [],
+                "question": "请选择请假类型",
+            },
+            {
+                "name": "rest_content",
+                "label": "请假事由",
+                "type": "text",
+                "required": True,
+                "options": [],
+                "aliases": ["请假事由"],
+                "extract_patterns": [],
+                "question": "请输入请假事由",
+            },
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-enum-no-options",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+    assert response.json()["awaiting_field_key"] == "rest_holiday_rule_id"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-enum-no-options",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "事假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["collected_slots"]["rest_holiday_rule_id"] == "事假"
+    assert body["awaiting_field"] == "请假事由"
+    assert body["awaiting_field_key"] == "rest_content"
 
 
 def test_flow_asks_assignee_selection_before_preview(monkeypatch) -> None:
@@ -335,19 +782,19 @@ def test_flow_asks_assignee_selection_before_preview(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        "app.graph.workflow.crm_approval_service.list_available_templates",
         fake_list_available_templates,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        "app.graph.workflow.crm_approval_service.get_template_detail",
         fake_get_template_detail,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        "app.graph.workflow.crm_approval_service.get_approval_nodes",
         fake_get_approval_nodes,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        "app.graph.workflow.crm_approval_service.validate_approval",
         lambda approval_type, slots, user: type(
             "Validation",
             (),
@@ -421,19 +868,19 @@ def test_flow_accepts_assignee_selection_then_previews(monkeypatch) -> None:
     ]
 
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        "app.graph.workflow.crm_approval_service.list_available_templates",
         lambda user: [template],
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        "app.graph.workflow.crm_approval_service.get_template_detail",
         lambda approval_type, user: template,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        "app.graph.workflow.crm_approval_service.get_approval_nodes",
         lambda approval_set_id, form_value, user: nodes,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        "app.graph.workflow.crm_approval_service.validate_approval",
         lambda approval_type, slots, user: type(
             "Validation",
             (),
@@ -514,19 +961,19 @@ def test_remote_confirmation_passes_nodes_to_submit(monkeypatch) -> None:
     ]
 
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.list_available_templates",
+        "app.graph.workflow.crm_approval_service.list_available_templates",
         lambda user: [template],
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_template_detail",
+        "app.graph.workflow.crm_approval_service.get_template_detail",
         lambda approval_type, user: template,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.get_approval_nodes",
+        "app.graph.workflow.crm_approval_service.get_approval_nodes",
         lambda approval_set_id, form_value, user: nodes,
     )
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.validate_approval",
+        "app.graph.workflow.crm_approval_service.validate_approval",
         lambda approval_type, slots, user: type(
             "Validation",
             (),
@@ -569,7 +1016,7 @@ def test_remote_confirmation_passes_nodes_to_submit(monkeypatch) -> None:
         )()
 
     monkeypatch.setattr(
-        "ai_approval_assistant.app.graph.workflow.crm_approval_service.submit_approval",
+        "app.graph.workflow.crm_approval_service.submit_approval",
         fake_submit_approval,
     )
 

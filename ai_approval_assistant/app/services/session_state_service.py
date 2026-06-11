@@ -1,6 +1,6 @@
 from __future__ import annotations
 from copy import deepcopy
-from ai_approval_assistant.app.graph.state import ApprovalState, initial_state
+from app.graph.state import ApprovalState, initial_state
 
 
 class InMemorySessionStateService:

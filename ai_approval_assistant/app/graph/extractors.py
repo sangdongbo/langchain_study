@@ -1,6 +1,6 @@
 from __future__ import annotations
 import re
-from ai_approval_assistant.app.schemas.approval import ApprovalField, ApprovalTemplate
+from app.schemas.approval import ApprovalField, ApprovalTemplate
 
 CONFIRM_WORDS = ("确认提交", "提交申请", "确认", "可以提交")
 CANCEL_WORDS = ("取消", "不提交", "算了", "不办", "先不", "停止")
@@ -125,6 +125,8 @@ def _raw_value_for_awaiting(field: ApprovalField, text: str) -> str | None:
         for option in field.options:
             if option in cleaned:
                 return option
+        if not field.options:
+            return cleaned
         return None
     if field.type == "number":
         return _extract_first_number(cleaned)

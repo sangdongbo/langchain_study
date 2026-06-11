@@ -1,5 +1,5 @@
 from __future__ import annotations
-from ai_approval_assistant.app.schemas.approval import ApprovalTemplate
+from app.schemas.approval import ApprovalTemplate
 
 
 def select_template_candidates(

@@ -31,6 +31,7 @@ class ApprovalState(TypedDict, total=False):
     _user_context: dict[str, Any] | None
     _available_templates: list[dict[str, Any]]
     _validation_warnings: list[str]
+    _field_labels: dict[str, str]
 
 
 def initial_state(session_id: str, user_id: str) -> ApprovalState:
@@ -62,4 +63,5 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "_user_context": None,
         "_available_templates": [],
         "_validation_warnings": [],
+        "_field_labels": {},
     }

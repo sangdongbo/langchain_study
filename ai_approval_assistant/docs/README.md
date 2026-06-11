@@ -3,19 +3,19 @@
 导出 LangGraph 流程图：
 
 ```bash
-.venv/bin/python ai_approval_assistant/scripts/export_graph.py
+.venv/bin/python scripts/export_graph.py
 ```
 
 生成文件：
 
 ```text
-ai_approval_assistant/docs/approval_graph.mmd
+docs/approval_graph.mmd
 ```
 
 业务会话级流程图：
 
 ```text
-ai_approval_assistant/docs/session_flow.mmd
+docs/session_flow.mmd
 ```
 
 可以把 `.mmd` 内容粘贴到 Mermaid Live Editor，或者在支持 Mermaid 的 Markdown 工具里查看。

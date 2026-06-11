@@ -2,7 +2,7 @@ from __future__ import annotations
 import hashlib
 import json
 from langgraph.graph import END, START, StateGraph
-from ai_approval_assistant.app.graph.extractors import (
+from app.graph.extractors import (
     classify_approval_type,
     extract_slots,
     has_approval_intent,
@@ -10,34 +10,47 @@ from ai_approval_assistant.app.graph.extractors import (
     is_confirm_message,
     is_switch_message,
 )
-from ai_approval_assistant.app.graph.state import ApprovalState, initial_state
-from ai_approval_assistant.app.schemas.approval import (
+from app.graph.state import ApprovalState, initial_state
+from app.schemas.approval import (
     ApprovalAssignee,
     ApprovalNode,
     ApprovalTemplate,
     UserContext,
 )
-from ai_approval_assistant.app.schemas.chat import (
+from app.schemas.chat import (
     ApprovalPreview,
     ChatRequest,
     ChatResponse,
     PreviewField,
 )
-from ai_approval_assistant.app.services.crm_service import crm_approval_service
-from ai_approval_assistant.app.services.model_service import model_service
-from ai_approval_assistant.app.services.session_state_service import (
+from app.services.crm_service import crm_approval_service
+from app.services.model_service import model_service
+from app.services.session_state_service import (
     session_state_service,
 )
-from ai_approval_assistant.app.services.template_candidate_service import (
+from app.services.debug_log_service import write_debug_log
+from app.services.template_candidate_service import (
     select_template_candidates,
 )
 
 MAX_REVIEW_COUNT = 2
+LOCAL_MOCK_APPROVAL_TYPES = {
+    "leave",
+    "expense",
+    "purchase",
+    "seal",
+    "inbound",
+    "outbound",
+    "overtime",
+}
 
 
 def run_chat_turn(request: ChatRequest) -> ChatResponse:
     """将单轮聊天请求放入审批工作流图执行。"""
+    write_debug_log("chat.request", request.model_dump())
     state = session_state_service.load(request.session_id, request.user_id)
+    if _should_reset_local_state_for_remote_credentials(state, request):
+        state = initial_state(request.session_id, request.user_id)
     state["session_id"] = request.session_id
     state["user_id"] = request.user_id
     state["uid"] = request.uid
@@ -47,7 +60,19 @@ def run_chat_turn(request: ChatRequest) -> ChatResponse:
     graph = create_workflow()
     result = graph.invoke(state)
     session_state_service.save(result)
-    return _to_response(result)
+    response = _to_response(result)
+    write_debug_log("chat.response", response.model_dump())
+    return response
+
+
+def _should_reset_local_state_for_remote_credentials(
+    state: ApprovalState, request: ChatRequest
+) -> bool:
+    """真实 ERP 凭证进入后，丢弃旧的本地模拟审批会话。"""
+    if not request.authorization or not request.uid:
+        return False
+    approval_type = state.get("approval_type")
+    return bool(approval_type and approval_type in LOCAL_MOCK_APPROVAL_TYPES)
 
 
 def create_workflow():
@@ -107,11 +132,12 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
         )
         templates = crm_approval_service.list_available_templates(user)
     except ValueError as exc:
+        message = _crm_error_message(str(exc))
         return {
             **state,
             "status": "error",
-            "assistant_message": str(exc),
-            "errors": [str(exc)],
+            "assistant_message": message,
+            "errors": [message],
             "trace": trace,
             "_user_context": None,
             "_available_templates": [],
@@ -130,6 +156,8 @@ def classify_node(state: ApprovalState) -> ApprovalState:
     trace = [*state.get("trace", []), "classify"]
     text = state["user_message"]
     status = state.get("status", "idle")
+    if status == "error":
+        return {**state, "trace": trace, "_route": "clarify"}
     if status == "submitted":
         return {**state, "trace": trace, "_route": "already_submitted"}
     if status in {
@@ -278,6 +306,10 @@ def collect_node(state: ApprovalState) -> ApprovalState:
         return {**state, "trace": trace, "_route": "clarify"}
     user = _user_from_state(state)
     template = crm_approval_service.get_template_detail(approval_type, user)
+    field_labels = {
+        **state.get("_field_labels", {}),
+        **_labels_from_template(template),
+    }
     slots = dict(state.get("collected_slots", {}))
     rule_slots = extract_slots(
         template, state["user_message"], state.get("awaiting_field")
@@ -301,6 +333,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
             "status": "collecting",
             "collected_slots": slots,
             "awaiting_field": missing_field,
+            "_field_labels": field_labels,
             "assistant_message": question,
             "preview": None,
             "trace": trace,
@@ -311,6 +344,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
         "status": "collecting",
         "collected_slots": slots,
         "awaiting_field": None,
+        "_field_labels": field_labels,
         "trace": trace,
         "_route": "validate",
     }
@@ -672,6 +706,13 @@ def _approval_type_clarification(templates: list[ApprovalTemplate]) -> str:
     return f"请告诉我要办理哪类审批。当前分类：{category_text}。"
 
 
+def _crm_error_message(error: str) -> str:
+    """将 CRM 接口错误转换为用户可理解的聊天提示。"""
+    if "401" in error:
+        return "CRM 登录已过期或授权无效，请刷新页面重新登录后再试。"
+    return f"获取 CRM 审批模板失败：{error}"
+
+
 def _to_response(state: ApprovalState) -> ChatResponse:
     """将图状态转换为对外聊天响应结构。"""
     preview_data = state.get("preview")
@@ -679,14 +720,24 @@ def _to_response(state: ApprovalState) -> ChatResponse:
     missing_fields: list[str] = []
     if state.get("awaiting_field"):
         missing_fields.append(state["awaiting_field"])
+    field_labels = _field_labels_for_state(state, missing_fields)
+    display_missing_fields = [
+        field_labels.get(field, field) for field in missing_fields
+    ]
+    awaiting_field_key = state.get("awaiting_field")
+    awaiting_field_label = field_labels.get(awaiting_field_key or "")
     return ChatResponse(
         session_id=state["session_id"],
         status=state.get("status", "idle"),
         assistant_message=state.get("assistant_message", ""),
         approval_type=state.get("approval_type"),
         collected_slots=state.get("collected_slots", {}),
-        missing_fields=missing_fields,
-        awaiting_field=state.get("awaiting_field"),
+        missing_fields=display_missing_fields,
+        missing_field_keys=missing_fields,
+        missing_field_labels=display_missing_fields,
+        awaiting_field=awaiting_field_label or awaiting_field_key,
+        awaiting_field_key=awaiting_field_key,
+        awaiting_field_label=awaiting_field_label,
         preview=preview,
         actions=_actions_for_status(state.get("status", "idle")),
         request_id=state.get("request_id"),
@@ -695,6 +746,30 @@ def _to_response(state: ApprovalState) -> ChatResponse:
         idempotency_key=state.get("idempotency_key"),
         trace=state.get("trace", []),
     )
+
+
+def _field_labels_for_state(
+    state: ApprovalState, field_names: list[str]
+) -> dict[str, str]:
+    """根据当前模板把字段 key 转换为用户可读名称。"""
+    if not field_names or not state.get("approval_type"):
+        return {}
+    labels = dict(state.get("_field_labels", {}))
+    if all(field in labels for field in field_names):
+        return labels
+    try:
+        template = crm_approval_service.get_template_detail(
+            state["approval_type"], _user_from_state(state)
+        )
+    except Exception:
+        return labels
+    labels.update(_labels_from_template(template))
+    return labels
+
+
+def _labels_from_template(template: ApprovalTemplate) -> dict[str, str]:
+    """从模板字段中抽取字段 key 到展示名称的映射。"""
+    return {field.name: field.label for field in template.fields}
 
 
 def _actions_for_status(status: str) -> list[str]:

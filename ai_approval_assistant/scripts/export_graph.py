@@ -4,10 +4,9 @@ from pathlib import Path
 import sys
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = PACKAGE_ROOT.parent
-sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PACKAGE_ROOT))
 
-from ai_approval_assistant.app.graph.workflow import create_workflow  # noqa: E402
+from app.graph.workflow import create_workflow  # noqa: E402
 
 
 ROOT = PACKAGE_ROOT

@@ -23,4 +23,11 @@ agent_demo/chroma_db/
 agent_demo/logs/
 agent_demo/.cache/
 
+ai_approval_assistant/logs/
+ai_approval_assistant/.env
+ai_approval_assistant/.env.*
+!ai_approval_assistant/.env.example
+ai_approval_assistant/.venv/
+ai_approval_assistant/.pytest_cache/
+
 volumes/

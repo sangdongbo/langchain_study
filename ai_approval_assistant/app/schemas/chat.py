@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, Field
-from ai_approval_assistant.app.schemas.approval import FieldError
+from app.schemas.approval import FieldError
 
 ApprovalStatus = Literal[
     "idle",
@@ -51,7 +51,11 @@ class ChatResponse(BaseModel):
     approval_type: str | None = None
     collected_slots: dict[str, str] = Field(default_factory=dict)
     missing_fields: list[str] = Field(default_factory=list)
+    missing_field_keys: list[str] = Field(default_factory=list)
+    missing_field_labels: list[str] = Field(default_factory=list)
     awaiting_field: str | None = None
+    awaiting_field_key: str | None = None
+    awaiting_field_label: str | None = None
     preview: ApprovalPreview | None = None
     actions: list[str] = Field(default_factory=list)
     request_id: str | None = None

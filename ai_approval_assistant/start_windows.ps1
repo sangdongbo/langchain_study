@@ -19,22 +19,25 @@ if (-not $Uv) {
 }
 
 $env:UV_LINK_MODE = "copy"
+if (-not $env:AI_APPROVAL_CRM_BASE_URL) {
+    $env:AI_APPROVAL_CRM_BASE_URL = "http://localhost:8002"
+}
 
 if (-not $SkipSync) {
-    Write-Host "Syncing Python dependencies with uv..." -ForegroundColor Cyan
+    Write-Host "Syncing AI Approval Assistant dependencies with uv..." -ForegroundColor Cyan
     uv sync
 }
 
 $Python = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
 if (-not (Test-Path $Python)) {
     Write-Host "Virtual environment was not created at .venv\Scripts\python.exe." -ForegroundColor Red
-    Write-Host "Run 'uv sync' from the project root and try again."
+    Write-Host "Run 'uv sync' from ai_approval_assistant and try again."
     exit 1
 }
 
 $UvicornArgs = @(
     "-m", "uvicorn",
-    "ai_approval_assistant.app.main:app",
+    "app.main:app",
     "--host", $BindHost,
     "--port", $Port
 )

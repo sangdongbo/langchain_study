@@ -5,11 +5,11 @@ import os
 from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_deepseek import ChatDeepSeek
-from dotenv import load_dotenv
-from ai_approval_assistant.app.schemas.approval import ApprovalTemplate
-from ai_approval_assistant.app.services.prompt_config_service import get_prompt_config
+from app.schemas.approval import ApprovalTemplate
+from app.services.env_config_service import load_ai_approval_env
+from app.services.prompt_config_service import get_prompt_config
 
-load_dotenv()
+load_ai_approval_env()
 logger = logging.getLogger("ai_approval_assistant.model")
 
 

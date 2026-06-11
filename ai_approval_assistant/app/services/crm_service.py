@@ -2,14 +2,13 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime
 import logging
-import os
 from typing import Any
 import httpx
-from ai_approval_assistant.app.mock_data.approval_templates import (
+from app.mock_data.approval_templates import (
     APPROVAL_TEMPLATES,
     USERS,
 )
-from ai_approval_assistant.app.schemas.approval import (
+from app.schemas.approval import (
     ApprovalAssignee,
     ApprovalNode,
     ApprovalTemplate,
@@ -18,12 +17,12 @@ from ai_approval_assistant.app.schemas.approval import (
     UserContext,
     ValidationResult,
 )
+from app.services.crm_config_service import (
+    load_crm_endpoint_config,
+)
+from app.services.debug_log_service import write_debug_log
 
 logger = logging.getLogger("ai_approval_assistant.crm")
-DEFAULT_APPROVAL_LIST_URL = "https://dev2.lanerp.com/api/approval/list"
-DEFAULT_FORM_FIELDS_URL = "https://dev2.lanerp.com/api/field/formFields"
-DEFAULT_GET_NODES_URL = "https://dev2.lanerp.com/api/approval/getNodes"
-DEFAULT_ADD_APPROVAL_URL = "https://dev2.lanerp.com/api/approval/add"
 
 
 class CrmApprovalService:
@@ -40,22 +39,17 @@ class CrmApprovalService:
         form_fields_url: str | None = None,
         get_nodes_url: str | None = None,
         add_approval_url: str | None = None,
+        related_list_url: str | None = None,
     ) -> None:
         """初始化 CRM 适配器地址、HTTP 客户端和模拟提交缓存。"""
         self._submitted_by_key: dict[str, SubmitResult] = {}
         self._http_client = http_client or httpx.Client(timeout=10)
-        self._approval_list_url = approval_list_url or os.getenv(
-            "AI_APPROVAL_LIST_URL", DEFAULT_APPROVAL_LIST_URL
-        )
-        self._form_fields_url = form_fields_url or os.getenv(
-            "AI_APPROVAL_FORM_FIELDS_URL", DEFAULT_FORM_FIELDS_URL
-        )
-        self._get_nodes_url = get_nodes_url or os.getenv(
-            "AI_APPROVAL_GET_NODES_URL", DEFAULT_GET_NODES_URL
-        )
-        self._add_approval_url = add_approval_url or os.getenv(
-            "AI_APPROVAL_ADD_URL", DEFAULT_ADD_APPROVAL_URL
-        )
+        endpoint_config = load_crm_endpoint_config()
+        self._approval_list_url = approval_list_url or endpoint_config.approval_list_url
+        self._form_fields_url = form_fields_url or endpoint_config.form_fields_url
+        self._get_nodes_url = get_nodes_url or endpoint_config.get_nodes_url
+        self._add_approval_url = add_approval_url or endpoint_config.add_approval_url
+        self._related_list_url = related_list_url or endpoint_config.related_list_url
 
     def get_user_context(
         self, user_id: str, uid: str | None = None, authorization: str | None = None
@@ -75,31 +69,33 @@ class CrmApprovalService:
 
     def list_available_templates(self, user: UserContext) -> list[ApprovalTemplate]:
         """有授权时从 ERP 获取审批模板，否则返回本地模拟模板。"""
+        return self.search_available_templates(user, "")
+
+    def search_available_templates(
+        self, user: UserContext, keyword: str
+    ) -> list[ApprovalTemplate]:
+        """根据用户关键词从 ERP 搜索审批模板；无授权时返回本地模拟模板。"""
         if user.authorization and user.uid:
-            try:
-                templates = self._list_remote_templates(user)
-                if templates:
-                    return templates
-            except Exception as exc:
-                logger.warning("Remote approval list failed: %s", exc)
+            return self._list_remote_templates(user, keyword)
         return [
             ApprovalTemplate(**template) for template in APPROVAL_TEMPLATES.values()
         ]
 
-    def _list_remote_templates(self, user: UserContext) -> list[ApprovalTemplate]:
+    def _list_remote_templates(
+        self, user: UserContext, keyword: str = ""
+    ) -> list[ApprovalTemplate]:
         """从 ERP 审批列表接口获取模板分组。"""
+        body = {"keyword": keyword}
+        headers = _crm_headers(user)
+        _log_crm_request("approval.list", self._approval_list_url, headers, body)
         response = self._http_client.post(
             self._approval_list_url,
-            headers={
-                "Accept": "application/json, text/plain, */*",
-                "Content-Type": "application/json;charset=UTF-8",
-                "Authorization": user.authorization or "",
-                "UID": user.uid or "",
-            },
-            json={"keyword": ""},
+            headers=headers,
+            json=body,
         )
         response.raise_for_status()
         payload = response.json()
+        _log_crm_response("approval.list", payload)
         if payload.get("code") != 200:
             raise ValueError(f"approval list returned code {payload.get('code')}")
         return _templates_from_remote_payload(payload)
@@ -124,21 +120,20 @@ class CrmApprovalService:
         if not template.template_id or not user.authorization or (not user.uid):
             return template
         try:
+            body = {"field_form": f"approval_type_{template.template_id}"}
+            headers = _crm_headers(user)
+            _log_crm_request("field.formFields", self._form_fields_url, headers, body)
             response = self._http_client.post(
                 self._form_fields_url,
-                headers={
-                    "Accept": "application/json, text/plain, */*",
-                    "Content-Type": "application/json;charset=UTF-8",
-                    "Authorization": user.authorization or "",
-                    "UID": user.uid or "",
-                },
-                json={"field_form": f"approval_type_{template.template_id}"},
+                headers=headers,
+                json=body,
             )
             response.raise_for_status()
             payload = response.json()
+            _log_crm_response("field.formFields", payload)
             if payload.get("code") != 200:
                 raise ValueError(f"form fields returned code {payload.get('code')}")
-            fields = _fields_from_remote_payload(payload)
+            fields = _fields_from_remote_payload(payload, self, user)
         except Exception as exc:
             logger.warning("Remote form fields failed: %s", exc)
             return template
@@ -201,24 +196,63 @@ class CrmApprovalService:
         """根据审批模板和表单值获取 CRM 审批流程节点。"""
         if not user.authorization or not user.uid:
             return []
+        body = {
+            "approval_set_id": int(approval_set_id),
+            "form_value": form_value,
+        }
+        headers = _crm_headers(user)
+        _log_crm_request("approval.getNodes", self._get_nodes_url, headers, body)
         response = self._http_client.post(
             self._get_nodes_url,
-            headers={
-                "Accept": "application/json, text/plain, */*",
-                "Content-Type": "application/json;charset=UTF-8",
-                "Authorization": user.authorization or "",
-                "UID": user.uid or "",
-            },
-            json={
-                "approval_set_id": int(approval_set_id),
-                "form_value": form_value,
-            },
+            headers=headers,
+            json=body,
         )
         response.raise_for_status()
         payload = response.json()
+        _log_crm_response("approval.getNodes", payload)
         if payload.get("code") != 200:
             raise ValueError(f"approval nodes returned code {payload.get('code')}")
         return _nodes_from_remote_payload(payload)
+
+    def get_related_list(
+        self,
+        user: UserContext,
+        relate_type: str,
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 20,
+    ) -> list[dict[str, Any]]:
+        """从 ERP 拉取关联业务对象列表，例如关联订单。"""
+        if not user.authorization or not user.uid:
+            return []
+        body = {
+            "relate_type": relate_type,
+            "page": page,
+            "pageSize": page_size,
+            "keyword": keyword,
+            "status": 0,
+            "created_at": "",
+            "hasNoAccess": False,
+            "type": "",
+        }
+        headers = _crm_headers(user)
+        _log_crm_request("company.getRelatedList", self._related_list_url, headers, body)
+        response = self._http_client.post(
+            self._related_list_url,
+            headers=headers,
+            json=body,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        _log_crm_response("company.getRelatedList", payload)
+        if payload.get("code") != 200:
+            raise ValueError(f"related list returned code {payload.get('code')}")
+        data = payload.get("data")
+        if isinstance(data, dict):
+            items = data.get("data") or data.get("list") or data.get("items") or []
+        else:
+            items = data or []
+        return [item for item in items if isinstance(item, dict)]
 
     def submit_approval(
         self,
@@ -267,18 +301,16 @@ class CrmApprovalService:
             "node_list": _remote_submit_nodes(approval_nodes, selected_assignees),
             "form_data": _remote_form_data(slots),
         }
+        headers = _crm_headers(user)
+        _log_crm_request("approval.add", self._add_approval_url, headers, body)
         response = self._http_client.post(
             self._add_approval_url,
-            headers={
-                "Accept": "application/json, text/plain, */*",
-                "Content-Type": "application/json;charset=UTF-8",
-                "Authorization": user.authorization or "",
-                "UID": user.uid or "",
-            },
+            headers=headers,
             json=body,
         )
         response.raise_for_status()
         payload = response.json()
+        _log_crm_response("approval.add", payload)
         if payload.get("code") != 200:
             raise ValueError(f"approval add returned code {payload.get('code')}")
         data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
@@ -300,6 +332,49 @@ def _approval_node(approval_type: str, slots: dict[str, str]) -> str:
     if approval_type == "seal":
         return "行政负责人审批"
     return "直属主管审批"
+
+
+def _crm_headers(user: UserContext) -> dict[str, str]:
+    """构建 CRM 接口请求头。"""
+    return {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Authorization": user.authorization or "",
+        "UID": user.uid or "",
+    }
+
+
+def _log_crm_request(
+    event: str, url: str, headers: dict[str, str], body: dict[str, Any]
+) -> None:
+    """记录 CRM 请求，Authorization 会在日志服务中脱敏。"""
+    write_debug_log(
+        f"crm.{event}.request",
+        {
+            "url": url,
+            "headers": headers,
+            "body": body,
+        },
+    )
+
+
+def _log_crm_response(event: str, payload: dict[str, Any]) -> None:
+    """记录 CRM 响应摘要，避免大响应刷爆日志。"""
+    data = payload.get("data")
+    summary: dict[str, Any] = {
+        "code": payload.get("code"),
+        "message": payload.get("message"),
+        "data_type": type(data).__name__,
+    }
+    if isinstance(data, list):
+        summary["data_count"] = len(data)
+        summary["data_sample"] = data[:2]
+    elif isinstance(data, dict):
+        summary["data_keys"] = list(data.keys())[:20]
+        summary["data_sample"] = data
+    else:
+        summary["data"] = data
+    write_debug_log(f"crm.{event}.response", summary)
 
 
 def _templates_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalTemplate]:
@@ -368,16 +443,17 @@ def _fields_from_remote_payload(payload: dict[str, Any]) -> list[dict[str, Any]]
         if not field_key or not field_name:
             continue
         extend = item.get("extend") if isinstance(item.get("extend"), dict) else {}
+        options = _remote_field_options(item)
         mapped_fields.append(
             {
                 "name": field_key,
                 "label": field_name,
                 "type": field_type,
                 "required": int(item.get("is_required") or 0) == 1,
-                "options": _remote_field_options(item),
+                "options": options,
                 "aliases": _remote_field_aliases(field_name),
                 "extract_patterns": [],
-                "question": _remote_field_question(field_name, extend),
+                "question": _remote_field_question(field_name, extend, options),
             }
         )
     return mapped_fields
@@ -550,8 +626,11 @@ def _remote_field_aliases(field_name: str) -> list[str]:
     return [alias for alias in aliases if alias]
 
 
-def _remote_field_question(field_name: str, extend: dict[str, Any]) -> str:
+def _remote_field_question(
+    field_name: str, extend: dict[str, Any], options: list[str] | None = None
+) -> str:
     """选择 ERP 字段对应的用户追问文案。"""
+    option_text = "、".join(options or [])
     for key in (
         "placeholder",
         "area_accuracy_placeholder",
@@ -559,7 +638,11 @@ def _remote_field_question(field_name: str, extend: dict[str, Any]) -> str:
     ):
         value = str(extend.get(key) or "").strip()
         if value:
+            if option_text:
+                return f"{value}，可选：{option_text}。"
             return value
+    if option_text:
+        return f"请选择{field_name}，可选：{option_text}。"
     return f"请补充{field_name}。"
 
 

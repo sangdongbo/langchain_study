@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import json
 
-from ai_approval_assistant.app.mock_data.approval_templates import APPROVAL_TEMPLATES
-from ai_approval_assistant.app.schemas.approval import ApprovalTemplate
-from ai_approval_assistant.app.services.model_service import (
+from app.mock_data.approval_templates import APPROVAL_TEMPLATES
+from app.schemas.approval import ApprovalTemplate
+from app.services.model_service import (
     build_classification_prompt,
     build_decision_review_prompt,
     build_slot_extraction_prompt,
 )
-from ai_approval_assistant.app.services.prompt_config_service import reload_prompt_config
+from app.services.prompt_config_service import reload_prompt_config
 
 
 def _template(name: str) -> ApprovalTemplate:

@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 
 import httpx
+import pytest
 
-from ai_approval_assistant.app.schemas.approval import UserContext
-from ai_approval_assistant.app.services.crm_service import CrmApprovalService
+from app.schemas.approval import UserContext
+from app.services.crm_service import CrmApprovalService
 
 
 def test_remote_approval_list_uses_chat_credentials() -> None:
@@ -60,6 +61,80 @@ def test_remote_approval_list_uses_chat_credentials() -> None:
     assert requests[0].headers["Authorization"] == "Bearer test-token"
     assert requests[0].headers["UID"] == "863"
     assert requests[0].content == b'{"keyword":""}'
+
+
+def test_remote_approval_list_can_search_by_keyword() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "message": "success",
+                "data": [
+                    {
+                        "id": 1371,
+                        "name": "zh-测试",
+                        "approvals": [
+                            {
+                                "id": 5911,
+                                "name": "测试外出",
+                                "type": "",
+                                "approval_type": "",
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        approval_list_url="https://dev2.lanerp.com/api/approval/list",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    templates = service.search_available_templates(user, "测试外出")
+
+    assert [template.template_id for template in templates] == ["5911"]
+    assert requests[0].content == b'{"keyword":"\\u6d4b\\u8bd5\\u5916\\u51fa"}'
+
+
+def test_remote_approval_list_failure_does_not_fallback_to_mock_when_credentials_exist() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"code": 401, "message": "unauthorized", "data": []},
+        )
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        approval_list_url="https://dev2.lanerp.com/api/approval/list",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    with pytest.raises(ValueError, match="approval list returned code 401"):
+        service.list_available_templates(user)
 
 
 def test_remote_template_detail_loads_form_fields() -> None:
@@ -191,6 +266,165 @@ def test_remote_template_detail_loads_form_fields() -> None:
     assert requests[1].headers["Authorization"] == "Bearer test-token"
     assert requests[1].headers["UID"] == "863"
     assert requests[1].content == b'{"field_form":"approval_type_5911"}'
+
+
+def test_remote_related_order_field_loads_related_list_options() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path == "/api/approval/list":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {
+                            "id": 1371,
+                            "name": "zh-测试",
+                            "approvals": [
+                                {
+                                    "id": 5911,
+                                    "name": "测试外出",
+                                    "type": "",
+                                    "approval_type": "",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        if request.url.path == "/api/field/formFields":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {
+                            "field_key": "field_525793",
+                            "field_name": "关联订单",
+                            "field_type": "checkbox_order",
+                            "is_required": 1,
+                            "sort": 1,
+                        }
+                    ],
+                },
+            )
+        if request.url.path == "/api/Company/getRelatedList":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {"id": 9001, "name": "SO-9001"},
+                        {"id": 9002, "title": "SO-9002"},
+                    ],
+                },
+            )
+        raise AssertionError(f"Unexpected request path: {request.url.path}")
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        approval_list_url="https://dev2.lanerp.com/api/approval/list",
+        form_fields_url="https://dev2.lanerp.com/api/field/formFields",
+        related_list_url="https://dev2.lanerp.com/api/Company/getRelatedList",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    template = service.get_template_detail("remote_5911", user)
+
+    assert template.fields[0].label == "关联订单"
+    assert template.fields[0].type == "enum"
+    assert template.fields[0].options == ["SO-9001", "SO-9002"]
+    assert requests[2].headers["Authorization"] == "Bearer test-token"
+
+
+def test_remote_enum_field_question_includes_readable_options() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path == "/api/approval/list":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {
+                            "id": 1365,
+                            "name": "测试审批编辑",
+                            "approvals": [
+                                {
+                                    "id": 5904,
+                                    "name": "审批编辑-请假控件组",
+                                    "type": "",
+                                    "approval_type": "",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        if request.url.path == "/api/field/formFields":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {
+                            "field_key": "rest_holiday_rule_id",
+                            "field_name": "请假类型",
+                            "field_type": "select",
+                            "is_required": 1,
+                            "sort": 1,
+                            "extend": {
+                                "placeholder": "请选择请假类型",
+                                "options": [
+                                    {"label": "事假", "value": 13},
+                                    {"label": "年假", "value": 14},
+                                ],
+                            },
+                        }
+                    ],
+                },
+            )
+        raise AssertionError(f"Unexpected request path: {request.url.path}")
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        approval_list_url="http://localhost:8002/api/approval/list",
+        form_fields_url="http://localhost:8002/api/field/formFields",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    template = service.get_template_detail("remote_5904", user)
+
+    assert template.fields[0].label == "请假类型"
+    assert template.fields[0].options == ["事假", "年假"]
+    assert template.fields[0].question == "请选择请假类型，可选：事假、年假。"
 
 
 def test_remote_approval_type_never_uses_local_mock_key() -> None:

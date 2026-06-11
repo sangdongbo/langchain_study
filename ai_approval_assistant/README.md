@@ -78,11 +78,11 @@ ai_approval_assistant/
 
 ## 4. 启动服务
 
-推荐在项目根目录执行：
+推荐把 `ai_approval_assistant` 当成独立项目目录执行：
 
 ```bash
-cd /Users/sangdongbo/PhpstormProjects/langchain_study
-.venv/bin/python -m uvicorn ai_approval_assistant.app.main:app --host 127.0.0.1 --port 8010 --reload
+cd ai_approval_assistant
+.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8010 --reload
 ```
 
 启动成功后会看到类似输出：
@@ -94,22 +94,22 @@ Uvicorn running on http://127.0.0.1:8010
 如果使用 `uv`：
 
 ```bash
-uv run uvicorn ai_approval_assistant.app.main:app --host 127.0.0.1 --port 8010 --reload
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8010 --reload
 ```
 
-Windows PowerShell 推荐在项目根目录执行：
+Windows PowerShell 推荐把 `ai_approval_assistant` 当成独立项目目录执行：
 
 ```powershell
-.\start_ai_approval_windows.ps1
+.\start_windows.ps1
 ```
 
 也可以直接运行 bat 包装器：
 
 ```bat
-start_ai_approval_windows.bat
+start_windows.bat
 ```
 
-脚本会先执行 `uv sync` 安装/同步 `pyproject.toml` 和 `uv.lock` 里声明的依赖，然后用当前项目的 `.venv\Scripts\python.exe` 启动服务。默认地址仍然是：
+脚本会先在 `ai_approval_assistant` 内执行 `uv sync` 安装/同步本项目 `pyproject.toml` 里声明的依赖，然后用 `.venv\Scripts\python.exe` 启动服务。环境变量放在 `.env`，可参考 `.env.example`。默认地址仍然是：
 
 ```text
 http://127.0.0.1:8010
@@ -118,13 +118,13 @@ http://127.0.0.1:8010
 如需修改端口：
 
 ```powershell
-.\start_ai_approval_windows.ps1 -Port 8011
+.\start_windows.ps1 -Port 8011
 ```
 
 如果依赖已经安装好，只想直接启动：
 
 ```powershell
-.\start_ai_approval_windows.ps1 -SkipSync
+.\start_windows.ps1 -SkipSync
 ```
 
 启用 DeepSeek：
@@ -135,7 +135,7 @@ export DEEPSEEK_API_KEY=your_deepseek_api_key_here
 export DEEPSEEK_MODEL=deepseek-chat
 export DEEPSEEK_TEMPERATURE=0
 
-.venv/bin/python -m uvicorn ai_approval_assistant.app.main:app --host 127.0.0.1 --port 8010 --reload
+.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8010 --reload
 ```
 
 不设置 `AI_APPROVAL_USE_LLM=true` 时，服务不会请求模型，会使用规则版抽取和复核。
@@ -145,7 +145,7 @@ export DEEPSEEK_TEMPERATURE=0
 默认 prompt 文件：
 
 ```text
-ai_approval_assistant/prompts/approval_prompts.json
+prompts/approval_prompts.json
 ```
 
 现在 prompt 不写死在代码里，配置文件里分成三段：
@@ -173,7 +173,7 @@ ai_approval_assistant/prompts/approval_prompts.json
 如果你想调试一版 prompt，不建议直接改默认文件。可以复制一份：
 
 ```bash
-cp ai_approval_assistant/prompts/approval_prompts.json /tmp/approval_prompts.debug.json
+cp prompts/approval_prompts.json /tmp/approval_prompts.debug.json
 ```
 
 然后启动时指定：
@@ -183,7 +183,7 @@ export AI_APPROVAL_PROMPT_FILE=/tmp/approval_prompts.debug.json
 export AI_APPROVAL_USE_LLM=true
 export DEEPSEEK_API_KEY=your_deepseek_api_key_here
 
-.venv/bin/python -m uvicorn ai_approval_assistant.app.main:app --host 127.0.0.1 --port 8010
+.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
 注意：prompt 文件只在服务进程内加载并缓存。修改 JSON 后，需要重启服务才能生效。
@@ -271,13 +271,13 @@ POST /api/ai-approval/chat
 传入 `uid` 和 `authorization` 后，后端会先调用真实 ERP 的审批列表接口：
 
 ```text
-https://dev2.lanerp.com/api/approval/list
+${AI_APPROVAL_CRM_BASE_URL}/api/approval/list
 ```
 
 识别到具体审批模板后，会再调用字段接口获取当前模板字段：
 
 ```text
-https://dev2.lanerp.com/api/field/formFields
+${AI_APPROVAL_CRM_BASE_URL}/api/field/formFields
 ```
 
 字段接口请求体示例：
@@ -291,10 +291,22 @@ https://dev2.lanerp.com/api/field/formFields
 如果需要切换地址，可以通过环境变量覆盖：
 
 ```text
-AI_APPROVAL_LIST_URL=https://dev2.lanerp.com/api/approval/list
-AI_APPROVAL_FORM_FIELDS_URL=https://dev2.lanerp.com/api/field/formFields
-AI_APPROVAL_GET_NODES_URL=https://dev2.lanerp.com/api/approval/getNodes
-AI_APPROVAL_ADD_URL=https://dev2.lanerp.com/api/approval/add
+AI_APPROVAL_CRM_BASE_URL=http://localhost:8002
+```
+
+推荐写入 `.env`：
+
+```text
+AI_APPROVAL_CRM_BASE_URL=http://localhost:8002
+```
+
+如某个接口需要单独覆盖，也仍然兼容以下环境变量：
+
+```text
+AI_APPROVAL_LIST_URL=http://localhost:8002/api/approval/list
+AI_APPROVAL_FORM_FIELDS_URL=http://localhost:8002/api/field/formFields
+AI_APPROVAL_GET_NODES_URL=http://localhost:8002/api/approval/getNodes
+AI_APPROVAL_ADD_URL=http://localhost:8002/api/approval/add
 ```
 
 响应核心字段：
@@ -411,11 +423,11 @@ INFO [ai_approval_assistant.http] POST /api/ai-approval/chat -> 200 8.45ms
 现在日志实现位置：
 
 ```text
-ai_approval_assistant/app/logging_config.py
-ai_approval_assistant/app/middleware.py
+app/logging_config.py
+app/middleware.py
 ```
 
-当前日志主要用于接口级调试。业务流程级调试优先看响应里的 `trace`。后续可以继续把 `session_id`、`user_id`、`approval_type`、`status`、CRM 调用结果写入结构化日志。
+接口日志会输出到控制台；AI 审批调试日志会写入 `logs/ai_approval_debug.log`。调试日志包含 `chat.request`、`chat.response` 和 CRM 请求/响应摘要，`Authorization` 会脱敏。
 
 模型调用失败时，会写 warning 日志并自动回退规则逻辑，例如：
 
@@ -428,13 +440,13 @@ WARNING [ai_approval_assistant.model] LLM slot extraction failed: ...
 运行测试：
 
 ```bash
-.venv/bin/python -m pytest ai_approval_assistant/tests -v
+.venv/bin/python -m pytest tests -v
 ```
 
 如果要看更详细失败信息：
 
 ```bash
-.venv/bin/python -m pytest ai_approval_assistant/tests -vv
+.venv/bin/python -m pytest tests -vv
 ```
 
 ### 8.6 修改 mock 审批模板
@@ -442,7 +454,7 @@ WARNING [ai_approval_assistant.model] LLM slot extraction failed: ...
 模板文件：
 
 ```text
-ai_approval_assistant/app/mock_data/approval_templates.py
+app/mock_data/approval_templates.py
 ```
 
 每个审批模板有：
@@ -474,7 +486,7 @@ ai_approval_assistant/app/mock_data/approval_templates.py
 
 调试 prompt 的建议流程：
 
-1. 复制 `ai_approval_assistant/prompts/approval_prompts.json` 到临时文件。
+1. 复制 `prompts/approval_prompts.json` 到临时文件。
 2. 设置 `AI_APPROVAL_PROMPT_FILE` 指向临时文件。
 3. 设置 `AI_APPROVAL_USE_LLM=true` 和 `DEEPSEEK_API_KEY`。
 4. 启动服务后，用 Swagger 或 curl 固定同一个 `session_id` 反复测试。
@@ -494,7 +506,7 @@ ai_approval_assistant/app/mock_data/approval_templates.py
 如果只是想确认 prompt 拼出来的结构，可以看测试：
 
 ```text
-ai_approval_assistant/tests/test_model_prompts.py
+tests/test_model_prompts.py
 ```
 
 这里会验证默认配置和 `AI_APPROVAL_PROMPT_FILE` 覆盖逻辑。
@@ -591,7 +603,7 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
 业务会话级流程图：
 
 ```text
-ai_approval_assistant/docs/session_flow.mmd
+docs/session_flow.mmd
 ```
 
 可以把内容粘贴到 Mermaid Live Editor：
@@ -605,13 +617,13 @@ https://mermaid.live/
 如果想重新导出 LangGraph 节点图：
 
 ```bash
-.venv/bin/python ai_approval_assistant/scripts/export_graph.py
+.venv/bin/python scripts/export_graph.py
 ```
 
 会生成：
 
 ```text
-ai_approval_assistant/docs/approval_graph.mmd
+docs/approval_graph.mmd
 ```
 
 如果不需要该图，可以删除生成文件，不影响代码运行。
@@ -619,13 +631,13 @@ ai_approval_assistant/docs/approval_graph.mmd
 ## 11. 运行测试
 
 ```bash
-.venv/bin/python -m pytest ai_approval_assistant/tests
+.venv/bin/python -m pytest tests
 ```
 
 当前预期：
 
 ```text
-6 passed
+36 passed
 ```
 
 ## 12. 后续接真实 CRM
@@ -633,7 +645,7 @@ ai_approval_assistant/docs/approval_graph.mmd
 主要替换：
 
 ```text
-ai_approval_assistant/app/services/crm_service.py
+app/services/crm_service.py
 ```
 
 需要对接的真实能力：
@@ -660,14 +672,14 @@ ai_approval_assistant/app/services/crm_service.py
 入口：
 
 ```text
-ai_approval_assistant/app/main.py
+app/main.py
 ```
 
 路由：
 
 ```text
-ai_approval_assistant/app/api/health.py
-ai_approval_assistant/app/api/chat.py
+app/api/health.py
+app/api/chat.py
 ```
 
 职责：
@@ -682,7 +694,7 @@ ai_approval_assistant/app/api/chat.py
 位置：
 
 ```text
-ai_approval_assistant/app/schemas/
+app/schemas/
 ```
 
 职责：
@@ -696,7 +708,7 @@ ai_approval_assistant/app/schemas/
 位置：
 
 ```text
-ai_approval_assistant/app/graph/workflow.py
+app/graph/workflow.py
 ```
 
 当前节点：
@@ -724,8 +736,8 @@ clarify
 位置：
 
 ```text
-ai_approval_assistant/app/graph/extractors.py
-ai_approval_assistant/app/mock_data/approval_templates.py
+app/graph/extractors.py
+app/mock_data/approval_templates.py
 ```
 
 工作方式：
@@ -746,7 +758,7 @@ ai_approval_assistant/app/mock_data/approval_templates.py
 位置：
 
 ```text
-ai_approval_assistant/app/services/crm_service.py
+app/services/crm_service.py
 ```
 
 当前是 mock 实现。后续真实接入时替换这里。
@@ -766,7 +778,7 @@ submit_approval
 位置：
 
 ```text
-ai_approval_assistant/app/services/session_state_service.py
+app/services/session_state_service.py
 ```
 
 当前是内存保存：
@@ -782,8 +794,8 @@ session_id -> ApprovalState
 位置：
 
 ```text
-ai_approval_assistant/app/logging_config.py
-ai_approval_assistant/app/middleware.py
+app/logging_config.py
+app/middleware.py
 ```
 
 当前能力：
@@ -807,7 +819,7 @@ ai_approval_assistant/app/middleware.py
 位置：
 
 ```text
-ai_approval_assistant/app/services/model_service.py
+app/services/model_service.py
 ```
 
 当前接入点：
@@ -860,7 +872,7 @@ Prompt 设计原则：
 需要把 mock 的：
 
 ```text
-ai_approval_assistant/app/mock_data/approval_templates.py
+app/mock_data/approval_templates.py
 ```
 
 替换为真实 CRM 返回，或者在 `crm_service.py` 中把真实 CRM 模板映射成当前 `ApprovalTemplate`。
