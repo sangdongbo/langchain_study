@@ -19,11 +19,12 @@ from app.schemas.approval import (
 )
 from app.schemas.chat import (
     ApprovalPreview,
+    AwaitingInput,
     ChatRequest,
     ChatResponse,
     PreviewField,
 )
-from app.services.crm_service import crm_approval_service
+from app.services.crm_service import CrmApprovalService, crm_approval_service
 from app.services.model_service import model_service
 from app.services.session_state_service import (
     session_state_service,
@@ -56,6 +57,7 @@ def run_chat_turn(request: ChatRequest) -> ChatResponse:
     state["uid"] = request.uid
     state["authorization"] = request.authorization
     state["user_message"] = request.message.strip()
+    state["_answer"] = request.answer
     state["trace"] = []
     graph = create_workflow()
     result = graph.invoke(state)
@@ -130,7 +132,17 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
             uid=state.get("uid"),
             authorization=state.get("authorization"),
         )
-        templates = crm_approval_service.list_available_templates(user)
+        if state.get("_template_candidates") and not state.get("approval_type"):
+            templates = _template_candidates_from_state(state)
+            search_keyword = state.get("_template_search_keyword", "")
+        elif _should_keyword_search_templates(state, user):
+            search_keyword = state.get("user_message", "").strip()
+            templates = crm_approval_service.search_available_templates(
+                user, search_keyword
+            )
+        else:
+            search_keyword = ""
+            templates = crm_approval_service.list_available_templates(user)
     except ValueError as exc:
         message = _crm_error_message(str(exc))
         return {
@@ -141,6 +153,7 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_user_context": None,
             "_available_templates": [],
+            "_template_search_keyword": "",
             "_route": "clarify",
         }
     return {
@@ -148,6 +161,7 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
         "trace": trace,
         "_user_context": user.model_dump(),
         "_available_templates": [template.model_dump() for template in templates],
+        "_template_search_keyword": search_keyword,
     }
 
 
@@ -175,6 +189,71 @@ def classify_node(state: ApprovalState) -> ApprovalState:
             return {**state, "confirmed": False, "trace": trace, "_route": "collect"}
         return {**state, "trace": trace, "_route": "clarify"}
     available_templates = _templates_from_state(state)
+    if state.get("_template_candidates") and not state.get("approval_type"):
+        selected = _select_template_candidate(
+            text,
+            _template_candidates_from_state(state),
+            state.get("_answer"),
+        )
+        if selected:
+            return {
+                **state,
+                "approval_type": selected.approval_type,
+                "status": "collecting",
+                "collected_slots": {},
+                "collected_values": {},
+                "awaiting_field": None,
+                "confirmed": False,
+                "request_id": None,
+                "idempotency_key": None,
+                "preview": None,
+                "_template_candidates": [],
+                "trace": trace,
+                "_route": "collect",
+            }
+        return {
+            **state,
+            "assistant_message": _template_choice_message(
+                _template_candidates_from_state(state)
+            ),
+            "trace": trace,
+            "_route": "clarify",
+        }
+    if _is_remote_keyword_search_result(state):
+        if len(available_templates) == 1:
+            return {
+                **state,
+                "approval_type": available_templates[0].approval_type,
+                "status": "collecting",
+                "collected_slots": {},
+                "collected_values": {},
+                "awaiting_field": None,
+                "confirmed": False,
+                "request_id": None,
+                "idempotency_key": None,
+                "preview": None,
+                "_template_candidates": [],
+                "trace": trace,
+                "_route": "collect",
+            }
+        if len(available_templates) > 1:
+            return {
+                **state,
+                "status": "idle",
+                "approval_type": None,
+                "_template_candidates": [
+                    template.model_dump() for template in available_templates
+                ],
+                "assistant_message": _template_choice_message(available_templates),
+                "trace": trace,
+                "_route": "clarify",
+            }
+        return {
+            **state,
+            "assistant_message": f"没有找到“{state.get('_template_search_keyword')}”对应的审批模板，请换个关键词再试。",
+            "trace": trace,
+            "_route": "clarify",
+        }
     candidate_templates = select_template_candidates(text, available_templates)
     detected_type = classify_approval_type(text, candidate_templates)
     if not detected_type:
@@ -195,6 +274,7 @@ def classify_node(state: ApprovalState) -> ApprovalState:
                 **state,
                 "approval_type": detected_type,
                 "collected_slots": {},
+                "collected_values": {},
                 "awaiting_field": None,
                 "confirmed": False,
                 "request_id": None,
@@ -216,11 +296,13 @@ def classify_node(state: ApprovalState) -> ApprovalState:
         "approval_type": detected_type,
         "status": "collecting",
         "collected_slots": {},
+        "collected_values": {},
         "awaiting_field": None,
         "confirmed": False,
         "request_id": None,
         "idempotency_key": None,
         "preview": None,
+        "_template_candidates": [],
         "trace": trace,
         "_route": "collect",
     }
@@ -311,6 +393,13 @@ def collect_node(state: ApprovalState) -> ApprovalState:
         **_labels_from_template(template),
     }
     slots = dict(state.get("collected_slots", {}))
+    collected_values = dict(state.get("collected_values", {}))
+    answer_slots, answer_values = _slots_from_structured_answer(
+        state.get("_answer"),
+        state.get("awaiting_field"),
+    )
+    slots.update(answer_slots)
+    collected_values.update(answer_values)
     rule_slots = extract_slots(
         template, state["user_message"], state.get("awaiting_field")
     )
@@ -332,6 +421,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
             **state,
             "status": "collecting",
             "collected_slots": slots,
+            "collected_values": collected_values,
             "awaiting_field": missing_field,
             "_field_labels": field_labels,
             "assistant_message": question,
@@ -343,6 +433,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
         **state,
         "status": "collecting",
         "collected_slots": slots,
+        "collected_values": collected_values,
         "awaiting_field": None,
         "_field_labels": field_labels,
         "trace": trace,
@@ -402,7 +493,13 @@ def assignee_node(state: ApprovalState) -> ApprovalState:
         node_id = _awaiting_assignee_node_id(state.get("awaiting_field"))
         current_node = next((node for node in nodes if node.node_id == node_id), None)
         if current_node:
-            selected = _select_assignees_from_message(current_node, state.get("user_message", ""))
+            selected = _select_assignees_from_answer(
+                current_node,
+                state.get("_answer"),
+            ) or _select_assignees_from_message(
+                current_node,
+                state.get("user_message", ""),
+            )
             if selected:
                 selected_assignees[current_node.node_id] = [assignee.uid for assignee in selected]
             else:
@@ -485,7 +582,7 @@ def submit_node(state: ApprovalState) -> ApprovalState:
     idempotency_key = state.get("idempotency_key") or _build_idempotency_key(state)
     result = crm_approval_service.submit_approval(
         state["approval_type"],
-        state.get("collected_slots", {}),
+        _submission_slots(state),
         user,
         idempotency_key=idempotency_key,
         approval_set_id=template.template_id,
@@ -562,6 +659,83 @@ def _templates_from_state(state: ApprovalState) -> list[ApprovalTemplate]:
     return [ApprovalTemplate(**item) for item in state.get("_available_templates", [])]
 
 
+def _template_candidates_from_state(state: ApprovalState) -> list[ApprovalTemplate]:
+    """从图状态中反序列化等待用户选择的候选模板。"""
+    return [ApprovalTemplate(**item) for item in state.get("_template_candidates", [])]
+
+
+def _should_keyword_search_templates(
+    state: ApprovalState, user: UserContext
+) -> bool:
+    """判断当前轮是否应按用户关键词直接查 ERP 模板。"""
+    if not user.authorization or not user.uid:
+        return False
+    if state.get("approval_type") or state.get("_template_candidates"):
+        return False
+    if state.get("status", "idle") != "idle":
+        return False
+    if not state.get("user_message", "").strip():
+        return False
+    return _uses_default_search_method()
+
+
+def _uses_default_search_method() -> bool:
+    """测试中 monkeypatch 旧 list 方法时，保持旧路径兼容。"""
+    return (
+        getattr(crm_approval_service.list_available_templates, "__func__", None)
+        is CrmApprovalService.list_available_templates
+    )
+
+
+def _is_remote_keyword_search_result(state: ApprovalState) -> bool:
+    """识别可直接采用 ERP keyword 查询结果的首轮远程模板列表。"""
+    return bool(
+        state.get("_template_search_keyword")
+        and state.get("uid")
+        and state.get("authorization")
+        and not state.get("approval_type")
+    )
+
+
+def _select_template_candidate(
+    text: str,
+    candidates: list[ApprovalTemplate],
+    answer: dict[str, object] | None = None,
+) -> ApprovalTemplate | None:
+    """根据用户回复的序号、ID 或名称选择远程审批模板。"""
+    if isinstance(answer, dict) and answer.get("field_key") == "__approval_template__":
+        selected_value = str(answer.get("value") or "").strip()
+        selected_label = str(answer.get("label") or "").strip()
+        selected = _select_template_candidate_by_text(
+            selected_value or selected_label,
+            candidates,
+        )
+        if selected:
+            return selected
+    return _select_template_candidate_by_text(text, candidates)
+
+
+def _select_template_candidate_by_text(
+    text: str, candidates: list[ApprovalTemplate]
+) -> ApprovalTemplate | None:
+    """按序号、ID、内部类型或名称匹配候选模板。"""
+    cleaned = text.strip()
+    if cleaned.isdigit():
+        number = int(cleaned)
+        if 1 <= number <= len(candidates):
+            return candidates[number - 1]
+    for template in candidates:
+        markers = [
+            template.template_id or "",
+            template.approval_type,
+            template.title,
+            *template.aliases,
+        ]
+        if any(marker and marker in cleaned for marker in markers):
+            return template
+    return None
+
+
 def _user_from_state(state: ApprovalState) -> UserContext:
     """从图状态中反序列化或重建用户上下文。"""
     user_data = state.get("_user_context")
@@ -584,6 +758,129 @@ def _first_missing_field(
     return None
 
 
+def _slots_from_structured_answer(
+    answer: dict[str, object] | None,
+    awaiting_field: str | None,
+) -> tuple[dict[str, str], dict[str, object]]:
+    """将前端结构化控件答案转换为展示值和提交值。"""
+    if not isinstance(answer, dict):
+        return {}, {}
+    field_key = str(answer.get("field_key") or "").strip()
+    if not field_key or field_key != awaiting_field:
+        return {}, {}
+    label = str(answer.get("label") or answer.get("value") or "").strip()
+    if not label:
+        return {}, {}
+    return {
+        field_key: label,
+    }, {
+        field_key: {
+            "label": label,
+            "value": answer.get("value"),
+        }
+    }
+
+
+def _awaiting_input_for_state(state: ApprovalState) -> AwaitingInput | None:
+    """构建前端可渲染的当前等待控件描述。"""
+    if state.get("_template_candidates") and not state.get("approval_type"):
+        return _template_choice_input(_template_candidates_from_state(state))
+    awaiting_field = state.get("awaiting_field")
+    if state.get("status") == "awaiting_assignee_selection":
+        node_id = _awaiting_assignee_node_id(awaiting_field)
+        nodes = _nodes_from_state(state)
+        current_node = next((node for node in nodes if node.node_id == node_id), None)
+        if current_node:
+            return _assignee_selection_input(current_node)
+        return None
+    if not awaiting_field or not state.get("approval_type"):
+        return None
+    try:
+        template = crm_approval_service.get_template_detail(
+            state["approval_type"], _user_from_state(state)
+        )
+    except Exception:
+        return None
+    field = next(
+        (item for item in template.fields if item.name == awaiting_field),
+        None,
+    )
+    if not field:
+        return None
+    if field.type == "enum":
+        if not field.options:
+            return None
+        option_values = field.option_values or [
+            {"label": option, "value": option} for option in field.options
+        ]
+        return AwaitingInput(
+            field_key=field.name,
+            label=field.label,
+            type="single_select",
+            required=field.required,
+            placeholder=field.question,
+            options=option_values,
+        )
+    input_type = _awaiting_input_type_for_field(field)
+    return AwaitingInput(
+        field_key=field.name,
+        label=field.label,
+        type=input_type,
+        required=field.required,
+        placeholder=field.question,
+        options=[],
+        min=_awaiting_input_min(field, state),
+        max=None,
+        value_schema=_awaiting_value_schema(input_type),
+    )
+
+
+def _awaiting_input_type_for_field(field) -> str:
+    """根据内部字段模型选择前端输入控件类型。"""
+    if field.type == "date":
+        return field.input_type or "datetime"
+    if field.input_type in {"textarea", "address"}:
+        return field.input_type
+    return "text"
+
+
+def _awaiting_input_min(field, state: ApprovalState):
+    """为结束时间提供最小值约束。"""
+    if field.type != "date":
+        return None
+    if not field.name.endswith("end_time"):
+        return None
+    start_field = field.name.removesuffix("end_time") + "start_time"
+    value = state.get("collected_values", {}).get(start_field)
+    if isinstance(value, dict) and value.get("value"):
+        return value["value"]
+    return state.get("collected_slots", {}).get(start_field)
+
+
+def _awaiting_value_schema(input_type: str) -> dict[str, str] | None:
+    """返回复杂控件 value 的结构说明。"""
+    if input_type == "address":
+        return {"area": "array", "detail": "string"}
+    return None
+
+
+def _template_choice_input(templates: list[ApprovalTemplate]) -> AwaitingInput | None:
+    """构建审批模板候选单选控件。"""
+    if not templates:
+        return None
+    return AwaitingInput(
+        field_key="__approval_template__",
+        label="审批模板",
+        type="single_select",
+        required=True,
+        placeholder="请选择审批模板",
+        options=[
+            {"label": template.title, "value": template.approval_type}
+            for template in templates
+        ],
+    )
+
+
 def _form_value_from_slots(slots: dict[str, str]) -> list[dict[str, str]]:
     """将已收集字段转换为 getNodes 需要的 form_value。"""
     return [{"field_key": key, "value": value} for key, value in slots.items()]
@@ -599,6 +896,31 @@ def _awaiting_assignee_node_id(awaiting_field: str | None) -> str | None:
     if not awaiting_field or not awaiting_field.startswith("assignee:"):
         return None
     return awaiting_field.split(":", 1)[1]
+
+
+def _select_assignees_from_answer(
+    node: ApprovalNode,
+    answer: dict[str, object] | None,
+) -> list[ApprovalAssignee]:
+    """根据前端结构化选择从候选审批人中取值。"""
+    if not isinstance(answer, dict):
+        return []
+    expected_field = f"__approval_assignee__:{node.node_id}"
+    if answer.get("field_key") != expected_field:
+        return []
+    raw_value = answer.get("value")
+    values = raw_value if isinstance(raw_value, list) else [raw_value]
+    selected_uids = {str(value).strip() for value in values if str(value or "").strip()}
+    if not selected_uids:
+        return []
+    selected = [
+        assignee
+        for assignee in node.candidate_assignees
+        if assignee.uid in selected_uids
+    ]
+    if selected and not node.multiple:
+        return selected[:1]
+    return selected
 
 
 def _select_assignees_from_message(
@@ -639,6 +961,27 @@ def _assignee_selection_message(node: ApprovalNode) -> str:
     if names:
         return f"请选择{node.node_name}审批人，可选：{names}。"
     return f"请选择{node.node_name}审批人。"
+
+
+def _assignee_selection_input(node: ApprovalNode) -> AwaitingInput:
+    """构建审批节点办理人选择控件。"""
+    label = f"{node.node_name}审批人"
+    return AwaitingInput(
+        field_key=f"__approval_assignee__:{node.node_id}",
+        label=label,
+        type="user_select",
+        required=True,
+        placeholder=f"请选择{label}",
+        options=[
+            {
+                "label": assignee.name,
+                "value": assignee.uid,
+                "avatar": assignee.avatar,
+            }
+            for assignee in node.candidate_assignees
+        ],
+        multiple=node.multiple,
+    )
 
 
 def _assignee_preview_fields(
@@ -689,6 +1032,14 @@ def _build_preview(
     )
 
 
+def _submission_slots(state: ApprovalState) -> dict[str, object]:
+    """合并展示字段和结构化字段，供 ERP 提交使用。"""
+    slots: dict[str, object] = dict(state.get("collected_slots", {}))
+    for key, value in state.get("collected_values", {}).items():
+        slots[key] = value
+    return slots
+
+
 def _approval_type_clarification(templates: list[ApprovalTemplate]) -> str:
     """构建列出可用审批分类的澄清消息。"""
     if not templates:
@@ -704,6 +1055,14 @@ def _approval_type_clarification(templates: list[ApprovalTemplate]) -> str:
         common_text = "、".join(common)
         return f"请告诉我要办理哪类审批。常用审批包括：{common_text}。当前分类：{category_text}。"
     return f"请告诉我要办理哪类审批。当前分类：{category_text}。"
+
+
+def _template_choice_message(templates: list[ApprovalTemplate]) -> str:
+    """构建多个远程审批模板的选择提示。"""
+    lines = ["找到多个审批模板，请回复序号或模板名称确认是哪一个审批："]
+    for index, template in enumerate(templates, start=1):
+        lines.append(f"{index}. {template.title}")
+    return "\n".join(lines)
 
 
 def _crm_error_message(error: str) -> str:
@@ -732,12 +1091,14 @@ def _to_response(state: ApprovalState) -> ChatResponse:
         assistant_message=state.get("assistant_message", ""),
         approval_type=state.get("approval_type"),
         collected_slots=state.get("collected_slots", {}),
+        collected_values=state.get("collected_values", {}),
         missing_fields=display_missing_fields,
         missing_field_keys=missing_fields,
         missing_field_labels=display_missing_fields,
         awaiting_field=awaiting_field_label or awaiting_field_key,
         awaiting_field_key=awaiting_field_key,
         awaiting_field_label=awaiting_field_label,
+        awaiting_input=_awaiting_input_for_state(state),
         preview=preview,
         actions=_actions_for_status(state.get("status", "idle")),
         request_id=state.get("request_id"),

@@ -14,6 +14,7 @@ class ApprovalState(TypedDict, total=False):
     intent: str | None
     approval_type: str | None
     collected_slots: dict[str, str]
+    collected_values: dict[str, Any]
     awaiting_field: str | None
     preview: dict[str, Any] | None
     confirmed: bool
@@ -30,6 +31,9 @@ class ApprovalState(TypedDict, total=False):
     _route: str
     _user_context: dict[str, Any] | None
     _available_templates: list[dict[str, Any]]
+    _template_candidates: list[dict[str, Any]]
+    _template_search_keyword: str
+    _answer: dict[str, Any] | None
     _validation_warnings: list[str]
     _field_labels: dict[str, str]
 
@@ -46,6 +50,7 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "intent": None,
         "approval_type": None,
         "collected_slots": {},
+        "collected_values": {},
         "awaiting_field": None,
         "preview": None,
         "confirmed": False,
@@ -62,6 +67,9 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "_route": "end",
         "_user_context": None,
         "_available_templates": [],
+        "_template_candidates": [],
+        "_template_search_keyword": "",
+        "_answer": None,
         "_validation_warnings": [],
         "_field_labels": {},
     }

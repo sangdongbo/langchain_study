@@ -1030,6 +1030,19 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-milvus"
+version = "0.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+    { name = "pymilvus" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/21/ecce785a24e61ba2c0f6249a5a68b969ccc053342f933aeab31a3f885f5e/langchain_milvus-0.3.3.tar.gz", hash = "sha256:406c2d88da133741f5cc3e2fea4b36386182b35500205c70d003382ded210e41", size = 35577, upload-time = "2026-01-05T10:01:16.386Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/5d/6a0dac51ca2343332d5de9c79686d54f905d225b173a8e1b03ae6d35982a/langchain_milvus-0.3.3-py3-none-any.whl", hash = "sha256:6e12f15453372dd48836978faa4a149de79c721df3322229ad732a5e628e8e97", size = 38962, upload-time = "2026-01-05T10:01:15.186Z" },
+]
+
+[[package]]
 name = "langchain-openai"
 version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1171,11 +1184,13 @@ dependencies = [
     { name = "langchain-anthropic" },
     { name = "langchain-chroma" },
     { name = "langchain-deepseek" },
+    { name = "langchain-milvus" },
     { name = "langchain-openai" },
     { name = "langchain-tavily" },
     { name = "langchain-text-splitters" },
     { name = "langgraph" },
     { name = "pandas" },
+    { name = "pymilvus" },
     { name = "pytest" },
     { name = "python-dotenv" },
     { name = "streamlit" },
@@ -1192,11 +1207,13 @@ requires-dist = [
     { name = "langchain-anthropic", specifier = ">=1.4.3" },
     { name = "langchain-chroma", specifier = ">=1.0.1" },
     { name = "langchain-deepseek", specifier = ">=1.0.1" },
+    { name = "langchain-milvus", specifier = ">=0.3.3" },
     { name = "langchain-openai", specifier = ">=1.2.1" },
     { name = "langchain-tavily", specifier = ">=0.2.18" },
     { name = "langchain-text-splitters", specifier = ">=1.0.0" },
     { name = "langgraph", specifier = ">=1.2.0" },
     { name = "pandas", specifier = ">=3.0.3" },
+    { name = "pymilvus", specifier = ">=2.6.15" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "streamlit", specifier = ">=1.57.0" },
@@ -1977,6 +1994,24 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
+]
+
+[[package]]
+name = "pymilvus"
+version = "2.6.15"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cachetools" },
+    { name = "grpcio" },
+    { name = "orjson" },
+    { name = "pandas" },
+    { name = "protobuf" },
+    { name = "python-dotenv" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/79/62/f5f975e56f1a52c479c6150bd0a9abda70508c52557395d2c09a375f1950/pymilvus-2.6.15.tar.gz", hash = "sha256:329a20fed7eb78607306ec80289f55151d9238bcfd3ecc61605b653c268326aa", size = 308491, upload-time = "2026-06-01T07:09:00.532Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6f/89/e21f103daef4e591ff2ed75e5b76061f5a9237930af4540bd02631bc58f3/pymilvus-2.6.15-py3-none-any.whl", hash = "sha256:c9e67810b40973d917010c176c6c07d3221a8c65b577bd924ae74fb222da8500", size = 343611, upload-time = "2026-06-01T07:08:58.934Z" },
 ]
 
 [[package]]

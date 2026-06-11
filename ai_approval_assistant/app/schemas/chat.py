@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Literal
+from typing import Any, Literal
 from pydantic import BaseModel, Field
 from app.schemas.approval import FieldError
 
@@ -22,6 +22,30 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1)
     uid: str | None = None
     authorization: str | None = None
+    answer: dict[str, Any] | None = None
+
+
+class AwaitingInput(BaseModel):
+    """前端可直接渲染的当前等待输入控件描述。"""
+
+    field_key: str
+    label: str
+    type: Literal[
+        "single_select",
+        "user_select",
+        "datetime",
+        "date",
+        "text",
+        "textarea",
+        "address",
+    ]
+    required: bool = True
+    placeholder: str = ""
+    options: list[dict[str, Any]] = Field(default_factory=list)
+    multiple: bool | None = None
+    min: Any | None = None
+    max: Any | None = None
+    value_schema: dict[str, str] | None = None
 
 
 class PreviewField(BaseModel):
@@ -50,12 +74,14 @@ class ChatResponse(BaseModel):
     assistant_message: str
     approval_type: str | None = None
     collected_slots: dict[str, str] = Field(default_factory=dict)
+    collected_values: dict[str, Any] = Field(default_factory=dict)
     missing_fields: list[str] = Field(default_factory=list)
     missing_field_keys: list[str] = Field(default_factory=list)
     missing_field_labels: list[str] = Field(default_factory=list)
     awaiting_field: str | None = None
     awaiting_field_key: str | None = None
     awaiting_field_label: str | None = None
+    awaiting_input: AwaitingInput | None = None
     preview: ApprovalPreview | None = None
     actions: list[str] = Field(default_factory=list)
     request_id: str | None = None

@@ -24,8 +24,10 @@ class ApprovalField(BaseModel):
     name: str
     label: str
     type: FieldType
+    input_type: str | None = None
     required: bool = True
     options: list[str] = Field(default_factory=list)
+    option_values: list[dict[str, Any]] = Field(default_factory=list)
     aliases: list[str] = Field(default_factory=list)
     extract_patterns: list[str] = Field(default_factory=list)
     question: str

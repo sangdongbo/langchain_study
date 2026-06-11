@@ -285,6 +285,27 @@ Hybrid Retrieve: dense search + sparse search + reranking
 
 `bge-large` 是 BAAI BGE 系列中的常见中文/多语言文本向量模型，适合语义检索、问答、聚类等任务。`BM25` 是经典信息检索排序算法，基于词频、逆文档频率和文档长度归一化衡量 query 与文档的关键词匹配程度。
 
+### DeepSeek 和 Embedding 的分工
+
+`OpenAIEmbeddings` 需要配置 `OPENAI_API_KEY`，因为它调用的是 OpenAI 的 embedding 接口。DeepSeek 的 OpenAI 兼容接口主要用于 Chat / Completion 生成回答；截至本文整理时，DeepSeek 官方 API 文档没有提供独立 embedding 模型。因此 RAG 里不要把 `OpenAIEmbeddings` 直接改成 DeepSeek。
+
+推荐分工：
+
+| 环节 | 推荐选择 | 是否需要 DeepSeek Key |
+| --- | --- | --- |
+| 文档向量化 | BGE、Qwen Embedding、Jina、公司统一 embedding 服务 | 不需要 |
+| 查询向量化 | 与文档相同的 embedding 模型 | 不需要 |
+| 关键词检索 | Milvus BM25 Function / sparse 字段 | 不需要 |
+| 答案生成 | DeepSeek Chat，例如 `ChatDeepSeek` | 需要 `DEEPSEEK_API_KEY` |
+
+也就是说，典型本地学习链路可以是：
+
+```text
+本地 embedding 模型 -> Milvus 检索 -> DeepSeek 根据检索上下文生成答案
+```
+
+如果公司内部网关额外提供 OpenAI-compatible embedding 接口，可以继续用 `OpenAIEmbeddings(base_url=..., api_key=..., model=...)`，但要确认该网关真的支持 `/embeddings`，不能只看它支持 Chat。
+
 如果从 Hugging Face 下载模型较慢，可以使用镜像或提前下载到本地目录。常见命令：
 
 ```bash
@@ -334,25 +355,416 @@ Milvus: VectorStore，负责向量写入、索引、检索和过滤
 LLM: 根据检索上下文生成回答
 ```
 
-## 六、检索方式
+### 1. 服务启动不等于已经有 dense / sparse 数据
 
-截图中的 Milvus 检索脑图可整理为以下类别。
+本机 Docker 启动 Milvus 只是把向量数据库服务跑起来。此时 Milvus 里不一定有 collection，也不会自动出现 `dense`、`sparse`、`text` 等字段。
 
-| 检索方式 | 说明 | 适合场景 |
-| --- | --- | --- |
-| 基本向量搜索 | 只按向量相似度取 top_k | 普通语义问答 |
-| 过滤搜索 | 向量检索 + 元数据条件 | 多租户、按文件、按权限 |
-| 范围搜索 | 只返回距离或分数在阈值内的结果 | 需要设置水位线 |
-| 分组搜索 | 按字段分组后返回结果 | 同一文件不想占满结果 |
-| 主键搜索 | 按 id 查询 | 调试、回溯来源 |
-| 混合搜索 | 稠密向量 + 稀疏向量 / BM25 | 语义和关键词都重要 |
-| 全文搜索 | 关键词倒排检索 | 专有名词、编号、短文本 |
-| 文本匹配 | 按字符串字段过滤 | 标签、类别、状态 |
-
-RAG 项目里常用组合：
+RAG 要真正用 Milvus，需要再执行 Python 入库流程：
 
 ```text
-用户问题 -> 向量检索 top_k=20 -> 元数据过滤 -> rerank -> 取前 3-5 个片段 -> 生成回答
+启动 Milvus 服务
+-> 创建 collection schema
+-> 定义 text / dense / sparse / metadata 字段
+-> 为 dense 和 sparse 建索引
+-> 解析文档并切片
+-> 生成 dense embedding
+-> 写入 text、dense、metadata
+-> Milvus 根据 BM25 Function 生成 sparse
+-> 查询时做 dense + sparse 混合检索
+```
+
+所以要区分两件事：
+
+| 状态 | 含义 |
+| --- | --- |
+| Docker 里 Milvus 容器 healthy | 数据库服务可连接 |
+| collection 已创建 | 已经有表结构 |
+| `dense` 字段已定义 | 可以保存稠密向量 |
+| `sparse` 字段已定义 | 可以保存 BM25 或其他稀疏向量 |
+| 文档已 insert | 知识库里真正有可检索数据 |
+
+### 2. RAG 中 Milvus 推荐字段设计
+
+一个支持混合检索的 RAG collection 通常包含：
+
+| 字段 | Milvus 类型 | 用途 |
+| --- | --- | --- |
+| `id` | `INT64` 或 `VARCHAR` | 主键，定位 chunk |
+| `text` | `VARCHAR` | chunk 原文，也可用于 BM25 分词 |
+| `dense` | `FLOAT_VECTOR` | 稠密语义向量，例如 BGE、Qwen、OpenAI Embedding |
+| `sparse` | `SPARSE_FLOAT_VECTOR` | 稀疏关键词向量，例如 BM25 Function 输出 |
+| `source` | `VARCHAR` | 文件名、URL、知识来源 |
+| `page` | `INT64` | PDF 页码或文档页码 |
+| `title` | `VARCHAR` | 标题路径或章节名 |
+| `tenant_id` | `VARCHAR` | 多租户或权限过滤 |
+
+简单记忆：
+
+```text
+text   = 原文
+dense  = 语义相似
+sparse = 关键词匹配
+metadata = 来源、页码、权限、分类
+```
+
+### 3. PyMilvus 创建 dense + sparse schema 示例
+
+下面示例只展示“建表结构”的写法。实际执行前要确认连接的是测试 Milvus，不要对生产库操作。
+
+```python
+from pymilvus import DataType, Function, FunctionType, MilvusClient
+
+client = MilvusClient(uri="http://127.0.0.1:19530")
+
+schema = client.create_schema(auto_id=True)
+schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True)
+schema.add_field(
+    field_name="text",
+    datatype=DataType.VARCHAR,
+    max_length=4000,
+    enable_analyzer=True,
+)
+schema.add_field(field_name="dense", datatype=DataType.FLOAT_VECTOR, dim=1024)
+schema.add_field(field_name="sparse", datatype=DataType.SPARSE_FLOAT_VECTOR)
+schema.add_field(field_name="source", datatype=DataType.VARCHAR, max_length=500)
+schema.add_field(field_name="title", datatype=DataType.VARCHAR, max_length=500)
+schema.add_field(field_name="page", datatype=DataType.INT64)
+
+bm25_function = Function(
+    name="text_bm25_emb",
+    input_field_names=["text"],
+    output_field_names=["sparse"],
+    function_type=FunctionType.BM25,
+)
+schema.add_function(bm25_function)
+```
+
+关键点：
+
+- `dense` 是 embedding 模型生成的稠密向量，维度必须和模型一致。
+- `sparse` 是 BM25 Function 从 `text` 自动生成的稀疏向量。
+- `text` 要设置 `enable_analyzer=True`，否则 BM25/全文分析无法正常分词。
+- `source`、`title`、`page` 这些 metadata 用于答案引用和过滤。
+
+### 4. dense / sparse 索引示例
+
+建好字段后，还要给向量字段建索引。
+
+```python
+index_params = client.prepare_index_params()
+
+# 稠密向量索引：适合语义相似度搜索。
+index_params.add_index(
+    field_name="dense",
+    index_name="dense_vector_index",
+    index_type="HNSW",
+    metric_type="IP",
+    params={"M": 16, "efConstruction": 64},
+)
+
+# 稀疏向量索引：适合 BM25 关键词检索。
+index_params.add_index(
+    field_name="sparse",
+    index_name="sparse_inverted_index",
+    index_type="SPARSE_INVERTED_INDEX",
+    metric_type="BM25",
+    params={
+        "inverted_index_algo": "DAAT_MAXSCORE",
+        "bm25_k1": 1.6,
+        "bm25_b": 0.75,
+    },
+)
+```
+
+RAG 学习阶段可以先用 `FLAT` 或 `AUTOINDEX` 简化索引配置；项目里再根据数据量、召回和延迟调 HNSW、IVF 或 DiskANN。
+
+### 5. 写入数据时 dense 和 sparse 怎么来
+
+写入一条 chunk 时，通常由应用侧生成 `dense`，Milvus 自动生成 `sparse`：
+
+```python
+row = {
+    "text": "Milvus 支持 dense+sparse 混合检索，适合 RAG 知识库。",
+    "dense": embedding_model.embed_query("Milvus 支持 dense+sparse 混合检索，适合 RAG 知识库。"),
+    "source": "python_rag_notes.md",
+    "title": "Milvus 在 RAG 中负责什么",
+    "page": 1,
+}
+
+client.insert(collection_name="rag_docs", data=[row])
+```
+
+这里没有手写 `sparse`，因为 schema 里配置了 BM25 Function：
+
+```text
+text -> BM25 Function -> sparse
+```
+
+如果没有配置 BM25 Function，也可以用外部稀疏 embedding 模型生成 `sparse` 后再写入，但学习阶段用 Milvus BM25 Function 更容易理解。
+
+### 6. 混合检索的数据流
+
+查询时一般同时走两路：
+
+```text
+用户问题
+-> dense embedding -> dense vector search
+-> BM25 analyzer -> sparse / full text search
+-> WeightedRanker 或 RRFRanker 融合
+-> reranker 精排
+-> top chunks 进入 Prompt
+```
+
+dense 和 sparse 各自解决不同问题：
+
+| 查询类型 | dense 更强 | sparse 更强 |
+| --- | --- | --- |
+| “如何提升检索准确率” | 是，能理解语义 | 一般 |
+| “BM25_k1 是什么” | 一般 | 是，关键词精确 |
+| “订单 ABC-2024-001” | 弱 | 强 |
+| “向量数据库和知识库有什么关系” | 强 | 一般 |
+
+工程上常见做法：
+
+```text
+dense top_k=20
+sparse top_k=20
+fusion top_k=20
+rerank top_k=5
+LLM answer with sources
+```
+
+## 六、最新 RAG 检索方式
+
+现在的 RAG 检索不建议只做“单路向量 top_k”。更稳的做法是把语义检索、关键词检索、过滤、融合、重排和上下文增强组合起来。Milvus 当前文档里重点覆盖 basic vector search、full-text search、hybrid search、multi-vector hybrid search、range search、reranking 和 contextual retrieval。
+
+### 1. 基础向量检索：Dense Vector Search
+
+基础向量检索也叫 ANN Search。流程是把用户问题转成 dense vector，再在 `dense` 字段里找最相似的 chunk。
+
+```text
+query -> embedding -> dense vector search -> top_k chunks
+```
+
+适合：
+
+- 用户用自然语言描述问题。
+- 问题和文档不是完全同词，但语义相近。
+- FAQ、文档问答、课程笔记检索。
+
+局限：
+
+- 对订单号、型号、函数名、人名、专有缩写不稳定。
+- 对很短 query 容易误召回。
+- 如果 chunk 缺标题或上下文，向量语义会漂。
+
+### 2. 全文检索：Full-Text Search / BM25
+
+Milvus 2.5+ 支持原生 BM25 全文检索。写入原始 `text` 后，Milvus 可以通过 analyzer 和 BM25 Function 自动生成 sparse vector，不需要手动计算稀疏向量。
+
+```text
+text -> analyzer -> BM25 Function -> sparse vector
+query text -> BM25 scoring -> keyword-ranked results
+```
+
+适合：
+
+- 精确关键词、产品型号、订单号、错误码、API 名。
+- 法规条款、编号、标题、函数名。
+- 用户问题很短，向量检索不稳定的场景。
+
+注意：
+
+- `text` 字段要启用 `enable_analyzer=True`。
+- collection 需要有 `SPARSE_FLOAT_VECTOR` 字段。
+- 当前 Milvus Full-Text Search 适合 Standalone、Distributed、Zilliz Cloud；Milvus Lite 不适合作为这块的测试基线。
+
+### 3. 混合检索：Dense + Sparse Hybrid Search
+
+混合检索是现在 RAG 项目的主流做法之一：dense 负责语义，sparse/BM25 负责关键词，然后用 ranker 融合。
+
+```text
+query
+-> dense embedding -> dense search
+-> BM25 / sparse embedding -> sparse search
+-> WeightedRanker / RRFRanker
+-> top candidates
+-> reranker
+```
+
+Milvus Hybrid Search 支持在一个 collection 中保存 dense 和 sparse 两类向量。BGE-M3 这类模型也可以同时生成 dense 和 sparse 表示；Milvus BM25 Function 则可以直接从原文生成 BM25 sparse 表示。
+
+常见策略：
+
+| 策略 | 说明 | 适合场景 |
+| --- | --- | --- |
+| Dense + BM25 | dense 走语义，BM25 走全文关键词 | 企业知识库、课程笔记、产品文档 |
+| Dense + Sparse Embedding | sparse 由 BGE-M3/SPLADE 等模型生成 | 对关键词和语义都要求高 |
+| WeightedRanker | 给各路召回结果配置权重 | 已知某一路更可靠 |
+| RRFRanker | 按排名融合，不强依赖分数尺度 | 多路检索分数不可直接比较 |
+
+推荐默认流程：
+
+```text
+dense top_k=20
+sparse top_k=20
+fusion top_k=20
+rerank top_k=5
+LLM answer with sources
+```
+
+### 4. 多向量 / 多模态混合检索
+
+如果资料里同时有文本、图片、表格、页面截图，可以在一个 collection 中放多个向量字段，例如：
+
+| 字段 | 用途 |
+| --- | --- |
+| `text_dense` | 文本语义向量 |
+| `text_sparse` | BM25 或 sparse embedding |
+| `image_dense` | 图片或页面截图向量 |
+| `table_dense` | 表格摘要向量 |
+
+检索时可以同时走：
+
+```text
+文本语义检索 + 全文检索 + 图片向量检索 + rerank
+```
+
+适合：
+
+- PDF 页面含图表。
+- 产品图片 + 商品描述。
+- PPT、扫描件、合同版面问答。
+- 多模态 RAG。
+
+### 5. 过滤检索：Metadata Filter
+
+过滤检索不是单独替代向量检索，而是和 dense/sparse 一起使用。
+
+```text
+query -> dense/sparse search + tenant_id/source/date/category filter
+```
+
+典型过滤条件：
+
+| 过滤字段 | 用途 |
+| --- | --- |
+| `tenant_id` | 多租户隔离 |
+| `department` | 部门权限 |
+| `source` / `doc_id` | 限定文档范围 |
+| `created_at` / `version` | 只查最新版本 |
+| `category` | 限定业务分类 |
+
+RAG 项目里，权限过滤必须在检索层强制加入，不能只靠 prompt 约束。
+
+### 6. 范围搜索：Range Search / Score Threshold
+
+Range Search 用相似度或距离范围过滤结果，可以理解为“只返回达到可信水位线的结果”。
+
+```text
+query vector -> ANN search -> 只保留分数在指定范围内的结果
+```
+
+适合：
+
+- 不想硬凑无关上下文。
+- 用户问题和知识库无关时返回“不知道”。
+- 控制低质量召回进入 LLM。
+
+经验：
+
+- 阈值太高：容易查不到。
+- 阈值太低：会把噪声塞给模型。
+- 阈值要用业务评测集调，不要凭感觉。
+
+### 7. 分组检索与去重
+
+RAG 很容易出现一个文档的多个相邻 chunk 占满 top_k。分组检索或结果去重可以让候选来源更均衡。
+
+常见做法：
+
+- 按 `doc_id` 分组，每个文档最多返回 N 条。
+- 对相邻 chunk 做合并或去重。
+- 小 chunk 负责检索，parent chunk 负责生成。
+
+适合：
+
+- 同一文档重复段落很多。
+- 检索结果来源过于集中。
+- 希望答案引用多个独立来源。
+
+### 8. Reranker 精排
+
+Reranker 是两阶段检索的第二阶段。第一阶段用 dense/sparse 快速召回较多候选，第二阶段用 cross-encoder 或 reranker 模型重新排序。
+
+```text
+dense/sparse/hybrid recall top 20-100
+-> reranker(query, candidate)
+-> top 3-8
+-> LLM
+```
+
+适合：
+
+- top 20 有正确答案，但 top 3 不稳定。
+- 文档相似度很高，需要精细判断。
+- 混合检索后需要统一排序。
+
+常见模型：
+
+- BGE Reranker
+- Qwen Reranker
+- Cohere Rerank
+- Cross-Encoder reranker
+
+### 9. Contextual Retrieval 上下文增强检索
+
+Contextual Retrieval 的核心是在入库前给每个 chunk 增加“它在原文里的上下文说明”，再做 embedding 和 BM25。
+
+```text
+原始 chunk
+-> LLM 生成上下文摘要：这段在文档中讲什么、属于哪个章节、关键实体是什么
+-> context + chunk 一起索引
+-> dense + BM25 + rerank
+```
+
+适合：
+
+- chunk 脱离标题后语义不完整。
+- 文档里有大量“该系统”“上述方案”“本产品”等指代。
+- 企业知识库、技术文档、长 PDF。
+
+成本：
+
+- 入库时需要额外 LLM 调用。
+- 需要保存原始 chunk 和上下文增强文本。
+- 要评估增强是否真的提高 Recall@K 和引用准确率。
+
+### 10. 当前推荐的 RAG 检索组合
+
+学习项目可以按这个顺序升级：
+
+```text
+阶段 1：dense vector search
+阶段 2：dense search + metadata filter
+阶段 3：dense + BM25 hybrid search
+阶段 4：hybrid search + reranker
+阶段 5：contextual retrieval + hybrid search + reranker
+阶段 6：多向量 / 多模态 hybrid search
+```
+
+企业 RAG 比较稳的默认链路：
+
+```text
+query rewrite
+-> metadata permission filter
+-> dense vector search
+-> BM25 full-text search
+-> RRFRanker / WeightedRanker fusion
+-> reranker
+-> score threshold
+-> parent chunk / neighboring chunk expansion
+-> LLM answer with citations
 ```
 
 ## 七、索引与水位线

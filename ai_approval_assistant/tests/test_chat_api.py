@@ -367,6 +367,21 @@ def test_remote_keyword_search_with_multiple_templates_asks_user_to_choose(monke
     assert "找到多个审批模板" in body["assistant_message"]
     assert "1. 测试外出" in body["assistant_message"]
     assert "2. 测试外出备用" in body["assistant_message"]
+    assert body["awaiting_input"] == {
+        "field_key": "__approval_template__",
+        "label": "审批模板",
+        "type": "single_select",
+        "required": True,
+        "placeholder": "请选择审批模板",
+        "options": [
+            {"label": "测试外出", "value": "remote_5911"},
+            {"label": "测试外出备用", "value": "remote_5912"},
+        ],
+        "multiple": None,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+    }
 
     response = client.post(
         "/api/ai-approval/chat",
@@ -375,7 +390,13 @@ def test_remote_keyword_search_with_multiple_templates_asks_user_to_choose(monke
             "user_id": "863",
             "uid": "863",
             "authorization": "Bearer test-token",
-            "message": "1",
+            "message": "测试外出",
+            "answer": {
+                "field_key": "__approval_template__",
+                "type": "single_select",
+                "label": "测试外出",
+                "value": "remote_5911",
+            },
         },
     )
 
@@ -596,6 +617,293 @@ def test_remote_waiting_field_exposes_label_for_display_and_key_for_program(monk
     assert body["missing_field_keys"] == ["rest_holiday_rule_id"]
     assert body["awaiting_field_label"] == "请假类型"
     assert body["missing_field_labels"] == ["请假类型"]
+    assert body["awaiting_input"] == {
+        "field_key": "rest_holiday_rule_id",
+        "label": "请假类型",
+        "type": "single_select",
+        "required": True,
+        "placeholder": "请选择请假类型",
+        "options": [
+            {"label": "事假", "value": "事假"},
+            {"label": "年假", "value": "年假"},
+        ],
+        "multiple": None,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+    }
+
+
+def test_structured_single_select_answer_is_collected(monkeypatch) -> None:
+    session_state_service.clear("S-remote-single-select-answer")
+
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_holiday_rule_id",
+                "label": "请假类型",
+                "type": "enum",
+                "required": True,
+                "options": ["调休假（余8小时）", "事假"],
+                "option_values": [
+                    {"label": "调休假（余8小时）", "value": 11},
+                    {"label": "事假", "value": 13},
+                ],
+                "aliases": ["请假类型"],
+                "extract_patterns": [],
+                "question": "请选择请假类型",
+            },
+            {
+                "name": "rest_content",
+                "label": "请假事由",
+                "type": "text",
+                "required": True,
+                "options": [],
+                "aliases": ["请假事由"],
+                "extract_patterns": [],
+                "question": "请输入请假事由",
+            },
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    first_response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-single-select-answer",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+    assert first_response.json()["awaiting_input"]["options"][1] == {
+        "label": "事假",
+        "value": 13,
+    }
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-single-select-answer",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "事假",
+            "answer": {
+                "field_key": "rest_holiday_rule_id",
+                "type": "single_select",
+                "label": "事假",
+                "value": 13,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["collected_slots"]["rest_holiday_rule_id"] == "事假"
+    assert body["collected_values"]["rest_holiday_rule_id"] == {
+        "label": "事假",
+        "value": 13,
+    }
+    assert body["awaiting_field"] == "请假事由"
+
+
+def test_remote_datetime_field_returns_datetime_awaiting_input(monkeypatch) -> None:
+    session_state_service.clear("S-remote-datetime-input")
+
+    template = ApprovalTemplate(
+        template_id="5904",
+        approval_type="remote_5904",
+        title="审批编辑-请假控件组",
+        category="测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_start_time",
+                "label": "开始时间",
+                "type": "date",
+                "input_type": "datetime",
+                "required": True,
+                "options": [],
+                "aliases": ["开始时间"],
+                "extract_patterns": [],
+                "question": "请选择开始时间",
+            }
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-datetime-input",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["awaiting_input"] == {
+        "field_key": "rest_start_time",
+        "label": "开始时间",
+        "type": "datetime",
+        "required": True,
+        "placeholder": "请选择开始时间",
+        "options": [],
+        "multiple": None,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+    }
+
+
+def test_remote_end_datetime_uses_start_time_as_min(monkeypatch) -> None:
+    session_state_service.clear("S-remote-datetime-min")
+
+    template = ApprovalTemplate(
+        template_id="5904",
+        approval_type="remote_5904",
+        title="审批编辑-请假控件组",
+        category="测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_start_time",
+                "label": "开始时间",
+                "type": "date",
+                "input_type": "datetime",
+                "required": True,
+                "question": "请选择开始时间",
+            },
+            {
+                "name": "rest_end_time",
+                "label": "结束时间",
+                "type": "date",
+                "input_type": "datetime",
+                "required": True,
+                "question": "请选择结束时间",
+            },
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-datetime-min",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-datetime-min",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "2026-06-12 09:00",
+            "answer": {
+                "field_key": "rest_start_time",
+                "type": "datetime",
+                "label": "2026-06-12 09:00",
+                "value": "2026-06-12 09:00:00",
+            },
+        },
+    )
+
+    body = response.json()
+    assert body["awaiting_input"]["field_key"] == "rest_end_time"
+    assert body["awaiting_input"]["type"] == "datetime"
+    assert body["awaiting_input"]["min"] == "2026-06-12 09:00:00"
+
+
+def test_remote_address_field_returns_address_awaiting_input(monkeypatch) -> None:
+    session_state_service.clear("S-remote-address-input")
+
+    template = ApprovalTemplate(
+        template_id="5911",
+        approval_type="remote_5911",
+        title="测试外出",
+        category="测试",
+        aliases=["外出"],
+        intent_keywords=["外出"],
+        fields=[
+            {
+                "name": "go_out_addr",
+                "label": "外出地点",
+                "type": "text",
+                "input_type": "address",
+                "required": True,
+                "question": "请选择外出地点",
+            }
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.list_available_templates",
+        lambda user: [template],
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-address-input",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要外出",
+        },
+    )
+
+    body = response.json()
+    assert body["awaiting_input"]["type"] == "address"
+    assert body["awaiting_input"]["value_schema"] == {
+        "area": "array",
+        "detail": "string",
+    }
 
 
 def test_remote_waiting_field_uses_collected_template_label_if_detail_reload_fails(monkeypatch) -> None:
@@ -824,14 +1132,29 @@ def test_flow_asks_assignee_selection_before_preview(monkeypatch) -> None:
     assert body["status"] == "awaiting_assignee_selection"
     assert body["approval_type"] == "remote_5904"
     assert body["awaiting_field"] == "assignee:12204"
+    assert body["awaiting_input"] == {
+        "field_key": "__approval_assignee__:12204",
+        "label": "办理审批人",
+        "type": "user_select",
+        "required": True,
+        "placeholder": "请选择办理审批人",
+        "options": [
+            {"label": "张三", "value": "864", "avatar": None},
+            {"label": "李四", "value": "865", "avatar": None},
+        ],
+        "multiple": False,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+    }
     assert "请选择办理审批人" in body["assistant_message"]
     assert "张三" in body["assistant_message"]
     assert "李四" in body["assistant_message"]
     assert "assignee" in body["trace"]
 
 
-def test_flow_accepts_assignee_selection_then_previews(monkeypatch) -> None:
-    session_state_service.clear("S-assignee-selected")
+def test_flow_accepts_structured_assignee_selection_then_previews(monkeypatch) -> None:
+    session_state_service.clear("S-assignee-structured-selected")
 
     template = ApprovalTemplate(
         template_id="5904",
@@ -897,7 +1220,7 @@ def test_flow_accepts_assignee_selection_then_previews(monkeypatch) -> None:
     response = client.post(
         "/api/ai-approval/chat",
         json={
-            "session_id": "S-assignee-selected",
+            "session_id": "S-assignee-structured-selected",
             "user_id": "863",
             "uid": "863",
             "authorization": "Bearer test-token",
@@ -909,11 +1232,17 @@ def test_flow_accepts_assignee_selection_then_previews(monkeypatch) -> None:
     response = client.post(
         "/api/ai-approval/chat",
         json={
-            "session_id": "S-assignee-selected",
+            "session_id": "S-assignee-structured-selected",
             "user_id": "863",
             "uid": "863",
             "authorization": "Bearer test-token",
-            "message": "选张三",
+            "message": "选择办理人",
+            "answer": {
+                "field_key": "__approval_assignee__:12204",
+                "type": "user_select",
+                "label": "张三",
+                "value": "864",
+            },
         },
     )
 
