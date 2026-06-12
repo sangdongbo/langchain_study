@@ -4,33 +4,57 @@ config:
     curve: linear
 ---
 graph TD
-    start([用户发送消息]) --> load[加载 session 状态和 CRM 模板]
-    load --> classify{识别意图和审批类型}
-    classify --> review{有界决策复核}
+    start([用户发送消息]) --> load[加载 session 和用户上下文]
+    load --> remote_gate{远程凭证 + 首轮 idle?}
 
-    review -->|复核通过: 新审批/修改| collect[按当前审批模板收集字段]
-    review -->|复核通过: 取消| cancel[取消当前审批状态]
-    review -->|复核通过: 确认提交| submit_guard{是否已预览且明确确认}
-    review -->|复核不确定或超过上限| clarify[追问要办理哪类审批]
+    remote_gate -->|普通问候/帮助问句| skip_templates[跳过 ERP 模板搜索]
+    remote_gate -->|明确审批意图/模板关键词| search_templates[调用 /api/approval/list 搜模板]
+    remote_gate -->|本地 mock 或已有流程| load_templates[加载可用模板]
 
-    collect --> missing{是否还有缺失字段}
-    missing -->|有| ask[追问下一个缺失字段]
-    ask --> wait_user([等待用户下一轮回复])
-    wait_user --> start
+    skip_templates --> classify{识别意图和当前状态}
+    search_templates --> classify
+    load_templates --> classify
 
-    missing -->|无| validate[调用 CRM 预校验]
-    validate --> valid{校验是否通过}
-    valid -->|不通过| fix[返回错误并要求补充或修改]
-    fix --> wait_user
+    classify -->|普通聊天/帮助问答| review_general[decision_review]
+    review_general --> general_chat[general_chat 调用 LLM 普通回复]
+    general_chat --> idle([返回 idle])
 
-    valid -->|通过| preview[生成审批预览]
-    preview --> wait_confirm([等待用户确认、修改或取消])
+    classify -->|多个模板待选择| template_choice[返回 awaiting_input: single_select 模板]
+    template_choice --> wait_template([等待选择模板/取消])
+    wait_template --> start
+
+    classify -->|取消| review_cancel[decision_review]
+    review_cancel --> cancel[清空审批状态]
+    cancel --> cancelled([返回 cancelled])
+
+    classify -->|已提交会话| already[already_submitted]
+    already --> submitted_again([返回原提交结果])
+
+    classify -->|新审批/继续收集/修改字段| review_collect[decision_review]
+    review_collect --> collect[collect 收集必填字段和 answer]
+    collect --> missing{是否还有缺失字段?}
+    missing -->|有| ask_field[返回 awaiting_input 或字段追问]
+    ask_field --> wait_field([等待用户填写字段])
+    wait_field --> start
+
+    missing -->|无| validate[validate 预校验字段]
+    validate --> valid{校验是否通过?}
+    valid -->|不通过| fix[返回 field_errors]
+    fix --> wait_field
+
+    valid -->|通过| assignee[assignee 调用 /api/approval/getNodes]
+    assignee --> need_user{是否需要发起人选择办理人?}
+    need_user -->|需要| ask_assignee[返回 awaiting_input: user_select]
+    ask_assignee --> wait_assignee([等待选择办理人/审批人])
+    wait_assignee --> start
+
+    need_user -->|不需要或已选择| preview[生成审批预览]
+    preview --> wait_confirm([等待确认/修改/取消])
     wait_confirm --> start
 
-    submit_guard -->|未满足| clarify_confirm[要求明确回复确认提交]
-    clarify_confirm --> wait_user
-    submit_guard -->|满足| submit[调用 CRM 创建审批]
-    submit --> submitted([返回申请编号和审批节点])
-
-    cancel --> cancelled([返回未提交])
-    clarify --> wait_user
+    classify -->|确认提交| review_submit[decision_review]
+    review_submit --> submit_guard{是否已预览且明确确认?}
+    submit_guard -->|否| clarify_confirm[要求先补全并确认预览]
+    clarify_confirm --> wait_field
+    submit_guard -->|是| submit[调用 /api/approval/add]
+    submit --> submitted([返回 request_id])

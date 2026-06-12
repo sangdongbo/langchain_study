@@ -2,17 +2,24 @@
 
 接口版 AI 聊天审批助手。
 
-当前目录是独立后端骨架，只参考 `docs/ai_approval` 中的方案，不依赖仓库里的其他 demo 目录。第一版用 mock CRM 数据演示整体链路，后续接真实 CRM 时主要替换 `app/services/crm_service.py`。
+当前目录是独立后端骨架，只参考 `docs/ai_approval` 中的方案，不依赖仓库里的其他 demo 目录。当前实现同时支持本地 mock CRM 演示和真实 ERP 接口调用；真实接入的主要边界在 `app/services/crm_service.py`。
 
 ## 1. 功能范围
 
 - `GET /health`：健康检查。
 - `POST /api/ai-approval/chat`：聊天审批主接口。
 - 按 `session_id` 保存多轮审批会话状态。
-- 从 mock CRM 获取当前用户可发起的审批模板。
+- 从 mock CRM 或真实 ERP 获取当前用户可发起的审批模板。
+- 远程模式下，普通问候和帮助问句走通用聊天，不会误触发审批模板搜索。
+- 明确审批意图时按关键词调用 `/api/approval/list` 搜索模板。
+- 多个模板命中时返回结构化单选控件，让前端选择模板。
 - 按审批模板动态收集字段。
+- 快速发起只收集必填字段，非必填字段默认忽略。
+- 支持结构化控件返回和接收：单选、人员选择、日期时间、日期、文本、多行文本、地址。
 - 缺字段时在聊天里逐项追问。
 - 字段完整后调用 CRM 预校验。
+- 真实 ERP 模板会调用 `/api/field/formFields` 获取字段，调用 `/api/approval/getNodes` 获取审批流程节点。
+- 需要发起人选择办理人/审批人时，返回 `user_select` 控件。
 - 生成审批预览。
 - 用户明确回复“确认提交”后才创建审批。
 - 支持取消、修改和确认提交守卫。
@@ -254,7 +261,8 @@ POST /api/ai-approval/chat
   "user_id": "U001",
   "uid": "863",
   "authorization": "Bearer your_token_here",
-  "message": "我要报销餐饮费 2000 元，客户招待，发票已提供"
+  "message": "我要报销餐饮费 2000 元，客户招待，发票已提供",
+  "answer": null
 }
 ```
 
@@ -267,8 +275,12 @@ POST /api/ai-approval/chat
 | `uid` | 可选，真实 ERP 用户 UID；传入后会作为 `UID` 请求头调用审批列表接口 |
 | `authorization` | 可选，真实 ERP 登录凭证；传入后会作为 `Authorization` 请求头调用审批列表接口 |
 | `message` | 用户本轮聊天内容 |
+| `answer` | 可选，前端结构化控件的回传值；普通文本聊天传 `null` 或省略 |
 
-传入 `uid` 和 `authorization` 后，后端会先调用真实 ERP 的审批列表接口：
+传入 `uid` 和 `authorization` 后，后端会按消息意图决定是否调用真实 ERP：
+
+- 普通问候、帮助问句，例如 `你好`、`怎么新增审批`：直接走通用聊天，不调用模板搜索。
+- 明确审批意图或模板关键词，例如 `我要请假`、`我要外出`、`测试外出`：调用审批列表接口搜索模板。
 
 ```text
 ${AI_APPROVAL_CRM_BASE_URL}/api/approval/list
@@ -317,8 +329,12 @@ AI_APPROVAL_ADD_URL=http://localhost:8002/api/approval/add
 | `assistant_message` | 返回给用户看的文本 |
 | `approval_type` | 当前匹配到的审批类型 |
 | `collected_slots` | 已收集字段 |
+| `collected_values` | 已收集字段的结构化原始值，用于提交 ERP |
 | `missing_fields` | 当前缺失字段 |
 | `awaiting_field` | 正在等待用户补充的字段 |
+| `awaiting_field_key` | 当前等待字段的机器 key |
+| `awaiting_field_label` | 当前等待字段的展示名称 |
+| `awaiting_input` | 当前前端可直接渲染的控件描述 |
 | `preview` | 审批预览 |
 | `actions` | 当前可执行动作 |
 | `request_id` | 提交成功后的申请编号 |
@@ -332,10 +348,106 @@ AI_APPROVAL_ADD_URL=http://localhost:8002/api/approval/add
 |---|---|
 | `idle` | 空闲或还没有进入审批流程 |
 | `collecting` | 正在收集审批字段 |
+| `awaiting_assignee_selection` | 字段完整，等待选择审批流程中的办理人/审批人 |
 | `awaiting_confirmation` | 字段完整，等待用户确认提交 |
 | `submitted` | 已提交审批 |
 | `cancelled` | 已取消 |
 | `error` | 出错 |
+
+### 7.3 `awaiting_input` 和 `answer` 约定
+
+当后端需要前端渲染结构化控件时，会返回 `awaiting_input`。前端展示该控件，用户选择或填写后，把结果放到下一轮请求的 `answer` 中。
+
+`awaiting_input` 通用结构：
+
+```json
+{
+  "field_key": "rest_holiday_rule_id",
+  "label": "请假类型",
+  "type": "single_select",
+  "required": true,
+  "placeholder": "请选择请假类型",
+  "options": [
+    { "label": "调休假（余8小时）", "value": 11 }
+  ],
+  "multiple": null,
+  "min": null,
+  "max": null,
+  "value_schema": null
+}
+```
+
+支持的 `type`：
+
+| type | 用途 |
+|---|---|
+| `single_select` | 普通单选，例如审批模板、请假类型 |
+| `user_select` | 人员选择，例如办理人/审批人 |
+| `datetime` | 日期时间 |
+| `date` | 日期 |
+| `text` | 单行文本 |
+| `textarea` | 多行文本 |
+| `address` | 地址，`value_schema` 为 `{ "area": "array", "detail": "string" }` |
+
+前端回传 `answer` 示例：
+
+```json
+{
+  "field_key": "rest_holiday_rule_id",
+  "type": "single_select",
+  "label": "调休假（余8小时）",
+  "value": 11
+}
+```
+
+审批模板选择：
+
+```json
+{
+  "field_key": "__approval_template__",
+  "type": "single_select",
+  "label": "测试外出",
+  "value": "remote_5911"
+}
+```
+
+办理人/审批人选择：
+
+```json
+{
+  "field_key": "__approval_assignee__:12204",
+  "type": "user_select",
+  "label": "张三",
+  "value": "864"
+}
+```
+
+日期时间：
+
+```json
+{
+  "field_key": "rest_start_time",
+  "type": "datetime",
+  "label": "2026-06-13 09:00",
+  "value": "2026-06-13 09:00:00"
+}
+```
+
+地址：
+
+```json
+{
+  "field_key": "go_out_addr",
+  "type": "address",
+  "label": "上海市浦东新区张江路 88 号",
+  "value": {
+    "area": ["上海市", "浦东新区"],
+    "detail": "张江路 88 号"
+  }
+}
+```
+
+前端建议只根据 `awaiting_input` 渲染控件，不要解析 `assistant_message`。当 `awaiting_input.options` 为空时，应给出“暂无可选项/请稍后重试”的提示。
 
 ## 8. 调试方式
 
@@ -598,6 +710,130 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
 - `request_id` 是 `null`
 - `trace` 包含 `decision_review`
 
+### 9.5 演示普通聊天不会搜索审批模板
+
+带真实 ERP 凭证时，普通问候仍然走通用聊天，不会调用 `/api/approval/list` 搜索 `你好`。
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-chat","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"你好"}'
+```
+
+预期：
+
+- `status` 是 `idle`
+- `approval_type` 是 `null`
+- `trace` 包含 `general_chat`
+- 不会返回“没有找到审批模板”
+
+帮助问句也走通用聊天：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-help","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"怎么新增审批"}'
+```
+
+### 9.6 演示远程模板选择
+
+用户输入明确模板关键词后，后端会调用 `/api/approval/list`：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-template","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"测试外出"}'
+```
+
+如果命中多个模板，响应会包含：
+
+```json
+{
+  "status": "idle",
+  "awaiting_input": {
+    "field_key": "__approval_template__",
+    "label": "审批模板",
+    "type": "single_select",
+    "options": [
+      { "label": "测试外出", "value": "remote_5911" }
+    ]
+  }
+}
+```
+
+前端选择模板后，下一轮请求带 `answer`：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-template","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"测试外出","answer":{"field_key":"__approval_template__","type":"single_select","label":"测试外出","value":"remote_5911"}}'
+```
+
+模板选择阶段用户回复 `取消` 会取消本次流程并清空候选模板。
+
+### 9.7 演示结构化字段填写
+
+请假类型这类动态单选字段会返回 `single_select`。前端选择后，回传 label 和真实 value：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-field","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"调休假","answer":{"field_key":"rest_holiday_rule_id","type":"single_select","label":"调休假（余8小时）","value":11}}'
+```
+
+日期时间字段：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-field","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"2026-06-13 09:00","answer":{"field_key":"rest_start_time","type":"datetime","label":"2026-06-13 09:00","value":"2026-06-13 09:00:00"}}'
+```
+
+地址字段：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-field","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"上海市浦东新区张江路88号","answer":{"field_key":"go_out_addr","type":"address","label":"上海市浦东新区张江路88号","value":{"area":["上海市","浦东新区"],"detail":"张江路88号"}}}'
+```
+
+### 9.8 演示审批人选择和提交
+
+必填字段收集完并通过校验后，后端会调用 `/api/approval/getNodes`。如果流程节点需要发起人选择办理人，会返回：
+
+```json
+{
+  "status": "awaiting_assignee_selection",
+  "awaiting_input": {
+    "field_key": "__approval_assignee__:12204",
+    "label": "办理审批人",
+    "type": "user_select",
+    "options": [
+      { "label": "张三", "value": "864", "avatar": null }
+    ],
+    "multiple": false
+  }
+}
+```
+
+前端选择后回传：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-field","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"张三","answer":{"field_key":"__approval_assignee__:12204","type":"user_select","label":"张三","value":"864"}}'
+```
+
+随后进入 `awaiting_confirmation`，用户明确回复：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"S-show-field","user_id":"863","uid":"863","authorization":"Bearer your_token_here","message":"确认提交"}'
+```
+
+提交时后端会组装 `/api/approval/add` 需要的 `form_data` 和 `node_list`，并把已选办理人写入对应节点的 `handle_uids`、`handle_uids_info`。
+
 ## 10. 查看流程图
 
 业务会话级流程图：
@@ -637,7 +873,7 @@ docs/approval_graph.mmd
 当前预期：
 
 ```text
-36 passed
+56 passed
 ```
 
 ## 12. 后续接真实 CRM
@@ -719,16 +955,22 @@ classify
 decision_review
 collect
 validate
+assignee
 preview
 submit
+already_submitted
 cancel
 clarify
+general_chat
 ```
 
 职责：
 
 - 管理每轮聊天审批的状态流转。
+- 普通聊天和帮助问句走 `general_chat`，不会误触发模板搜索。
+- 明确审批意图才进入模板搜索、字段收集和审批提交链路。
 - 控制提交前必须预览和确认。
+- 控制需要发起人选择办理人/审批人时暂停，并返回 `user_select`。
 - 控制有界复核，避免无限思考。
 
 ### 13.4 模板驱动字段收集
@@ -743,6 +985,8 @@ app/mock_data/approval_templates.py
 工作方式：
 
 - 模板支持 `category`、`group_name`、`aliases`、`visibility`、`enabled`、`is_common`、`sort_order` 等元数据。
+- 远程模板搜索只在明确审批意图或模板关键词时触发，普通问候和帮助问句走通用聊天。
+- 多个远程模板命中时返回 `awaiting_input.type=single_select`，由前端选择模板后继续收集字段。
 - 审批类型先按模板标题、分类、分组、别名、关键词做候选筛选。
 - 规则识别和 LLM 识别都只处理候选模板，避免真实审批库过大导致 prompt 膨胀。
 - 审批类型由模板的 `intent_keywords`、`aliases`、枚举选项等信息匹配。
@@ -768,10 +1012,21 @@ app/services/crm_service.py
 ```text
 get_user_context
 list_available_templates
+search_available_templates
 get_template_detail
 validate_approval
+get_approval_nodes
 submit_approval
 ```
+
+真实 ERP 模式下当前调用：
+
+- `/api/approval/list`：按关键词查模板。
+- `/api/field/formFields`：按 `approval_type_{id}` 查表单字段。
+- `/api/attendance/getHolidayRuleByUser`：按字段映射拉请假类型等动态单选。
+- `/api/Company/getRelatedList`：按字段映射拉关联业务对象。
+- `/api/approval/getNodes`：字段完整后获取审批流程节点。
+- `/api/approval/add`：确认提交后创建审批。
 
 ### 13.6 会话状态
 

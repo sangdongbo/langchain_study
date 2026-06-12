@@ -23,9 +23,27 @@ docs/session_flow.mmd
 接口返回里的 `trace` 可以和图对照看，例如：
 
 ```json
-["load_context", "classify", "collect", "validate", "preview"]
+["load_context", "classify", "decision_review", "collect", "validate", "assignee", "preview"]
 ```
 
-这表示本轮从加载上下文开始，识别审批类型，收集字段，预校验，最后生成预览。
+这表示本轮从加载上下文开始，识别审批类型，经过有界复核，收集字段，预校验，检查审批流程节点，最后生成预览。
 
-流程里有 `decision_review` 节点时，表示进入了有界决策复核。它用于后续接入模型复核，但必须有最大次数限制，避免无限重复思考。
+常见 trace：
+
+| trace 片段 | 含义 |
+|---|---|
+| `["load_context", "classify", "decision_review", "general_chat"]` | 普通聊天或帮助问句，不进入审批模板搜索 |
+| `["load_context", "classify", "decision_review", "clarify"]` | 需要用户澄清，比如多个模板待选择 |
+| `["load_context", "classify", "decision_review", "collect"]` | 已进入审批字段收集 |
+| `["load_context", "classify", "decision_review", "collect", "validate", "assignee"]` | 字段完整后获取审批节点，需要选择办理人/审批人 |
+| `["load_context", "classify", "decision_review", "collect", "validate", "assignee", "preview"]` | 已生成提交前预览 |
+| `["load_context", "classify", "decision_review", "submit"]` | 用户明确确认后提交审批 |
+
+流程里有 `decision_review` 节点时，表示进入了有界决策复核。它用于接入模型复核，但必须有最大次数限制，避免无限重复思考。
+
+前端联调时重点看响应里的：
+
+- `awaiting_input`：当前应该渲染的控件。
+- `answer`：下一轮请求里回传的结构化值。
+- `awaiting_field_key` / `awaiting_field_label`：当前字段 key 和展示名。
+- `trace`：本轮 graph 走过的节点。

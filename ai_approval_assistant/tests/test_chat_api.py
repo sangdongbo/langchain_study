@@ -183,6 +183,124 @@ def test_remote_greeting_uses_general_chat_without_template_search(monkeypatch) 
     assert "general_chat" in body["trace"]
 
 
+def test_general_chat_response_clears_structured_approval_state(monkeypatch) -> None:
+    session_state_service.clear("S-general-clears-state")
+    monkeypatch.setattr(model_service, "chat", lambda message: "你好")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-general-clears-state",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "你好",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approval_type"] is None
+    assert body["collected_slots"] == {}
+    assert body["collected_values"] == {}
+    assert body["preview"] is None
+    assert body["awaiting_field"] is None
+    state = session_state_service.load("S-general-clears-state", "863")
+    assert state["approval_nodes"] == []
+    assert state["selected_assignees"] == {}
+
+
+def test_remote_help_question_uses_general_chat_without_template_search(monkeypatch) -> None:
+    session_state_service.clear("S-remote-help-question")
+    searched_keywords: list[str] = []
+    monkeypatch.setattr(
+        model_service,
+        "chat",
+        lambda message: "可以从审批中心发起，也可以直接告诉我审批类型。",
+    )
+
+    def fake_search_available_templates(user, keyword):
+        searched_keywords.append(keyword)
+        return []
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        fake_search_available_templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-help-question",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "怎么新增审批",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert searched_keywords == []
+    assert body["status"] == "idle"
+    assert body["approval_type"] is None
+    assert body["assistant_message"] == "可以从审批中心发起，也可以直接告诉我审批类型。"
+    assert "general_chat" in body["trace"]
+
+
+def test_remote_approval_intent_searches_templates(monkeypatch) -> None:
+    session_state_service.clear("S-remote-approval-intent-search")
+    searched_keywords: list[str] = []
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_content",
+                "label": "请假事由",
+                "type": "text",
+                "required": True,
+                "question": "请输入请假事由",
+            }
+        ],
+    )
+
+    def fake_search_available_templates(user, keyword):
+        searched_keywords.append(keyword)
+        return [template]
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        fake_search_available_templates,
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        lambda approval_type, user: template,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-approval-intent-search",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert searched_keywords == ["我要请假"]
+    assert body["approval_type"] == "remote_6408"
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "rest_content"
+
+
 def test_collecting_flow_can_cancel_without_submit() -> None:
     response = client.post(
         "/api/ai-approval/chat",
@@ -446,6 +564,155 @@ def test_remote_keyword_search_with_multiple_templates_asks_user_to_choose(monke
     assert body["status"] == "collecting"
     assert body["awaiting_field"] == "开始时间"
     assert body["awaiting_field_key"] == "go_out_start_time"
+
+
+def test_remote_template_choice_can_be_cancelled(monkeypatch) -> None:
+    session_state_service.clear("S-remote-template-choice-cancel")
+    templates = [
+        ApprovalTemplate(
+            template_id="5911",
+            approval_type="remote_5911",
+            title="测试外出",
+            category="zh-测试",
+            aliases=["测试外出", "外出"],
+            intent_keywords=["测试外出", "外出"],
+            fields=[
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        ),
+        ApprovalTemplate(
+            template_id="5912",
+            approval_type="remote_5912",
+            title="测试外出备用",
+            category="zh-测试",
+            aliases=["测试外出备用", "外出"],
+            intent_keywords=["测试外出备用", "外出"],
+            fields=[
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        ),
+    ]
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        lambda user, keyword: templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice-cancel",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "测试外出",
+        },
+    )
+    assert response.json()["awaiting_input"]["field_key"] == "__approval_template__"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice-cancel",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "取消",
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "cancelled"
+    assert body["approval_type"] is None
+    assert body["awaiting_input"] is None
+    assert "没有提交" in body["assistant_message"]
+    assert "cancel" in body["trace"]
+
+
+def test_remote_template_choice_reprompts_for_help_question(monkeypatch) -> None:
+    session_state_service.clear("S-remote-template-choice-help")
+    templates = [
+        ApprovalTemplate(
+            template_id="5911",
+            approval_type="remote_5911",
+            title="测试外出",
+            category="zh-测试",
+            aliases=["测试外出", "外出"],
+            intent_keywords=["测试外出", "外出"],
+            fields=[
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        ),
+        ApprovalTemplate(
+            template_id="5912",
+            approval_type="remote_5912",
+            title="测试外出备用",
+            category="zh-测试",
+            aliases=["测试外出备用", "外出"],
+            intent_keywords=["测试外出备用", "外出"],
+            fields=[
+                {
+                    "name": "go_out_start_time",
+                    "label": "开始时间",
+                    "type": "date",
+                    "required": True,
+                    "question": "请选择开始时间",
+                }
+            ],
+        ),
+    ]
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        lambda user, keyword: templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice-help",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "测试外出",
+        },
+    )
+    assert response.json()["awaiting_input"]["field_key"] == "__approval_template__"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-choice-help",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "怎么选",
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "idle"
+    assert body["approval_type"] is None
+    assert body["awaiting_input"]["field_key"] == "__approval_template__"
+    assert "找到多个审批模板" in body["assistant_message"]
+    assert "general_chat" not in body["trace"]
 
 
 def test_remote_template_load_error_is_not_rewritten_as_empty_template_message(monkeypatch) -> None:

@@ -183,6 +183,12 @@ def classify_node(state: ApprovalState) -> ApprovalState:
         "awaiting_assignee_selection",
     } and is_cancel_message(text):
         return {**state, "trace": trace, "_route": "cancel"}
+    if (
+        state.get("_template_candidates")
+        and not state.get("approval_type")
+        and is_cancel_message(text)
+    ):
+        return {**state, "trace": trace, "_route": "cancel"}
     if status == "awaiting_assignee_selection":
         return {**state, "trace": trace, "_route": "assignee"}
     if status == "awaiting_confirmation":
@@ -222,6 +228,8 @@ def classify_node(state: ApprovalState) -> ApprovalState:
             "trace": trace,
             "_route": "clarify",
         }
+    if status == "idle" and _looks_like_general_question(text):
+        return {**state, "trace": trace, "_route": "general_chat"}
     if _is_remote_keyword_search_result(state):
         if len(available_templates) == 1:
             return {
