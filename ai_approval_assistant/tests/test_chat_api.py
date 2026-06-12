@@ -144,6 +144,45 @@ def test_greeting_uses_general_chat_instead_of_approval_clarification(monkeypatc
     assert "general_chat" in body["trace"]
 
 
+def test_remote_greeting_uses_general_chat_without_template_search(monkeypatch) -> None:
+    session_state_service.clear("S-remote-general-greeting")
+    searched_keywords: list[str] = []
+    monkeypatch.setattr(
+        model_service,
+        "chat",
+        lambda message: "你好，我可以帮你处理审批，也可以回答普通问题。",
+    )
+
+    def fake_search_available_templates(user, keyword):
+        searched_keywords.append(keyword)
+        return []
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        fake_search_available_templates,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-general-greeting",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "你好",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert searched_keywords == []
+    assert body["status"] == "idle"
+    assert body["approval_type"] is None
+    assert body["assistant_message"] == "你好，我可以帮你处理审批，也可以回答普通问题。"
+    assert "没有找到" not in body["assistant_message"]
+    assert "general_chat" in body["trace"]
+
+
 def test_collecting_flow_can_cancel_without_submit() -> None:
     response = client.post(
         "/api/ai-approval/chat",

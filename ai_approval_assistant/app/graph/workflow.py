@@ -135,6 +135,9 @@ def load_context_node(state: ApprovalState) -> ApprovalState:
         if state.get("_template_candidates") and not state.get("approval_type"):
             templates = _template_candidates_from_state(state)
             search_keyword = state.get("_template_search_keyword", "")
+        elif _should_skip_remote_templates_for_general_chat(state, user):
+            templates = []
+            search_keyword = ""
         elif _should_keyword_search_templates(state, user):
             search_keyword = state.get("user_message", "").strip()
             templates = crm_approval_service.search_available_templates(
@@ -674,9 +677,42 @@ def _should_keyword_search_templates(
         return False
     if state.get("status", "idle") != "idle":
         return False
-    if not state.get("user_message", "").strip():
+    message = state.get("user_message", "").strip()
+    if not message:
+        return False
+    if not _looks_like_remote_template_search(message):
         return False
     return _uses_default_search_method()
+
+
+def _should_skip_remote_templates_for_general_chat(
+    state: ApprovalState, user: UserContext
+) -> bool:
+    """远程凭证下，明显普通聊天不预拉 ERP 模板，直接进入通用对话。"""
+    if not user.authorization or not user.uid:
+        return False
+    if state.get("approval_type") or state.get("_template_candidates"):
+        return False
+    if state.get("status", "idle") != "idle":
+        return False
+    message = state.get("user_message", "").strip()
+    if not message:
+        return False
+    return not _looks_like_remote_template_search(message)
+
+
+def _looks_like_remote_template_search(message: str) -> bool:
+    """避免把普通聊天问候误当作 ERP 模板关键词。"""
+    if _looks_like_general_question(message):
+        return False
+    if has_approval_intent(message, []):
+        return True
+    return any((marker in message for marker in ("测试", "zh-", "ZH-", "审批编辑")))
+
+
+def _looks_like_general_question(message: str) -> bool:
+    """识别帮助类/问答类输入，避免误触发发起审批。"""
+    return any((marker in message for marker in ("怎么", "如何", "什么", "哪些", "？", "?")))
 
 
 def _uses_default_search_method() -> bool:
