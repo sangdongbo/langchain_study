@@ -285,26 +285,49 @@ Hybrid Retrieve: dense search + sparse search + reranking
 
 `bge-large` 是 BAAI BGE 系列中的常见中文/多语言文本向量模型，适合语义检索、问答、聚类等任务。`BM25` 是经典信息检索排序算法，基于词频、逆文档频率和文档长度归一化衡量 query 与文档的关键词匹配程度。
 
-### DeepSeek 和 Embedding 的分工
+### 阿里云百炼大模型和 Embedding 的分工
 
-`OpenAIEmbeddings` 需要配置 `OPENAI_API_KEY`，因为它调用的是 OpenAI 的 embedding 接口。DeepSeek 的 OpenAI 兼容接口主要用于 Chat / Completion 生成回答；截至本文整理时，DeepSeek 官方 API 文档没有提供独立 embedding 模型。因此 RAG 里不要把 `OpenAIEmbeddings` 直接改成 DeepSeek。
+RAG 里要区分两类模型：
 
-推荐分工：
+- **Embedding 模型**：把文档和问题转成向量，用于 Milvus 检索。
+- **Chat / LLM 模型**：拿到检索上下文后生成最终答案。
 
-| 环节 | 推荐选择 | 是否需要 DeepSeek Key |
+当前项目可以统一使用阿里云百炼：
+
+| 环节 | 推荐选择 | `.env` 配置 |
 | --- | --- | --- |
-| 文档向量化 | BGE、Qwen Embedding、Jina、公司统一 embedding 服务 | 不需要 |
-| 查询向量化 | 与文档相同的 embedding 模型 | 不需要 |
-| 关键词检索 | Milvus BM25 Function / sparse 字段 | 不需要 |
-| 答案生成 | DeepSeek Chat，例如 `ChatDeepSeek` | 需要 `DEEPSEEK_API_KEY` |
+| 文档向量化 | 阿里云百炼 `text-embedding-v4` | `DASHSCOPE_API_KEY`、`DASHSCOPE_EMBEDDING_MODEL`、`DASHSCOPE_EMBEDDING_DIMENSIONS` |
+| 查询向量化 | 与文档相同的 `text-embedding-v4` | 同上 |
+| 关键词检索 | Milvus BM25 Function / sparse 字段 | 不需要额外 LLM Key |
+| 答案生成 | 阿里云百炼 OpenAI-compatible Chat 模型 | `OPENAI_BASE_URL`、`OPENAI_MODEL`、`DASHSCOPE_API_KEY` 或兼容网关 Key |
 
-也就是说，典型本地学习链路可以是：
+典型本地学习链路：
 
 ```text
-本地 embedding 模型 -> Milvus 检索 -> DeepSeek 根据检索上下文生成答案
+阿里云百炼 text-embedding-v4 -> Milvus dense/sparse 检索 -> 阿里云百炼大模型根据上下文生成答案
 ```
 
-如果公司内部网关额外提供 OpenAI-compatible embedding 接口，可以继续用 `OpenAIEmbeddings(base_url=..., api_key=..., model=...)`，但要确认该网关真的支持 `/embeddings`，不能只看它支持 Chat。
+如果使用 `langchain_openai`，通常是：
+
+```python
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-v4",
+    api_key=DASHSCOPE_API_KEY,
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    dimensions=1024,
+    check_embedding_ctx_length=False,
+)
+
+llm = ChatOpenAI(
+    model=OPENAI_MODEL,
+    api_key=DASHSCOPE_API_KEY,
+    base_url=OPENAI_BASE_URL,
+)
+```
+
+注意：embedding 接口和 chat 接口虽然都可以走 OpenAI-compatible SDK，但它们不是同一个模型能力。`OpenAIEmbeddings` 只能用于向量化，`ChatOpenAI` 才用于生成答案。
 
 如果从 Hugging Face 下载模型较慢，可以使用镜像或提前下载到本地目录。常见命令：
 

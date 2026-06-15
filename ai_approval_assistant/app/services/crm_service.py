@@ -2,6 +2,8 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime
 import logging
+import os
+import time
 from typing import Any
 import httpx
 from app.mock_data.approval_templates import (
@@ -28,6 +30,9 @@ DYNAMIC_OPTION_FIELD_SOURCES = {
     "rest_holiday_rule_id": "holiday_rule",
 }
 
+DEFAULT_TEMPLATE_CACHE_TTL_SECONDS = 300
+DEFAULT_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS = 300
+
 
 class CrmApprovalService:
     """CRM 适配器边界。
@@ -45,9 +50,26 @@ class CrmApprovalService:
         add_approval_url: str | None = None,
         related_list_url: str | None = None,
         holiday_rule_url: str | None = None,
+        cache_ttl_seconds: int | None = None,
+        dynamic_options_cache_ttl_seconds: int | None = None,
+        clock: Any | None = None,
     ) -> None:
         """初始化 CRM 适配器地址、HTTP 客户端和模拟提交缓存。"""
         self._submitted_by_key: dict[str, SubmitResult] = {}
+        self._remote_template_by_user_type: dict[tuple[str, str], dict[str, Any]] = {}
+        self._remote_template_detail_by_user_type: dict[tuple[str, str], dict[str, Any]] = {}
+        self._dynamic_options_cache: dict[tuple[Any, ...], dict[str, Any]] = {}
+        self._template_cache_ttl_seconds = (
+            cache_ttl_seconds
+            if cache_ttl_seconds is not None
+            else _template_cache_ttl_from_env()
+        )
+        self._dynamic_options_cache_ttl_seconds = (
+            dynamic_options_cache_ttl_seconds
+            if dynamic_options_cache_ttl_seconds is not None
+            else _dynamic_options_cache_ttl_from_env()
+        )
+        self._clock = clock or time.monotonic
         self._http_client = http_client or httpx.Client(timeout=10)
         endpoint_config = load_crm_endpoint_config()
         self._approval_list_url = approval_list_url or endpoint_config.approval_list_url
@@ -93,27 +115,47 @@ class CrmApprovalService:
         """从 ERP 审批列表接口获取模板分组。"""
         body = {"keyword": keyword}
         headers = _crm_headers(user)
-        _log_crm_request("approval.list", self._approval_list_url, headers, body)
-        response = self._http_client.post(
-            self._approval_list_url,
-            headers=headers,
-            json=body,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        _log_crm_response("approval.list", payload)
+        payload = self._post_crm_json("approval.list", self._approval_list_url, headers, body)
         if payload.get("code") != 200:
             raise ValueError(f"approval list returned code {payload.get('code')}")
-        return _templates_from_remote_payload(payload)
+        templates = _templates_from_remote_payload(payload)
+        for template in templates:
+            self._set_remote_template_cache(
+                self._remote_template_by_user_type,
+                _remote_template_cache_key(user, template.approval_type),
+                template,
+            )
+        return templates
 
     def get_template_detail(
         self, approval_type: str, user: UserContext
     ) -> ApprovalTemplate:
         """返回完整模板详情；远程模板会按需补充表单字段。"""
         if approval_type.startswith("remote_"):
-            for template in self.list_available_templates(user):
-                if template.approval_type == approval_type:
-                    return self._with_remote_form_fields(template, user)
+            cache_key = _remote_template_cache_key(user, approval_type)
+            detail = self._get_remote_template_cache(
+                self._remote_template_detail_by_user_type,
+                cache_key,
+            )
+            if detail is not None:
+                return detail
+            template = self._get_remote_template_cache(
+                self._remote_template_by_user_type,
+                cache_key,
+            )
+            if template is None:
+                for item in self.list_available_templates(user):
+                    if item.approval_type == approval_type:
+                        template = item
+                        break
+            if template is not None:
+                detail = self._with_remote_form_fields(template, user)
+                self._set_remote_template_cache(
+                    self._remote_template_detail_by_user_type,
+                    cache_key,
+                    detail,
+                )
+                return detail
         template = APPROVAL_TEMPLATES.get(approval_type)
         if template is None:
             raise ValueError(f"Unknown approval_type: {approval_type}")
@@ -128,15 +170,9 @@ class CrmApprovalService:
         try:
             body = {"field_form": f"approval_type_{template.template_id}"}
             headers = _crm_headers(user)
-            _log_crm_request("field.formFields", self._form_fields_url, headers, body)
-            response = self._http_client.post(
-                self._form_fields_url,
-                headers=headers,
-                json=body,
+            payload = self._post_crm_json(
+                "field.formFields", self._form_fields_url, headers, body
             )
-            response.raise_for_status()
-            payload = response.json()
-            _log_crm_response("field.formFields", payload)
             if payload.get("code") != 200:
                 raise ValueError(f"form fields returned code {payload.get('code')}")
             fields = _fields_from_remote_payload(payload, self, user)
@@ -207,15 +243,7 @@ class CrmApprovalService:
             "form_value": form_value,
         }
         headers = _crm_headers(user)
-        _log_crm_request("approval.getNodes", self._get_nodes_url, headers, body)
-        response = self._http_client.post(
-            self._get_nodes_url,
-            headers=headers,
-            json=body,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        _log_crm_response("approval.getNodes", payload)
+        payload = self._post_crm_json("approval.getNodes", self._get_nodes_url, headers, body)
         if payload.get("code") != 200:
             raise ValueError(f"approval nodes returned code {payload.get('code')}")
         return _nodes_from_remote_payload(payload)
@@ -231,6 +259,17 @@ class CrmApprovalService:
         """从 ERP 拉取关联业务对象列表，例如关联订单。"""
         if not user.authorization or not user.uid:
             return []
+        cache_key = _dynamic_options_cache_key(
+            user,
+            "related_list",
+            relate_type,
+            keyword,
+            page,
+            page_size,
+        )
+        cached = self._get_dynamic_options_cache(cache_key)
+        if cached is not None:
+            return cached
         body = {
             "relate_type": relate_type,
             "page": page,
@@ -242,15 +281,9 @@ class CrmApprovalService:
             "type": "",
         }
         headers = _crm_headers(user)
-        _log_crm_request("company.getRelatedList", self._related_list_url, headers, body)
-        response = self._http_client.post(
-            self._related_list_url,
-            headers=headers,
-            json=body,
+        payload = self._post_crm_json(
+            "company.getRelatedList", self._related_list_url, headers, body
         )
-        response.raise_for_status()
-        payload = response.json()
-        _log_crm_response("company.getRelatedList", payload)
         if payload.get("code") != 200:
             raise ValueError(f"related list returned code {payload.get('code')}")
         data = payload.get("data")
@@ -258,27 +291,29 @@ class CrmApprovalService:
             items = data.get("data") or data.get("list") or data.get("items") or []
         else:
             items = data or []
-        return [item for item in items if isinstance(item, dict)]
+        result = [item for item in items if isinstance(item, dict)]
+        self._set_dynamic_options_cache(cache_key, result)
+        return result
 
     def get_holiday_rules(self, user: UserContext) -> list[dict[str, Any]]:
         """获取当前用户可用的假期类型选项。"""
         if not user.authorization or not user.uid:
             return []
+        cache_key = _dynamic_options_cache_key(user, "holiday_rule")
+        cached = self._get_dynamic_options_cache(cache_key)
+        if cached is not None:
+            return cached
         body: dict[str, Any] = {}
         headers = _crm_headers(user)
-        _log_crm_request("attendance.getHolidayRuleByUser", self._holiday_rule_url, headers, body)
-        response = self._http_client.post(
-            self._holiday_rule_url,
-            headers=headers,
-            json=body,
+        payload = self._post_crm_json(
+            "attendance.getHolidayRuleByUser", self._holiday_rule_url, headers, body
         )
-        response.raise_for_status()
-        payload = response.json()
-        _log_crm_response("attendance.getHolidayRuleByUser", payload)
         if payload.get("code") != 200:
             raise ValueError(f"holiday rule returned code {payload.get('code')}")
         data = payload.get("data") or []
-        return [item for item in data if isinstance(item, dict)]
+        result = [item for item in data if isinstance(item, dict)]
+        self._set_dynamic_options_cache(cache_key, result)
+        return result
 
     def submit_approval(
         self,
@@ -328,15 +363,7 @@ class CrmApprovalService:
             "form_data": _remote_form_data(slots),
         }
         headers = _crm_headers(user)
-        _log_crm_request("approval.add", self._add_approval_url, headers, body)
-        response = self._http_client.post(
-            self._add_approval_url,
-            headers=headers,
-            json=body,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        _log_crm_response("approval.add", payload)
+        payload = self._post_crm_json("approval.add", self._add_approval_url, headers, body)
         if payload.get("code") != 200:
             raise ValueError(f"approval add returned code {payload.get('code')}")
         data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
@@ -348,6 +375,88 @@ class CrmApprovalService:
             idempotency_key=None,
         )
 
+    def _set_remote_template_cache(
+        self,
+        cache: dict[tuple[str, str], dict[str, Any]],
+        key: tuple[str, str],
+        template: ApprovalTemplate,
+    ) -> None:
+        """写入带过期时间的远程模板缓存。"""
+        if self._template_cache_ttl_seconds <= 0:
+            return
+        cache[key] = {
+            "expires_at": self._clock() + self._template_cache_ttl_seconds,
+            "template": template,
+        }
+
+    def _get_remote_template_cache(
+        self,
+        cache: dict[tuple[str, str], dict[str, Any]],
+        key: tuple[str, str],
+    ) -> ApprovalTemplate | None:
+        """读取远程模板缓存，过期则删除并返回空。"""
+        item = cache.get(key)
+        if not item:
+            return None
+        if item["expires_at"] <= self._clock():
+            cache.pop(key, None)
+            return None
+        return item["template"]
+
+    def _set_dynamic_options_cache(
+        self, key: tuple[Any, ...], value: list[dict[str, Any]]
+    ) -> None:
+        """写入动态下拉缓存。"""
+        if self._dynamic_options_cache_ttl_seconds <= 0:
+            return
+        self._dynamic_options_cache[key] = {
+            "expires_at": self._clock() + self._dynamic_options_cache_ttl_seconds,
+            "value": deepcopy(value),
+        }
+
+    def _get_dynamic_options_cache(
+        self, key: tuple[Any, ...]
+    ) -> list[dict[str, Any]] | None:
+        """读取动态下拉缓存，过期则删除。"""
+        item = self._dynamic_options_cache.get(key)
+        if not item:
+            return None
+        if item["expires_at"] <= self._clock():
+            self._dynamic_options_cache.pop(key, None)
+            return None
+        return deepcopy(item["value"])
+
+    def _post_crm_json(
+        self,
+        event: str,
+        url: str,
+        headers: dict[str, str],
+        body: dict[str, Any],
+    ) -> dict[str, Any]:
+        """统一调用 CRM POST JSON 接口并记录耗时摘要。"""
+        started_at = self._clock()
+        status_code: int | None = None
+        try:
+            _log_crm_request(event, url, headers, body)
+            response = self._http_client.post(url, headers=headers, json=body)
+            status_code = response.status_code
+            response.raise_for_status()
+            payload = response.json()
+            _log_crm_response(event, payload)
+            _log_crm_timing(event, url, started_at, self._clock(), True, status_code)
+            return payload
+        except Exception as exc:
+            _log_crm_timing(
+                event,
+                url,
+                started_at,
+                self._clock(),
+                False,
+                status_code,
+                str(exc),
+            )
+            raise
+
 
 def _approval_node(approval_type: str, slots: dict[str, str]) -> str:
     """根据模板类型和字段值选择模拟审批节点。"""
@@ -358,6 +467,41 @@ def _approval_node(approval_type: str, slots: dict[str, str]) -> str:
     if approval_type == "seal":
         return "行政负责人审批"
     return "直属主管审批"
+
+
+def _remote_template_cache_key(
+    user: UserContext,
+    approval_type: str,
+) -> tuple[str, str]:
+    """构建远程模板缓存 key，避免不同用户权限下互相复用。"""
+    return (user.uid or user.user_id, approval_type)
+
+
+def _dynamic_options_cache_key(user: UserContext, source: str, *parts: Any) -> tuple[Any, ...]:
+    """构建动态选项缓存 key，避免不同用户权限下互相复用。"""
+    return (user.uid or user.user_id, source, *parts)
+
+
+def _template_cache_ttl_from_env() -> int:
+    """读取远程模板缓存 TTL。0 表示禁用缓存。"""
+    raw_value = os.getenv("AI_APPROVAL_TEMPLATE_CACHE_TTL_SECONDS", "")
+    if not raw_value:
+        return DEFAULT_TEMPLATE_CACHE_TTL_SECONDS
+    try:
+        return max(0, int(raw_value))
+    except ValueError:
+        return DEFAULT_TEMPLATE_CACHE_TTL_SECONDS
+
+
+def _dynamic_options_cache_ttl_from_env() -> int:
+    """读取动态下拉缓存 TTL。0 表示禁用缓存。"""
+    raw_value = os.getenv("AI_APPROVAL_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS", "")
+    if not raw_value:
+        return DEFAULT_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS
+    try:
+        return max(0, int(raw_value))
+    except ValueError:
+        return DEFAULT_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS
 
 
 def _crm_headers(user: UserContext) -> dict[str, str]:
@@ -401,6 +545,27 @@ def _log_crm_response(event: str, payload: dict[str, Any]) -> None:
     else:
         summary["data"] = data
     write_debug_log(f"crm.{event}.response", summary)
+
+
+def _log_crm_timing(
+    event: str,
+    url: str,
+    started_at: float,
+    finished_at: float,
+    success: bool,
+    status_code: int | None,
+    error: str | None = None,
+) -> None:
+    """记录 CRM 接口耗时摘要。"""
+    payload: dict[str, Any] = {
+        "url": url,
+        "duration_ms": max(0, int((finished_at - started_at) * 1000)),
+        "success": success,
+        "status_code": status_code,
+    }
+    if error:
+        payload["error"] = error[:300]
+    write_debug_log(f"crm.{event}.timing", payload)
 
 
 def _templates_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalTemplate]:
@@ -479,6 +644,9 @@ def _fields_from_remote_payload(
         extend = item.get("extend") if isinstance(item.get("extend"), dict) else {}
         option_values = _remote_option_values_for_field(item, service, user)
         options = [str(option["label"]) for option in option_values]
+        parent_group = (
+            item.get("_parent_group") if isinstance(item.get("_parent_group"), dict) else {}
+        )
         mapped_fields.append(
             {
                 "name": field_key,
@@ -488,6 +656,9 @@ def _fields_from_remote_payload(
                 "required": required,
                 "options": options,
                 "option_values": option_values,
+                "group_key": parent_group.get("group_key") or None,
+                "group_label": parent_group.get("group_label") or None,
+                "group_type": parent_group.get("group_type") or None,
                 "aliases": _remote_field_aliases(field_name),
                 "extract_patterns": [],
                 "question": _remote_field_question(field_name, extend, options),
@@ -626,7 +797,9 @@ def _assignees_from_remote(items: list[Any]) -> list[ApprovalAssignee]:
     return assignees
 
 
-def _flatten_remote_fields(items: list[Any]) -> list[dict[str, Any]]:
+def _flatten_remote_fields(
+    items: list[Any], parent_group: dict[str, str] | None = None
+) -> list[dict[str, Any]]:
     """将嵌套 ERP 控件组展开为排序后的字段列表。"""
     fields: list[dict[str, Any]] = []
     for item in sorted(
@@ -635,10 +808,25 @@ def _flatten_remote_fields(items: list[Any]) -> list[dict[str, Any]]:
     ):
         children = item.get("_child") or []
         if isinstance(children, list) and children:
-            fields.extend(_flatten_remote_fields(children))
+            group = {
+                "group_key": str(item.get("field_key") or item.get("field_id") or "").strip(),
+                "group_label": str(item.get("field_name") or "").strip(),
+                "group_type": _remote_group_type(str(item.get("field_type") or "")),
+            }
+            fields.extend(_flatten_remote_fields(children, group))
         else:
-            fields.append(item)
+            field = deepcopy(item)
+            if parent_group:
+                field["_parent_group"] = parent_group
+            fields.append(field)
     return fields
+
+
+def _remote_group_type(field_type: str) -> str:
+    """将 ERP 父控件类型映射为内部复杂字段分组类型。"""
+    if field_type in {"detail", "detail_table", "table"}:
+        return "detail_table"
+    return "complex_group"
 
 
 def _map_remote_field_type(field_type: str) -> str | None:

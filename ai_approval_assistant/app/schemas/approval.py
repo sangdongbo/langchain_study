@@ -28,6 +28,9 @@ class ApprovalField(BaseModel):
     required: bool = True
     options: list[str] = Field(default_factory=list)
     option_values: list[dict[str, Any]] = Field(default_factory=list)
+    group_key: str | None = None
+    group_label: str | None = None
+    group_type: str | None = None
     aliases: list[str] = Field(default_factory=list)
     extract_patterns: list[str] = Field(default_factory=list)
     question: str

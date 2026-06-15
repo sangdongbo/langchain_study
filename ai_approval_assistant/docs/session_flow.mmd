@@ -4,7 +4,7 @@ config:
     curve: linear
 ---
 graph TD
-    start([用户发送消息]) --> load[加载 session 和用户上下文]
+    start([用户发送消息]) --> load[从 Redis/内存加载 session 和用户上下文]
     load --> remote_gate{远程凭证 + 首轮 idle?}
 
     remote_gate -->|普通问候/帮助问句| skip_templates[跳过 ERP 模板搜索]
@@ -12,7 +12,8 @@ graph TD
     remote_gate -->|本地 mock 或已有流程| load_templates[加载可用模板]
 
     skip_templates --> classify{识别意图和当前状态}
-    search_templates --> classify
+    search_templates --> template_cache[写入模板/字段 TTL 缓存]
+    template_cache --> classify
     load_templates --> classify
 
     classify -->|普通聊天/帮助问答| review_general[decision_review]
@@ -32,7 +33,8 @@ graph TD
 
     classify -->|新审批/继续收集/修改字段| review_collect[decision_review]
     review_collect --> collect[collect 收集必填字段和 answer]
-    collect --> missing{是否还有缺失字段?}
+    collect --> dynamic_options[按需读取动态下拉 TTL 缓存]
+    dynamic_options --> missing{是否还有缺失字段?}
     missing -->|有| ask_field[返回 awaiting_input 或字段追问]
     ask_field --> wait_field([等待用户填写字段])
     wait_field --> start
@@ -57,4 +59,5 @@ graph TD
     submit_guard -->|否| clarify_confirm[要求先补全并确认预览]
     clarify_confirm --> wait_field
     submit_guard -->|是| submit[调用 /api/approval/add]
-    submit --> submitted([返回 request_id])
+    submit --> save_state[保存 session TTL]
+    save_state --> submitted([返回 request_id])

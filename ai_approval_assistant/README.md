@@ -321,6 +321,48 @@ AI_APPROVAL_GET_NODES_URL=http://localhost:8002/api/approval/getNodes
 AI_APPROVAL_ADD_URL=http://localhost:8002/api/approval/add
 ```
 
+远程模板和字段详情会短时间缓存，减少同一会话反复调用 `/api/approval/list` 和 `/api/field/formFields`。默认 TTL 是 300 秒，模板更新后最迟会在 TTL 到期后重新拉取：
+
+```text
+AI_APPROVAL_TEMPLATE_CACHE_TTL_SECONDS=300
+```
+
+动态下拉也会按用户和请求参数短时间缓存，例如请假类型 `/api/attendance/getHolidayRuleByUser`、关联订单 `/api/Company/getRelatedList`。默认 TTL 是 300 秒：
+
+```text
+AI_APPROVAL_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS=300
+```
+
+设置为 0 可以关闭动态下拉缓存：
+
+```text
+AI_APPROVAL_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS=0
+```
+
+如果调试模板配置或希望每次都实时读取，可以设置为 0 禁用缓存：
+
+```text
+AI_APPROVAL_TEMPLATE_CACHE_TTL_SECONDS=0
+```
+
+会话状态默认支持 Redis 持久化，服务重启或多实例部署时可以继续审批中间状态：
+
+```text
+AI_APPROVAL_SESSION_BACKEND=redis
+AI_APPROVAL_SESSION_TTL_SECONDS=7200
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+REDIS_PREFIX=lanerp20_local_
+```
+
+如果本地没有 Redis，或需要纯内存演示：
+
+```text
+AI_APPROVAL_SESSION_BACKEND=memory
+```
+
 响应核心字段：
 
 | 字段 | 说明 |
@@ -448,6 +490,33 @@ AI_APPROVAL_ADD_URL=http://localhost:8002/api/approval/add
 ```
 
 前端建议只根据 `awaiting_input` 渲染控件，不要解析 `assistant_message`。当 `awaiting_input.options` 为空时，应给出“暂无可选项/请稍后重试”的提示。
+
+### 7.4 审批中途问答、继续和修改字段
+
+审批流程进行中，如果用户问普通问题，例如“这个审批能撤回吗？”，后端会走 `general_chat` 回答问题，但不会清空当前审批状态。响应仍保持当前 `status`、`approval_type`、`awaiting_input`，并在 `assistant_message` 后附加当前等待项，例如：
+
+```text
+提交后能否撤回取决于审批配置。
+
+继续刚才的审批，当前等待填写：数量。
+```
+
+用户回复“继续”“继续审批”“回到刚才审批”等，会直接返回当前等待项，不重新搜索模板。
+
+字段修改支持两种方式：
+
+- 前端结构化修改：下一轮请求带 `answer.field_key`，如果该字段已收集，会覆盖旧值。
+- 自然语言修改：例如“金额改成3000”，规则或 LLM 能抽取到字段时会覆盖旧值。
+
+修改字段后，后端会清理依赖字段，避免旧值误提交。例如：
+
+```text
+start_date -> 清理 end_date
+rest_start_time -> 清理 rest_end_time、rest_duration
+go_out_start_time -> 清理 go_out_end_time、go_out_duration
+```
+
+预览阶段修改字段后不会提交，会重新进入 `collect -> validate -> assignee -> preview` 链路，生成新的预览。
 
 ## 8. 调试方式
 
@@ -873,7 +942,7 @@ docs/approval_graph.mmd
 当前预期：
 
 ```text
-56 passed
+64 passed
 ```
 
 ## 12. 后续接真实 CRM
@@ -1028,6 +1097,14 @@ submit_approval
 - `/api/approval/getNodes`：字段完整后获取审批流程节点。
 - `/api/approval/add`：确认提交后创建审批。
 
+CRM 适配层会为每个接口记录：
+
+- request：脱敏后的请求头和请求体。
+- response：响应 code、message、数据类型和少量样例。
+- timing：`duration_ms`、`success`、`status_code`、错误摘要。
+
+模板详情、请假类型和关联对象列表都有 TTL 缓存。缓存 key 会带上 `uid` 或 `user_id`，避免不同用户权限下互相复用。
+
 ### 13.6 会话状态
 
 位置：
@@ -1036,13 +1113,14 @@ submit_approval
 app/services/session_state_service.py
 ```
 
-当前是内存保存：
+当前支持两种保存方式：
 
 ```text
-session_id -> ApprovalState
+memory: session_id -> ApprovalState
+redis:  {REDIS_PREFIX}ai_approval:session:{session_id} -> ApprovalState JSON
 ```
 
-本地演示可用。生产环境需要替换成 Redis 或数据库。
+默认优先使用 Redis；没有配置 Redis 或 Redis 不可用时自动回退内存。会话 Redis TTL 由 `AI_APPROVAL_SESSION_TTL_SECONDS` 控制，默认 7200 秒。
 
 ### 13.7 日志
 
@@ -1059,15 +1137,15 @@ app/middleware.py
 - 请求路径
 - HTTP 状态码
 - 接口耗时
+- CRM/ERP 接口 request、response、timing 日志
 
-后续建议扩展：
+聊天 debug 日志还会记录：
 
 - `session_id`
 - `user_id`
 - `approval_type`
 - `status`
 - `trace`
-- CRM 请求耗时和错误
 
 ### 13.8 DeepSeek LLM 层
 
@@ -1155,16 +1233,22 @@ app/mock_data/approval_templates.py
 
 ### 14.3 Redis 会话存储
 
-当前会话状态在内存里：
+已支持 Redis 会话存储：
 
-- 服务重启后状态丢失。
-- 多实例部署无法共享状态。
-
-生产建议换成 Redis：
-
-- key：`ai_approval:session:{session_id}`
+- key：`{REDIS_PREFIX}ai_approval:session:{session_id}`
 - value：序列化后的 `ApprovalState`
-- TTL：例如 30 分钟或 2 小时
+- TTL：`AI_APPROVAL_SESSION_TTL_SECONDS`，默认 7200 秒
+
+本地没有 Redis 时会自动回退内存。生产环境建议明确配置：
+
+```text
+AI_APPROVAL_SESSION_BACKEND=redis
+AI_APPROVAL_SESSION_TTL_SECONDS=7200
+REDIS_HOST=...
+REDIS_PORT=6379
+REDIS_PASSWORD=...
+REDIS_PREFIX=lanerp20_local_
+```
 
 ### 14.4 幂等提交
 
@@ -1178,16 +1262,23 @@ session_id + approval_type + preview_hash
 
 避免用户重复点击、网络重试、重复说“确认提交”导致创建多张审批单。
 
-### 14.5 附件字段
+### 14.5 复杂字段和附件字段
 
-当前只支持文本、数字、日期、枚举。
+当前 `_child` 控件组会先展开，快速发起只收集必填子字段。子字段会保留父级元数据：
 
-真实审批可能需要：
+- `group_key`
+- `group_label`
+- `group_type`
+
+其中 `detail/detail_table/table` 会标记成 `detail_table`，其他父控件标记成 `complex_group`。这样后续组装提交数据时可以知道字段来自哪个复杂控件。
+
+当前主要支持文本、数字、日期、枚举、地址、用户选择和单选。真实审批还可能需要：
 
 - 发票附件
 - 合同附件
 - 图片
 - PDF
+- 多行明细表
 
 建议附件单独走上传接口，再把附件 ID 写入审批字段。
 

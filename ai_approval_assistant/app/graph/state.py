@@ -33,6 +33,7 @@ class ApprovalState(TypedDict, total=False):
     _available_templates: list[dict[str, Any]]
     _template_candidates: list[dict[str, Any]]
     _template_search_keyword: str
+    _current_template: dict[str, Any] | None
     _answer: dict[str, Any] | None
     _validation_warnings: list[str]
     _field_labels: dict[str, str]
@@ -69,6 +70,7 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "_available_templates": [],
         "_template_candidates": [],
         "_template_search_keyword": "",
+        "_current_template": None,
         "_answer": None,
         "_validation_warnings": [],
         "_field_labels": {},

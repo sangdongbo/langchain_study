@@ -89,6 +89,180 @@ def test_purchase_flow_asks_missing_fields() -> None:
     assert "数量" in body["assistant_message"]
 
 
+def test_collecting_flow_answers_general_question_then_resumes(monkeypatch) -> None:
+    session_state_service.clear("S-collecting-general-question")
+    monkeypatch.setattr(model_service, "chat", lambda message: "提交后能否撤回取决于审批配置。")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-collecting-general-question",
+            "user_id": "U001",
+            "message": "我要申请采购笔记本电脑",
+        },
+    )
+    assert response.json()["awaiting_field_key"] == "quantity"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-collecting-general-question",
+            "user_id": "U001",
+            "message": "这个审批能撤回吗？",
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["approval_type"] == "purchase"
+    assert body["awaiting_field_key"] == "quantity"
+    assert body["collected_slots"]["item"] == "笔记本电脑"
+    assert "提交后能否撤回取决于审批配置。" in body["assistant_message"]
+    assert "当前等待填写：数量" in body["assistant_message"]
+    assert "general_chat" in body["trace"]
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-collecting-general-question",
+            "user_id": "U001",
+            "message": "2台，预算8000，用途是办公使用",
+        },
+    )
+    body = response.json()
+    assert body["status"] == "awaiting_confirmation"
+    assert body["collected_slots"]["quantity"] == "2"
+    assert body["collected_slots"]["budget"] == "8000"
+    assert body["collected_slots"]["purpose"] == "办公使用"
+
+
+def test_resume_message_returns_current_awaiting_input() -> None:
+    session_state_service.clear("S-resume-current-approval")
+
+    client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-resume-current-approval",
+            "user_id": "U001",
+            "message": "我要申请采购笔记本电脑",
+        },
+    )
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-resume-current-approval",
+            "user_id": "U001",
+            "message": "继续审批",
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["approval_type"] == "purchase"
+    assert body["awaiting_field_key"] == "quantity"
+    assert "继续刚才的审批" in body["assistant_message"]
+    assert "resume" in body["trace"]
+
+
+def test_preview_structured_answer_modifies_field_and_repreviews() -> None:
+    session_state_service.clear("S-preview-modify-field")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-preview-modify-field",
+            "user_id": "U001",
+            "message": "我要报销餐饮费 2000 元，客户招待，发票已提供",
+        },
+    )
+    assert response.json()["status"] == "awaiting_confirmation"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-preview-modify-field",
+            "user_id": "U001",
+            "message": "金额改成3000",
+            "answer": {
+                "field_key": "amount",
+                "type": "text",
+                "label": "3000",
+                "value": "3000",
+            },
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "awaiting_confirmation"
+    assert body["collected_slots"]["amount"] == "3000"
+    assert body["preview"]["fields"][1]["value"] == "3000"
+    assert "确认提交" in body["assistant_message"]
+
+
+def test_preview_natural_language_modifies_field_and_repreviews() -> None:
+    session_state_service.clear("S-preview-natural-modify-field")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-preview-natural-modify-field",
+            "user_id": "U001",
+            "message": "我要报销餐饮费 2000 元，客户招待，发票已提供",
+        },
+    )
+    assert response.json()["status"] == "awaiting_confirmation"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-preview-natural-modify-field",
+            "user_id": "U001",
+            "message": "金额改成3000",
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "awaiting_confirmation"
+    assert body["collected_slots"]["amount"] == "3000"
+    assert body["preview"]["fields"][1]["value"] == "3000"
+
+
+def test_modifying_start_date_clears_dependent_end_date() -> None:
+    session_state_service.clear("S-modify-dependent-field")
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-modify-dependent-field",
+            "user_id": "U001",
+            "message": "我要请假，调休，从2026-06-16到2026-06-17，因为家中有事",
+        },
+    )
+    assert response.json()["status"] == "awaiting_confirmation"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-modify-dependent-field",
+            "user_id": "U001",
+            "message": "开始时间改成2026-06-18",
+            "answer": {
+                "field_key": "start_date",
+                "type": "date",
+                "label": "2026-06-18",
+                "value": "2026-06-18",
+            },
+        },
+    )
+
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["collected_slots"]["start_date"] == "2026-06-18"
+    assert "end_date" not in body["collected_slots"]
+    assert body["awaiting_field_key"] == "end_date"
+    assert "结束时间" in body["assistant_message"]
+
+
 def test_large_template_library_classifies_inventory_templates() -> None:
     response = client.post(
         "/api/ai-approval/chat",
@@ -299,6 +473,59 @@ def test_remote_approval_intent_searches_templates(monkeypatch) -> None:
     assert body["approval_type"] == "remote_6408"
     assert body["status"] == "collecting"
     assert body["awaiting_field_key"] == "rest_content"
+
+
+def test_remote_collecting_response_reuses_template_detail(monkeypatch) -> None:
+    session_state_service.clear("S-remote-template-detail-cache")
+    detail_calls: list[str] = []
+    template = ApprovalTemplate(
+        template_id="6408",
+        approval_type="remote_6408",
+        title="zh-请假",
+        category="zh-测试",
+        aliases=["请假"],
+        intent_keywords=["请假"],
+        fields=[
+            {
+                "name": "rest_content",
+                "label": "请假事由",
+                "type": "text",
+                "required": True,
+                "question": "请输入请假事由",
+            }
+        ],
+    )
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        lambda user, keyword: [template],
+    )
+
+    def fake_get_template_detail(approval_type, user):
+        detail_calls.append(approval_type)
+        return template
+
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.get_template_detail",
+        fake_get_template_detail,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-template-detail-cache",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "我要请假",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_input"]["field_key"] == "rest_content"
+    assert detail_calls == ["remote_6408"]
 
 
 def test_collecting_flow_can_cancel_without_submit() -> None:
