@@ -116,11 +116,39 @@ Windows PowerShell 推荐把 `ai_approval_assistant` 当成独立项目目录执
 start_windows.bat
 ```
 
-脚本会先在 `ai_approval_assistant` 内执行 `uv sync` 安装/同步本项目 `pyproject.toml` 里声明的依赖，然后用 `.venv\Scripts\python.exe` 启动服务。环境变量放在 `.env`，可参考 `.env.example`。默认地址仍然是：
+脚本会先在 `ai_approval_assistant` 内执行 `uv sync --dev` 安装/同步本项目 `pyproject.toml` 里声明的依赖，然后用 `.venv\Scripts\python.exe` 启动服务。环境变量放在 `.env`，可参考 `.env.example`。默认地址仍然是：
 
 ```text
 http://127.0.0.1:8010
 ```
+
+如果要同一个脚本同时启动 LangGraph Studio，在 `.env` 中开启：
+
+```text
+AI_APPROVAL_STUDIO_ENABLED=true
+AI_APPROVAL_STUDIO_HOST=127.0.0.1
+AI_APPROVAL_STUDIO_PORT=2024
+```
+
+然后仍然运行：
+
+```powershell
+.\start_windows.ps1
+```
+
+脚本会后台启动 Studio，本窗口继续前台运行 FastAPI。临时不启动 Studio 可以加：
+
+```powershell
+.\start_windows.ps1 -NoStudio
+```
+
+如果端口已被上一次启动的进程占用，可以在 `.env` 开启自动清理：
+
+```text
+AI_APPROVAL_KILL_EXISTING_PORT_PROCESS=true
+```
+
+脚本会在启动前停止占用 FastAPI 端口和 Studio 端口的监听进程。
 
 如需修改端口：
 
@@ -354,6 +382,7 @@ REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DB=0
+REDIS_PROTOCOL=2
 REDIS_PREFIX=lanerp20_local_
 ```
 
@@ -933,7 +962,58 @@ docs/approval_graph.mmd
 
 如果不需要该图，可以删除生成文件，不影响代码运行。
 
-## 11. 运行测试
+## 11. LangGraph Studio 调试
+
+项目根目录已提供 `langgraph.json`，Studio graph 入口是：
+
+```text
+app.graph.studio:graph
+```
+
+本地启动：
+
+```powershell
+cd D:\PythonProject\LearnOne\ai_approval_assistant
+$env:PYTHONIOENCODING = "utf-8"
+.\.venv\Scripts\langgraph.exe dev
+```
+
+也可以在 `.env` 配置 `AI_APPROVAL_STUDIO_ENABLED=true`，然后用 `.\start_windows.ps1` 同时启动 FastAPI 和 Studio。
+
+如果当前环境没有 LangGraph CLI，可以先同步开发依赖：
+
+```powershell
+uv sync --dev
+```
+
+Studio 里直接调的是 `ApprovalState`，不是 FastAPI 的 `ChatRequest`。调试示例放在：
+
+```text
+app/graph/studio.py
+```
+
+可用示例：
+
+- `STUDIO_EXAMPLES["new_purchase"]`：从 0 开始采购审批。
+- `STUDIO_EXAMPLES["new_expense"]`：从 0 开始报销审批。
+- `STUDIO_EXAMPLES["resume_collecting"]`：模拟已在收集字段中的会话。
+
+ERP 能力也封装成了现代 `@tool` 工具，位置：
+
+```text
+app/tools/approval_tools.py
+```
+
+当前工具：
+
+- `search_approval_templates`
+- `get_approval_form_fields`
+- `get_holiday_rule_options`
+- `get_related_business_options`
+
+这些工具先作为 Studio/后续 agent 化调试边界，不改变现有 `/api/ai-approval/chat` 的确定性审批主流程。
+
+## 12. 运行测试
 
 ```bash
 .venv/bin/python -m pytest tests
@@ -942,10 +1022,10 @@ docs/approval_graph.mmd
 当前预期：
 
 ```text
-64 passed
+77 passed
 ```
 
-## 12. 后续接真实 CRM
+## 13. 后续接真实 CRM
 
 主要替换：
 
@@ -970,9 +1050,9 @@ app/services/crm_service.py
 - 有附件的字段需要单独设计上传和绑定逻辑。
 - 如果 CRM 模板很多，不要把全部模板直接塞给 LLM；应先按分类、常用、关键词、别名筛出候选模板。
 
-## 13. 当前实现用了哪些技术
+## 14. 当前实现用了哪些技术
 
-### 13.1 FastAPI API 层
+### 14.1 FastAPI API 层
 
 入口：
 
@@ -994,7 +1074,7 @@ app/api/chat.py
 - 调用 LangGraph 工作流。
 - 返回 Pydantic 响应。
 
-### 13.2 Pydantic Schema
+### 14.2 Pydantic Schema
 
 位置：
 
@@ -1008,7 +1088,7 @@ app/schemas/
 - 定义审批模板字段。
 - 定义 CRM 用户上下文、预校验结果、提交结果。
 
-### 13.3 LangGraph 流程编排
+### 14.3 LangGraph 流程编排
 
 位置：
 
@@ -1042,7 +1122,7 @@ general_chat
 - 控制需要发起人选择办理人/审批人时暂停，并返回 `user_select`。
 - 控制有界复核，避免无限思考。
 
-### 13.4 模板驱动字段收集
+### 14.4 模板驱动字段收集
 
 位置：
 
@@ -1066,7 +1146,7 @@ app/mock_data/approval_templates.py
 - 如果开启 `AI_APPROVAL_USE_LLM=true`，审批类型规则识别不到时，会调用 DeepSeek 从当前可用 CRM 模板中选择审批类型。
 - 如果开启 `AI_APPROVAL_USE_LLM=true`，字段收集会先用规则抽取，再调用 DeepSeek 补充规则没有抽到的字段。
 
-### 13.5 CRM 适配层
+### 14.5 CRM 适配层
 
 位置：
 
@@ -1105,7 +1185,7 @@ CRM 适配层会为每个接口记录：
 
 模板详情、请假类型和关联对象列表都有 TTL 缓存。缓存 key 会带上 `uid` 或 `user_id`，避免不同用户权限下互相复用。
 
-### 13.6 会话状态
+### 14.6 会话状态
 
 位置：
 
@@ -1122,7 +1202,7 @@ redis:  {REDIS_PREFIX}ai_approval:session:{session_id} -> ApprovalState JSON
 
 默认优先使用 Redis；没有配置 Redis 或 Redis 不可用时自动回退内存。会话 Redis TTL 由 `AI_APPROVAL_SESSION_TTL_SECONDS` 控制，默认 7200 秒。
 
-### 13.7 日志
+### 14.7 日志
 
 位置：
 
@@ -1147,7 +1227,7 @@ app/middleware.py
 - `status`
 - `trace`
 
-### 13.8 DeepSeek LLM 层
+### 14.8 DeepSeek LLM 层
 
 位置：
 
@@ -1196,9 +1276,9 @@ Prompt 设计原则：
 - LLM 失败时自动回退规则逻辑。
 - CRM 预校验和提交守卫始终由后端确定性代码执行。
 
-## 14. 还需要修改和完善的地方
+## 15. 还需要修改和完善的地方
 
-### 14.1 接真实 CRM
+### 15.1 接真实 CRM
 
 优先级最高。
 
@@ -1219,7 +1299,7 @@ app/mock_data/approval_templates.py
 - 创建审批。
 - 查询审批状态。
 
-### 14.2 身份认证
+### 15.2 身份认证
 
 当前接口直接接收：
 
@@ -1231,7 +1311,7 @@ app/mock_data/approval_templates.py
 
 真实环境不能信任前端传入的 `user_id`，应该从登录态、JWT、网关 Header 或后端 session 解析用户身份。
 
-### 14.3 Redis 会话存储
+### 15.3 Redis 会话存储
 
 已支持 Redis 会话存储：
 
@@ -1250,7 +1330,7 @@ REDIS_PASSWORD=...
 REDIS_PREFIX=lanerp20_local_
 ```
 
-### 14.4 幂等提交
+### 15.4 幂等提交
 
 当前 mock 提交已经生成并保存 `idempotency_key`，同一会话同一审批内容重复确认时会复用提交结果。
 
@@ -1262,7 +1342,7 @@ session_id + approval_type + preview_hash
 
 避免用户重复点击、网络重试、重复说“确认提交”导致创建多张审批单。
 
-### 14.5 复杂字段和附件字段
+### 15.5 复杂字段和附件字段
 
 当前 `_child` 控件组会先展开，快速发起只收集必填子字段。子字段会保留父级元数据：
 
@@ -1282,7 +1362,7 @@ session_id + approval_type + preview_hash
 
 建议附件单独走上传接口，再把附件 ID 写入审批字段。
 
-### 14.6 字段抽取能力
+### 15.6 字段抽取能力
 
 当前字段抽取是规则 + 可选 DeepSeek。
 
@@ -1293,7 +1373,7 @@ session_id + approval_type + preview_hash
 - 要求：只能输出模板中存在的字段。
 - 防护：LLM 抽取后仍要 CRM 预校验。
 
-### 14.7 decision_review 接 LLM
+### 15.7 decision_review 接 LLM
 
 当前 `decision_review` 已支持可选 LLM 复核。
 
@@ -1311,7 +1391,7 @@ session_id + approval_type + preview_hash
 - 未预览不提交。
 - 未明确确认不提交。
 
-### 14.8 字段级错误处理
+### 15.8 字段级错误处理
 
 当前 mock 预校验已经同时返回字符串错误和字段级错误。
 
@@ -1326,7 +1406,7 @@ session_id + approval_type + preview_hash
 
 这样聊天可以准确追问或要求修改某个字段。
 
-### 14.9 日志和可观测
+### 15.9 日志和可观测
 
 当前只有基础请求日志。
 
@@ -1339,7 +1419,7 @@ session_id + approval_type + preview_hash
 - 敏感字段脱敏。
 - LangSmith trace，后续接 LLM 时使用。
 
-### 14.10 测试覆盖
+### 15.10 测试覆盖
 
 当前测试覆盖了主流程。
 

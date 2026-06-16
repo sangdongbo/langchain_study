@@ -1,0 +1,49 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	load_context(load_context)
+	classify(classify)
+	decision_review(decision_review)
+	collect(collect)
+	validate(validate)
+	assignee(assignee)
+	preview(preview)
+	submit(submit)
+	already_submitted(already_submitted)
+	cancel(cancel)
+	clarify(clarify)
+	general_chat(general_chat)
+	resume(resume)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> load_context;
+	assignee -. &nbsp;end&nbsp; .-> __end__;
+	assignee -.-> preview;
+	classify --> decision_review;
+	collect -. &nbsp;end&nbsp; .-> __end__;
+	collect -.-> validate;
+	decision_review -.-> already_submitted;
+	decision_review -.-> assignee;
+	decision_review -.-> cancel;
+	decision_review -.-> clarify;
+	decision_review -.-> collect;
+	decision_review -.-> general_chat;
+	decision_review -.-> resume;
+	decision_review -.-> submit;
+	load_context --> classify;
+	validate -. &nbsp;end&nbsp; .-> __end__;
+	validate -.-> assignee;
+	already_submitted --> __end__;
+	cancel --> __end__;
+	clarify --> __end__;
+	general_chat --> __end__;
+	preview --> __end__;
+	resume --> __end__;
+	submit --> __end__;
+	decision_review -. &nbsp;review&nbsp; .-> decision_review;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

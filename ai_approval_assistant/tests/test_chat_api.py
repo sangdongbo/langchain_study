@@ -5,6 +5,7 @@ import os
 from fastapi.testclient import TestClient
 
 os.environ["AI_APPROVAL_USE_LLM"] = "false"
+os.environ["AI_APPROVAL_SESSION_BACKEND"] = "memory"
 
 from app.main import app  # noqa: E402
 from app.schemas.approval import ApprovalAssignee, ApprovalNode, ApprovalTemplate  # noqa: E402

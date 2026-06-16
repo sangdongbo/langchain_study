@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "approval_assistant": "app.graph.studio:graph"
+  },
+  "env": ".env"
+}

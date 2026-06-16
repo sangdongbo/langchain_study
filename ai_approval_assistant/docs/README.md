@@ -18,6 +18,12 @@ docs/approval_graph.mmd
 docs/session_flow.mmd
 ```
 
+LangGraph Studio 调试说明：
+
+```text
+docs/studio_debug.md
+```
+
 可以把 `.mmd` 内容粘贴到 Mermaid Live Editor，或者在支持 Mermaid 的 Markdown 工具里查看。
 
 接口返回里的 `trace` 可以和图对照看，例如：

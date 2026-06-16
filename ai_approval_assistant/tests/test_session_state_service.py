@@ -19,6 +19,11 @@ class FakeRedis:
         self.values[key] = value
         self.ttls[key] = ttl
 
+    def set(self, key: str, value: str, ex: int | None = None) -> None:
+        self.values[key] = value
+        if ex is not None:
+            self.ttls[key] = ex
+
     def get(self, key: str) -> str | None:
         return self.values.get(key)
 
@@ -80,3 +85,27 @@ def test_build_session_state_service_returns_memory_when_redis_disabled(monkeypa
     service = build_session_state_service()
 
     assert isinstance(service, InMemorySessionStateService)
+
+
+def test_build_session_state_service_uses_configured_redis_protocol(
+    monkeypatch,
+) -> None:
+    created_clients: list[dict[str, object]] = []
+
+    class FakeRedisClient:
+        def __init__(self, **kwargs) -> None:
+            created_clients.append(kwargs)
+
+        def ping(self) -> None:
+            return None
+
+    monkeypatch.setenv("AI_APPROVAL_SESSION_BACKEND", "redis")
+    monkeypatch.setenv("REDIS_HOST", "redis.local")
+    monkeypatch.setenv("REDIS_PORT", "6379")
+    monkeypatch.setenv("REDIS_PROTOCOL", "2")
+    monkeypatch.setattr("redis.Redis", FakeRedisClient)
+
+    service = build_session_state_service()
+
+    assert isinstance(service, RedisSessionStateService)
+    assert created_clients[0]["protocol"] == 2

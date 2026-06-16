@@ -83,7 +83,7 @@ class RedisSessionStateService:
     def save(self, state: ApprovalState) -> None:
         payload = json.dumps(state, ensure_ascii=False)
         try:
-            self._redis.setex(self._key(state["session_id"]), self._ttl_seconds, payload)
+            self._redis.set(self._key(state["session_id"]), payload, ex=self._ttl_seconds)
         except Exception as exc:
             logger.warning("Redis session save failed: %s", exc)
 
@@ -116,6 +116,7 @@ def build_session_state_service() -> SessionStateService:
             decode_responses=True,
             socket_connect_timeout=float(os.getenv("REDIS_CONNECT_TIMEOUT", "1.5")),
             socket_timeout=float(os.getenv("REDIS_SOCKET_TIMEOUT", "1.5")),
+            protocol=_redis_protocol_from_env(),
         )
         client.ping()
     except Exception as exc:
@@ -136,6 +137,17 @@ def _session_ttl_from_env() -> int:
         return max(1, int(raw_value))
     except ValueError:
         return DEFAULT_SESSION_TTL_SECONDS
+
+
+def _redis_protocol_from_env() -> int:
+    raw_value = os.getenv("REDIS_PROTOCOL", "2")
+    try:
+        protocol = int(raw_value)
+    except ValueError:
+        return 2
+    if protocol not in {2, 3}:
+        return 2
+    return protocol
 
 
 session_state_service = build_session_state_service()
