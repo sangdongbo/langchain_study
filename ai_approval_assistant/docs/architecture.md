@@ -11,6 +11,34 @@ app/services            Business services, API clients, mappers, payload builder
 app/schemas             Pydantic request/response/domain schemas
 ```
 
+## Top-Level Agent Orchestration
+
+The Studio graph starts with visible agent-level nodes:
+
+```text
+START
+  -> memory_agent
+  -> user_profile_agent
+  -> intent_router
+      -> user_info_agent
+      -> general_chat
+      -> approval_creation_agent
+          -> approval_creation_subgraph
+```
+
+`memory_agent` records the current turn into `ApprovalAgentState.short_term_memory`.
+`user_profile_agent` loads current user and superior profiles. `intent_router` decides
+whether the turn should go to a user information answer, general chat, or the approval
+creation workflow. Future agents such as `order_agent`, `stock_agent`, or
+`approval_process_agent` should be connected at this top orchestration layer instead of
+being hidden inside approval node functions.
+
+`approval_creation_agent` is a compiled subgraph. Its internal nodes include
+`load_context`, `classify`, `decision_review`, `collect`, `validate`, `assignee`,
+`preview`, and `submit`. Studio therefore shows a clean top-level multi-agent graph,
+while the chat `trace` still records the internal approval nodes when a request really
+enters approval creation.
+
 ## Approval Flow
 
 `app.graph.approval_workflow` is the production workflow entrypoint used by the
@@ -57,6 +85,18 @@ app/services/crm_service.py             approval business facade
 app/services/user_service.py            user business facade
 app/services/crm_mapper.py              ERP approval response mapping
 app/services/approval_payload_builder.py approval submit payload assembly
+app/services/short_term_memory_service.py short session memory helpers
 ```
 
 Agents and tools should call services, not raw ERP endpoints.
+
+## Short-Term Memory
+
+Short-term memory is stored inside `ApprovalAgentState.short_term_memory` and
+saved by the existing session backend. It follows the same Redis key and TTL as
+the approval session, so no extra cleanup process is needed.
+
+The memory is intentionally bounded by `AI_APPROVAL_SHORT_MEMORY_TURNS`. It helps
+general chat understand recent context, while structured approval submission
+continues to rely on explicit state such as `collected_slots`, `awaiting_field`,
+and `selected_assignees`.

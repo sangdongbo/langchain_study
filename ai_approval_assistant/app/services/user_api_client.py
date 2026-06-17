@@ -46,12 +46,34 @@ class UserApiClient:
         response = self._http_client.post(url, headers=headers, json=body)
         response.raise_for_status()
         payload = response.json()
+        data = payload.get("data")
         self._log_writer(
             f"crm.{event}.response",
             {
                 "code": payload.get("code"),
                 "message": payload.get("message"),
-                "data_type": type(payload.get("data")).__name__,
+                "data_type": type(data).__name__,
+                **_user_data_log_summary(data),
             },
         )
         return payload
+
+
+def _user_data_log_summary(data: Any) -> dict[str, Any]:
+    """只记录排查组织关系需要的低风险字段。"""
+    if not isinstance(data, dict):
+        return {}
+    preview_keys = (
+        "id",
+        "uid",
+        "user_id",
+        "superior_id",
+        "superior_uid",
+        "parent_id",
+        "leader_id",
+        "manager_id",
+    )
+    return {
+        "data_keys": sorted(str(key) for key in data.keys()),
+        "data_preview": {key: data.get(key) for key in preview_keys},
+    }

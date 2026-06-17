@@ -17,6 +17,7 @@ class ApprovalAgentState(AgentState, total=False):
     authorization: str | None
     user_profile: dict[str, Any] | None
     superior_profile: dict[str, Any] | None
+    short_term_memory: list[dict[str, Any]]
     user_message: str
     status: str
     intent: str | None
@@ -45,6 +46,7 @@ class ApprovalAgentState(AgentState, total=False):
     _answer: dict[str, Any] | None
     _validation_warnings: list[str]
     _field_labels: dict[str, str]
+    _tool_calls: list[dict[str, Any]]
 
 
 ApprovalState = ApprovalAgentState
@@ -61,6 +63,7 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "authorization": None,
         "user_profile": None,
         "superior_profile": None,
+        "short_term_memory": [],
         "user_message": "",
         "status": "idle",
         "intent": None,
@@ -89,4 +92,5 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "_answer": None,
         "_validation_warnings": [],
         "_field_labels": {},
+        "_tool_calls": [],
     }

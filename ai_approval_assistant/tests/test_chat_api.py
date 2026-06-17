@@ -316,7 +316,49 @@ def test_greeting_uses_general_chat_instead_of_approval_clarification(monkeypatc
     assert body["approval_type"] is None
     assert body["assistant_message"] == "你好，我可以帮你处理审批，也可以回答普通问题。"
     assert "审批模板" not in body["assistant_message"]
+    assert "load_context" not in body["trace"]
     assert "general_chat" in body["trace"]
+
+
+def test_chat_turn_stores_short_term_memory_and_passes_context(monkeypatch) -> None:
+    session_state_service.clear("S-short-memory")
+    chat_inputs: list[str] = []
+
+    def fake_chat(message: str) -> str:
+        chat_inputs.append(message)
+        return "我还记得你刚才说的话。"
+
+    monkeypatch.setattr(model_service, "chat", fake_chat)
+
+    client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-short-memory",
+            "user_id": "U001",
+            "message": "我叫张三",
+        },
+    )
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-short-memory",
+            "user_id": "U001",
+            "message": "我刚才说我叫什么？",
+        },
+    )
+
+    assert response.status_code == 200
+    state = session_state_service.load("S-short-memory", "U001")
+    assert [item["role"] for item in state["short_term_memory"]] == [
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+    ]
+    assert state["short_term_memory"][0]["content"] == "我叫张三"
+    assert state["short_term_memory"][-1]["content"] == "我还记得你刚才说的话。"
+    assert "短期会话记忆" in chat_inputs[-1]
+    assert "user: 我叫张三" in chat_inputs[-1]
 
 
 def test_remote_greeting_uses_general_chat_without_template_search(monkeypatch) -> None:
@@ -397,6 +439,91 @@ def test_remote_chat_loads_user_profiles_before_approval_flow(monkeypatch) -> No
     assert "user_profile_agent" in body["trace"]
     assert saved["user_profile"]["superior_id"] == "864"
     assert saved["superior_profile"]["name"] == "张经理"
+
+
+def test_user_info_question_routes_to_user_agent_without_approval_flow(monkeypatch) -> None:
+    session_state_service.clear("S-user-info-question")
+
+    def fake_load_user_profiles(state):
+        return {
+            **state,
+            "user_profile": {"uid": "863", "name": "桑东波", "department_name": "研发部"},
+            "superior_profile": {"uid": "864", "name": "张经理"},
+            "trace": [*state.get("trace", []), "user_profile_agent"],
+        }
+
+    monkeypatch.setattr(
+        "app.agents.approval_agent.load_user_profiles",
+        fake_load_user_profiles,
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-user-info-question",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer token",
+            "message": "我的用户信息是什么",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "user_info_agent" in body["trace"]
+    assert "load_context" not in body["trace"]
+    assert "collect" not in body["trace"]
+    assert body["approval_type"] is None
+    assert "桑东波" in body["assistant_message"]
+    assert "张经理" in body["assistant_message"]
+
+
+def test_user_info_question_during_approval_keeps_approval_context(monkeypatch) -> None:
+    session_state_service.clear("S-user-info-during-approval")
+
+    def fake_load_user_profiles(state):
+        return {
+            **state,
+            "user_profile": {"uid": "863", "name": "桑东波", "department_name": "研发部"},
+            "superior_profile": {"uid": "864", "name": "张经理"},
+            "trace": [*state.get("trace", []), "user_profile_agent"],
+        }
+
+    monkeypatch.setattr(
+        "app.agents.approval_agent.load_user_profiles",
+        fake_load_user_profiles,
+    )
+
+    first = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-user-info-during-approval",
+            "user_id": "U001",
+            "message": "我要申请采购笔记本电脑",
+        },
+    )
+    assert first.json()["status"] == "collecting"
+    assert first.json()["awaiting_field_key"] == "quantity"
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-user-info-during-approval",
+            "user_id": "U001",
+            "message": "我的用户信息是什么",
+        },
+    )
+
+    body = response.json()
+    saved = session_state_service.load("S-user-info-during-approval", "U001")
+    assert "user_info_agent" in body["trace"]
+    assert "load_context" not in body["trace"]
+    assert "collect" not in body["trace"]
+    assert body["status"] == "collecting"
+    assert body["approval_type"] == "purchase"
+    assert saved["awaiting_field"] == "quantity"
+    assert "桑东波" in body["assistant_message"]
+    assert "当前等待填写：数量" in body["assistant_message"]
 
 
 def test_general_chat_response_clears_structured_approval_state(monkeypatch) -> None:

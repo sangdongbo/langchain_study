@@ -1,4 +1,6 @@
 from __future__ import annotations
+import logging
+
 from langgraph.graph import END, START, StateGraph
 from app.graph.extractors import (
     classify_approval_type,
@@ -86,10 +88,18 @@ from app.services.model_service import model_service
 from app.services.session_state_service import (
     session_state_service,
 )
+from app.services.short_term_memory_service import (
+    append_assistant_message,
+    with_memory_context,
+)
 from app.services.debug_log_service import write_debug_log
 from app.services.template_candidate_service import (
     select_template_candidates,
 )
+from app.tools.user_tools import get_current_user_info, get_user_superior_info
+
+
+logger = logging.getLogger("ai_approval_assistant.user")
 
 
 def run_chat_turn(request: ChatRequest) -> ChatResponse:
@@ -107,8 +117,9 @@ def run_chat_turn(request: ChatRequest) -> ChatResponse:
     state["trace"] = []
     graph = create_workflow()
     result = graph.invoke(state)
-    session_state_service.save(result)
     response = _to_response(result)
+    append_assistant_message(result, response.assistant_message)
+    session_state_service.save(result)
     write_debug_log("chat.response", response.model_dump())
     return response
 
@@ -124,8 +135,41 @@ def _should_reset_local_state_for_remote_credentials(
 
 
 def create_workflow():
-    """创建并编译 LangGraph 审批工作流。"""
+    """创建并编译顶层多 Agent 编排图。
+
+    顶层图只保留业务 Agent 级别的节点，审批创建内部的字段收集、
+    审批人选择和提交等步骤收敛在 approval_creation_agent 子图里。
+    这样 Studio 首屏能先看清楚多 Agent 编排，而不是直接被审批细节铺满。
+    """
     builder = StateGraph(ApprovalState)
+    builder.add_node("memory_agent", memory_agent_node)
+    builder.add_node("user_profile_agent", user_profile_agent_node)
+    builder.add_node("intent_router", intent_router_node)
+    builder.add_node("user_info_agent", user_info_agent_node)
+    builder.add_node("approval_creation_agent", create_approval_creation_workflow())
+    builder.add_node("general_chat", general_chat_node)
+    builder.add_edge(START, "memory_agent")
+    builder.add_edge("memory_agent", "user_profile_agent")
+    builder.add_edge("user_profile_agent", "intent_router")
+    builder.add_conditional_edges(
+        "intent_router",
+        _route,
+        {
+            "approval_creation_agent": "approval_creation_agent",
+            "user_info_agent": "user_info_agent",
+            "general_chat": "general_chat",
+        },
+    )
+    builder.add_edge("approval_creation_agent", END)
+    builder.add_edge("user_info_agent", END)
+    builder.add_edge("general_chat", END)
+    return builder.compile()
+
+
+def create_approval_creation_workflow():
+    """创建审批发起 Agent 的内部子图。"""
+    builder = StateGraph(ApprovalState)
+    builder.add_node("approval_creation_entry", approval_creation_agent_node)
     builder.add_node("load_context", load_context_node)
     builder.add_node("classify", classify_node)
     builder.add_node("decision_review", decision_review_node)
@@ -139,7 +183,8 @@ def create_workflow():
     builder.add_node("clarify", clarify_node)
     builder.add_node("general_chat", general_chat_node)
     builder.add_node("resume", resume_node)
-    builder.add_edge(START, "load_context")
+    builder.add_edge(START, "approval_creation_entry")
+    builder.add_edge("approval_creation_entry", "load_context")
     builder.add_edge("load_context", "classify")
     builder.add_edge("classify", "decision_review")
     builder.add_conditional_edges(
@@ -172,9 +217,111 @@ def create_workflow():
     return builder.compile()
 
 
+def memory_agent_node(state: ApprovalState) -> ApprovalState:
+    """顶层记忆 Agent：记录本轮用户输入，供后续 Agent 共享上下文。"""
+    from app.services.short_term_memory_service import append_user_message
+
+    append_user_message(state, state.get("user_message", ""))
+    return {
+        **state,
+        "trace": [*state.get("trace", []), "memory_agent"],
+    }
+
+
+def user_profile_agent_node(state: ApprovalState) -> ApprovalState:
+    """顶层用户 Agent：加载当前用户、直属上级等组织上下文。"""
+    return load_user_profiles(state)
+
+
+def intent_router_node(state: ApprovalState) -> ApprovalState:
+    """顶层意图路由：决定本轮交给哪个业务 Agent 处理。"""
+    text = state.get("user_message", "")
+    trace = [*state.get("trace", []), "intent_router"]
+    if _looks_like_user_info_question(text):
+        return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
+    if _has_pending_approval_selection(state):
+        return {**state, "trace": trace, "_route": "approval_creation_agent"}
+    if _has_active_approval_context(state) and (
+        _looks_like_general_question(text) or _looks_like_greeting(text)
+    ):
+        return {**state, "intent": "general_chat", "trace": trace, "_route": "general_chat"}
+    if _has_active_approval_context(state):
+        return {**state, "trace": trace, "_route": "approval_creation_agent"}
+    if _looks_like_general_question(text) or _looks_like_greeting(text):
+        return {**state, "intent": "general_chat", "trace": trace, "_route": "general_chat"}
+    return {**state, "intent": "approval_creation", "trace": trace, "_route": "approval_creation_agent"}
+
+
+def user_info_agent_node(state: ApprovalState) -> ApprovalState:
+    """用户信息 Agent：回答当前用户、上级、部门等组织信息问题。"""
+    trace = [*state.get("trace", []), "user_info_agent"]
+    current_state = _load_user_info_with_tools(state)
+    message = _user_info_message(current_state)
+    if _has_active_approval_context(current_state):
+        message = _append_resume_hint(message, current_state)
+    return {
+        **current_state,
+        "assistant_message": message,
+        "trace": trace,
+        "_route": "end",
+    }
+
+
+def _load_user_info_with_tools(state: ApprovalState) -> ApprovalState:
+    """通过用户 tools 刷新当前用户和直属上级信息。"""
+    if not state.get("uid") or not state.get("authorization"):
+        return state
+    tool_input = {
+        "user_id": state["user_id"],
+        "uid": state.get("uid"),
+        "authorization": state.get("authorization"),
+    }
+    tool_calls = list(state.get("_tool_calls", []))
+    try:
+        user_profile = get_current_user_info.invoke(tool_input)
+        tool_calls.append(
+            {
+                "name": "get_current_user_info",
+                "status": "success",
+                "result": user_profile,
+            }
+        )
+        superior_profile = get_user_superior_info.invoke(tool_input)
+        tool_calls.append(
+            {
+                "name": "get_user_superior_info",
+                "status": "success",
+                "result": superior_profile,
+            }
+        )
+    except Exception as exc:
+        logger.warning("User info tools failed: %s", exc)
+        tool_calls.append(
+            {
+                "name": "user_info_tools",
+                "status": "error",
+                "error": str(exc),
+            }
+        )
+        return {**state, "_tool_calls": tool_calls}
+    return {
+        **state,
+        "user_profile": user_profile or state.get("user_profile"),
+        "superior_profile": superior_profile or state.get("superior_profile"),
+        "_tool_calls": tool_calls,
+    }
+
+
+def approval_creation_agent_node(state: ApprovalState) -> ApprovalState:
+    """审批发起 Agent 入口：承接后续模板搜索、字段收集和提交子流程。"""
+    return {
+        **state,
+        "trace": [*state.get("trace", []), "approval_creation_agent"],
+    }
+
+
 def load_context_node(state: ApprovalState) -> ApprovalState:
     """加载用户上下文和可用审批模板。"""
-    state = load_user_profiles(state)
     trace = [*state.get("trace", []), "load_context"]
     try:
         user = crm_approval_service.get_user_context(
@@ -714,7 +861,9 @@ def clarify_node(state: ApprovalState) -> ApprovalState:
 def general_chat_node(state: ApprovalState) -> ApprovalState:
     """使用通用聊天模型处理非审批消息。"""
     trace = [*state.get("trace", []), "general_chat"]
-    answer = model_service.chat(state.get("user_message", ""))
+    answer = model_service.chat(
+        with_memory_context(state, state.get("user_message", ""))
+    )
     if _has_active_approval_context(state):
         return {
             **state,
@@ -764,6 +913,11 @@ def _template_candidates_from_state(state: ApprovalState) -> list[ApprovalTempla
 def _has_active_approval_context(state: ApprovalState) -> bool:
     """判断当前会话是否有可继续的审批上下文。"""
     return has_active_approval_context(state)
+
+
+def _has_pending_approval_selection(state: ApprovalState) -> bool:
+    """判断当前是否正在等待选择审批模板。"""
+    return bool(state.get("_template_candidates") and not state.get("approval_type"))
 
 
 def _is_resume_message(text: str) -> bool:
@@ -816,6 +970,53 @@ def _looks_like_remote_template_search(message: str) -> bool:
 def _looks_like_general_question(message: str) -> bool:
     """识别帮助类/问答类输入，避免误触发发起审批。"""
     return looks_like_general_question(message)
+
+
+def _looks_like_greeting(message: str) -> bool:
+    """识别简单问候，避免无意义进入审批模板加载。"""
+    cleaned = message.strip()
+    return cleaned in {"你好", "您好", "hello", "hi", "嗨", "在吗"}
+
+
+def _looks_like_user_info_question(message: str) -> bool:
+    """识别用户资料、上级、部门等组织上下文查询。"""
+    cleaned = message.strip()
+    return any(
+        marker in cleaned
+        for marker in (
+            "用户信息",
+            "我的信息",
+            "我是谁",
+            "我的上级",
+            "用户上级",
+            "上级是",
+            "上级是谁",
+            "我的部门",
+            "部门是什么",
+        )
+    )
+
+
+def _user_info_message(state: ApprovalState) -> str:
+    """根据 AgentState 中的用户资料构造用户信息回答。"""
+    user_profile = state.get("user_profile") or {}
+    superior_profile = state.get("superior_profile") or {}
+    if not user_profile:
+        return "暂时没有获取到你的用户信息，请刷新登录状态后再试。"
+    lines = ["当前用户信息："]
+    name = user_profile.get("display_name") or user_profile.get("name")
+    if name:
+        lines.append(f"- 姓名：{name}")
+    uid = user_profile.get("uid")
+    if uid:
+        lines.append(f"- UID：{uid}")
+    department = user_profile.get("department_name") or user_profile.get("dept_name")
+    if department:
+        lines.append(f"- 部门：{department}")
+    superior_name = superior_profile.get("display_name") or superior_profile.get("name")
+    if superior_name:
+        lines.append(f"- 上级：{superior_name}")
+    return "\n".join(lines)
 
 
 def _uses_default_search_method() -> bool:

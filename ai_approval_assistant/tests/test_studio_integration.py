@@ -15,7 +15,26 @@ def test_langgraph_json_points_to_importable_compiled_graph() -> None:
     graph = getattr(module, variable_name)
 
     assert graph.get_graph().nodes
-    assert "load_context" in graph.get_graph().nodes
+    assert "memory_agent" in graph.get_graph().nodes
+    assert "user_profile_agent" in graph.get_graph().nodes
+    assert "intent_router" in graph.get_graph().nodes
+    assert "user_info_agent" in graph.get_graph().nodes
+    assert "approval_creation_agent" in graph.get_graph().nodes
+    assert "load_context" not in graph.get_graph().nodes
+    assert "collect" not in graph.get_graph().nodes
+
+
+def test_approval_creation_subgraph_keeps_approval_internal_nodes() -> None:
+    module = importlib.import_module("app.agents.approval_agent")
+    graph = module.create_approval_creation_workflow()
+
+    nodes = graph.get_graph().nodes
+
+    assert "approval_creation_entry" in nodes
+    assert "load_context" in nodes
+    assert "classify" in nodes
+    assert "collect" in nodes
+    assert "submit" in nodes
 
 
 def test_studio_examples_include_minimal_new_approval_state() -> None:

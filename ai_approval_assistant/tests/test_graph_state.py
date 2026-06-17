@@ -21,5 +21,6 @@ def test_initial_state_contains_agent_state_and_approval_fields() -> None:
     assert state["user_id"] == "U001"
     assert state["user_profile"] is None
     assert state["superior_profile"] is None
+    assert state["short_term_memory"] == []
     assert state["status"] == "idle"
     assert state["approval_nodes"] == []

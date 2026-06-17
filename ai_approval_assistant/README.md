@@ -594,13 +594,18 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
 每次响应都有 `trace`：
 
 ```json
-["load_context", "classify", "decision_review", "collect", "validate", "preview"]
+["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "collect", "validate", "preview"]
 ```
 
 常见节点：
 
 | 节点 | 说明 |
 |---|---|
+| `memory_agent` | 写入本轮短期会话记忆 |
+| `user_profile_agent` | 加载当前用户和直属上级等用户上下文 |
+| `intent_router` | 在用户信息、普通聊天、审批发起等 Agent 之间路由 |
+| `user_info_agent` | 回答当前用户、上级、部门等信息，不进入审批子流程 |
+| `approval_creation_agent` | 审批发起子图入口 |
 | `load_context` | 加载用户上下文和可用审批模板 |
 | `classify` | 识别用户意图和审批类型 |
 | `decision_review` | 有界决策复核，防止误提交或无限思考 |
@@ -980,6 +985,8 @@ $env:PYTHONIOENCODING = "utf-8"
 
 也可以在 `.env` 配置 `AI_APPROVAL_STUDIO_ENABLED=true`，然后用 `.\start_windows.ps1` 同时启动 FastAPI 和 Studio。
 
+Studio 顶层图展示的是多 Agent 编排：`memory_agent -> user_profile_agent -> intent_router`，再按意图进入 `user_info_agent`、`general_chat` 或 `approval_creation_agent`。`load_context`、`classify`、`collect` 等审批细节已经收敛在 `approval_creation_agent` 子图里；普通问候、帮助问句和“我的用户信息是什么”不会经过这些审批节点。
+
 如果当前环境没有 LangGraph CLI，可以先同步开发依赖：
 
 ```powershell
@@ -1096,7 +1103,18 @@ app/schemas/
 app/graph/workflow.py
 ```
 
-当前节点：
+顶层 Agent 节点：
+
+```text
+memory_agent
+user_profile_agent
+intent_router
+user_info_agent
+general_chat
+approval_creation_agent
+```
+
+`approval_creation_agent` 子图节点：
 
 ```text
 load_context

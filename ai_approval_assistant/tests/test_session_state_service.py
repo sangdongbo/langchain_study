@@ -42,12 +42,14 @@ def test_redis_session_state_service_saves_with_prefix_and_ttl() -> None:
     state["status"] = "collecting"
     state["approval_type"] = "purchase"
     state["collected_slots"] = {"item": "笔记本电脑"}
+    state["short_term_memory"] = [{"role": "user", "content": "我要采购"}]
 
     service.save(state)
 
     key = "lanerp20_local_ai_approval:session:S-redis"
     assert client.ttls[key] == 7200
     assert json.loads(client.values[key])["approval_type"] == "purchase"
+    assert json.loads(client.values[key])["short_term_memory"][0]["content"] == "我要采购"
 
 
 def test_redis_session_state_service_loads_existing_state_and_refreshes_user() -> None:
@@ -55,6 +57,7 @@ def test_redis_session_state_service_loads_existing_state_and_refreshes_user() -
     key = "lanerp20_local_ai_approval:session:S-redis"
     state = initial_state("S-redis", "U001")
     state["status"] = "collecting"
+    state["short_term_memory"] = [{"role": "user", "content": "上一轮消息"}]
     client.values[key] = json.dumps(state, ensure_ascii=False)
     service = RedisSessionStateService(
         redis_client=client,
@@ -67,6 +70,7 @@ def test_redis_session_state_service_loads_existing_state_and_refreshes_user() -
     assert loaded["session_id"] == "S-redis"
     assert loaded["user_id"] == "U002"
     assert loaded["status"] == "collecting"
+    assert loaded["short_term_memory"][0]["content"] == "上一轮消息"
 
 
 def test_redis_session_state_service_falls_back_to_initial_state_on_bad_payload() -> None:

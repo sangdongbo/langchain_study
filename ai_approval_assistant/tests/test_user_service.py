@@ -115,3 +115,33 @@ def test_get_superior_info_uses_current_user_superior_id() -> None:
     assert superior["uid"] == "864"
     assert superior["name"] == "张经理"
     assert superior["superior_id"] == "0"
+
+
+def test_get_superior_info_skips_second_request_without_superior_id() -> None:
+    calls: list[str] = []
+
+    class FakeNoSuperiorApiClient:
+        def get_userinfo(self, user: UserContext) -> dict[str, object]:
+            calls.append(user.uid or "")
+            return {
+                "code": 200,
+                "message": "success",
+                "data": {"uid": 863, "name": "桑东波", "superior_id": 0},
+            }
+
+    service = UserService(api_client=FakeNoSuperiorApiClient())
+    user = UserContext(
+        user_id="U001",
+        name="User U001",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        uid="863",
+        authorization="Bearer test-token",
+    )
+
+    superior = service.get_superior_info(user)
+
+    assert calls == ["863"]
+    assert superior == {}
