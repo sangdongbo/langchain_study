@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.graph.state import ApprovalState, initial_state
-from app.graph.workflow import create_workflow
+from app.graph.approval_workflow import create_workflow
 
 
 graph = create_workflow()

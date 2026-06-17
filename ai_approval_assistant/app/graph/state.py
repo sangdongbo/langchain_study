@@ -15,6 +15,8 @@ class ApprovalAgentState(AgentState, total=False):
     user_id: str
     uid: str | None
     authorization: str | None
+    user_profile: dict[str, Any] | None
+    superior_profile: dict[str, Any] | None
     user_message: str
     status: str
     intent: str | None
@@ -57,6 +59,8 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "user_id": user_id,
         "uid": None,
         "authorization": None,
+        "user_profile": None,
+        "superior_profile": None,
         "user_message": "",
         "status": "idle",
         "intent": None,

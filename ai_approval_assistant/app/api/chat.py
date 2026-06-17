@@ -1,6 +1,6 @@
 from __future__ import annotations
 from fastapi import APIRouter, Header
-from app.graph.workflow import run_chat_turn
+from app.graph.approval_workflow import run_chat_turn
 from app.schemas.chat import ChatRequest, ChatResponse
 
 router = APIRouter(prefix="/api/ai-approval", tags=["ai-approval"])

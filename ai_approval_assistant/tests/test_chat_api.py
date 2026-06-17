@@ -358,6 +358,47 @@ def test_remote_greeting_uses_general_chat_without_template_search(monkeypatch) 
     assert "general_chat" in body["trace"]
 
 
+def test_remote_chat_loads_user_profiles_before_approval_flow(monkeypatch) -> None:
+    session_state_service.clear("S-remote-user-profile-agent")
+    calls: list[str] = []
+
+    def fake_load_user_profiles(state):
+        calls.append(state["uid"])
+        return {
+            **state,
+            "user_profile": {"uid": "863", "name": "桑东波", "superior_id": "864"},
+            "superior_profile": {"uid": "864", "name": "张经理", "superior_id": "0"},
+            "trace": [*state.get("trace", []), "user_profile_agent"],
+        }
+
+    monkeypatch.setattr(
+        "app.agents.approval_agent.load_user_profiles",
+        fake_load_user_profiles,
+    )
+    monkeypatch.setattr(
+        "app.graph.workflow.crm_approval_service.search_available_templates",
+        lambda user, keyword: [],
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-remote-user-profile-agent",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer token",
+            "message": "我要请假",
+        },
+    )
+
+    body = response.json()
+    saved = session_state_service.load("S-remote-user-profile-agent", "863")
+    assert calls == ["863"]
+    assert "user_profile_agent" in body["trace"]
+    assert saved["user_profile"]["superior_id"] == "864"
+    assert saved["superior_profile"]["name"] == "张经理"
+
+
 def test_general_chat_response_clears_structured_approval_state(monkeypatch) -> None:
     session_state_service.clear("S-general-clears-state")
     monkeypatch.setattr(model_service, "chat", lambda message: "你好")

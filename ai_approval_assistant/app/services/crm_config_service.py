@@ -9,6 +9,7 @@ GET_NODES_PATH = "/api/approval/getNodes"
 ADD_APPROVAL_PATH = "/api/approval/add"
 RELATED_LIST_PATH = "/api/Company/getRelatedList"
 HOLIDAY_RULE_PATH = "/api/attendance/getHolidayRuleByUser"
+USERINFO_PATH = "/api/User/userinfo"
 
 
 class CrmEndpointConfig(BaseModel):
@@ -20,6 +21,7 @@ class CrmEndpointConfig(BaseModel):
     add_approval_url: str
     related_list_url: str
     holiday_rule_url: str
+    userinfo_url: str
 
 
 def load_crm_endpoint_config() -> CrmEndpointConfig:
@@ -43,6 +45,9 @@ def load_crm_endpoint_config() -> CrmEndpointConfig:
         ),
         holiday_rule_url=os.getenv(
             "AI_APPROVAL_HOLIDAY_RULE_URL", _join_url(base_url, HOLIDAY_RULE_PATH)
+        ),
+        userinfo_url=os.getenv(
+            "AI_APPROVAL_USERINFO_URL", _join_url(base_url, USERINFO_PATH)
         ),
     )
 
