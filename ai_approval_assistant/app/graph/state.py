@@ -1,9 +1,15 @@
 from __future__ import annotations
 from typing import Any, TypedDict
 
+from langgraph.prebuilt.chat_agent_executor import AgentState
 
-class ApprovalState(TypedDict, total=False):
-    """单个审批聊天会话的可变 LangGraph 状态。"""
+
+class ApprovalAgentState(AgentState, total=False):
+    """审批多 Agent 共享状态。
+
+    继承 LangGraph 的 AgentState 后，审批 Agent、用户信息 Agent 等后续子图
+    可以通过 messages/remaining_steps 与审批业务字段在同一个状态对象中通信。
+    """
 
     session_id: str
     user_id: str
@@ -39,9 +45,14 @@ class ApprovalState(TypedDict, total=False):
     _field_labels: dict[str, str]
 
 
+ApprovalState = ApprovalAgentState
+
+
 def initial_state(session_id: str, user_id: str) -> ApprovalState:
     """为新聊天会话创建初始内存状态。"""
     return {
+        "messages": [],
+        "remaining_steps": 20,
         "session_id": session_id,
         "user_id": user_id,
         "uid": None,

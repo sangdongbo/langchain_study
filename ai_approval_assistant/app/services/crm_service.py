@@ -19,9 +19,7 @@ from app.schemas.approval import (
     UserContext,
     ValidationResult,
 )
-from app.services.crm_config_service import (
-    load_crm_endpoint_config,
-)
+from app.services.crm_api_client import CrmApiClient
 from app.services.debug_log_service import write_debug_log
 
 logger = logging.getLogger("ai_approval_assistant.crm")
@@ -70,14 +68,17 @@ class CrmApprovalService:
             else _dynamic_options_cache_ttl_from_env()
         )
         self._clock = clock or time.monotonic
-        self._http_client = http_client or httpx.Client(timeout=10)
-        endpoint_config = load_crm_endpoint_config()
-        self._approval_list_url = approval_list_url or endpoint_config.approval_list_url
-        self._form_fields_url = form_fields_url or endpoint_config.form_fields_url
-        self._get_nodes_url = get_nodes_url or endpoint_config.get_nodes_url
-        self._add_approval_url = add_approval_url or endpoint_config.add_approval_url
-        self._related_list_url = related_list_url or endpoint_config.related_list_url
-        self._holiday_rule_url = holiday_rule_url or endpoint_config.holiday_rule_url
+        self._api_client = CrmApiClient(
+            http_client=http_client,
+            approval_list_url=approval_list_url,
+            form_fields_url=form_fields_url,
+            get_nodes_url=get_nodes_url,
+            add_approval_url=add_approval_url,
+            related_list_url=related_list_url,
+            holiday_rule_url=holiday_rule_url,
+            clock=self._clock,
+            log_writer=write_debug_log,
+        )
 
     def get_user_context(
         self, user_id: str, uid: str | None = None, authorization: str | None = None
@@ -113,9 +114,7 @@ class CrmApprovalService:
         self, user: UserContext, keyword: str = ""
     ) -> list[ApprovalTemplate]:
         """从 ERP 审批列表接口获取模板分组。"""
-        body = {"keyword": keyword}
-        headers = _crm_headers(user)
-        payload = self._post_crm_json("approval.list", self._approval_list_url, headers, body)
+        payload = self._api_client.list_approvals(user, keyword)
         if payload.get("code") != 200:
             raise ValueError(f"approval list returned code {payload.get('code')}")
         templates = _templates_from_remote_payload(payload)
@@ -168,11 +167,7 @@ class CrmApprovalService:
         if not template.template_id or not user.authorization or (not user.uid):
             return template
         try:
-            body = {"field_form": f"approval_type_{template.template_id}"}
-            headers = _crm_headers(user)
-            payload = self._post_crm_json(
-                "field.formFields", self._form_fields_url, headers, body
-            )
+            payload = self._api_client.get_form_fields(user, template.template_id)
             if payload.get("code") != 200:
                 raise ValueError(f"form fields returned code {payload.get('code')}")
             fields = _fields_from_remote_payload(payload, self, user)
@@ -238,12 +233,7 @@ class CrmApprovalService:
         """根据审批模板和表单值获取 CRM 审批流程节点。"""
         if not user.authorization or not user.uid:
             return []
-        body = {
-            "approval_set_id": int(approval_set_id),
-            "form_value": form_value,
-        }
-        headers = _crm_headers(user)
-        payload = self._post_crm_json("approval.getNodes", self._get_nodes_url, headers, body)
+        payload = self._api_client.get_approval_nodes(user, approval_set_id, form_value)
         if payload.get("code") != 200:
             raise ValueError(f"approval nodes returned code {payload.get('code')}")
         return _nodes_from_remote_payload(payload)
@@ -270,19 +260,12 @@ class CrmApprovalService:
         cached = self._get_dynamic_options_cache(cache_key)
         if cached is not None:
             return cached
-        body = {
-            "relate_type": relate_type,
-            "page": page,
-            "pageSize": page_size,
-            "keyword": keyword,
-            "status": 0,
-            "created_at": "",
-            "hasNoAccess": False,
-            "type": "",
-        }
-        headers = _crm_headers(user)
-        payload = self._post_crm_json(
-            "company.getRelatedList", self._related_list_url, headers, body
+        payload = self._api_client.get_related_list(
+            user,
+            relate_type,
+            keyword=keyword,
+            page=page,
+            page_size=page_size,
         )
         if payload.get("code") != 200:
             raise ValueError(f"related list returned code {payload.get('code')}")
@@ -303,11 +286,7 @@ class CrmApprovalService:
         cached = self._get_dynamic_options_cache(cache_key)
         if cached is not None:
             return cached
-        body: dict[str, Any] = {}
-        headers = _crm_headers(user)
-        payload = self._post_crm_json(
-            "attendance.getHolidayRuleByUser", self._holiday_rule_url, headers, body
-        )
+        payload = self._api_client.get_holiday_rules(user)
         if payload.get("code") != 200:
             raise ValueError(f"holiday rule returned code {payload.get('code')}")
         data = payload.get("data") or []
@@ -357,13 +336,12 @@ class CrmApprovalService:
         selected_assignees: dict[str, list[str]],
     ) -> SubmitResult:
         """调用 ERP 创建审批接口。"""
-        body = {
-            "approval_set_id": int(approval_set_id),
-            "node_list": _remote_submit_nodes(approval_nodes, selected_assignees),
-            "form_data": _remote_form_data(slots),
-        }
-        headers = _crm_headers(user)
-        payload = self._post_crm_json("approval.add", self._add_approval_url, headers, body)
+        payload = self._api_client.add_approval(
+            user,
+            approval_set_id,
+            node_list=_remote_submit_nodes(approval_nodes, selected_assignees),
+            form_data=_remote_form_data(slots),
+        )
         if payload.get("code") != 200:
             raise ValueError(f"approval add returned code {payload.get('code')}")
         data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
@@ -426,38 +404,6 @@ class CrmApprovalService:
             return None
         return deepcopy(item["value"])
 
-    def _post_crm_json(
-        self,
-        event: str,
-        url: str,
-        headers: dict[str, str],
-        body: dict[str, Any],
-    ) -> dict[str, Any]:
-        """统一调用 CRM POST JSON 接口并记录耗时摘要。"""
-        started_at = self._clock()
-        status_code: int | None = None
-        try:
-            _log_crm_request(event, url, headers, body)
-            response = self._http_client.post(url, headers=headers, json=body)
-            status_code = response.status_code
-            response.raise_for_status()
-            payload = response.json()
-            _log_crm_response(event, payload)
-            _log_crm_timing(event, url, started_at, self._clock(), True, status_code)
-            return payload
-        except Exception as exc:
-            _log_crm_timing(
-                event,
-                url,
-                started_at,
-                self._clock(),
-                False,
-                status_code,
-                str(exc),
-            )
-            raise
-
-
 def _approval_node(approval_type: str, slots: dict[str, str]) -> str:
     """根据模板类型和字段值选择模拟审批节点。"""
     if approval_type == "expense" and _safe_number(slots.get("amount", "0")) >= 5000:
@@ -502,70 +448,6 @@ def _dynamic_options_cache_ttl_from_env() -> int:
         return max(0, int(raw_value))
     except ValueError:
         return DEFAULT_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS
-
-
-def _crm_headers(user: UserContext) -> dict[str, str]:
-    """构建 CRM 接口请求头。"""
-    return {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=UTF-8",
-        "Authorization": user.authorization or "",
-        "UID": user.uid or "",
-    }
-
-
-def _log_crm_request(
-    event: str, url: str, headers: dict[str, str], body: dict[str, Any]
-) -> None:
-    """记录 CRM 请求，Authorization 会在日志服务中脱敏。"""
-    write_debug_log(
-        f"crm.{event}.request",
-        {
-            "url": url,
-            "headers": headers,
-            "body": body,
-        },
-    )
-
-
-def _log_crm_response(event: str, payload: dict[str, Any]) -> None:
-    """记录 CRM 响应摘要，避免大响应刷爆日志。"""
-    data = payload.get("data")
-    summary: dict[str, Any] = {
-        "code": payload.get("code"),
-        "message": payload.get("message"),
-        "data_type": type(data).__name__,
-    }
-    if isinstance(data, list):
-        summary["data_count"] = len(data)
-        summary["data_sample"] = data[:2]
-    elif isinstance(data, dict):
-        summary["data_keys"] = list(data.keys())[:20]
-        summary["data_sample"] = data
-    else:
-        summary["data"] = data
-    write_debug_log(f"crm.{event}.response", summary)
-
-
-def _log_crm_timing(
-    event: str,
-    url: str,
-    started_at: float,
-    finished_at: float,
-    success: bool,
-    status_code: int | None,
-    error: str | None = None,
-) -> None:
-    """记录 CRM 接口耗时摘要。"""
-    payload: dict[str, Any] = {
-        "url": url,
-        "duration_ms": max(0, int((finished_at - started_at) * 1000)),
-        "success": success,
-        "status_code": status_code,
-    }
-    if error:
-        payload["error"] = error[:300]
-    write_debug_log(f"crm.{event}.timing", payload)
 
 
 def _templates_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalTemplate]:
