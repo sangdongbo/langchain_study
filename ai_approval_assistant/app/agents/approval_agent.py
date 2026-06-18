@@ -149,17 +149,17 @@ def create_workflow():
     builder.add_node("approval_creation_agent", create_approval_creation_workflow())
     builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "memory_agent")
-    builder.add_edge("memory_agent", "user_profile_agent")
-    builder.add_edge("user_profile_agent", "intent_router")
+    builder.add_edge("memory_agent", "intent_router")
     builder.add_conditional_edges(
         "intent_router",
         _route,
         {
             "approval_creation_agent": "approval_creation_agent",
-            "user_info_agent": "user_info_agent",
+            "user_info_agent": "user_profile_agent",
             "general_chat": "general_chat",
         },
     )
+    builder.add_edge("user_profile_agent", "user_info_agent")
     builder.add_edge("approval_creation_agent", END)
     builder.add_edge("user_info_agent", END)
     builder.add_edge("general_chat", END)
@@ -268,8 +268,10 @@ def user_info_agent_node(state: ApprovalState) -> ApprovalState:
 
 
 def _load_user_info_with_tools(state: ApprovalState) -> ApprovalState:
-    """通过用户 tools 刷新当前用户和直属上级信息。"""
+    """按需通过用户 tools 补齐当前用户和直属上级信息。"""
     if not state.get("uid") or not state.get("authorization"):
+        return state
+    if state.get("user_profile") and state.get("superior_profile") is not None:
         return state
     tool_input = {
         "user_id": state["user_id"],
@@ -277,23 +279,27 @@ def _load_user_info_with_tools(state: ApprovalState) -> ApprovalState:
         "authorization": state.get("authorization"),
     }
     tool_calls = list(state.get("_tool_calls", []))
+    user_profile = state.get("user_profile")
+    superior_profile = state.get("superior_profile")
     try:
-        user_profile = get_current_user_info.invoke(tool_input)
-        tool_calls.append(
-            {
-                "name": "get_current_user_info",
-                "status": "success",
-                "result": user_profile,
-            }
-        )
-        superior_profile = get_user_superior_info.invoke(tool_input)
-        tool_calls.append(
-            {
-                "name": "get_user_superior_info",
-                "status": "success",
-                "result": superior_profile,
-            }
-        )
+        if not user_profile:
+            user_profile = get_current_user_info.invoke(tool_input)
+            tool_calls.append(
+                {
+                    "name": "get_current_user_info",
+                    "status": "success",
+                    "result": user_profile,
+                }
+            )
+        if superior_profile is None:
+            superior_profile = get_user_superior_info.invoke(tool_input)
+            tool_calls.append(
+                {
+                    "name": "get_user_superior_info",
+                    "status": "success",
+                    "result": superior_profile,
+                }
+            )
     except Exception as exc:
         logger.warning("User info tools failed: %s", exc)
         tool_calls.append(

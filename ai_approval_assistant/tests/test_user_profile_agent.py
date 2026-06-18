@@ -5,17 +5,24 @@ from app.graph.state import initial_state
 
 
 def test_load_user_profiles_returns_agent_state_profile_updates(monkeypatch) -> None:
-    calls: list[str | None] = []
+    userinfo_calls: list[str | None] = []
+    detail_calls: list[str] = []
 
     def fake_get_userinfo(user):
-        calls.append(user.uid)
-        if user.uid == "863":
-            return {"uid": "863", "name": "桑东波", "superior_id": "864"}
+        userinfo_calls.append(user.uid)
+        return {"uid": "863", "name": "桑东波", "superior_id": "864"}
+
+    def fake_get_user_detail(user, user_id):
+        detail_calls.append(user_id)
         return {"uid": "864", "name": "张经理", "superior_id": "0"}
 
     monkeypatch.setattr(
         "app.agents.user_profile_agent.user_service.get_userinfo",
         fake_get_userinfo,
+    )
+    monkeypatch.setattr(
+        "app.agents.user_profile_agent.user_service.get_user_detail",
+        fake_get_user_detail,
     )
     state = {
         **initial_state("S001", "U001"),
@@ -25,7 +32,8 @@ def test_load_user_profiles_returns_agent_state_profile_updates(monkeypatch) -> 
 
     update = load_user_profiles(state)
 
-    assert calls == ["863", "864"]
+    assert userinfo_calls == ["863"]
+    assert detail_calls == ["864"]
     assert update["user_profile"] == {"uid": "863", "name": "桑东波", "superior_id": "864"}
     assert update["superior_profile"] == {"uid": "864", "name": "张经理", "superior_id": "0"}
     assert update["trace"][-1] == "user_profile_agent"
@@ -50,13 +58,19 @@ def test_load_user_profiles_uses_loaded_superior_id_without_refetching_current_u
 
     def fake_get_userinfo(user):
         calls.append(("userinfo", user.uid))
-        if user.uid == "863":
-            return {"uid": "863", "name": "桑东波", "superior_id": "40"}
+        return {"uid": "863", "name": "桑东波", "superior_id": "40"}
+
+    def fake_get_user_detail(user, user_id):
+        calls.append(("user_detail", user_id))
         return {"uid": "40", "name": "直属上级", "superior_id": "0"}
 
     monkeypatch.setattr(
         "app.agents.user_profile_agent.user_service.get_userinfo",
         fake_get_userinfo,
+    )
+    monkeypatch.setattr(
+        "app.agents.user_profile_agent.user_service.get_user_detail",
+        fake_get_user_detail,
     )
     state = {
         **initial_state("S001", "863"),
@@ -66,7 +80,7 @@ def test_load_user_profiles_uses_loaded_superior_id_without_refetching_current_u
 
     update = load_user_profiles(state)
 
-    assert calls == [("userinfo", "863"), ("userinfo", "40")]
+    assert calls == [("userinfo", "863"), ("user_detail", "40")]
     assert update["user_profile"]["superior_id"] == "40"
     assert update["superior_profile"]["uid"] == "40"
     assert update["superior_profile"]["name"] == "直属上级"

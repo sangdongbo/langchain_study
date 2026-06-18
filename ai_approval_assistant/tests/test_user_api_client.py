@@ -63,3 +63,47 @@ def test_get_userinfo_posts_chat_credentials_to_userinfo_endpoint() -> None:
             },
         },
     )
+
+
+def test_get_user_detail_posts_target_user_id_to_person_user_details() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "message": "success",
+                "data": {
+                    "user_id": 40,
+                    "name": {"value": "王云斐"},
+                    "superior_id": {"value": []},
+                },
+            },
+        )
+
+    client = UserApiClient(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        userinfo_url="https://crm.local/api/User/userinfo",
+        user_detail_url="https://crm.local/api/person/userDetails",
+        log_writer=lambda event, payload: None,
+    )
+    user = UserContext(
+        user_id="U001",
+        name="User U001",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        uid="863",
+        authorization="Bearer test-token",
+    )
+
+    payload = client.get_user_detail(user, "40")
+
+    assert payload["code"] == 200
+    assert requests[0].url.path == "/api/person/userDetails"
+    assert requests[0].headers["Authorization"] == "Bearer test-token"
+    assert requests[0].headers["UID"] == "863"
+    assert requests[0].content == b'{"user_id":40}'

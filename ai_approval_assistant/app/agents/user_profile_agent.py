@@ -61,8 +61,7 @@ def load_user_profiles(state: ApprovalAgentState) -> ApprovalAgentState:
         if not superior_id or superior_id == "0":
             superior_profile = {}
         else:
-            superior_user = user.model_copy(update={"uid": superior_id})
-            superior_profile = user_service.get_userinfo(superior_user)
+            superior_profile = user_service.get_user_detail(user, superior_id)
     except Exception as exc:
         logger.warning("Load superior profile failed: %s", exc)
         tool_calls.append(

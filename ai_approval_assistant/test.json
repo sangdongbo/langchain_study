@@ -5,3 +5,11 @@
   "uid": "863",
   "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDIvYXBpL0xvZ2luL2xvZ2luIiwiaWF0IjoxNzgxNjA1MTgzLCJleHAiOjE3ODQxOTcxODMsIm5iZiI6MTc4MTYwNTE4MywianRpIjoiMTVNVElNNkxISEt5VFpZOSIsInN1YiI6Ijg2MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJjb21wYW55X25hbWUiOiLljJfkuqzmvpzmma_np5HmioDmnInpmZDlhazlj7giLCJjb21wYW55X2lkIjoxNn0.a3lyAmjTVHo7AZiBS93TEb_HQy5VbxmXcpSILA4gTZQ"
 }
+
+{
+  "session_id": "...",
+  "user_id": "863",
+  "user_message": "",
+  "uid": "863",
+  "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDIvYXBpL0xvZ2luL2xvZ2luIiwiaWF0IjoxNzgxNjA1MTgzLCJleHAiOjE3ODQxOTcxODMsIm5iZiI6MTc4MTYwNTE4MywianRpIjoiMTVNVElNNkxISEt5VFpZOSIsInN1YiI6Ijg2MyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJjb21wYW55X25hbWUiOiLljJfkuqzmvpzmma_np5HmioDmnInpmZDlhazlj7giLCJjb21wYW55X2lkIjoxNn0.a3lyAmjTVHo7AZiBS93TEb_HQy5VbxmXcpSILA4gTZQ"
+}

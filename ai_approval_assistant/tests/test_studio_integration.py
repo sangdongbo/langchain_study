@@ -20,6 +20,10 @@ def test_langgraph_json_points_to_importable_compiled_graph() -> None:
     assert "intent_router" in graph.get_graph().nodes
     assert "user_info_agent" in graph.get_graph().nodes
     assert "approval_creation_agent" in graph.get_graph().nodes
+    edges = {(edge.source, edge.target) for edge in graph.get_graph().edges}
+    assert ("memory_agent", "intent_router") in edges
+    assert ("user_profile_agent", "user_info_agent") in edges
+    assert ("memory_agent", "user_profile_agent") not in edges
     assert "load_context" not in graph.get_graph().nodes
     assert "collect" not in graph.get_graph().nodes
 

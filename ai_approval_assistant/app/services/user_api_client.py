@@ -17,15 +17,27 @@ class UserApiClient:
         self,
         http_client: httpx.Client | None = None,
         userinfo_url: str | None = None,
+        user_detail_url: str | None = None,
         log_writer: DebugLogWriter | None = None,
     ) -> None:
-        self._http_client = http_client or httpx.Client(timeout=10)
-        self._userinfo_url = userinfo_url or load_crm_endpoint_config().userinfo_url
+        endpoint_config = load_crm_endpoint_config()
+        self._http_client = http_client or httpx.Client(timeout=30)
+        self._userinfo_url = userinfo_url or endpoint_config.userinfo_url
+        self._user_detail_url = user_detail_url or endpoint_config.user_detail_url
         self._log_writer = log_writer or write_debug_log
 
     def get_userinfo(self, user: UserContext) -> dict[str, Any]:
         """调用 /api/User/userinfo 获取当前登录用户信息。"""
         return self._post_json("user.userinfo", self._userinfo_url, user, {})
+
+    def get_user_detail(self, user: UserContext, user_id: str) -> dict[str, Any]:
+        """调用 /api/person/userDetails 获取指定用户详情。"""
+        return self._post_json(
+            "person.userDetails",
+            self._user_detail_url,
+            user,
+            {"user_id": int(user_id)},
+        )
 
     def _post_json(
         self,
@@ -63,6 +75,7 @@ def _user_data_log_summary(data: Any) -> dict[str, Any]:
     """只记录排查组织关系需要的低风险字段。"""
     if not isinstance(data, dict):
         return {}
+    user_data = data.get("user") if isinstance(data.get("user"), dict) else data
     preview_keys = (
         "id",
         "uid",
@@ -75,5 +88,5 @@ def _user_data_log_summary(data: Any) -> dict[str, Any]:
     )
     return {
         "data_keys": sorted(str(key) for key in data.keys()),
-        "data_preview": {key: data.get(key) for key in preview_keys},
+        "data_preview": {key: user_data.get(key) for key in preview_keys},
     }
