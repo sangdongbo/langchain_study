@@ -114,6 +114,7 @@ app/services/daily_report_service.py    daily report business facade
 app/services/crm_mapper.py              ERP approval response mapping
 app/services/approval_payload_builder.py approval submit payload assembly
 app/services/short_term_memory_service.py short session memory helpers
+app/services/time_travel_service.py     in-memory checkpoints for learning/debugging
 ```
 
 Agents and tools should call services, not raw ERP endpoints.
@@ -128,3 +129,19 @@ The memory is intentionally bounded by `AI_APPROVAL_SHORT_MEMORY_TURNS`. It help
 general chat understand recent context, while structured approval submission
 continues to rely on explicit state such as `collected_slots`, `awaiting_field`,
 and `selected_assignees`.
+
+## Time Travel Checkpoints
+
+The project includes a lightweight learning version of time travel. After
+`run_chat_turn` saves the current session state, it records a deep-copied checkpoint
+through `time_travel_service.record(...)`.
+
+The FastAPI routes under `/api/ai-approval/time-travel` can list checkpoints, inspect
+one snapshot, restore the original session to a checkpoint, or fork a checkpoint into
+a new `session_id`. This intentionally stays outside the visible Studio graph because
+it is a wrapper around the chat turn, not a business agent node.
+
+The current implementation is in-memory only. It demonstrates the checkpoint model
+without adding a database or migration. A production version could swap the service
+implementation for Redis, file storage, or LangGraph's native checkpointer while
+keeping the API shape and chat-turn hook mostly stable.

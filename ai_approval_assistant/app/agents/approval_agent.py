@@ -90,6 +90,7 @@ from app.services.model_service import model_service
 from app.services.session_state_service import (
     session_state_service,
 )
+from app.services.time_travel_service import time_travel_service
 from app.services.short_term_memory_service import (
     append_assistant_message,
     with_memory_context,
@@ -122,8 +123,16 @@ def run_chat_turn(request: ChatRequest) -> ChatResponse:
     response = _to_response(result)
     append_assistant_message(result, response.assistant_message)
     session_state_service.save(result)
+    _record_time_travel_checkpoint(result, request.message.strip())
     write_debug_log("chat.response", response.model_dump())
     return response
+
+
+def _record_time_travel_checkpoint(state: ApprovalState, user_message: str) -> None:
+    try:
+        time_travel_service.record(state, user_message=user_message)
+    except Exception as exc:
+        logger.warning("Time travel checkpoint record failed: %s", exc)
 
 
 def _should_reset_local_state_for_remote_credentials(

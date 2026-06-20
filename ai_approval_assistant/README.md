@@ -9,6 +9,7 @@
 - `GET /health`：健康检查。
 - `POST /api/ai-approval/chat`：聊天审批主接口。
 - 按 `session_id` 保存多轮审批会话状态。
+- `GET/POST /api/ai-approval/time-travel/...`：查看、恢复和分叉会话 checkpoint，用于学习 LangGraph 的时光回溯思想。
 - 从 mock CRM 或真实 ERP 获取当前用户可发起的审批模板。
 - 远程模式下，普通问候和帮助问句走通用聊天，不会误触发审批模板搜索。
 - 明确审批意图时按关键词调用 `/api/approval/list` 搜索模板。
@@ -24,6 +25,7 @@
 - 用户明确回复“确认提交”后才创建审批。
 - 支持取消、修改和确认提交守卫。
 - 支持有界决策复核 `decision_review`，避免无限反复思考。
+- 支持轻量时光回溯：每轮聊天后记录一份内存 checkpoint，可查看历史状态、恢复当前会话或从历史点分叉新会话。
 - 支持写日志/日报意图路由，顶层 graph 中与审批、用户信息、普通聊天并列。
 - `daily_report_form_agent` 会加载日报表单字段、日报配置、草稿和同步数据，并返回 `ui_action.open_daily_report_form` 给前端弹正常写日志表单。
 - 前端填写完整日报 payload 后，agent 生成预览；用户明确回复“确认提交”后调用 `/oa/dailyReport/add` 提交。
@@ -558,6 +560,40 @@ go_out_start_time -> 清理 go_out_end_time、go_out_duration
 ```
 
 预览阶段修改字段后不会提交，会重新进入 `collect -> validate -> assignee -> preview` 链路，生成新的预览。
+
+### 7.5 时光回溯接口
+
+每次 `POST /api/ai-approval/chat` 成功处理后，后端都会保存一份内存 checkpoint。这个能力用于学习和调试：可以看某轮对话结束后的完整状态，也可以恢复到历史点继续跑，或者分叉成一个新 `session_id` 做对比实验。
+
+列出 checkpoint：
+
+```bash
+curl -s "http://127.0.0.1:8010/api/ai-approval/time-travel/S-demo/checkpoints?user_id=U001"
+```
+
+查看详情：
+
+```bash
+curl -s "http://127.0.0.1:8010/api/ai-approval/time-travel/S-demo/checkpoints/ckpt_xxx?user_id=U001"
+```
+
+恢复当前会话：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/time-travel/S-demo/restore \
+  -H 'Content-Type: application/json' \
+  -d '{"checkpoint_id":"ckpt_xxx","user_id":"U001"}'
+```
+
+从历史点分叉新会话：
+
+```bash
+curl -s -X POST http://127.0.0.1:8010/api/ai-approval/time-travel/S-demo/fork \
+  -H 'Content-Type: application/json' \
+  -d '{"checkpoint_id":"ckpt_xxx","user_id":"U001","new_session_id":"S-demo-branch"}'
+```
+
+当前实现是学习版内存 checkpoint，不依赖数据库；服务重启后 checkpoint 会丢失。接口返回的状态会脱敏 `authorization`、`token`、`password` 等字段，但恢复到内部 session 时仍保留原状态，方便继续调试。
 
 ## 8. 调试方式
 
@@ -1272,6 +1308,30 @@ redis:  {REDIS_PREFIX}ai_approval:session:{session_id} -> ApprovalState JSON
 ```
 
 默认优先使用 Redis；没有配置 Redis 或 Redis 不可用时自动回退内存。会话 Redis TTL 由 `AI_APPROVAL_SESSION_TTL_SECONDS` 控制，默认 7200 秒。
+
+### 14.6.1 时光回溯 checkpoint
+
+位置：
+
+```text
+app/services/time_travel_service.py
+app/api/time_travel.py
+app/schemas/time_travel.py
+```
+
+当前实现是学习版的内存 checkpoint：
+
+- `run_chat_turn` 在每轮会话保存后调用 `time_travel_service.record(...)`。
+- checkpoint 保存 `session_id`、`user_id`、轮次、用户消息、状态、意图、trace 摘要和一份深拷贝后的 `ApprovalState`。
+- `restore` 会把某个 checkpoint 的状态写回原 `session_id`。
+- `fork` 会把某个 checkpoint 的状态复制到新的 `session_id`，适合对比不同后续输入。
+- API 返回状态时会脱敏凭证字段，内部恢复仍使用原始状态。
+
+知识点：
+
+- LangGraph 的“时光回溯”本质是状态快照 + 线程标识 + checkpoint 选择。本项目先用项目自有服务模拟这个概念，代码更容易读。
+- checkpoint 和当前 session state 是两份深拷贝，后续聊天不会悄悄修改历史快照。
+- 生产化可以把 `TimeTravelService` 换成 Redis、文件或 LangGraph 原生 checkpointer；API 和 agent 挂点可以保持基本不变。
 
 ### 14.7 日志
 

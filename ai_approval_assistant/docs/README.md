@@ -58,6 +58,14 @@ docs/studio_debug.md
 - `awaiting_field_key` / `awaiting_field_label`：当前字段 key 和展示名。
 - `trace`：本轮 graph 走过的节点。
 
+时光回溯调试时重点看：
+
+- `GET /api/ai-approval/time-travel/{session_id}/checkpoints?user_id=...`：查看每轮聊天后的 checkpoint 列表。
+- `GET /api/ai-approval/time-travel/{session_id}/checkpoints/{checkpoint_id}?user_id=...`：查看某个 checkpoint 的状态快照。
+- `POST /api/ai-approval/time-travel/{session_id}/restore`：把当前会话恢复到历史状态。
+- `POST /api/ai-approval/time-travel/{session_id}/fork`：从历史状态复制出一个新的 `session_id`。
+- 当前 checkpoint 是 `run_chat_turn` 外层记录的学习版能力，所以它不会作为一个独立 LangGraph 节点显示在 Studio 图中。
+
 日报联调时还要重点看：
 
 - `ui_action`：当 `type=open_daily_report_form` 时，前端应打开正常写日志表单。
