@@ -1,8 +1,8 @@
 # AI Approval Assistant
 
-接口版 AI 聊天审批助手。
+接口版 AI 办公助手，当前以“审批发起 + 用户信息查询 + 写日志/日报”为核心场景。
 
-当前目录是独立后端骨架，只参考 `docs/ai_approval` 中的方案，不依赖仓库里的其他 demo 目录。当前实现同时支持本地 mock CRM 演示和真实 ERP 接口调用；真实接入的主要边界在 `app/services/crm_service.py`。
+当前目录是独立后端骨架，只参考 `docs/ai_approval` 中的方案，不依赖仓库里的其他 demo 目录。当前实现同时支持本地 mock CRM 演示和真实 ERP 接口调用；审批真实接入的主要边界在 `app/services/crm_service.py`，日报真实接入的主要边界在 `app/services/daily_report_service.py`。
 
 ## 1. 功能范围
 
@@ -24,6 +24,10 @@
 - 用户明确回复“确认提交”后才创建审批。
 - 支持取消、修改和确认提交守卫。
 - 支持有界决策复核 `decision_review`，避免无限反复思考。
+- 支持写日志/日报意图路由，顶层 graph 中与审批、用户信息、普通聊天并列。
+- `daily_report_form_agent` 会加载日报表单字段、日报配置、草稿和同步数据，并返回 `ui_action.open_daily_report_form` 给前端弹正常写日志表单。
+- 前端填写完整日报 payload 后，agent 生成预览；用户明确回复“确认提交”后调用 `/oa/dailyReport/add` 提交。
+- `daily_report_chat_agent` 支持简单快捷日报：用用户消息作为 `content` 生成预览，确认后提交；复杂自定义字段仍建议走表单版。
 
 当前 mock 审批模板库已经模拟“分类 + 常用审批 + 多模板”的形态，包含：
 
@@ -41,7 +45,7 @@
 - FastAPI：HTTP API 服务。
 - Uvicorn：ASGI 服务启动器。
 - Pydantic：请求、响应、审批模板和 CRM 数据结构。
-- LangGraph：审批会话流程编排。
+- LangGraph：多 Agent 会话流程编排。
 - DeepSeek Chat：可选 LLM，用于审批类型识别、字段抽取和决策复核。
 - Python logging：请求日志和后续业务日志基础设施。
 - pytest：接口测试。
@@ -61,13 +65,21 @@ ai_approval_assistant/
 │   │   ├── extractors.py
 │   │   ├── state.py
 │   │   └── workflow.py
+│   ├── agents/
+│   │   ├── approval_agent.py
+│   │   ├── daily_report_form_agent.py
+│   │   ├── daily_report_chat_agent.py
+│   │   └── user_profile_agent.py
 │   ├── mock_data/
 │   │   └── approval_templates.py
 │   ├── schemas/
 │   │   ├── approval.py
+│   │   ├── daily_report.py
 │   │   └── chat.py
 │   ├── services/
 │   │   ├── crm_service.py
+│   │   ├── daily_report_api_client.py
+│   │   ├── daily_report_service.py
 │   │   ├── model_service.py
 │   │   ├── prompt_config_service.py
 │   │   └── session_state_service.py
@@ -606,6 +618,9 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
 | `intent_router` | 在用户信息、普通聊天、审批发起等 Agent 之间路由 |
 | `user_info_agent` | 回答当前用户、上级、部门等信息，不进入审批子流程 |
 | `approval_creation_agent` | 审批发起子图入口 |
+| `daily_report_form_agent` | 写日志主流程，加载日报页面上下文并等待前端表单回填 |
+| `daily_report_chat_agent` | 写日志快捷流程，用用户消息生成简单日报内容 |
+| `submit_daily_report` | 用户确认后提交日报 |
 | `load_context` | 加载用户上下文和可用审批模板 |
 | `classify` | 识别用户意图和审批类型 |
 | `decision_review` | 有界决策复核，防止误提交或无限思考 |
@@ -985,7 +1000,7 @@ $env:PYTHONIOENCODING = "utf-8"
 
 也可以在 `.env` 配置 `AI_APPROVAL_STUDIO_ENABLED=true`，然后用 `.\start_windows.ps1` 同时启动 FastAPI 和 Studio。
 
-Studio 顶层图展示的是多 Agent 编排：`memory_agent -> user_profile_agent -> intent_router`，再按意图进入 `user_info_agent`、`general_chat` 或 `approval_creation_agent`。`load_context`、`classify`、`collect` 等审批细节已经收敛在 `approval_creation_agent` 子图里；普通问候、帮助问句和“我的用户信息是什么”不会经过这些审批节点。
+Studio 顶层图展示的是多 Agent 编排：`memory_agent -> user_profile_agent -> intent_router`，再按意图进入 `user_info_agent`、`general_chat`、`approval_creation_agent`、`daily_report_form_agent` 或 `daily_report_chat_agent`。`load_context`、`classify`、`collect` 等审批细节已经收敛在 `approval_creation_agent` 子图里；写日志/日报的字段加载和提交确认收敛在日报 agent 里；普通问候、帮助问句和“我的用户信息是什么”不会经过审批节点。
 
 如果当前环境没有 LangGraph CLI，可以先同步开发依赖：
 
@@ -1112,6 +1127,8 @@ intent_router
 user_info_agent
 general_chat
 approval_creation_agent
+daily_report_form_agent
+daily_report_chat_agent
 ```
 
 `approval_creation_agent` 子图节点：
@@ -1136,9 +1153,45 @@ general_chat
 - 管理每轮聊天审批的状态流转。
 - 普通聊天和帮助问句走 `general_chat`，不会误触发模板搜索。
 - 明确审批意图才进入模板搜索、字段收集和审批提交链路。
+- 明确写日志/日报意图时进入日报 agent；默认走表单版，明确“快速/简单/直接”时走聊天快捷版。
 - 控制提交前必须预览和确认。
 - 控制需要发起人选择办理人/审批人时暂停，并返回 `user_select`。
 - 控制有界复核，避免无限思考。
+
+### 14.3.1 日报 Agent 编排
+
+位置：
+
+```text
+app/agents/daily_report_form_agent.py
+app/agents/daily_report_chat_agent.py
+app/agents/daily_report_common.py
+app/services/daily_report_service.py
+app/services/daily_report_api_client.py
+app/schemas/daily_report.py
+```
+
+当前有两个写日志方案：
+
+- `daily_report_form_agent`：主路径。用户说“写今天日报/写日志”时，后端请求日报表单字段、日报设置、当天草稿和同步数据，然后返回 `ui_action.type=open_daily_report_form`。前端负责弹出正常写日志表单并收集完整 payload，包括自定义字段 `extends` 和 `extend_fields`。
+- `daily_report_chat_agent`：快捷路径。用户明确说“快速写日报/简单写日报/直接按这段写日报”时，用当前消息生成简单日报内容，适合无复杂自定义字段的场景。
+
+日报相关接口：
+
+| 接口 | 方法 | 用途 |
+|---|---|---|
+| `/api/field/formFields` | POST | 获取 `daily_reports` 自定义字段 |
+| `/oa/dailyReport/config/get?need_parse=1` | GET | 获取日报配置 |
+| `/oa/dailyReport/draft/get?type=1&date=YYYY-MM-DD` | GET | 获取当天草稿 |
+| `/api/oa/dailyReport/syncData` | POST | 获取流程、跟进、订单、工单、客户管理等同步数据 |
+| `/oa/dailyReport/add` | POST | 用户确认后提交日报 |
+
+知识点：
+
+- 动态表单不要在聊天里硬编码控件逻辑；复杂字段由前端原生日报表单收集，agent 只负责加载上下文、预览和确认提交。
+- 自定义字段必须完整透传 `extends` 和 `extend_fields`，否则提交接口无法还原用户填写的动态字段。
+- 写入类操作必须有确认守卫：预览后用户明确回复“确认提交”才调用 `/oa/dailyReport/add`。
+- 顶层 graph 只展示业务 agent，具体业务内部步骤收敛在各自 agent/service 中，避免 Studio 图被细节淹没。
 
 ### 14.4 模板驱动字段收集
 

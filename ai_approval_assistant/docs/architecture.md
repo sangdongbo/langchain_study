@@ -24,12 +24,14 @@ START
       -> general_chat
       -> approval_creation_agent
           -> approval_creation_subgraph
+      -> daily_report_form_agent
+      -> daily_report_chat_agent
 ```
 
 `memory_agent` records the current turn into `ApprovalAgentState.short_term_memory`.
 `user_profile_agent` loads current user and superior profiles. `intent_router` decides
-whether the turn should go to a user information answer, general chat, or the approval
-creation workflow. Future agents such as `order_agent`, `stock_agent`, or
+whether the turn should go to a user information answer, general chat, the approval
+creation workflow, or one of the daily report agents. Future agents such as `order_agent`, `stock_agent`, or
 `approval_process_agent` should be connected at this top orchestration layer instead of
 being hidden inside approval node functions.
 
@@ -38,6 +40,13 @@ being hidden inside approval node functions.
 `preview`, and `submit`. Studio therefore shows a clean top-level multi-agent graph,
 while the chat `trace` still records the internal approval nodes when a request really
 enters approval creation.
+
+`daily_report_form_agent` is the recommended write-log path. It loads the ERP daily
+report form fields, report config, draft, and sync data, then returns a UI action for
+the frontend to open the normal daily report form. `daily_report_chat_agent` is a
+minimal fast path for simple reports where the user's message can be used as the
+report content. Both daily report paths require an explicit confirmation before
+submitting to ERP.
 
 ## Approval Flow
 
@@ -74,6 +83,24 @@ get_current_user_info
 get_user_superior_info
 ```
 
+## Daily Report Agents
+
+Daily report code is split by responsibility:
+
+```text
+app/agents/daily_report_form_agent.py   form-first write-log workflow
+app/agents/daily_report_chat_agent.py   quick chat write-log workflow
+app/agents/daily_report_common.py       shared state, preview, and submit helpers
+app/services/daily_report_api_client.py ERP daily report HTTP calls
+app/services/daily_report_service.py    daily report context, preview, and submit facade
+app/schemas/daily_report.py             Pydantic daily report context/result schemas
+```
+
+The form-first agent intentionally does not reimplement dynamic field widgets in chat.
+The frontend owns collection of custom fields and sends back a complete payload with
+`extends` and `extend_fields`. The agent validates the payload, shows a preview, and
+submits only after a confirmation message.
+
 ## Services
 
 Services stay below agents and tools:
@@ -83,6 +110,7 @@ app/services/crm_api_client.py          ERP approval HTTP calls
 app/services/user_api_client.py         ERP user HTTP calls
 app/services/crm_service.py             approval business facade
 app/services/user_service.py            user business facade
+app/services/daily_report_service.py    daily report business facade
 app/services/crm_mapper.py              ERP approval response mapping
 app/services/approval_payload_builder.py approval submit payload assembly
 app/services/short_term_memory_service.py short session memory helpers

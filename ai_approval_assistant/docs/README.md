@@ -40,6 +40,9 @@ docs/studio_debug.md
 |---|---|
 | `["memory_agent", "user_profile_agent", "intent_router", "general_chat"]` | 普通聊天或帮助问句，不进入审批模板搜索 |
 | `["memory_agent", "user_profile_agent", "intent_router", "user_info_agent"]` | 查询当前用户、上级、部门等信息，不进入审批流程 |
+| `["memory_agent", "intent_router", "daily_report_form_agent"]` | 写日志/日报主流程，返回前端打开正常日报表单的 UI action |
+| `["memory_agent", "intent_router", "daily_report_chat_agent"]` | 快捷写日志/日报，用用户消息生成简单日报内容 |
+| `["memory_agent", "intent_router", "daily_report_form_agent", "submit_daily_report"]` | 用户确认后提交日报 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "clarify"]` | 审批发起需要用户澄清，比如多个模板待选择 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "collect"]` | 已进入审批字段收集 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "collect", "validate", "assignee"]` | 字段完整后获取审批节点，需要选择办理人/审批人 |
@@ -55,6 +58,12 @@ docs/studio_debug.md
 - `awaiting_field_key` / `awaiting_field_label`：当前字段 key 和展示名。
 - `trace`：本轮 graph 走过的节点。
 
+日报联调时还要重点看：
+
+- `ui_action`：当 `type=open_daily_report_form` 时，前端应打开正常写日志表单。
+- `daily_report_payload`：前端表单回填或快捷流程生成的完整提交 payload。
+- `daily_report_preview`：确认提交前展示给用户看的预览。
+
 运行时存储和性能：
 
 - 会话状态支持 Redis：`{REDIS_PREFIX}ai_approval:session:{session_id}`，TTL 由 `AI_APPROVAL_SESSION_TTL_SECONDS` 控制。
@@ -62,3 +71,4 @@ docs/studio_debug.md
 - 远程模板、表单字段、动态下拉都有 TTL 缓存，分别由 `AI_APPROVAL_TEMPLATE_CACHE_TTL_SECONDS` 和 `AI_APPROVAL_DYNAMIC_OPTIONS_CACHE_TTL_SECONDS` 控制。
 - CRM/ERP 调用会写 `crm.<接口>.timing` 日志，包含 `duration_ms`、`success`、`status_code` 和错误摘要。
 - `_child` 控件组会展开必填子字段，并保留 `group_key`、`group_label`、`group_type`，用于后续复杂明细组装。
+- 日报自定义字段由 `extends` 和 `extend_fields` 承载，表单版 agent 会完整透传，避免聊天侧重复实现动态字段控件。

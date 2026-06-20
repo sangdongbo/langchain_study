@@ -5,45 +5,28 @@ config:
 ---
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	load_context(load_context)
-	classify(classify)
-	decision_review(decision_review)
-	collect(collect)
-	validate(validate)
-	assignee(assignee)
-	preview(preview)
-	submit(submit)
-	already_submitted(already_submitted)
-	cancel(cancel)
-	clarify(clarify)
+	memory_agent(memory_agent)
+	user_profile_agent(user_profile_agent)
+	intent_router(intent_router)
+	user_info_agent(user_info_agent)
+	approval_creation_agent(approval_creation_agent)
+	daily_report_form_agent(daily_report_form_agent)
+	daily_report_chat_agent(daily_report_chat_agent)
 	general_chat(general_chat)
-	resume(resume)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> load_context;
-	assignee -. &nbsp;end&nbsp; .-> __end__;
-	assignee -.-> preview;
-	classify --> decision_review;
-	collect -. &nbsp;end&nbsp; .-> __end__;
-	collect -.-> validate;
-	decision_review -.-> already_submitted;
-	decision_review -.-> assignee;
-	decision_review -.-> cancel;
-	decision_review -.-> clarify;
-	decision_review -.-> collect;
-	decision_review -.-> general_chat;
-	decision_review -.-> resume;
-	decision_review -.-> submit;
-	load_context --> classify;
-	validate -. &nbsp;end&nbsp; .-> __end__;
-	validate -.-> assignee;
-	already_submitted --> __end__;
-	cancel --> __end__;
-	clarify --> __end__;
+	__start__ --> memory_agent;
+	intent_router -.-> approval_creation_agent;
+	intent_router -.-> daily_report_chat_agent;
+	intent_router -.-> daily_report_form_agent;
+	intent_router -.-> general_chat;
+	intent_router -. &nbsp;user_info_agent&nbsp; .-> user_profile_agent;
+	memory_agent --> intent_router;
+	user_profile_agent --> user_info_agent;
+	approval_creation_agent --> __end__;
+	daily_report_chat_agent --> __end__;
+	daily_report_form_agent --> __end__;
 	general_chat --> __end__;
-	preview --> __end__;
-	resume --> __end__;
-	submit --> __end__;
-	decision_review -. &nbsp;review&nbsp; .-> decision_review;
+	user_info_agent --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2
 	classDef first fill-opacity:0
 	classDef last fill:#bfb6fc
