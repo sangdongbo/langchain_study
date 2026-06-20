@@ -70,6 +70,8 @@ from app.agents.approval.state_helpers import (
     user_from_state,
 )
 from app.agents.user_profile_agent import load_user_profiles
+from app.agents.daily_report_chat_agent import daily_report_chat_agent_node
+from app.agents.daily_report_form_agent import daily_report_form_agent_node
 from app.schemas.approval import (
     ApprovalAssignee,
     ApprovalNode,
@@ -147,6 +149,8 @@ def create_workflow():
     builder.add_node("intent_router", intent_router_node)
     builder.add_node("user_info_agent", user_info_agent_node)
     builder.add_node("approval_creation_agent", create_approval_creation_workflow())
+    builder.add_node("daily_report_form_agent", daily_report_form_agent_node)
+    builder.add_node("daily_report_chat_agent", daily_report_chat_agent_node)
     builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "memory_agent")
     builder.add_edge("memory_agent", "intent_router")
@@ -156,11 +160,15 @@ def create_workflow():
         {
             "approval_creation_agent": "approval_creation_agent",
             "user_info_agent": "user_profile_agent",
+            "daily_report_form_agent": "daily_report_form_agent",
+            "daily_report_chat_agent": "daily_report_chat_agent",
             "general_chat": "general_chat",
         },
     )
     builder.add_edge("user_profile_agent", "user_info_agent")
     builder.add_edge("approval_creation_agent", END)
+    builder.add_edge("daily_report_form_agent", END)
+    builder.add_edge("daily_report_chat_agent", END)
     builder.add_edge("user_info_agent", END)
     builder.add_edge("general_chat", END)
     return builder.compile()
@@ -237,8 +245,22 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
     """顶层意图路由：决定本轮交给哪个业务 Agent 处理。"""
     text = state.get("user_message", "")
     trace = [*state.get("trace", []), "intent_router"]
+    if _has_active_daily_report_context(state):
+        return {
+            **state,
+            "intent": "daily_report",
+            "trace": trace,
+            "_route": "daily_report_form_agent",
+        }
     if _looks_like_user_info_question(text):
         return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
+    if _looks_like_daily_report_request(text):
+        route = (
+            "daily_report_chat_agent"
+            if _looks_like_fast_daily_report_request(text)
+            else "daily_report_form_agent"
+        )
+        return {**state, "intent": "daily_report", "trace": trace, "_route": route}
     if _has_pending_approval_selection(state):
         return {**state, "trace": trace, "_route": "approval_creation_agent"}
     if _has_active_approval_context(state) and (
@@ -999,6 +1021,45 @@ def _looks_like_user_info_question(message: str) -> bool:
             "上级是谁",
             "我的部门",
             "部门是什么",
+        )
+    )
+
+
+def _has_active_daily_report_context(state: ApprovalState) -> bool:
+    return state.get("status") in {
+        "awaiting_daily_report_form",
+        "awaiting_daily_report_confirmation",
+    }
+
+
+def _looks_like_daily_report_request(message: str) -> bool:
+    cleaned = message.strip()
+    return any(
+        marker in cleaned
+        for marker in (
+            "写日报",
+            "写日结",
+            "写日志",
+            "填日报",
+            "填日志",
+            "提交日报",
+            "提交日志",
+            "日报",
+            "日志",
+        )
+    )
+
+
+def _looks_like_fast_daily_report_request(message: str) -> bool:
+    cleaned = message.strip()
+    return _looks_like_daily_report_request(cleaned) and any(
+        marker in cleaned
+        for marker in (
+            "快速",
+            "简单",
+            "直接",
+            "按这段",
+            "按这些内容",
         )
     )
 
