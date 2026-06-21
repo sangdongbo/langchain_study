@@ -593,7 +593,22 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/time-travel/S-demo/fork \
   -d '{"checkpoint_id":"ckpt_xxx","user_id":"U001","new_session_id":"S-demo-branch"}'
 ```
 
-当前实现是学习版内存 checkpoint，不依赖数据库；服务重启后 checkpoint 会丢失。接口返回的状态会脱敏 `authorization`、`token`、`password` 等字段，但恢复到内部 session 时仍保留原状态，方便继续调试。
+也可以在 Swagger 里查看：服务启动后打开 `http://127.0.0.1:8010/docs`，找到 `time-travel` 分组。
+
+当前 checkpoint 默认优先保存到 Redis；没有配置 Redis 或 Redis 不可用时回退内存，不依赖数据库。接口返回的状态会脱敏 `authorization`、`token`、`password` 等字段，但恢复到内部 session 时仍保留原状态，方便继续调试。
+
+相关配置：
+
+```text
+AI_APPROVAL_CHECKPOINT_BACKEND=redis
+AI_APPROVAL_CHECKPOINT_TTL_SECONDS=7200
+AI_APPROVAL_CHECKPOINT_MAX_PER_SESSION=50
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+REDIS_PREFIX=lanerp20_local_
+```
 
 ## 8. 调试方式
 
@@ -1319,19 +1334,21 @@ app/api/time_travel.py
 app/schemas/time_travel.py
 ```
 
-当前实现是学习版的内存 checkpoint：
+当前实现是学习版的 Redis 优先 checkpoint：
 
 - `run_chat_turn` 在每轮会话保存后调用 `time_travel_service.record(...)`。
 - checkpoint 保存 `session_id`、`user_id`、轮次、用户消息、状态、意图、trace 摘要和一份深拷贝后的 `ApprovalState`。
 - `restore` 会把某个 checkpoint 的状态写回原 `session_id`。
 - `fork` 会把某个 checkpoint 的状态复制到新的 `session_id`，适合对比不同后续输入。
 - API 返回状态时会脱敏凭证字段，内部恢复仍使用原始状态。
+- Redis key：`{REDIS_PREFIX}ai_approval:checkpoints:{session_id}`。
+- 没有配置 Redis 或 Redis 连接失败时，会自动回退内存版，方便本地学习。
 
 知识点：
 
 - LangGraph 的“时光回溯”本质是状态快照 + 线程标识 + checkpoint 选择。本项目先用项目自有服务模拟这个概念，代码更容易读。
 - checkpoint 和当前 session state 是两份深拷贝，后续聊天不会悄悄修改历史快照。
-- 生产化可以把 `TimeTravelService` 换成 Redis、文件或 LangGraph 原生 checkpointer；API 和 agent 挂点可以保持基本不变。
+- 生产化可以把 `RedisTimeTravelService` 换成数据库、对象存储或 LangGraph 原生 checkpointer；API 和 agent 挂点可以保持基本不变。
 
 ### 14.7 日志
 

@@ -60,10 +60,12 @@ docs/studio_debug.md
 
 时光回溯调试时重点看：
 
+- Swagger：服务启动后打开 `http://127.0.0.1:8010/docs`，查看 `time-travel` 分组。
 - `GET /api/ai-approval/time-travel/{session_id}/checkpoints?user_id=...`：查看每轮聊天后的 checkpoint 列表。
 - `GET /api/ai-approval/time-travel/{session_id}/checkpoints/{checkpoint_id}?user_id=...`：查看某个 checkpoint 的状态快照。
 - `POST /api/ai-approval/time-travel/{session_id}/restore`：把当前会话恢复到历史状态。
 - `POST /api/ai-approval/time-travel/{session_id}/fork`：从历史状态复制出一个新的 `session_id`。
+- Redis key：`{REDIS_PREFIX}ai_approval:checkpoints:{session_id}`；无 Redis 时回退内存。
 - 当前 checkpoint 是 `run_chat_turn` 外层记录的学习版能力，所以它不会作为一个独立 LangGraph 节点显示在 Studio 图中。
 
 日报联调时还要重点看：

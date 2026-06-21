@@ -141,7 +141,14 @@ one snapshot, restore the original session to a checkpoint, or fork a checkpoint
 a new `session_id`. This intentionally stays outside the visible Studio graph because
 it is a wrapper around the chat turn, not a business agent node.
 
-The current implementation is in-memory only. It demonstrates the checkpoint model
-without adding a database or migration. A production version could swap the service
-implementation for Redis, file storage, or LangGraph's native checkpointer while
-keeping the API shape and chat-turn hook mostly stable.
+The current implementation prefers Redis and falls back to memory when Redis is not
+configured or unavailable. Checkpoints use this key shape:
+
+```text
+{REDIS_PREFIX}ai_approval:checkpoints:{session_id}
+```
+
+This demonstrates the checkpoint model without adding a database or migration. A
+production version could swap the service implementation for database storage,
+object storage, or LangGraph's native checkpointer while keeping the API shape and
+chat-turn hook mostly stable.
