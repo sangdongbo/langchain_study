@@ -11,6 +11,9 @@ ApprovalStatus = Literal[
     "submitted",
     "cancelled",
     "error",
+    "awaiting_daily_report_form",
+    "awaiting_daily_report_confirmation",
+    "daily_report_submitted",
 ]
 
 
@@ -89,3 +92,6 @@ class ChatResponse(BaseModel):
     field_errors: list[FieldError] = Field(default_factory=list)
     idempotency_key: str | None = None
     trace: list[str] = Field(default_factory=list)
+    ui_action: dict[str, Any] | None = None
+    daily_report_payload: dict[str, Any] | None = None
+    daily_report_preview: dict[str, Any] | None = None

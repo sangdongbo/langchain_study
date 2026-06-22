@@ -10,21 +10,18 @@ graph TD;
 	intent_router(intent_router)
 	user_info_agent(user_info_agent)
 	approval_creation_agent(approval_creation_agent)
-	daily_report_form_agent(daily_report_form_agent)
 	daily_report_chat_agent(daily_report_chat_agent)
 	general_chat(general_chat)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> memory_agent;
 	intent_router -.-> approval_creation_agent;
 	intent_router -.-> daily_report_chat_agent;
-	intent_router -.-> daily_report_form_agent;
 	intent_router -.-> general_chat;
 	intent_router -. &nbsp;user_info_agent&nbsp; .-> user_profile_agent;
 	memory_agent --> intent_router;
 	user_profile_agent --> user_info_agent;
 	approval_creation_agent --> __end__;
 	daily_report_chat_agent --> __end__;
-	daily_report_form_agent --> __end__;
 	general_chat --> __end__;
 	user_info_agent --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from app.agents import approval_agent
-from app.agents.approval_agent import create_workflow
 from app.agents.approval_agent import intent_router_node
 from app.agents.approval_agent import user_info_agent_node
+from app.graph.approval_workflow import create_workflow
 from app.graph.state import initial_state
 from app.tools import user_tools
 

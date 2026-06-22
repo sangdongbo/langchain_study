@@ -1,7 +1,6 @@
 from __future__ import annotations
 import logging
 
-from langgraph.graph import END, START, StateGraph
 from app.graph.extractors import (
     classify_approval_type,
     extract_slots,
@@ -22,7 +21,6 @@ from app.agents.approval.assignee import (
 )
 from app.agents.approval.constants import (
     FIELD_DEPENDENCIES,
-    LOCAL_MOCK_APPROVAL_TYPES,
     MAX_REVIEW_COUNT,
 )
 from app.agents.approval.messages import (
@@ -44,7 +42,6 @@ from app.agents.approval.responses import (
     build_preview,
     field_labels_for_state,
     labels_from_template,
-    to_chat_response,
 )
 from app.agents.approval.routing import (
     has_active_approval_context,
@@ -70,8 +67,6 @@ from app.agents.approval.state_helpers import (
     user_from_state,
 )
 from app.agents.user_profile_agent import load_user_profiles
-from app.agents.daily_report_chat_agent import daily_report_chat_agent_node
-from app.agents.daily_report_form_agent import daily_report_form_agent_node
 from app.schemas.approval import (
     ApprovalAssignee,
     ApprovalNode,
@@ -81,21 +76,13 @@ from app.schemas.approval import (
 from app.schemas.chat import (
     ApprovalPreview,
     AwaitingInput,
-    ChatRequest,
-    ChatResponse,
     PreviewField,
 )
 from app.services.crm_service import crm_approval_service
 from app.services.model_service import model_service
-from app.services.session_state_service import (
-    session_state_service,
-)
-from app.services.time_travel_service import time_travel_service
 from app.services.short_term_memory_service import (
-    append_assistant_message,
     with_memory_context,
 )
-from app.services.debug_log_service import write_debug_log
 from app.services.template_candidate_service import (
     select_template_candidates,
 )
@@ -103,135 +90,6 @@ from app.tools.user_tools import get_current_user_info, get_user_superior_info
 
 
 logger = logging.getLogger("ai_approval_assistant.user")
-
-
-def run_chat_turn(request: ChatRequest) -> ChatResponse:
-    """将单轮聊天请求放入审批工作流图执行。"""
-    write_debug_log("chat.request", request.model_dump())
-    state = session_state_service.load(request.session_id, request.user_id)
-    if _should_reset_local_state_for_remote_credentials(state, request):
-        state = initial_state(request.session_id, request.user_id)
-    state["session_id"] = request.session_id
-    state["user_id"] = request.user_id
-    state["uid"] = request.uid
-    state["authorization"] = request.authorization
-    state["user_message"] = request.message.strip()
-    state["_answer"] = request.answer
-    state["trace"] = []
-    graph = create_workflow()
-    result = graph.invoke(state)
-    response = _to_response(result)
-    append_assistant_message(result, response.assistant_message)
-    session_state_service.save(result)
-    _record_time_travel_checkpoint(result, request.message.strip())
-    write_debug_log("chat.response", response.model_dump())
-    return response
-
-
-def _record_time_travel_checkpoint(state: ApprovalState, user_message: str) -> None:
-    try:
-        time_travel_service.record(state, user_message=user_message)
-    except Exception as exc:
-        logger.warning("Time travel checkpoint record failed: %s", exc)
-
-
-def _should_reset_local_state_for_remote_credentials(
-    state: ApprovalState, request: ChatRequest
-) -> bool:
-    """真实 ERP 凭证进入后，丢弃旧的本地模拟审批会话。"""
-    if not request.authorization or not request.uid:
-        return False
-    approval_type = state.get("approval_type")
-    return bool(approval_type and approval_type in LOCAL_MOCK_APPROVAL_TYPES)
-
-
-def create_workflow():
-    """创建并编译顶层多 Agent 编排图。
-
-    顶层图只保留业务 Agent 级别的节点，审批创建内部的字段收集、
-    审批人选择和提交等步骤收敛在 approval_creation_agent 子图里。
-    这样 Studio 首屏能先看清楚多 Agent 编排，而不是直接被审批细节铺满。
-    """
-    builder = StateGraph(ApprovalState)
-    builder.add_node("memory_agent", memory_agent_node)
-    builder.add_node("user_profile_agent", user_profile_agent_node)
-    builder.add_node("intent_router", intent_router_node)
-    builder.add_node("user_info_agent", user_info_agent_node)
-    builder.add_node("approval_creation_agent", create_approval_creation_workflow())
-    builder.add_node("daily_report_form_agent", daily_report_form_agent_node)
-    builder.add_node("daily_report_chat_agent", daily_report_chat_agent_node)
-    builder.add_node("general_chat", general_chat_node)
-    builder.add_edge(START, "memory_agent")
-    builder.add_edge("memory_agent", "intent_router")
-    builder.add_conditional_edges(
-        "intent_router",
-        _route,
-        {
-            "approval_creation_agent": "approval_creation_agent",
-            "user_info_agent": "user_profile_agent",
-            "daily_report_form_agent": "daily_report_form_agent",
-            "daily_report_chat_agent": "daily_report_chat_agent",
-            "general_chat": "general_chat",
-        },
-    )
-    builder.add_edge("user_profile_agent", "user_info_agent")
-    builder.add_edge("approval_creation_agent", END)
-    builder.add_edge("daily_report_form_agent", END)
-    builder.add_edge("daily_report_chat_agent", END)
-    builder.add_edge("user_info_agent", END)
-    builder.add_edge("general_chat", END)
-    return builder.compile()
-
-
-def create_approval_creation_workflow():
-    """创建审批发起 Agent 的内部子图。"""
-    builder = StateGraph(ApprovalState)
-    builder.add_node("approval_creation_entry", approval_creation_agent_node)
-    builder.add_node("load_context", load_context_node)
-    builder.add_node("classify", classify_node)
-    builder.add_node("decision_review", decision_review_node)
-    builder.add_node("collect", collect_node)
-    builder.add_node("validate", validate_node)
-    builder.add_node("assignee", assignee_node)
-    builder.add_node("preview", preview_node)
-    builder.add_node("submit", submit_node)
-    builder.add_node("already_submitted", already_submitted_node)
-    builder.add_node("cancel", cancel_node)
-    builder.add_node("clarify", clarify_node)
-    builder.add_node("general_chat", general_chat_node)
-    builder.add_node("resume", resume_node)
-    builder.add_edge(START, "approval_creation_entry")
-    builder.add_edge("approval_creation_entry", "load_context")
-    builder.add_edge("load_context", "classify")
-    builder.add_edge("classify", "decision_review")
-    builder.add_conditional_edges(
-        "decision_review",
-        _route,
-        {
-            "collect": "collect",
-            "submit": "submit",
-            "cancel": "cancel",
-            "clarify": "clarify",
-            "review": "decision_review",
-            "already_submitted": "already_submitted",
-            "general_chat": "general_chat",
-            "assignee": "assignee",
-            "resume": "resume",
-        },
-    )
-    builder.add_conditional_edges(
-        "collect", _route, {"validate": "validate", "end": END}
-    )
-    builder.add_conditional_edges("validate", _route, {"assignee": "assignee", "end": END})
-    builder.add_conditional_edges("assignee", _route, {"preview": "preview", "end": END})
-    builder.add_edge("preview", END)
-    builder.add_edge("submit", END)
-    builder.add_edge("already_submitted", END)
-    builder.add_edge("cancel", END)
-    builder.add_edge("clarify", END)
-    builder.add_edge("general_chat", END)
-    builder.add_edge("resume", END)
-    return builder.compile()
 
 
 def memory_agent_node(state: ApprovalState) -> ApprovalState:
@@ -259,17 +117,17 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
             **state,
             "intent": "daily_report",
             "trace": trace,
-            "_route": "daily_report_form_agent",
+            "_route": "daily_report_chat_agent",
         }
     if _looks_like_user_info_question(text):
         return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
     if _looks_like_daily_report_request(text):
-        route = (
-            "daily_report_chat_agent"
-            if _looks_like_fast_daily_report_request(text)
-            else "daily_report_form_agent"
-        )
-        return {**state, "intent": "daily_report", "trace": trace, "_route": route}
+        return {
+            **state,
+            "intent": "daily_report",
+            "trace": trace,
+            "_route": "daily_report_chat_agent",
+        }
     if _has_pending_approval_selection(state):
         return {**state, "trace": trace, "_route": "approval_creation_agent"}
     if _has_active_approval_context(state) and (
@@ -1035,6 +893,8 @@ def _looks_like_user_info_question(message: str) -> bool:
 
 
 def _has_active_daily_report_context(state: ApprovalState) -> bool:
+    if state.get("awaiting_field") == "daily_report_content":
+        return True
     return state.get("status") in {
         "awaiting_daily_report_form",
         "awaiting_daily_report_confirmation",
@@ -1055,20 +915,6 @@ def _looks_like_daily_report_request(message: str) -> bool:
             "提交日志",
             "日报",
             "日志",
-        )
-    )
-
-
-def _looks_like_fast_daily_report_request(message: str) -> bool:
-    cleaned = message.strip()
-    return _looks_like_daily_report_request(cleaned) and any(
-        marker in cleaned
-        for marker in (
-            "快速",
-            "简单",
-            "直接",
-            "按这段",
-            "按这些内容",
         )
     )
 
@@ -1287,11 +1133,6 @@ def _template_choice_message(templates: list[ApprovalTemplate]) -> str:
 def _crm_error_message(error: str) -> str:
     """将 CRM 接口错误转换为用户可理解的聊天提示。"""
     return crm_error_message(error)
-
-
-def _to_response(state: ApprovalState) -> ChatResponse:
-    """将图状态转换为对外聊天响应结构。"""
-    return to_chat_response(state, crm_approval_service)
 
 
 def _field_labels_for_state(

@@ -2106,3 +2106,34 @@ def test_validation_returns_field_errors() -> None:
     assert "开始时间不能晚于结束时间" in body["assistant_message"]
     assert {"field": "start_date", "message": "开始时间不能晚于结束时间。"} in body["field_errors"]
     assert {"field": "end_date", "message": "开始时间不能晚于结束时间。"} in body["field_errors"]
+
+
+def test_chat_api_returns_error_response_when_workflow_raises(monkeypatch) -> None:
+    session_state_service.clear("S-workflow-error")
+
+    class BrokenWorkflow:
+        def invoke(self, state):
+            raise RuntimeError("daily report add failed unexpectedly")
+
+    monkeypatch.setattr(
+        "app.services.chat_application_service.create_workflow",
+        lambda: BrokenWorkflow(),
+    )
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-workflow-error",
+            "user_id": "863",
+            "message": "确认",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "error"
+    assert "daily report add failed unexpectedly" in body["assistant_message"]
+    assert body["field_errors"] == [
+        {"field": "chat", "message": "daily report add failed unexpectedly"}
+    ]
+    assert "chat_error" in body["trace"]

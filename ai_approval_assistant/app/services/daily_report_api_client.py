@@ -5,7 +5,11 @@ from typing import Any
 import httpx
 
 from app.schemas.approval import UserContext
-from app.services.crm_config_service import _join_url, _trim_base_url, DEFAULT_CRM_BASE_URL
+from app.services.crm_config_service import (
+    _join_url,
+    _trim_base_url,
+    load_crm_endpoint_config,
+)
 
 DEFAULT_DAILY_REPORT_SYNC_TYPES = [
     "process",
@@ -21,7 +25,7 @@ class DailyReportApiClient:
 
     def __init__(self, http_client: httpx.Client | None = None, base_url: str | None = None) -> None:
         self._http_client = http_client or httpx.Client(timeout=10)
-        self._base_url = _trim_base_url(base_url or DEFAULT_CRM_BASE_URL)
+        self._base_url = _trim_base_url(base_url or _base_url_from_config())
 
     def get_form_fields(self, user: UserContext) -> dict[str, Any]:
         return self._post(
@@ -47,6 +51,9 @@ class DailyReportApiClient:
         )
         response.raise_for_status()
         return response.json()
+
+    def set_draft(self, user: UserContext, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post(user, "/oa/dailyReport/config/draft/set", payload)
 
     def sync_data(self, user: UserContext, report_type: int, report_date: str) -> dict[str, Any]:
         return self._post(
@@ -81,3 +88,11 @@ def _headers(user: UserContext) -> dict[str, str]:
         "Authorization": user.authorization or "",
         "UID": user.uid or "",
     }
+
+
+def _base_url_from_config() -> str:
+    approval_list_url = load_crm_endpoint_config().approval_list_url
+    marker = "/api/approval/list"
+    if approval_list_url.endswith(marker):
+        return approval_list_url[: -len(marker)]
+    return approval_list_url

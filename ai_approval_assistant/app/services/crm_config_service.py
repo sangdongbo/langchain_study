@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 from pydantic import BaseModel
 
-DEFAULT_CRM_BASE_URL = "http://localhost:8002"
+DEFAULT_CRM_BASE_URL = "http://127.0.0.1:8002"
 APPROVAL_LIST_PATH = "/api/approval/list"
 FORM_FIELDS_PATH = "/api/field/formFields"
 GET_NODES_PATH = "/api/approval/getNodes"

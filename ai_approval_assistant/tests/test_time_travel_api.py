@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.services.session_state_service import session_state_service
+from app.services.time_travel_service import time_travel_service
 
 
 client = TestClient(app)
@@ -114,3 +115,4 @@ def _post_chat(session_id: str, user_id: str, message: str) -> None:
 
 def _clear_session(session_id: str) -> None:
     session_state_service.clear(session_id)
+    time_travel_service.clear(session_id)

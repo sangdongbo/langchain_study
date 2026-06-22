@@ -5,6 +5,7 @@ from datetime import date
 from app.graph.extractors import is_confirm_message
 from app.graph.state import ApprovalState
 from app.schemas.approval import UserContext
+from app.services.daily_report_service import DailyReportSubmitError
 
 
 def user_from_daily_report_state(state: ApprovalState) -> UserContext:
@@ -44,7 +45,17 @@ def submit_if_confirmed(state: ApprovalState, service) -> ApprovalState | None:
     if not is_confirm_message(state.get("user_message", "")):
         return None
     user = user_from_daily_report_state(state)
-    result = service.submit_payload(user, state.get("daily_report_payload") or {})
+    try:
+        result = service.submit_payload(user, state.get("daily_report_payload") or {})
+    except DailyReportSubmitError as exc:
+        message = str(exc)
+        return {
+            **state,
+            "status": "error",
+            "assistant_message": f"日报提交失败：{message}",
+            "field_errors": [{"field": "daily_report", "message": message}],
+            "trace": [*state.get("trace", []), "submit_daily_report"],
+        }
     return {
         **state,
         "status": "daily_report_submitted",

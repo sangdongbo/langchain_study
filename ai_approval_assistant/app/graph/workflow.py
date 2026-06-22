@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from app.agents import approval_agent as _approval_agent
 from app.agents.approval_agent import *  # noqa: F403
-from app.agents.approval_agent import create_workflow, run_chat_turn
+from app.graph.approval_workflow import (
+    create_approval_creation_workflow,
+    create_workflow,
+    run_chat_turn,
+)
 
 
 class _WorkflowObjectProxy:
@@ -26,5 +30,6 @@ model_service = _WorkflowObjectProxy("model_service")
 
 __all__ = [
     "create_workflow",
+    "create_approval_creation_workflow",
     "run_chat_turn",
 ]

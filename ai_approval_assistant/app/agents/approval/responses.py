@@ -44,6 +44,9 @@ def to_chat_response(state: ApprovalState, crm_approval_service) -> ChatResponse
         field_errors=state.get("field_errors", []),
         idempotency_key=state.get("idempotency_key"),
         trace=state.get("trace", []),
+        ui_action=state.get("ui_action"),
+        daily_report_payload=state.get("daily_report_payload"),
+        daily_report_preview=state.get("daily_report_preview"),
     )
 
 
@@ -82,7 +85,13 @@ def actions_for_status(status: str) -> list[str]:
         return ["reply", "cancel"]
     if status == "awaiting_confirmation":
         return ["confirm", "modify", "cancel"]
+    if status == "awaiting_daily_report_form":
+        return ["fill_form", "cancel"]
+    if status == "awaiting_daily_report_confirmation":
+        return ["confirm", "modify", "cancel"]
     if status == "submitted":
+        return ["query_status"]
+    if status == "daily_report_submitted":
         return ["query_status"]
     return ["reply"]
 
