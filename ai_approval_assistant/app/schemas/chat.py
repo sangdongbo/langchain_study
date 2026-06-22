@@ -49,6 +49,7 @@ class AwaitingInput(BaseModel):
     min: Any | None = None
     max: Any | None = None
     value_schema: dict[str, str] | None = None
+    value: Any | None = None
 
 
 class PreviewField(BaseModel):

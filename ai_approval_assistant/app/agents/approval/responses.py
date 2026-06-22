@@ -88,7 +88,7 @@ def actions_for_status(status: str) -> list[str]:
     if status == "awaiting_daily_report_form":
         return ["fill_form", "cancel"]
     if status == "awaiting_daily_report_confirmation":
-        return ["confirm", "modify", "cancel"]
+        return ["confirm", "modify", "modify_date", "cancel"]
     if status == "submitted":
         return ["query_status"]
     if status == "daily_report_submitted":

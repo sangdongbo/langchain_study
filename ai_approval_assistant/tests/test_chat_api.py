@@ -8,6 +8,7 @@ os.environ["AI_APPROVAL_USE_LLM"] = "false"
 os.environ["AI_APPROVAL_SESSION_BACKEND"] = "memory"
 
 from app.main import app  # noqa: E402
+from app.graph.state import initial_state  # noqa: E402
 from app.schemas.approval import ApprovalAssignee, ApprovalNode, ApprovalTemplate  # noqa: E402
 from app.services.session_state_service import session_state_service  # noqa: E402
 from app.services.model_service import model_service  # noqa: E402
@@ -2137,3 +2138,125 @@ def test_chat_api_returns_error_response_when_workflow_raises(monkeypatch) -> No
         {"field": "chat", "message": "daily report add failed unexpectedly"}
     ]
     assert "chat_error" in body["trace"]
+
+
+def test_daily_report_content_editor_returns_existing_content(monkeypatch) -> None:
+    session_state_service.clear("S-daily-report-edit-content")
+    state = initial_state("S-daily-report-edit-content", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-edit-content",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-edit-content",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改",
+            "answer": {
+                "field_key": "action",
+                "type": "single_select",
+                "label": "修改",
+                "value": "modify",
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_content"
+    assert body["awaiting_input"] == {
+        "field_key": "daily_report_content",
+        "label": "工作内容",
+        "type": "textarea",
+        "required": True,
+        "placeholder": "请修改日志的工作内容",
+        "options": [],
+        "multiple": None,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+        "value": "用户之前填写的日志内容",
+    }
+
+
+def test_daily_report_date_editor_returns_existing_date(monkeypatch) -> None:
+    session_state_service.clear("S-daily-report-edit-date")
+    state = initial_state("S-daily-report-edit-date", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-edit-date",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-edit-date",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改日期",
+            "answer": {
+                "field_key": "action",
+                "type": "single_select",
+                "label": "修改日期",
+                "value": "modify_date",
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_date"
+    assert body["awaiting_input"] == {
+        "field_key": "daily_report_date",
+        "label": "日志时间",
+        "type": "date",
+        "required": True,
+        "placeholder": "请选择日志时间",
+        "options": [],
+        "multiple": None,
+        "min": None,
+        "max": None,
+        "value_schema": None,
+        "value": "2026-06-22",
+    }

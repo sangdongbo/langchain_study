@@ -24,6 +24,32 @@ def awaiting_input_for_state(
         return template_choice_input(template_candidates_from_state(state))
 
     awaiting_field = state.get("awaiting_field")
+    if awaiting_field == "daily_report_content":
+        payload = state.get("daily_report_payload") or {}
+        return AwaitingInput(
+            field_key="daily_report_content",
+            label="工作内容",
+            type="textarea",
+            required=True,
+            placeholder="请修改日志的工作内容"
+            if state.get("status") == "collecting"
+            else "请输入日志的工作内容",
+            options=[],
+            value=payload.get("content", ""),
+        )
+
+    if awaiting_field == "daily_report_date":
+        payload = state.get("daily_report_payload") or {}
+        return AwaitingInput(
+            field_key="daily_report_date",
+            label="日志时间",
+            type="date",
+            required=True,
+            placeholder="请选择日志时间",
+            options=[],
+            value=payload.get("date") or state.get("daily_report_date"),
+        )
+
     if state.get("status") == "awaiting_assignee_selection":
         node_id = awaiting_assignee_node_id(awaiting_field)
         nodes = nodes_from_state(state)

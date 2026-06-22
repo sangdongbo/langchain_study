@@ -432,6 +432,46 @@ def test_daily_report_chat_agent_uses_followup_content_after_empty_payload(monke
     assert service.saved_drafts[-1]["content"] == "今天完成客户跟进"
 
 
+def test_daily_report_chat_agent_uses_structured_followup_content(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-followup-structured-content", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "提交",
+            "_answer": {
+                "field_key": "daily_report_content",
+                "type": "textarea",
+                "label": "修改后的工作内容",
+                "value": "修改后的工作内容",
+            },
+            "status": "collecting",
+            "awaiting_field": "daily_report_content",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {"field_513687": {"value": "1122"}},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert result["status"] == "awaiting_daily_report_confirmation"
+    assert result["awaiting_field"] is None
+    assert result["daily_report_payload"]["content"] == "修改后的工作内容"
+    assert result["daily_report_preview"]["content"] == "修改后的工作内容"
+    assert service.saved_drafts[-1]["content"] == "修改后的工作内容"
+
+
 def test_daily_report_chat_agent_modifies_content_before_confirmation(monkeypatch) -> None:
     service = FakeDailyReportService()
     monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
@@ -502,6 +542,127 @@ def test_daily_report_chat_agent_modifies_structured_content_before_confirmation
     assert result["status"] == "awaiting_daily_report_confirmation"
     assert result["daily_report_payload"]["content"] == "今天完成客户拜访"
     assert service.saved_drafts[-1]["content"] == "今天完成客户拜访"
+
+
+def test_daily_report_chat_agent_reopens_content_editor_from_confirmation(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-reopen-content-editor", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "修改",
+            "_answer": {
+                "field_key": "action",
+                "type": "single_select",
+                "label": "修改",
+                "value": "modify",
+            },
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {"field_513687": {"value": "1122"}},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert result["status"] == "collecting"
+    assert result["awaiting_field"] == "daily_report_content"
+    assert result["daily_report_payload"]["content"] == "用户之前填写的日志内容"
+    assert result["assistant_message"] == "请修改日志的工作内容，提交后我会重新给你确认。"
+
+
+def test_daily_report_chat_agent_reopens_date_editor_from_confirmation(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-reopen-date-editor", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "修改日期",
+            "_answer": {
+                "field_key": "action",
+                "type": "single_select",
+                "label": "修改日期",
+                "value": "modify_date",
+            },
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {"field_513687": {"value": "1122"}},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert result["status"] == "collecting"
+    assert result["awaiting_field"] == "daily_report_date"
+    assert result["daily_report_date"] == "2026-06-22"
+    assert result["assistant_message"] == "请选择要填写日报的日期，我会重新获取当天草稿。"
+
+
+def test_daily_report_chat_agent_reloads_context_after_date_change(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    service.context.default_payload["date"] = "2026-06-21"
+    service.context.default_payload["content"] = "新日期的草稿内容"
+    service.context.report_date = "2026-06-21"
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-date-change", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "提交",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "type": "date",
+                "label": "2026-06-21",
+                "value": "2026-06-21",
+            },
+            "status": "collecting",
+            "awaiting_field": "daily_report_date",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "旧日期的草稿内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {"field_513687": {"value": "1122"}},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert service.load_calls == 1
+    assert result["status"] == "awaiting_daily_report_confirmation"
+    assert result["awaiting_field"] is None
+    assert result["daily_report_date"] == "2026-06-21"
+    assert result["daily_report_payload"]["date"] == "2026-06-21"
+    assert result["daily_report_payload"]["content"] == "新日期的草稿内容"
+    assert result["daily_report_preview"]["date"] == "2026-06-21"
 
 
 def test_daily_report_chat_agent_submits_confirmed_payload(monkeypatch) -> None:
