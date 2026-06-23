@@ -26,8 +26,10 @@
 - 支持取消、修改和确认提交守卫。
 - 支持有界决策复核 `decision_review`，避免无限反复思考。
 - 支持轻量时光回溯：每轮聊天后记录一份内存 checkpoint，可查看历史状态、恢复当前会话或从历史点分叉新会话。
-- 支持写日志/日报意图路由，顶层 graph 中与审批、用户信息、普通聊天并列。
-- `daily_report_chat_agent` 会加载日报字段、当天草稿和同步数据，整理完整日报 payload。
+- 支持写日志/日报意图路由，顶层 `daily_report_agent` 与审批、用户信息、普通聊天并列。
+- `daily_report_agent` 是独立日报子图，内部拆分动作识别、上下文加载、内容/日期编辑、草稿保存、预览确认、提交和取消节点。
+- 日报人机协作用 LangGraph `interrupt` 暂停，前端可弹出内容、日期和确认控件，用户恢复后继续同一条 graph 线程。
+- 日报字段、草稿、同步数据、草稿保存、预览和提交通过 `app/tools/daily_report_tools.py` 封装，不再把 ERP 调用硬写在单个节点里。
 - 用户确认预览后，agent 调用 `/oa/dailyReport/add` 提交；自定义字段通过 `extends` 和 `extend_fields` 沿用草稿/字段接口结构。
 
 当前 mock 审批模板库已经模拟“分类 + 常用审批 + 多模板”的形态，包含：
@@ -63,8 +65,11 @@ ai_approval_assistant/
 │   │   ├── chat.py
 │   │   └── health.py
 │   ├── graph/
+│   │   ├── approval_workflow.py
+│   │   ├── daily_report_workflow.py
 │   │   ├── extractors.py
 │   │   ├── state.py
+│   │   ├── studio.py
 │   │   └── workflow.py
 │   ├── agents/
 │   │   ├── approval_agent.py
@@ -667,8 +672,15 @@ curl -s -X POST http://127.0.0.1:8010/api/ai-approval/chat \
 | `intent_router` | 在用户信息、普通聊天、审批发起等 Agent 之间路由 |
 | `user_info_agent` | 回答当前用户、上级、部门等信息，不进入审批子流程 |
 | `approval_creation_agent` | 审批发起子图入口 |
-| `daily_report_chat_agent` | 写日志流程，加载字段/草稿/同步数据，整理 payload 并等待用户确认提交 |
+| `daily_report_agent` | 写日志/日报子图入口，内部编排字段/草稿/同步数据加载、编辑、保存、预览和提交 |
+| `daily_report_action` | 识别日报流程动作：开始、改内容、改日期、确认提交、取消 |
+| `load_daily_report_context` | 获取日报字段、配置、草稿和同步数据 |
+| `collect_daily_report_content` | 用 `interrupt` 让用户补充或再次编辑工作内容 |
+| `collect_daily_report_date` | 用 `interrupt` 让用户修改日报日期并重新加载当天草稿 |
+| `save_daily_report_draft` | 调用草稿保存接口同步当前 payload |
+| `preview_daily_report` | 生成提交前预览和确认动作 |
 | `submit_daily_report` | 用户确认后提交日报 |
+| `cancel_daily_report` | 取消本次日报提交 |
 | `load_context` | 加载用户上下文和可用审批模板 |
 | `classify` | 识别用户意图和审批类型 |
 | `decision_review` | 有界决策复核，防止误提交或无限思考 |
@@ -1164,6 +1176,8 @@ app/schemas/
 
 ```text
 app/graph/workflow.py
+app/graph/approval_workflow.py
+app/graph/daily_report_workflow.py
 ```
 
 顶层 Agent 节点：
@@ -1175,7 +1189,7 @@ intent_router
 user_info_agent
 general_chat
 approval_creation_agent
-daily_report_chat_agent
+daily_report_agent
 ```
 
 `approval_creation_agent` 子图节点：
@@ -1200,7 +1214,7 @@ general_chat
 - 管理每轮聊天审批的状态流转。
 - 普通聊天和帮助问句走 `general_chat`，不会误触发模板搜索。
 - 明确审批意图才进入模板搜索、字段收集和审批提交链路。
-- 明确写日志/日报意图时统一进入 `daily_report_chat_agent`。
+- 明确写日志/日报意图时统一进入 `daily_report_agent` 日报子图。
 - 控制提交前必须预览和确认。
 - 控制需要发起人选择办理人/审批人时暂停，并返回 `user_select`。
 - 控制有界复核，避免无限思考。
@@ -1211,6 +1225,9 @@ general_chat
 
 ```text
 app/agents/daily_report_chat_agent.py
+app/agents/daily_report/action_agent.py
+app/graph/daily_report_workflow.py
+app/tools/daily_report_tools.py
 app/agents/daily_report_common.py
 app/services/daily_report_service.py
 app/services/daily_report_api_client.py
@@ -1219,7 +1236,11 @@ app/schemas/daily_report.py
 
 当前写日志流程：
 
-- `daily_report_chat_agent`：用户说“写今天日报/写日志”时，后端请求日报字段、当天草稿和同步数据，组装 `content`、`recipients`、`cc_recipients`、`extends`、`extend_fields`，展示预览并在用户确认后提交。
+- 顶层图只挂 `daily_report_agent`，日报内部由 `DailyReportSubGraph` 拆成入口、动作识别、上下文加载、内容编辑、日期编辑、草稿保存、预览、提交和取消节点。
+- `daily_report_action` 优先识别结构化 `answer`，也能用规则/模型识别用户是要改内容、改日期、确认提交还是取消。
+- `load_daily_report_context` 请求日报字段、配置、当天草稿和同步数据，组装 `content`、`recipients`、`cc_recipients`、`extends`、`extend_fields`。
+- `collect_daily_report_content` 和 `collect_daily_report_date` 使用 LangGraph `interrupt` 暂停，前端弹出输入控件，用户提交后继续同一个 thread。
+- `save_daily_report_draft` 会在预览前调用草稿保存接口；`preview_daily_report` 让用户确认；`submit_daily_report` 只在确认后调用 `/oa/dailyReport/add`。
 
 日报相关接口：
 
@@ -1236,7 +1257,7 @@ app/schemas/daily_report.py
 - 动态表单不要在聊天里硬编码控件逻辑；复杂字段由前端原生日报表单收集，agent 只负责加载上下文、预览和确认提交。
 - 自定义字段必须完整透传 `extends` 和 `extend_fields`，否则提交接口无法还原用户填写的动态字段。
 - 写入类操作必须有确认守卫：预览后用户明确回复“确认提交”才调用 `/oa/dailyReport/add`。
-- 顶层 graph 只展示业务 agent，具体业务内部步骤收敛在各自 agent/service 中，避免 Studio 图被细节淹没。
+- 顶层 graph 只展示业务 agent；日报细节在独立子图中展开，所以 Studio 既能看主编排，也能看日报内部节点。
 
 ### 14.4 模板驱动字段收集
 

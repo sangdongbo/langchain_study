@@ -24,7 +24,8 @@ START
       -> general_chat
       -> approval_creation_agent
           -> approval_creation_subgraph
-      -> daily_report_chat_agent
+      -> daily_report_agent
+          -> daily_report_subgraph
 ```
 
 `memory_agent` records the current turn into `ApprovalAgentState.short_term_memory`.
@@ -40,17 +41,20 @@ being hidden inside approval node functions.
 while the chat `trace` still records the internal approval nodes when a request really
 enters approval creation.
 
-`daily_report_chat_agent` is the write-log path. It loads ERP daily report fields,
-report config, draft, and sync data, builds the submission payload with draft custom
-fields, and requires an explicit confirmation before submitting to ERP.
+`daily_report_agent` is a compiled write-log subgraph. Its internal nodes include
+`daily_report_entry`, `daily_report_action`, `load_daily_report_context`,
+`collect_daily_report_content`, `collect_daily_report_date`, `save_daily_report_draft`,
+`preview_daily_report`, `submit_daily_report`, and `cancel_daily_report`. The content,
+date, and confirmation handoffs use LangGraph `interrupt` so the frontend can collect
+user input and resume the same graph thread.
 
 ## Approval Flow
 
-`app.graph.approval_workflow` is the production workflow entrypoint used by the
+`app.graph.workflow` is the production top-level workflow entrypoint used by the
 FastAPI chat route and Studio.
 
-`app.graph.workflow` is kept as a compatibility shim for older imports and
-tests. New code should import from `app.graph.approval_workflow`.
+`app.graph.approval_workflow` contains only the approval-creation subgraph, and
+`app.graph.daily_report_workflow` contains only the daily-report subgraph.
 
 The approval agent implementation lives in `app.agents.approval_agent`. Pure
 helpers that are shared by approval sub-agents live under `app.agents.approval`:
@@ -84,16 +88,19 @@ get_user_superior_info
 Daily report code is split by responsibility:
 
 ```text
-app/agents/daily_report_chat_agent.py   write-log workflow
-app/agents/daily_report_common.py       shared state, preview, and submit helpers
+app/graph/daily_report_workflow.py      compiled write-log subgraph
+app/agents/daily_report_chat_agent.py   daily report node implementations
+app/agents/daily_report/action_agent.py daily report action classifier
+app/agents/daily_report_common.py       shared state and preview helpers
+app/tools/daily_report_tools.py         LangChain tools for daily report operations
 app/services/daily_report_api_client.py ERP daily report HTTP calls
 app/services/daily_report_service.py    daily report context, preview, and submit facade
 app/schemas/daily_report.py             Pydantic daily report context/result schemas
 ```
 
 Custom daily report fields are carried by `extends` and `extend_fields`. The agent
-keeps the ERP field shape intact, validates the payload, shows a preview, and submits
-only after a confirmation message.
+keeps the ERP field shape intact, validates the payload, saves the draft before preview,
+shows a confirmation, and submits only after an explicit confirmation message.
 
 ## Services
 

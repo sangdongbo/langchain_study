@@ -12,52 +12,13 @@ from app.agents.approval_agent import (
     collect_node,
     decision_review_node,
     general_chat_node,
-    intent_router_node,
     load_context_node,
-    memory_agent_node,
     preview_node,
     resume_node,
     submit_node,
-    user_info_agent_node,
-    user_profile_agent_node,
     validate_node,
 )
-from app.agents.daily_report_chat_agent import daily_report_chat_agent_node
 from app.graph.state import ApprovalState
-from app.schemas.chat import ChatRequest, ChatResponse
-
-
-def create_workflow():
-    """创建并编译顶层多 Agent 编排图。
-
-    graph 层只负责业务 Agent 编排；具体 Agent 节点实现放在 agents 层。
-    """
-    builder = StateGraph(ApprovalState)
-    builder.add_node("memory_agent", memory_agent_node)
-    builder.add_node("user_profile_agent", user_profile_agent_node)
-    builder.add_node("intent_router", intent_router_node)
-    builder.add_node("user_info_agent", user_info_agent_node)
-    builder.add_node("approval_creation_agent", create_approval_creation_workflow())
-    builder.add_node("daily_report_chat_agent", daily_report_chat_agent_node)
-    builder.add_node("general_chat", general_chat_node)
-    builder.add_edge(START, "memory_agent")
-    builder.add_edge("memory_agent", "intent_router")
-    builder.add_conditional_edges(
-        "intent_router",
-        _route,
-        {
-            "approval_creation_agent": "approval_creation_agent",
-            "user_info_agent": "user_profile_agent",
-            "daily_report_chat_agent": "daily_report_chat_agent",
-            "general_chat": "general_chat",
-        },
-    )
-    builder.add_edge("user_profile_agent", "user_info_agent")
-    builder.add_edge("approval_creation_agent", END)
-    builder.add_edge("daily_report_chat_agent", END)
-    builder.add_edge("user_info_agent", END)
-    builder.add_edge("general_chat", END)
-    return builder.compile()
 
 
 def create_approval_creation_workflow():
@@ -116,10 +77,4 @@ def _route(state: ApprovalState) -> str:
     return state.get("_route", "end")
 
 
-def run_chat_turn(request: ChatRequest) -> ChatResponse:
-    """兼容旧导入路径；新的 API 层应使用 chat_application_service。"""
-    from app.services.chat_application_service import chat_application_service
-
-    return chat_application_service.run_turn(request)
-
-__all__ = ["create_workflow", "create_approval_creation_workflow", "run_chat_turn"]
+__all__ = ["create_approval_creation_workflow"]

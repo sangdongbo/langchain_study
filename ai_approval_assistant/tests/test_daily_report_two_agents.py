@@ -3,6 +3,7 @@ from __future__ import annotations
 import httpx
 import json
 
+from app.agents.daily_report.action_agent import DailyReportActionAgent
 from app.agents.daily_report_chat_agent import daily_report_chat_agent_node
 from app.graph.state import initial_state
 from app.schemas.approval import UserContext
@@ -41,6 +42,45 @@ FORM_FIELDS = [
         },
     },
 ]
+
+
+def test_daily_report_action_agent_prefers_structured_actions() -> None:
+    agent = DailyReportActionAgent()
+    state = initial_state("S-daily-action-structured", "863")
+    state.update(
+        {
+            "status": "awaiting_daily_report_confirmation",
+            "user_message": "随便说点别的",
+            "_answer": {
+                "field_key": "action",
+                "label": "修改日期",
+                "value": "modify_date",
+            },
+        }
+    )
+
+    result = agent.classify(state)
+
+    assert result.action == "edit_date"
+    assert result.route == "collect_date"
+    assert result.source == "answer"
+
+
+def test_daily_report_action_agent_classifies_text_actions() -> None:
+    agent = DailyReportActionAgent()
+    state = initial_state("S-daily-action-text", "863")
+    state.update(
+        {
+            "status": "awaiting_daily_report_confirmation",
+            "user_message": "我想改一下日志日期",
+        }
+    )
+
+    result = agent.classify(state)
+
+    assert result.action == "edit_date"
+    assert result.route == "collect_date"
+    assert result.source in {"llm", "rule"}
 
 
 REAL_ADD_PAYLOAD = {
@@ -271,9 +311,11 @@ def test_daily_report_chat_agent_is_available_through_chat_api(monkeypatch) -> N
     from fastapi.testclient import TestClient
 
     from app.main import app
+    from app.graph.workflow import get_workflow
 
     service = FakeDailyReportService()
     monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    get_workflow.cache_clear()
     session_state_service.clear("S-daily-chat-api")
 
     response = TestClient(app).post(
@@ -354,6 +396,16 @@ def test_daily_report_chat_agent_confirmation_message_is_readable(monkeypatch) -
     assert "field_513687" not in result["assistant_message"]
     assert "field_513692" not in result["assistant_message"]
     assert "field_514141" not in result["assistant_message"]
+    assert result["ui_action"] == {
+        "type": "interrupt",
+        "field_key": "daily_report_confirmation",
+        "label": "确认提交",
+        "input_type": "action",
+        "required": True,
+        "value": None,
+        "message": result["assistant_message"],
+        "actions": ["confirm", "modify", "modify_date", "cancel"],
+    }
 
 
 def test_daily_report_chat_agent_uses_user_content_when_provided(monkeypatch) -> None:
@@ -395,6 +447,15 @@ def test_daily_report_chat_agent_asks_for_content_when_payload_content_is_empty(
     assert result["awaiting_field"] == "daily_report_content"
     assert result["assistant_message"] == "今天还没有可提交的工作内容，请补充日志的工作内容。"
     assert result["daily_report_payload"]["content"] == ""
+    assert result["ui_action"] == {
+        "type": "interrupt",
+        "field_key": "daily_report_content",
+        "label": "工作内容",
+        "input_type": "textarea",
+        "required": True,
+        "value": "",
+        "message": "今天还没有可提交的工作内容，请补充日志的工作内容。",
+    }
     assert "daily_report_chat_agent" in result["trace"]
 
 
@@ -618,6 +679,15 @@ def test_daily_report_chat_agent_reopens_date_editor_from_confirmation(monkeypat
     assert result["awaiting_field"] == "daily_report_date"
     assert result["daily_report_date"] == "2026-06-22"
     assert result["assistant_message"] == "请选择要填写日报的日期，我会重新获取当天草稿。"
+    assert result["ui_action"] == {
+        "type": "interrupt",
+        "field_key": "daily_report_date",
+        "label": "日志时间",
+        "input_type": "date",
+        "required": True,
+        "value": "2026-06-22",
+        "message": "请选择要填写日报的日期，我会重新获取当天草稿。",
+    }
 
 
 def test_daily_report_chat_agent_reloads_context_after_date_change(monkeypatch) -> None:
@@ -694,6 +764,40 @@ def test_daily_report_chat_agent_submits_confirmed_payload(monkeypatch) -> None:
     assert service.submit_calls == 1
     assert result["status"] == "daily_report_submitted"
     assert result["daily_report_request_id"] == "1001"
+
+
+def test_daily_report_chat_agent_cancels_from_confirmation(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-cancel-daily-report", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "取消",
+            "_answer": {"field_key": "action", "value": "cancel", "label": "取消"},
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "<div class=\"other_content\">123123</div>",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {"field_513687": {"value": "1122"}},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert result["status"] == "cancelled"
+    assert result["awaiting_field"] is None
+    assert result["assistant_message"] == "已取消本次日报提交。"
+    assert result["ui_action"] is None
+    assert service.submit_calls == 0
 
 
 def test_daily_report_chat_agent_returns_error_when_submit_is_rejected(monkeypatch) -> None:

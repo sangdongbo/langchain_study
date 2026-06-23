@@ -49,7 +49,8 @@ class AwaitingInput(BaseModel):
     min: Any | None = None
     max: Any | None = None
     value_schema: dict[str, str] | None = None
-    value: Any | None = None
+    # 只有日报编辑类控件需要回显已有值；普通控件不输出 value，保持旧 API 契约。
+    value: Any | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class PreviewField(BaseModel):

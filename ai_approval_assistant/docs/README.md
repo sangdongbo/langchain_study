@@ -40,8 +40,8 @@ docs/studio_debug.md
 |---|---|
 | `["memory_agent", "user_profile_agent", "intent_router", "general_chat"]` | 普通聊天或帮助问句，不进入审批模板搜索 |
 | `["memory_agent", "user_profile_agent", "intent_router", "user_info_agent"]` | 查询当前用户、上级、部门等信息，不进入审批流程 |
-| `["memory_agent", "intent_router", "daily_report_chat_agent"]` | 写日志/日报流程，加载字段、草稿和同步数据，生成提交前预览 |
-| `["memory_agent", "intent_router", "daily_report_chat_agent", "submit_daily_report"]` | 用户确认后提交日报 |
+| `["memory_agent", "intent_router", "daily_report_agent", "load_daily_report_context", "save_daily_report_draft", "preview_daily_report"]` | 写日志/日报子图，加载字段、草稿和同步数据，保存草稿并生成提交前预览 |
+| `["memory_agent", "intent_router", "daily_report_agent", "submit_daily_report"]` | 用户确认后提交日报 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "clarify"]` | 审批发起需要用户澄清，比如多个模板待选择 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "collect"]` | 已进入审批字段收集 |
 | `["memory_agent", "user_profile_agent", "intent_router", "approval_creation_agent", "load_context", "classify", "decision_review", "collect", "validate", "assignee"]` | 字段完整后获取审批节点，需要选择办理人/审批人 |
@@ -65,12 +65,13 @@ docs/studio_debug.md
 - `POST /api/ai-approval/time-travel/{session_id}/restore`：把当前会话恢复到历史状态。
 - `POST /api/ai-approval/time-travel/{session_id}/fork`：从历史状态复制出一个新的 `session_id`。
 - Redis key：`{REDIS_PREFIX}ai_approval:checkpoints:{session_id}`；无 Redis 时回退内存。
-- 当前 checkpoint 是 `run_chat_turn` 外层记录的学习版能力，所以它不会作为一个独立 LangGraph 节点显示在 Studio 图中。
+- 当前学习版时光回溯由 chat turn 外层记录；同时生产 graph 已挂 LangGraph checkpointer，用于 `interrupt`/resume 的线程恢复。
 
 日报联调时还要重点看：
 
 - `daily_report_payload`：agent 根据字段、草稿、同步数据和用户补充内容生成的完整提交 payload。
 - `daily_report_preview`：确认提交前展示给用户看的预览。
+- `ui_action.type == "interrupt"`：日报内容、日期和确认弹窗都走这套人机协作协议。
 
 运行时存储和性能：
 

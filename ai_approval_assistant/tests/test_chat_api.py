@@ -2113,11 +2113,11 @@ def test_chat_api_returns_error_response_when_workflow_raises(monkeypatch) -> No
     session_state_service.clear("S-workflow-error")
 
     class BrokenWorkflow:
-        def invoke(self, state):
+        def invoke(self, state, config=None):
             raise RuntimeError("daily report add failed unexpectedly")
 
     monkeypatch.setattr(
-        "app.services.chat_application_service.create_workflow",
+        "app.services.chat_application_service.get_workflow",
         lambda: BrokenWorkflow(),
     )
 
@@ -2201,6 +2201,69 @@ def test_daily_report_content_editor_returns_existing_content(monkeypatch) -> No
     }
 
 
+def test_daily_report_content_editor_resumes_with_new_content(monkeypatch) -> None:
+    session_state_service.clear("S-daily-report-resume-content")
+    state = initial_state("S-daily-report-resume-content", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-resume-content",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    first = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-resume-content",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改",
+            "answer": {"field_key": "action", "value": "modify", "label": "修改"},
+        },
+    )
+    assert first.status_code == 200
+    assert first.json()["awaiting_field_key"] == "daily_report_content"
+
+    second = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-resume-content",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "提交",
+            "answer": {
+                "field_key": "daily_report_content",
+                "type": "textarea",
+                "label": "修改后的日志内容",
+                "value": "修改后的日志内容",
+            },
+        },
+    )
+
+    assert second.status_code == 200
+    body = second.json()
+    assert body["status"] == "awaiting_daily_report_confirmation"
+    assert body["daily_report_payload"]["content"] == "修改后的日志内容"
+    assert body["daily_report_preview"]["content"] == "修改后的日志内容"
+
+
 def test_daily_report_date_editor_returns_existing_date(monkeypatch) -> None:
     session_state_service.clear("S-daily-report-edit-date")
     state = initial_state("S-daily-report-edit-date", "863")
@@ -2260,3 +2323,65 @@ def test_daily_report_date_editor_returns_existing_date(monkeypatch) -> None:
         "value_schema": None,
         "value": "2026-06-22",
     }
+
+
+def test_daily_report_date_editor_resumes_with_new_date(monkeypatch) -> None:
+    session_state_service.clear("S-daily-report-resume-date")
+    state = initial_state("S-daily-report-resume-date", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-resume-date",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "用户之前填写的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    first = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-resume-date",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改日期",
+            "answer": {"field_key": "action", "value": "modify_date", "label": "修改日期"},
+        },
+    )
+    assert first.status_code == 200
+    assert first.json()["awaiting_field_key"] == "daily_report_date"
+
+    second = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-resume-date",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "提交",
+            "answer": {
+                "field_key": "daily_report_date",
+                "type": "date",
+                "label": "2026-06-21",
+                "value": "2026-06-21",
+            },
+        },
+    )
+
+    assert second.status_code == 200
+    body = second.json()
+    assert body["status"] in {"awaiting_daily_report_confirmation", "collecting"}
+    assert body["daily_report_payload"]["date"] == "2026-06-21"

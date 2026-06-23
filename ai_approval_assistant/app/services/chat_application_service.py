@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import traceback
 
+from langgraph.types import Command
+
 from app.agents.approval.constants import LOCAL_MOCK_APPROVAL_TYPES
 from app.agents.approval.responses import to_chat_response
-from app.graph.approval_workflow import create_workflow
+from app.graph.workflow import get_workflow
 from app.graph.state import ApprovalState, initial_state
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.crm_service import crm_approval_service
@@ -41,7 +43,25 @@ class ChatApplicationService:
             state["trace"] = []
 
             # 执行正式生产 graph，内部会根据 intent_router 进入对应业务 agent。
-            result = create_workflow().invoke(state)
+            graph = get_workflow()
+            config = self._graph_config(request.session_id)
+            # 前端回传 interrupt 弹窗答案时，用 Command(resume=...) 回到暂停节点，
+            # 而不是重新从 START 跑一遍流程。
+            graph_input = (
+                Command(resume=self._resume_value(request.answer))
+                if self._should_resume_interrupt(state, request)
+                else state
+            )
+            result = graph.invoke(graph_input, config=config)
+            if "__interrupt__" in result:
+                # 嵌套子图 interrupt 时，返回体里只有中断对象；需要从 checkpoint
+                # 和中断 payload 中合并出 API 可返回、可保存的完整状态。
+                result = self._state_from_interrupt(
+                    state,
+                    request,
+                    result,
+                    graph.get_state(config).values,
+                )
 
             # 将内部 AgentState 转换成接口响应模型，避免 API 直接暴露状态细节。
             response = to_chat_response(result, crm_approval_service)
@@ -99,6 +119,80 @@ class ChatApplicationService:
                     "error": str(exc),
                 },
             )
+
+    def _graph_config(self, session_id: str) -> dict:
+        # thread_id 是 LangGraph checkpointer 区分会话线程的核心标识。
+        return {"configurable": {"thread_id": session_id}}
+
+    def _should_resume_interrupt(self, state: ApprovalState, request: ChatRequest) -> bool:
+        ui_action = state.get("ui_action")
+        return bool(
+            request.answer
+            and isinstance(ui_action, dict)
+            and ui_action.get("type") == "interrupt"
+        )
+
+    def _resume_value(self, answer: dict | None):
+        if not isinstance(answer, dict):
+            return answer
+        return answer.get("value", answer)
+
+    def _state_from_interrupt(
+        self,
+        previous_state: ApprovalState,
+        request: ChatRequest,
+        result: dict,
+        snapshot_values: dict,
+    ) -> ApprovalState:
+        interrupts = result.get("__interrupt__") or []
+        interrupt = interrupts[0] if interrupts else None
+        payload = getattr(interrupt, "value", None)
+        if not isinstance(payload, dict):
+            payload = {"message": "请补充信息。"}
+        # _state_patch 是日报子图传给后端的内部状态补丁，前端 ui_action 不展示它。
+        state_patch = payload.get("_state_patch") if isinstance(payload.get("_state_patch"), dict) else {}
+        ui_action = {key: value for key, value in payload.items() if key != "_state_patch"}
+        field_key = str(payload.get("field_key") or "")
+        message = str(payload.get("message") or previous_state.get("assistant_message") or "")
+        interrupted_state = {
+            key: value for key, value in result.items() if key != "__interrupt__"
+        }
+        if snapshot_values:
+            # checkpoint 里保存的是 interrupt 发生前的父图快照，先用它补齐基础状态。
+            interrupted_state = {
+                **interrupted_state,
+                **snapshot_values,
+            }
+        if state_patch:
+            # 子图内部最新的日报 payload/preview 要覆盖父图快照里的旧值。
+            interrupted_state = {
+                **interrupted_state,
+                **state_patch,
+            }
+        status = (
+            "awaiting_daily_report_confirmation"
+            if field_key == "daily_report_confirmation"
+            else "collecting"
+        )
+        awaiting_field = None if field_key == "daily_report_confirmation" else field_key
+        return {
+            **previous_state,
+            **interrupted_state,
+            "session_id": request.session_id,
+            "user_id": request.user_id,
+            "uid": request.uid,
+            "authorization": request.authorization,
+            "user_message": request.message.strip(),
+            "_answer": request.answer,
+            "status": status,
+            "awaiting_field": awaiting_field,
+            "assistant_message": message,
+            "ui_action": ui_action,
+            "trace": [
+                *interrupted_state.get("trace", previous_state.get("trace", [])),
+                "langgraph_interrupt",
+            ],
+        }
 
     def _should_reset_local_state_for_remote_credentials(
         self, state: ApprovalState, request: ChatRequest

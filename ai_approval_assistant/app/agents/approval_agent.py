@@ -117,7 +117,7 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
             **state,
             "intent": "daily_report",
             "trace": trace,
-            "_route": "daily_report_chat_agent",
+            "_route": "daily_report_agent",
         }
     if _looks_like_user_info_question(text):
         return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
@@ -126,19 +126,24 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
             **state,
             "intent": "daily_report",
             "trace": trace,
-            "_route": "daily_report_chat_agent",
+            "_route": "daily_report_agent",
         }
     if _has_pending_approval_selection(state):
-        return {**state, "trace": trace, "_route": "approval_creation_agent"}
+        return {**state, "trace": trace, "_route": "approval_creation_with_profile"}
     if _has_active_approval_context(state) and (
         _looks_like_general_question(text) or _looks_like_greeting(text)
     ):
         return {**state, "intent": "general_chat", "trace": trace, "_route": "general_chat"}
     if _has_active_approval_context(state):
-        return {**state, "trace": trace, "_route": "approval_creation_agent"}
+        return {**state, "trace": trace, "_route": "approval_creation_with_profile"}
     if _looks_like_general_question(text) or _looks_like_greeting(text):
         return {**state, "intent": "general_chat", "trace": trace, "_route": "general_chat"}
-    return {**state, "intent": "approval_creation", "trace": trace, "_route": "approval_creation_agent"}
+    return {
+        **state,
+        "intent": "approval_creation",
+        "trace": trace,
+        "_route": "approval_creation_with_profile",
+    }
 
 
 def user_info_agent_node(state: ApprovalState) -> ApprovalState:

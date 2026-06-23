@@ -3,7 +3,7 @@ from __future__ import annotations
 from app.agents import approval_agent
 from app.agents.approval_agent import intent_router_node
 from app.agents.approval_agent import user_info_agent_node
-from app.graph.approval_workflow import create_workflow
+from app.graph.workflow import create_workflow
 from app.graph.state import initial_state
 from app.tools import user_tools
 
@@ -136,7 +136,10 @@ def test_workflow_does_not_load_user_profile_for_general_chat(monkeypatch) -> No
         "user_message": "你好",
     }
 
-    result = create_workflow().invoke(state)
+    result = create_workflow().invoke(
+        state,
+        config={"configurable": {"thread_id": "S-general-no-profile"}},
+    )
 
     assert result["intent"] == "general_chat"
     assert result["trace"] == ["memory_agent", "intent_router", "general_chat"]

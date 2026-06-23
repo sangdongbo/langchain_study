@@ -16,6 +16,8 @@ ai_approval_assistant/
 │   │   └── health.py
 │   ├── graph/
 │   │   ├── approval_workflow.py
+│   │   ├── daily_report_workflow.py
+│   │   ├── workflow.py
 │   │   ├── state.py
 │   │   └── studio.py
 │   ├── mock_data/
@@ -73,7 +75,9 @@ HTTP API 层。
 LangGraph 入口和共享状态定义。
 
 - `state.py`：定义 `ApprovalAgentState` / `ApprovalState`，也就是所有 agent 共享的状态。
-- `approval_workflow.py`：正式 graph 编排入口，负责 `create_workflow`，并保留旧 `run_chat_turn` 兼容入口。
+- `workflow.py`：顶层主 graph 编排入口，负责 `create_workflow` / `get_workflow`，并保留旧 `run_chat_turn` 兼容入口。
+- `approval_workflow.py`：审批发起子图，只负责 `create_approval_creation_workflow`。
+- `daily_report_workflow.py`：日报/写日志子图，只负责日报内部节点编排。
 - `studio.py`：LangGraph Studio 使用的 graph 入口，`langgraph.json` 指向这里。
 
 ### `app/agents/`
