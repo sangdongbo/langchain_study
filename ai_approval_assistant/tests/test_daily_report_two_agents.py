@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import httpx
 import json
+import pytest
 
 from app.agents.daily_report.action_agent import DailyReportActionAgent
 from app.agents.daily_report_chat_agent import daily_report_chat_agent_node
 from app.graph.state import initial_state
 from app.schemas.approval import UserContext
 from app.schemas.daily_report import DailyReportContext, DailyReportSubmitResult
-from app.services.daily_report_api_client import DailyReportApiClient
+from app.services.daily_report_api_client import DailyReportApiClient, DailyReportApiError
 from app.services.daily_report_service import DailyReportService, DailyReportSubmitError
 from app.services.session_state_service import session_state_service
 
@@ -307,6 +308,17 @@ class FailingDailyReportService(FakeDailyReportService):
         raise DailyReportSubmitError("请填写汇报人")
 
 
+class TimeoutDailyReportService(FakeDailyReportService):
+    def load_context(self, user, report_type: int, report_date: str):
+        self.load_calls += 1
+        raise DailyReportApiError(
+            "config.get",
+            "GET",
+            "/oa/dailyReport/config/get",
+            "请求超时",
+        )
+
+
 def test_daily_report_chat_agent_is_available_through_chat_api(monkeypatch) -> None:
     from fastapi.testclient import TestClient
 
@@ -331,15 +343,57 @@ def test_daily_report_chat_agent_is_available_through_chat_api(monkeypatch) -> N
 
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "awaiting_daily_report_confirmation"
-    assert body["daily_report_payload"]["content"] == "<div class=\"other_content\">123123</div>"
-    assert body["daily_report_payload"]["recipients"] == [
-        {"relate_id": 959, "relate_name": "桑东波测试 2"}
-    ]
-    assert body["daily_report_payload"]["extend_fields"] == [
-        field for field in FORM_FIELDS if field["field_key"] != "content"
-    ]
-    assert "daily_report_chat_agent" in body["trace"]
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_date"
+    assert body["awaiting_input"]["value"]
+    assert body["trace"][-1] == "langgraph_interrupt"
+
+
+def test_daily_report_chat_agent_asks_for_date_before_loading_draft(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-date-first", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "写日志",
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert service.load_calls == 0
+    assert result["status"] == "collecting"
+    assert result["awaiting_field"] == "daily_report_date"
+    assert result["ui_action"]["field_key"] == "daily_report_date"
+    assert result["daily_report_date"]
+
+
+def test_daily_report_chat_agent_loads_and_saves_after_date_confirmed(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-date-confirmed", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "2026-06-22",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert service.load_calls == 1
+    assert service.saved_drafts[-1]["date"] == "2026-06-22"
+    assert result["status"] == "awaiting_daily_report_confirmation"
+    assert result["daily_report_payload"]["content"] == "<div class=\"other_content\">123123</div>"
 
 
 def test_daily_report_chat_agent_loads_draft_and_custom_fields(monkeypatch) -> None:
@@ -350,7 +404,13 @@ def test_daily_report_chat_agent_loads_draft_and_custom_fields(monkeypatch) -> N
         {
             "uid": "863",
             "authorization": "Bearer token",
-            "user_message": "写今天日报",
+            "user_message": "2026-06-22",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
         }
     )
 
@@ -384,7 +444,13 @@ def test_daily_report_chat_agent_confirmation_message_is_readable(monkeypatch) -
         {
             "uid": "863",
             "authorization": "Bearer token",
-            "user_message": "写日报",
+            "user_message": "2026-06-22",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
         }
     )
 
@@ -417,6 +483,12 @@ def test_daily_report_chat_agent_uses_user_content_when_provided(monkeypatch) ->
             "uid": "863",
             "authorization": "Bearer token",
             "user_message": "写日报：今天完成客户跟进",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
         }
     )
 
@@ -437,7 +509,13 @@ def test_daily_report_chat_agent_asks_for_content_when_payload_content_is_empty(
         {
             "uid": "863",
             "authorization": "Bearer token",
-            "user_message": "写日志",
+            "user_message": "2026-06-22",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
         }
     )
 
@@ -764,6 +842,52 @@ def test_daily_report_chat_agent_submits_confirmed_payload(monkeypatch) -> None:
     assert service.submit_calls == 1
     assert result["status"] == "daily_report_submitted"
     assert result["daily_report_request_id"] == "1001"
+    assert result["ui_action"] is None
+
+
+def test_daily_report_chat_agent_does_not_submit_again_after_submitted(monkeypatch) -> None:
+    service = FakeDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-already-submitted-daily-report", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "确认提交",
+            "status": "daily_report_submitted",
+            "daily_report_request_id": "1841",
+            "ui_action": {
+                "type": "interrupt",
+                "field_key": "daily_report_confirmation",
+                "label": "确认提交",
+                "input_type": "action",
+                "required": True,
+                "value": None,
+                "message": "旧的确认弹窗",
+                "actions": ["confirm", "modify", "modify_date", "cancel"],
+            },
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "已提交的内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert service.submit_calls == 0
+    assert result["status"] == "daily_report_submitted"
+    assert result["daily_report_request_id"] == "1841"
+    assert result["ui_action"] is None
+    assert "已提交日报" in result["assistant_message"]
+    assert "1841" in result["assistant_message"]
 
 
 def test_daily_report_chat_agent_cancels_from_confirmation(monkeypatch) -> None:
@@ -830,6 +954,39 @@ def test_daily_report_chat_agent_returns_error_when_submit_is_rejected(monkeypat
     assert result["status"] == "error"
     assert result["assistant_message"] == "日报提交失败：请填写汇报人"
     assert result["field_errors"] == [{"field": "daily_report", "message": "请填写汇报人"}]
+
+
+def test_daily_report_chat_agent_returns_clear_error_when_context_load_times_out(monkeypatch) -> None:
+    service = TimeoutDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-load-timeout", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "2026-06-22",
+            "awaiting_field": "daily_report_date",
+            "_answer": {
+                "field_key": "daily_report_date",
+                "value": "2026-06-22",
+                "label": "2026-06-22",
+            },
+        }
+    )
+
+    result = daily_report_chat_agent_node(state)
+
+    assert service.load_calls == 1
+    assert result["status"] == "error"
+    assert "日报接口请求失败" in result["assistant_message"]
+    assert "/oa/dailyReport/config/get" in result["assistant_message"]
+    assert result["field_errors"] == [
+        {
+            "field": "daily_report",
+            "message": "日报接口请求失败：GET /oa/dailyReport/config/get，请求超时",
+        }
+    ]
+    assert "load_daily_report_context" in result["trace"]
 
 
 def test_daily_report_service_excludes_system_content_from_extend_fields() -> None:
@@ -1135,6 +1292,40 @@ def test_daily_report_api_client_sends_required_daily_report_requests() -> None:
         b'"work_ticket","customer_manage"],"date_range":["2026-06-22","2026-06-22"]}'
     )
     assert b'"extends":{"field_513687":{"value":"1122"}}' in requests[5].read()
+
+
+def test_daily_report_api_client_wraps_config_timeout_with_endpoint() -> None:
+    logs: list[tuple[str, dict]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("timed out", request=request)
+
+    client = DailyReportApiClient(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        base_url="https://dev3.lanerp.com",
+        log_writer=lambda event, payload: logs.append((event, payload)),
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        uid="863",
+        authorization="Bearer token",
+    )
+
+    with pytest.raises(DailyReportApiError) as exc_info:
+        client.get_config(user)
+
+    assert str(exc_info.value) == (
+        "日报接口请求失败：GET /oa/dailyReport/config/get，请求超时"
+    )
+    assert exc_info.value.path == "/oa/dailyReport/config/get"
+    assert logs[-1][0] == "daily_report.config.get.timing"
+    assert logs[-1][1]["success"] is False
+    assert logs[-1][1]["error"] == "timed out"
 
 
 def test_daily_report_api_client_posts_real_add_payload_unchanged() -> None:

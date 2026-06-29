@@ -37,10 +37,12 @@ class ApprovalAgentState(AgentState, total=False):
     idempotency_key: str | None
     ui_action: dict[str, Any] | None
     daily_report_type: int | None
+    daily_report_mode: str | None
     daily_report_date: str | None
     daily_report_payload: dict[str, Any] | None
     daily_report_preview: dict[str, Any] | None
     daily_report_request_id: str | None
+    daily_report_agent_messages: list[dict[str, Any]]
     trace: list[str]
     review_count: int
     _route: str
@@ -89,10 +91,12 @@ def initial_state(session_id: str, user_id: str) -> ApprovalState:
         "idempotency_key": None,
         "ui_action": None,
         "daily_report_type": None,
+        "daily_report_mode": None,
         "daily_report_date": None,
         "daily_report_payload": None,
         "daily_report_preview": None,
         "daily_report_request_id": None,
+        "daily_report_agent_messages": [],
         "trace": [],
         "review_count": 0,
         "_route": "end",

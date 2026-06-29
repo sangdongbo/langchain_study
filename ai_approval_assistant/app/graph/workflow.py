@@ -14,13 +14,14 @@ from app.agents.approval_agent import (
     user_info_agent_node,
     user_profile_agent_node,
 )
+from app.agents.daily_report_create_agent import daily_report_create_agent_node
 from app.graph.approval_workflow import create_approval_creation_workflow
 from app.graph.daily_report_workflow import create_daily_report_workflow
 from app.graph.state import ApprovalState
 from app.schemas.chat import ChatRequest, ChatResponse
 
 
-def create_workflow():
+def create_workflow(*, with_checkpointer: bool = True):
     """创建并编译顶层多 Agent 编排图。
 
     workflow.py 是主图入口；审批、日报等业务细节放到各自 *_workflow.py 子图。
@@ -32,6 +33,7 @@ def create_workflow():
     builder.add_node("user_info_agent", user_info_agent_node)
     builder.add_node("approval_creation_agent", create_approval_creation_workflow())
     builder.add_node("daily_report_agent", create_daily_report_workflow())
+    builder.add_node("daily_report_create_agent", daily_report_create_agent_node)
     builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "memory_agent")
     builder.add_edge("memory_agent", "intent_router")
@@ -44,6 +46,7 @@ def create_workflow():
             "approval_creation_with_profile": "user_profile_agent",
             "user_info_agent": "user_profile_agent",
             "daily_report_agent": "daily_report_agent",
+            "daily_report_create_agent": "daily_report_create_agent",
             "general_chat": "general_chat",
         },
     )
@@ -58,10 +61,14 @@ def create_workflow():
     )
     builder.add_edge("approval_creation_agent", END)
     builder.add_edge("daily_report_agent", END)
+    builder.add_edge("daily_report_create_agent", END)
     builder.add_edge("user_info_agent", END)
     builder.add_edge("general_chat", END)
     # MemorySaver 支持 LangGraph 原生 interrupt/resume；ChatApplicationService
     # 通过 thread_id 让同一个 session 恢复到上次暂停的位置。
+    # LangGraph Studio/API 自带持久化能力，导出给 Studio 的图不能携带自定义 checkpointer。
+    if not with_checkpointer:
+        return builder.compile()
     return builder.compile(checkpointer=MemorySaver())
 
 

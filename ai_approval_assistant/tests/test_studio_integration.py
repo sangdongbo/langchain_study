@@ -21,12 +21,14 @@ def test_langgraph_json_points_to_importable_compiled_graph() -> None:
     assert "user_info_agent" in graph.get_graph().nodes
     assert "approval_creation_agent" in graph.get_graph().nodes
     assert "daily_report_agent" in graph.get_graph().nodes
+    assert "daily_report_create_agent" in graph.get_graph().nodes
     assert "daily_report_chat_agent" not in graph.get_graph().nodes
     assert "daily_report_form_agent" not in graph.get_graph().nodes
     edges = {(edge.source, edge.target) for edge in graph.get_graph().edges}
     assert ("memory_agent", "intent_router") in edges
     assert ("user_profile_agent", "user_info_agent") in edges
     assert ("daily_report_agent", "__end__") in edges
+    assert ("daily_report_create_agent", "__end__") in edges
     assert ("memory_agent", "user_profile_agent") not in edges
     assert "load_context" not in graph.get_graph().nodes
     assert "collect" not in graph.get_graph().nodes
@@ -54,6 +56,35 @@ def test_intent_router_routes_daily_report_requests_to_daily_report_agent() -> N
 
     assert result["intent"] == "daily_report"
     assert result["_route"] == "daily_report_agent"
+
+
+def test_intent_router_routes_explicit_autonomous_daily_report_requests_to_create_agent() -> None:
+    module = importlib.import_module("app.agents.approval_agent")
+    state = module.initial_state("S-daily-create-router", "863")
+    state["user_message"] = "用自主版 agent 帮我写今天日报"
+
+    result = module.intent_router_node(state)
+
+    assert result["intent"] == "daily_report"
+    assert result["daily_report_mode"] == "autonomous"
+    assert result["_route"] == "daily_report_create_agent"
+
+
+def test_intent_router_keeps_autonomous_daily_report_followup_on_create_agent() -> None:
+    module = importlib.import_module("app.agents.approval_agent")
+    state = module.initial_state("S-daily-create-followup-router", "863")
+    state.update(
+        {
+            "daily_report_mode": "autonomous",
+            "status": "awaiting_daily_report_confirmation",
+            "user_message": "确认提交",
+        }
+    )
+
+    result = module.intent_router_node(state)
+
+    assert result["intent"] == "daily_report"
+    assert result["_route"] == "daily_report_create_agent"
 
 
 def test_intent_router_keeps_daily_report_confirmation_on_daily_report_agent() -> None:

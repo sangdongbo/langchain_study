@@ -2264,6 +2264,214 @@ def test_daily_report_content_editor_resumes_with_new_content(monkeypatch) -> No
     assert body["daily_report_preview"]["content"] == "修改后的日志内容"
 
 
+def test_daily_report_confirmation_modify_button_opens_content_editor() -> None:
+    session_state_service.clear("S-daily-report-confirmation-modify-button")
+    state = initial_state("S-daily-report-confirmation-modify-button", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-confirmation-modify-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "intent": "daily_report",
+            "ui_action": {
+                "type": "interrupt",
+                "field_key": "daily_report_confirmation",
+                "input_type": "action",
+            },
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-23",
+                "content": "11222",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-confirmation-modify-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改",
+            "answer": {"field_key": "action", "label": "修改内容", "value": "modify"},
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_content"
+    assert body["awaiting_input"]["value"] == "11222"
+    assert body["daily_report_payload"]["content"] == "11222"
+
+
+def test_daily_report_confirmation_modify_date_button_opens_date_editor() -> None:
+    session_state_service.clear("S-daily-report-confirmation-modify-date-button")
+    state = initial_state("S-daily-report-confirmation-modify-date-button", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-confirmation-modify-date-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "intent": "daily_report",
+            "ui_action": {
+                "type": "interrupt",
+                "field_key": "daily_report_confirmation",
+                "input_type": "action",
+            },
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-23",
+                "content": "11222",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+        }
+    )
+    session_state_service.save(state)
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-confirmation-modify-date-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "修改日期",
+            "answer": {"field_key": "action", "label": "修改日期", "value": "modify_date"},
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_date"
+    assert body["awaiting_input"]["value"] == "2026-06-23"
+    assert body["daily_report_payload"]["date"] == "2026-06-23"
+
+
+def test_daily_report_initial_content_interrupt_resumes_with_answer(monkeypatch) -> None:
+    from app.schemas.daily_report import DailyReportContext
+
+    session_state_service.clear("S-daily-report-initial-content-resume")
+
+    class EmptyContentDailyReportService:
+        def __init__(self) -> None:
+            self.saved_drafts = []
+
+        def load_context(self, user, report_type: int, report_date: str):
+            return DailyReportContext(
+                report_type=report_type,
+                report_date=report_date,
+                form_fields_payload={"code": 200, "data": []},
+                config={},
+                draft={},
+                sync_data=[],
+                default_payload={
+                    "type": report_type,
+                    "date": report_date,
+                    "content": "",
+                    "files": [],
+                    "at_uids": [],
+                    "recipients": [{"relate_id": 959}],
+                    "cc_recipients": [],
+                    "extends": {},
+                    "extend_fields": [],
+                },
+            )
+
+        def save_draft_payload(self, user, payload):
+            self.saved_drafts.append(payload)
+            return {"code": 200, "data": ""}
+
+        def preview_from_payload(self, payload):
+            return {
+                "report_type": payload["type"],
+                "date": payload["date"],
+                "content": payload["content"],
+                "fields": [],
+                "recipients": payload.get("recipients", []),
+                "cc_recipients": payload.get("cc_recipients", []),
+                "sync_summary": None,
+            }
+
+    service = EmptyContentDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+
+    first = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-initial-content-resume",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "添加日志",
+        },
+    )
+    assert first.status_code == 200
+    assert first.json()["awaiting_field_key"] == "daily_report_date"
+
+    second = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-initial-content-resume",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "2026-06-23",
+            "answer": {
+                "field_key": "daily_report_date",
+                "type": "date",
+                "label": "2026-06-23",
+                "value": "2026-06-23",
+            },
+        },
+    )
+    assert second.status_code == 200
+    assert second.json()["awaiting_field_key"] == "daily_report_content"
+
+    third = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-initial-content-resume",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "232323",
+            "answer": {
+                "field_key": "daily_report_content",
+                "type": "textarea",
+                "label": "232323",
+                "value": "232323",
+            },
+        },
+    )
+
+    assert third.status_code == 200
+    body = third.json()
+    assert body["status"] == "awaiting_daily_report_confirmation"
+    assert body["awaiting_field_key"] is None
+    assert body["daily_report_payload"]["content"] == "232323"
+    assert body["daily_report_preview"]["content"] == "232323"
+    assert service.saved_drafts[-1]["content"] == "232323"
+
+
 def test_daily_report_date_editor_returns_existing_date(monkeypatch) -> None:
     session_state_service.clear("S-daily-report-edit-date")
     state = initial_state("S-daily-report-edit-date", "863")

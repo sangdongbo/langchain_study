@@ -40,6 +40,13 @@ class DailyReportActionAgent:
         awaiting_field = state.get("awaiting_field")
         message = state.get("user_message", "")
 
+        # 日报已经提交后进入终态，同一会话里的后续确认/修改按钮都不能再触发提交。
+        if status == "daily_report_submitted":
+            return DailyReportActionResult(
+                action="unknown",
+                route="end",
+                source="state",
+            )
         if status == "awaiting_daily_report_confirmation" and is_confirm_message(message):
             return self._result("confirm_submit", "rule")
         if awaiting_field == "daily_report_content":
@@ -132,7 +139,7 @@ class DailyReportActionAgent:
 
     def _result(self, action: DailyReportAction, source: str) -> DailyReportActionResult:
         routes = {
-            "start": "load",
+            "start": "collect_date",
             "edit_content": "collect_content",
             "edit_date": "collect_date",
             "confirm_submit": "submit",

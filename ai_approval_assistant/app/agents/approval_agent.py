@@ -112,6 +112,13 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
     """顶层意图路由：决定本轮交给哪个业务 Agent 处理。"""
     text = state.get("user_message", "")
     trace = [*state.get("trace", []), "intent_router"]
+    if _has_active_autonomous_daily_report_context(state):
+        return {
+            **state,
+            "intent": "daily_report",
+            "trace": trace,
+            "_route": "daily_report_create_agent",
+        }
     if _has_active_daily_report_context(state):
         return {
             **state,
@@ -121,6 +128,14 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         }
     if _looks_like_user_info_question(text):
         return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
+    if _looks_like_autonomous_daily_report_request(text):
+        return {
+            **state,
+            "intent": "daily_report",
+            "daily_report_mode": "autonomous",
+            "trace": trace,
+            "_route": "daily_report_create_agent",
+        }
     if _looks_like_daily_report_request(text):
         return {
             **state,
@@ -904,6 +919,33 @@ def _has_active_daily_report_context(state: ApprovalState) -> bool:
         "awaiting_daily_report_form",
         "awaiting_daily_report_confirmation",
     }
+
+
+def _has_active_autonomous_daily_report_context(state: ApprovalState) -> bool:
+    return state.get("daily_report_mode") == "autonomous" and state.get("status") in {
+        "awaiting_daily_report_confirmation",
+        "daily_report_submitted",
+    }
+
+
+def _looks_like_autonomous_daily_report_request(message: str) -> bool:
+    cleaned = message.strip().lower()
+    if not _looks_like_daily_report_request(cleaned):
+        return False
+    return any(
+        marker in cleaned
+        for marker in (
+            "自主版",
+            "自主",
+            "agent版",
+            "agent 版",
+            "agent",
+            "智能体",
+            "create_agent",
+            "create agent",
+            "自动 agent",
+        )
+    )
 
 
 def _looks_like_daily_report_request(message: str) -> bool:

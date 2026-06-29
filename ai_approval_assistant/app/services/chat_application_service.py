@@ -126,6 +126,8 @@ class ChatApplicationService:
 
     def _should_resume_interrupt(self, state: ApprovalState, request: ChatRequest) -> bool:
         ui_action = state.get("ui_action")
+        if isinstance(ui_action, dict) and ui_action.get("field_key") == "daily_report_confirmation":
+            return False
         return bool(
             request.answer
             and isinstance(ui_action, dict)

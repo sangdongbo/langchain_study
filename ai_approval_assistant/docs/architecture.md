@@ -90,6 +90,7 @@ Daily report code is split by responsibility:
 ```text
 app/graph/daily_report_workflow.py      compiled write-log subgraph
 app/agents/daily_report_chat_agent.py   daily report node implementations
+app/agents/daily_report_create_agent.py experimental autonomous create_agent version
 app/agents/daily_report/action_agent.py daily report action classifier
 app/agents/daily_report_common.py       shared state and preview helpers
 app/tools/daily_report_tools.py         LangChain tools for daily report operations
@@ -101,6 +102,14 @@ app/schemas/daily_report.py             Pydantic daily report context/result sch
 Custom daily report fields are carried by `extends` and `extend_fields`. The agent
 keeps the ERP field shape intact, validates the payload, saves the draft before preview,
 shows a confirmation, and submits only after an explicit confirmation message.
+
+`daily_report_create_agent.py` is a learning/demo entrypoint for an autonomous ERP
+daily report agent. It uses LangChain `create_agent` when available and falls back to
+LangGraph `create_react_agent` in the current local dependency set. It is intentionally
+not mounted into `create_daily_report_workflow`, so the stable workflow keeps its
+deterministic date -> load context -> save draft -> preview -> submit behavior. The
+autonomous version receives daily report tools, but its submit tool is guarded and
+requires an explicit user confirmation flag before `/oa/dailyReport/add` can run.
 
 ## Services
 

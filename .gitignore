@@ -3,6 +3,7 @@
 !.env.example
 
 .venv/
+.jupyter_runtime/
 __pycache__/
 *.py[cod]
 

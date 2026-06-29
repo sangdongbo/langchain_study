@@ -4,7 +4,9 @@ from app.graph.state import ApprovalState, initial_state
 from app.graph.workflow import create_workflow
 
 
-graph = create_workflow()
+# Studio 运行在 LangGraph API 内部，由平台接管 checkpoint；
+# 这里导出无自定义 checkpointer 的图，避免 Studio 启动时报 GraphLoadError。
+graph = create_workflow(with_checkpointer=False)
 
 
 def _example_state(session_id: str, user_id: str, message: str) -> ApprovalState:

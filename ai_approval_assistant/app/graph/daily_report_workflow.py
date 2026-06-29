@@ -90,7 +90,19 @@ def create_daily_report_workflow():
             "end": END,
         },
     )
-    builder.add_edge("interrupt_daily_report", END)
+    builder.add_conditional_edges(
+        "interrupt_daily_report",
+        _route,
+        {
+            "save": "save_daily_report_draft",
+            "load": "load_daily_report_context",
+            "collect_content": "collect_daily_report_content",
+            "collect_date": "collect_daily_report_date",
+            "submit": "submit_daily_report",
+            "cancel": "cancel_daily_report",
+            "end": END,
+        },
+    )
     builder.add_edge("submit_daily_report", END)
     builder.add_edge("cancel_daily_report", END)
     return builder.compile()

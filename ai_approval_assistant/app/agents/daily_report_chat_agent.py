@@ -12,6 +12,7 @@ from app.agents.daily_report_common import (
 from app.agents.daily_report.action_agent import daily_report_action_agent
 from app.graph.extractors import is_confirm_message
 from app.graph.state import ApprovalState
+from app.services.daily_report_api_client import DailyReportApiError
 from app.services.daily_report_service import DailyReportSubmitError
 from app.tools import daily_report_tools
 
@@ -36,6 +37,17 @@ def daily_report_chat_agent_node(state: ApprovalState) -> ApprovalState:
 def daily_report_entry_node(state: ApprovalState) -> ApprovalState:
     """日报子图入口：标记进入日报流程。"""
     trace = [*state.get("trace", []), "daily_report_chat_agent"]
+    if state.get("status") == "daily_report_submitted":
+        report_id = state.get("daily_report_request_id") or "无"
+        return {
+            **state,
+            "intent": "daily_report",
+            "awaiting_field": None,
+            "assistant_message": f"已提交日报。\n\n- 日报编号：{report_id}\n- 当前状态：submitted",
+            "ui_action": None,
+            "trace": [*trace, "daily_report_entry"],
+            "_route": "end",
+        }
     return {
         **state,
         "intent": "daily_report",
@@ -62,15 +74,18 @@ def load_daily_report_context_node(state: ApprovalState) -> ApprovalState:
     user = user_from_daily_report_state(state)
     report_type = int(state.get("daily_report_type") or 1)
     report_date = report_date_from_state(state)
-    context = daily_report_tools.load_daily_report_context.invoke(
-        {
-            "user_id": user.user_id,
-            "uid": user.uid,
-            "authorization": user.authorization,
-            "report_type": report_type,
-            "report_date": report_date,
-        }
-    )
+    try:
+        context = daily_report_tools.load_daily_report_context.invoke(
+            {
+                "user_id": user.user_id,
+                "uid": user.uid,
+                "authorization": user.authorization,
+                "report_type": report_type,
+                "report_date": report_date,
+            }
+        )
+    except DailyReportApiError as exc:
+        return _daily_report_error_state(state, trace, str(exc))
     payload = deepcopy(context.get("default_payload") or {})
     # 以后端请求入参为准，避免 ERP 草稿回包里残留旧日期时覆盖用户选择。
     payload["type"] = report_type
@@ -149,14 +164,17 @@ def save_daily_report_draft_node(state: ApprovalState) -> ApprovalState:
     trace = [*state.get("trace", []), "save_daily_report_draft"]
     payload = deepcopy(state.get("daily_report_payload") or {})
     user = user_from_daily_report_state(state)
-    daily_report_tools.save_daily_report_draft.invoke(
-        {
-            "user_id": user.user_id,
-            "uid": user.uid,
-            "authorization": user.authorization,
-            "payload": payload,
-        }
-    )
+    try:
+        daily_report_tools.save_daily_report_draft.invoke(
+            {
+                "user_id": user.user_id,
+                "uid": user.uid,
+                "authorization": user.authorization,
+                "payload": payload,
+            }
+        )
+    except DailyReportApiError as exc:
+        return _daily_report_error_state(state, trace, str(exc))
     return {
         **state,
         "daily_report_payload": payload,
@@ -227,11 +245,15 @@ def submit_daily_report_node(state: ApprovalState) -> ApprovalState:
                 "trace": trace,
                 "_route": "end",
             }
+        except DailyReportApiError as exc:
+            return _daily_report_error_state(state, trace, str(exc))
         return {
             **state,
             "status": "daily_report_submitted",
+            "awaiting_field": None,
             "daily_report_request_id": result.get("report_id"),
             "assistant_message": f"已提交日报。\n\n- 日报编号：{result.get('report_id') or '无'}\n- 当前状态：{result.get('status')}",
+            "ui_action": None,
             "trace": trace,
             "_route": "end",
         }
@@ -253,6 +275,21 @@ def cancel_daily_report_node(state: ApprovalState) -> ApprovalState:
         "assistant_message": "已取消本次日报提交。",
         "ui_action": None,
         "trace": trace,
+        "_route": "end",
+    }
+
+
+def _daily_report_error_state(
+    state: ApprovalState, trace: list[str], message: str
+) -> ApprovalState:
+    """日报外部接口失败时，返回前端可区分的业务错误，而不是泛化 chat_error。"""
+    return {
+        **state,
+        "status": "error",
+        "assistant_message": message,
+        "field_errors": [{"field": "daily_report", "message": message}],
+        "trace": trace,
+        "ui_action": None,
         "_route": "end",
     }
 
@@ -337,7 +374,8 @@ def _ask_for_daily_report_date(
     message: str = "请选择要填写日报的日期，我会重新获取当天草稿。",
 ) -> ApprovalState:
     payload = deepcopy(state.get("daily_report_payload") or {})
-    value = payload.get("date") or state.get("daily_report_date")
+    # 默认先选当天；用户确认或修改后，再按该日期加载草稿和同步数据。
+    value = payload.get("date") or state.get("daily_report_date") or report_date_from_state(state)
     ui_action = _interrupt_ui_action(
         field_key="daily_report_date",
         label="日志时间",
@@ -394,8 +432,77 @@ def _maybe_interrupt(state: ApprovalState):
 
 def interrupt_daily_report_node(state: ApprovalState) -> ApprovalState:
     """LangGraph 原生 interrupt 节点；resume 后保持当前 state 返回给外层。"""
-    _maybe_interrupt(state)
-    return {**state, "_route": "end"}
+    resumed = _maybe_interrupt(state)
+    if resumed is None:
+        return {**state, "_route": "end"}
+    return _resume_daily_report_interrupt(state, resumed)
+
+
+def _resume_daily_report_interrupt(state: ApprovalState, resumed) -> ApprovalState:
+    """把 interrupt resume 回来的前端答案合并进日报 state，再继续子图。"""
+    ui_action = state.get("ui_action") if isinstance(state.get("ui_action"), dict) else {}
+    field_key = str(ui_action.get("field_key") or "")
+    if field_key == "daily_report_content":
+        payload = deepcopy(state.get("daily_report_payload") or {})
+        payload["content"] = _content_from_resume(resumed)
+        return {
+            **state,
+            "awaiting_field": None,
+            "daily_report_payload": payload,
+            "ui_action": None,
+            "_route": "save",
+        }
+    if field_key == "daily_report_date":
+        report_date = _value_from_resume(resumed)
+        return {
+            **state,
+            "awaiting_field": None,
+            "daily_report_date": report_date,
+            "ui_action": None,
+            "_route": "load",
+        }
+    if field_key == "daily_report_confirmation":
+        action = _value_from_resume(resumed)
+        return {
+            **state,
+            "user_message": action,
+            "_answer": _answer_from_resume(resumed),
+            "ui_action": None,
+            "_route": _route_from_confirmation_resume(action),
+        }
+    return {**state, "ui_action": None, "_route": "end"}
+
+
+def _content_from_resume(resumed) -> str:
+    """兼容 Command(resume=纯值) 和 Command(resume=answer 对象) 两种形态。"""
+    return _value_from_resume(resumed).strip()
+
+
+def _value_from_resume(resumed) -> str:
+    """从 LangGraph resume 值中提取用户输入值。"""
+    if isinstance(resumed, dict):
+        return str(resumed.get("value") or resumed.get("label") or "").strip()
+    return str(resumed or "").strip()
+
+
+def _answer_from_resume(resumed):
+    """确认弹窗 resume 时保留结构化 answer，方便下游 action 判断。"""
+    if isinstance(resumed, dict):
+        return resumed
+    return {"field_key": "action", "value": resumed, "label": resumed}
+
+
+def _route_from_confirmation_resume(action: str) -> str:
+    """把确认弹窗按钮值映射到日报子图内部路由。"""
+    if action in {"modify", "修改", "重新编辑", "edit"}:
+        return "collect_content"
+    if action in {"modify_date", "修改日期", "编辑日期", "edit_date"}:
+        return "collect_date"
+    if action in {"cancel", "取消"}:
+        return "cancel"
+    if is_confirm_message(action):
+        return "submit"
+    return "end"
 
 
 def _interrupt_state_patch(state: ApprovalState) -> dict:
