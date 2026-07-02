@@ -14,6 +14,9 @@ from app.agents.approval_agent import (
     user_info_agent_node,
     user_profile_agent_node,
 )
+from app.agents.daily_report_agentic_workflow_demo import (
+    daily_report_agentic_workflow_demo_node,
+)
 from app.agents.daily_report_create_agent import daily_report_create_agent_node
 from app.graph.approval_workflow import create_approval_creation_workflow
 from app.graph.daily_report_workflow import create_daily_report_workflow
@@ -34,6 +37,10 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder.add_node("approval_creation_agent", create_approval_creation_workflow())
     builder.add_node("daily_report_agent", create_daily_report_workflow())
     builder.add_node("daily_report_create_agent", daily_report_create_agent_node)
+    builder.add_node(
+        "daily_report_agentic_workflow_demo",
+        daily_report_agentic_workflow_demo_node,
+    )
     builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "memory_agent")
     builder.add_edge("memory_agent", "intent_router")
@@ -45,6 +52,7 @@ def create_workflow(*, with_checkpointer: bool = True):
             # 真实审批发起需要当前用户/上级上下文，先走 user_profile_agent 再进审批子图。
             "approval_creation_with_profile": "user_profile_agent",
             "user_info_agent": "user_profile_agent",
+            "daily_report_agentic_workflow_demo": "daily_report_agentic_workflow_demo",
             "daily_report_agent": "daily_report_agent",
             "daily_report_create_agent": "daily_report_create_agent",
             "general_chat": "general_chat",
@@ -62,6 +70,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder.add_edge("approval_creation_agent", END)
     builder.add_edge("daily_report_agent", END)
     builder.add_edge("daily_report_create_agent", END)
+    builder.add_edge("daily_report_agentic_workflow_demo", END)
     builder.add_edge("user_info_agent", END)
     builder.add_edge("general_chat", END)
     # MemorySaver 支持 LangGraph 原生 interrupt/resume；ChatApplicationService

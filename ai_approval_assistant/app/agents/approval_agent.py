@@ -128,6 +128,14 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         }
     if _looks_like_user_info_question(text):
         return {**state, "intent": "user_info", "trace": trace, "_route": "user_info_agent"}
+    if _looks_like_agentic_workflow_daily_report_demo_request(text):
+        return {
+            **state,
+            "intent": "daily_report",
+            "daily_report_mode": "agentic_workflow_demo",
+            "trace": trace,
+            "_route": "daily_report_agentic_workflow_demo",
+        }
     if _looks_like_autonomous_daily_report_request(text):
         return {
             **state,
@@ -944,6 +952,24 @@ def _looks_like_autonomous_daily_report_request(message: str) -> bool:
             "create_agent",
             "create agent",
             "自动 agent",
+        )
+    )
+
+
+def _looks_like_agentic_workflow_daily_report_demo_request(message: str) -> bool:
+    cleaned = message.strip().lower()
+    if not _looks_like_daily_report_request(cleaned):
+        return False
+    return any(
+        marker in cleaned
+        for marker in (
+            "agentic workflow",
+            "agentic工作流",
+            "agentic 日报",
+            "日报 agentic",
+            "演示日报 workflow",
+            "演示 workflow 日报",
+            "演示 agentic",
         )
     )
 
