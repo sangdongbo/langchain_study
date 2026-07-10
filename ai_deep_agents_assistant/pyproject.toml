@@ -1,0 +1,17 @@
+[project]
+name = "ai-deep-agents-assistant"
+version = "0.1.0"
+description = "Deep Agents implementation of the AI approval assistant demo"
+requires-python = ">=3.11"
+dependencies = [
+    "deepagents>=0.6.0",
+    "fastapi>=0.115.0",
+    "langchain-openai>=0.3.0",
+    "langgraph>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "uvicorn>=0.30.0",
+]
+
+[tool.uv]
+dev-dependencies = []
+
