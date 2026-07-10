@@ -34,3 +34,5 @@ ai_approval_assistant/.venv/
 ai_approval_assistant/.pytest_cache/
 
 volumes/
+docker/milvus-embed/volumes/
+docker/milvus-embed/volumes_broken_backup_*/
