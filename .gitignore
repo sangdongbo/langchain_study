@@ -1,5 +1,7 @@
 .env
 .env.*
+.codex-tmp/
+docker/
 !.env.example
 
 .venv/

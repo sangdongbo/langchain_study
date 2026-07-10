@@ -1,0 +1,129 @@
+{
+  "request_examples": [
+    {
+      "request_id": "PR-2026-0710-001",
+      "requester": "张明",
+      "department": "研发平台部",
+      "item": "AI 推理服务器",
+      "quantity": 4,
+      "unit_price": 68000,
+      "preferred_supplier": "北辰智能硬件",
+      "business_reason": "用于内部数据分析、仿真计算和自动化测试平台扩容，支撑 30 人研发团队并发实验。"
+    }
+  ],
+  "inventory": [
+    {
+      "item": "AI 推理服务器",
+      "available_quantity": 1,
+      "reserved_quantity": 1,
+      "lead_time_days": 18,
+      "replacement_options": ["GPU 云算力包", "通用计算服务器"]
+    },
+    {
+      "item": "GPU 云算力包",
+      "available_quantity": 20,
+      "reserved_quantity": 4,
+      "lead_time_days": 2,
+      "replacement_options": []
+    },
+    {
+      "item": "通用计算服务器",
+      "available_quantity": 6,
+      "reserved_quantity": 2,
+      "lead_time_days": 7,
+      "replacement_options": []
+    }
+  ],
+  "suppliers": [
+    {
+      "name": "北辰智能硬件",
+      "risk_level": "medium",
+      "on_contract": true,
+      "delivery_score": 82,
+      "quality_score": 88,
+      "last_incident": "2026-05 曾有一次 5 天交付延迟",
+      "payment_terms": "30% 预付款，70% 到货验收后支付",
+      "certifications": ["ISO9001", "信息安全承诺函"]
+    },
+    {
+      "name": "华东云算力",
+      "risk_level": "low",
+      "on_contract": true,
+      "delivery_score": 95,
+      "quality_score": 91,
+      "last_incident": "无重大事件",
+      "payment_terms": "月结 30 天",
+      "certifications": ["ISO27001", "等保三级机房"]
+    },
+    {
+      "name": "远航电子",
+      "risk_level": "high",
+      "on_contract": false,
+      "delivery_score": 68,
+      "quality_score": 73,
+      "last_incident": "2026-03 发生批次返修",
+      "payment_terms": "全额预付款",
+      "certifications": []
+    }
+  ],
+  "budgets": [
+    {
+      "department": "研发平台部",
+      "annual_budget": 1200000,
+      "used_budget": 812000,
+      "reserved_budget": 120000,
+      "budget_owner": "研发平台部负责人"
+    },
+    {
+      "department": "销售运营部",
+      "annual_budget": 600000,
+      "used_budget": 420000,
+      "reserved_budget": 50000,
+      "budget_owner": "销售运营负责人"
+    }
+  ],
+  "approval_matrix": [
+    {
+      "condition": "amount <= 50000",
+      "approvers": ["直属主管", "部门负责人"]
+    },
+    {
+      "condition": "50000 < amount <= 200000",
+      "approvers": ["直属主管", "部门负责人", "财务经理"]
+    },
+    {
+      "condition": "amount > 200000",
+      "approvers": ["直属主管", "部门负责人", "财务经理", "分管 VP"]
+    },
+    {
+      "condition": "supplier_risk == high",
+      "approvers": ["法务负责人", "采购负责人"]
+    },
+    {
+      "condition": "prepayment_ratio >= 0.3",
+      "approvers": ["财务经理"]
+    }
+  ],
+  "compliance_rules": [
+    {
+      "rule_id": "C001",
+      "description": "单笔采购金额超过 200000 元必须进行三方比价或说明豁免原因。",
+      "severity": "high"
+    },
+    {
+      "rule_id": "C002",
+      "description": "高风险供应商不得使用全额预付款。",
+      "severity": "high"
+    },
+    {
+      "rule_id": "C003",
+      "description": "预算可用余额不足时必须先走预算追加审批。",
+      "severity": "high"
+    },
+    {
+      "rule_id": "C004",
+      "description": "涉及 AI 算力、客户数据或核心业务分析平台时，需要信息安全负责人复核部署用途。",
+      "severity": "medium"
+    }
+  ]
+}

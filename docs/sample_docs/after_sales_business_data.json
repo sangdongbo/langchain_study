@@ -1,0 +1,209 @@
+{
+  "tickets": [
+    {
+      "ticket_id": "AS-2026-0710-001",
+      "customer_id": "C-10086",
+      "order_id": "OD-2026-0628-9001",
+      "channel": "app",
+      "priority": "high",
+      "created_at": "2026-07-10 09:12:00",
+      "customer_message": "我买的智能咖啡机到货后发现外壳裂了，水箱也漏水。已经影响使用，希望今天给我一个处理结果。"
+    },
+    {
+      "ticket_id": "AS-2026-0710-002",
+      "customer_id": "C-10019",
+      "order_id": "OD-2026-0701-3312",
+      "channel": "web",
+      "priority": "medium",
+      "created_at": "2026-07-10 10:05:00",
+      "customer_message": "订单显示已经签收，但我没有收到包裹。小区驿站也查不到，请帮忙处理。"
+    },
+    {
+      "ticket_id": "AS-2026-0710-003",
+      "customer_id": "C-10088",
+      "order_id": "OD-2026-0703-7788",
+      "channel": "phone",
+      "priority": "low",
+      "created_at": "2026-07-10 11:20:00",
+      "customer_message": "耳机用了两天不喜欢，想退货退款，包装和配件都还在。"
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "OD-2026-0628-9001",
+      "customer_id": "C-10086",
+      "sku": "SKU-COFFEE-PRO-01",
+      "item_name": "Barista Pro 智能咖啡机",
+      "quantity": 1,
+      "paid_amount": 3299,
+      "paid_at": "2026-06-28 20:18:00",
+      "payment_method": "credit_card",
+      "warranty_months": 12,
+      "return_window_days": 7,
+      "delivery_promise": "2026-07-03",
+      "seller": "自营旗舰店"
+    },
+    {
+      "order_id": "OD-2026-0701-3312",
+      "customer_id": "C-10019",
+      "sku": "SKU-AIR-FRYER-02",
+      "item_name": "6L 可视空气炸锅",
+      "quantity": 1,
+      "paid_amount": 599,
+      "paid_at": "2026-07-01 13:43:00",
+      "payment_method": "alipay",
+      "warranty_months": 12,
+      "return_window_days": 7,
+      "delivery_promise": "2026-07-05",
+      "seller": "厨房电器专营店"
+    },
+    {
+      "order_id": "OD-2026-0703-7788",
+      "customer_id": "C-10088",
+      "sku": "SKU-EARBUDS-LITE-01",
+      "item_name": "LitePods 降噪耳机",
+      "quantity": 1,
+      "paid_amount": 399,
+      "paid_at": "2026-07-03 08:26:00",
+      "payment_method": "wechat_pay",
+      "warranty_months": 12,
+      "return_window_days": 7,
+      "delivery_promise": "2026-07-06",
+      "seller": "自营旗舰店"
+    }
+  ],
+  "logistics": [
+    {
+      "order_id": "OD-2026-0628-9001",
+      "tracking_no": "SF99881230001",
+      "carrier": "顺丰",
+      "status": "delivered",
+      "delivered_at": "2026-07-02 16:40:00",
+      "signed_by": "本人签收",
+      "damage_report": true,
+      "damage_note": "派送员备注：外箱一角明显挤压，客户当场拍照反馈。",
+      "proof_images": ["outer_box_crushed.jpg", "water_tank_leak.jpg"]
+    },
+    {
+      "order_id": "OD-2026-0701-3312",
+      "tracking_no": "YT77889912001",
+      "carrier": "圆通",
+      "status": "delivered",
+      "delivered_at": "2026-07-05 19:20:00",
+      "signed_by": "驿站代收",
+      "damage_report": false,
+      "damage_note": "",
+      "proof_images": []
+    },
+    {
+      "order_id": "OD-2026-0703-7788",
+      "tracking_no": "JD66001288801",
+      "carrier": "京东物流",
+      "status": "delivered",
+      "delivered_at": "2026-07-05 10:12:00",
+      "signed_by": "本人签收",
+      "damage_report": false,
+      "damage_note": "",
+      "proof_images": []
+    }
+  ],
+  "customers": [
+    {
+      "customer_id": "C-10086",
+      "name": "李女士",
+      "member_level": "platinum",
+      "total_orders_180d": 18,
+      "refund_count_180d": 1,
+      "complaint_count_180d": 0,
+      "risk_level": "low",
+      "preferred_contact": "app_message"
+    },
+    {
+      "customer_id": "C-10019",
+      "name": "王先生",
+      "member_level": "silver",
+      "total_orders_180d": 6,
+      "refund_count_180d": 3,
+      "complaint_count_180d": 2,
+      "risk_level": "medium",
+      "preferred_contact": "phone"
+    },
+    {
+      "customer_id": "C-10088",
+      "name": "赵同学",
+      "member_level": "standard",
+      "total_orders_180d": 3,
+      "refund_count_180d": 0,
+      "complaint_count_180d": 0,
+      "risk_level": "low",
+      "preferred_contact": "app_message"
+    }
+  ],
+  "inventory": [
+    {
+      "sku": "SKU-COFFEE-PRO-01",
+      "available_new": 3,
+      "available_refurbished": 1,
+      "next_restock_date": "2026-07-14",
+      "warehouse": "华东仓"
+    },
+    {
+      "sku": "SKU-AIR-FRYER-02",
+      "available_new": 0,
+      "available_refurbished": 0,
+      "next_restock_date": "2026-07-18",
+      "warehouse": "华南仓"
+    },
+    {
+      "sku": "SKU-EARBUDS-LITE-01",
+      "available_new": 48,
+      "available_refurbished": 6,
+      "next_restock_date": "2026-07-12",
+      "warehouse": "华东仓"
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "P001",
+      "name": "到货破损处理",
+      "rule": "物流破损且客户在签收后 72 小时内反馈，可优先换新；若无库存，允许原路退款并补偿不超过订单金额 5%。"
+    },
+    {
+      "policy_id": "P002",
+      "name": "未收到货处理",
+      "rule": "物流显示签收但客户否认收货，需要先发起物流核查；中风险及以上客户不得直接退款。"
+    },
+    {
+      "policy_id": "P003",
+      "name": "七天无理由退货",
+      "rule": "签收后 7 天内、商品不影响二次销售、配件齐全，可走退货退款；非质量问题退货运费由客户承担。"
+    },
+    {
+      "policy_id": "P004",
+      "name": "高价值订单升级",
+      "rule": "订单金额超过 2000 元且涉及退款、换新或补偿时，需要售后主管审批。"
+    },
+    {
+      "policy_id": "P005",
+      "name": "客户体验补偿",
+      "rule": "平台责任导致的问题，可给优惠券或现金补偿；现金补偿超过 100 元需要主管审批。"
+    }
+  ],
+  "sla_rules": [
+    {
+      "priority": "high",
+      "first_response_minutes": 30,
+      "resolution_hours": 8
+    },
+    {
+      "priority": "medium",
+      "first_response_minutes": 60,
+      "resolution_hours": 24
+    },
+    {
+      "priority": "low",
+      "first_response_minutes": 120,
+      "resolution_hours": 48
+    }
+  ]
+}
