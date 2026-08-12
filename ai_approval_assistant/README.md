@@ -364,6 +364,8 @@ AI_APPROVAL_LIST_URL=http://127.0.0.1:8002/api/approval/list
 AI_APPROVAL_FORM_FIELDS_URL=http://127.0.0.1:8002/api/field/formFields
 AI_APPROVAL_GET_NODES_URL=http://127.0.0.1:8002/api/approval/getNodes
 AI_APPROVAL_ADD_URL=http://127.0.0.1:8002/api/approval/add
+AI_APPROVAL_USER_LIST_URL=http://127.0.0.1:8002/api/User/getList
+AI_APPROVAL_CALCULATE_HOLIDAY_DURATION_URL=http://127.0.0.1:8002/api/attendance/calculateHolidayDuration
 ```
 
 远程模板和字段详情会短时间缓存，减少同一会话反复调用 `/api/approval/list` 和 `/api/field/formFields`。默认 TTL 是 300 秒，模板更新后最迟会在 TTL 到期后重新拉取：
@@ -1060,7 +1062,207 @@ $env:PYTHONIOENCODING = "utf-8"
 
 也可以在 `.env` 配置 `AI_APPROVAL_STUDIO_ENABLED=true`，然后用 `.\start_windows.ps1` 同时启动 FastAPI 和 Studio。
 
-Studio 顶层图展示的是多 Agent 编排：`memory_agent -> user_profile_agent -> intent_router`，再按意图进入 `user_info_agent`、`general_chat`、`approval_creation_agent` 或 `daily_report_chat_agent`。`load_context`、`classify`、`collect` 等审批细节已经收敛在 `approval_creation_agent` 子图里；写日志/日报的字段加载和提交确认收敛在日报 agent 里；普通问候、帮助问句和“我的用户信息是什么”不会经过审批节点。
+### 11.1 LangSmith、Studio 和本地接口的关系
+
+截图中的页面是 LangSmith 承载的 LangGraph Studio 调试界面，但点击 `Submit` 时，请求的是本机 `langgraph dev` 启动的 LangGraph Server，默认地址为 `http://127.0.0.1:2024`。它不是把审批请求直接发给 LangSmith API。
+
+本项目有两种调用入口：
+
+| 入口 | 地址 | 请求参数 |
+|---|---|---|
+| 业务接口，推荐给前端使用 | `POST http://127.0.0.1:8010/api/ai-approval/chat` | `ChatRequest` |
+| Studio / LangGraph Server 调试接口 | `POST http://127.0.0.1:2024/threads/{thread_id}/runs/wait` | `ApprovalState` |
+
+LangSmith 在这里主要负责展示 Studio 和接收 trace。若要把 LangChain/LangGraph 的运行轨迹上传到 LangSmith，可在本机 `.env` 中配置：
+
+```text
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your_langsmith_api_key
+LANGSMITH_PROJECT=ai-approval-assistant
+# 一般不用设置，私有部署时才修改：
+# LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+```
+
+不要把真实 `LANGSMITH_API_KEY` 或 ERP token 提交到仓库。
+
+### 11.2 Input 应该填写什么
+
+Studio 里直接调的是 `ApprovalState`，不是 FastAPI 的 `ChatRequest`。在截图红框的 `Input` 中粘贴下面的 JSON，并保持右下角 `As Node` 为空，让图从 `START` 开始执行：
+
+```json
+{
+  "messages": [],
+  "remaining_steps": 20,
+  "session_id": "studio-new-purchase",
+  "user_id": "863",
+  "uid": "863",
+  "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RldjIubGFuZXJwLmNvbS9hcGkvTG9naW4vbG9naW4iLCJpYXQiOjE3ODQyNTY4MTIsImV4cCI6MTc4Njg0ODgxMiwibmJmIjoxNzg0MjU2ODEyLCJqdGkiOiJnWWRsS0I4TnlzcjZPUDNjIiwic3ViIjoiODYzIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyIsImNvbXBhbnlfbmFtZSI6IuWMl-S6rOa-nOaZr-enkeaKgOaciemZkOWFrOWPuCIsImNvbXBhbnlfaWQiOjE2fQ.2MU6icCDpbLZ0hm4ZYy8zCGzBc7ihqffF4QC4z-2vSE",
+  "user_message": "我要申请采购笔记本电脑",
+  "status": "idle",
+  "trace": []
+}
+```
+```
+{
+  "messages": [],
+  "remaining_steps": 20,
+  "session_id": "studio-new-purchase",
+  "user_id": "863",
+  "uid": "863",
+  "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RldjIubGFuZXJwLmNvbS9hcGkvTG9naW4vbG9naW4iLCJpYXQiOjE3ODQyNTY4MTIsImV4cCI6MTc4Njg0ODgxMiwibmJmIjoxNzg0MjU2ODEyLCJqdGkiOiJnWWRsS0I4TnlzcjZPUDNjIiwic3ViIjoiODYzIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyIsImNvbXBhbnlfbmFtZSI6IuWMl-S6rOa-nOaZr-enkeaKgOaciemZkOWFrOWPuCIsImNvbXBhbnlfaWQiOjE2fQ.2MU6icCDpbLZ0hm4ZYy8zCGzBc7ihqffF4QC4z-2vSE",
+  "user_message": "请假",
+  "status": "idle",
+  "trace": []
+}
+```
+
+本地 mock 模式下，`uid` 和 `authorization` 可以传 `null`。调用真实 ERP 时改为：
+
+```json
+{
+  "messages": [],
+  "remaining_steps": 20,
+  "session_id": "studio-erp-863",
+  "user_id": "863",
+  "uid": "863",
+  "authorization": "Bearer your_erp_token_here",
+  "user_message": "我要申请采购笔记本电脑",
+  "status": "idle",
+  "trace": []
+}
+```
+
+常用输入字段：
+
+| 字段 | 是否必填 | 说明 |
+|---|---|---|
+| `session_id` | 是 | 业务会话 ID；多轮对话保持不变。建议和 LangGraph `thread_id` 对应，方便排查。 |
+| `user_id` | 是 | 当前业务用户 ID。 |
+| `user_message` | 是 | 本轮自然语言输入。对应业务接口中的 `message`。 |
+| `uid` | 真实 ERP 必填 | ERP 当前用户 UID；本地 mock 可为 `null`。 |
+| `authorization` | 真实 ERP 必填 | ERP Authorization，例如 `Bearer xxx`；本地 mock 可为 `null`。 |
+| `messages` | 建议首次传 | `AgentState` 的消息列表，新会话传 `[]`。 |
+| `remaining_steps` | 建议首次传 | Agent 最大剩余步数，示例值为 `20`。 |
+| `status` | 建议首次传 | 新会话传 `idle`。恢复指定中间状态时才改为 `collecting` 等值。 |
+| `_answer` | 按需 | Studio 直接调用图时，结构化控件的回填值。业务接口对应字段名是 `answer`。 |
+| `trace` | 否 | 节点执行轨迹，新会话传 `[]` 或省略。 |
+
+`intent`、`approval_type`、`collected_slots`、`preview` 等其余字段都是工作流运行过程中产生的状态。新会话不需要手工填写；只有在调试某个中间节点时才需要构造它们。
+
+多轮审批调试要在 Studio 中继续使用同一个 thread，每轮只更新 `user_message` 和必要的 `_answer`，不要创建新 thread。例如文本回答：
+
+```json
+{
+  "user_message": "数量 2 台"
+}
+```
+
+结构化控件回答：
+
+```json
+{
+  "user_message": "张三",
+  "_answer": {
+    "field_key": "__approval_assignee__:12204",
+    "type": "user_select",
+    "label": "张三",
+    "value": "864"
+  }
+}
+```
+
+日报子图使用 LangGraph `interrupt` 时，应在 Studio 的中断恢复入口提交控件值并继续当前 thread；不要把它当成一个全新的首次请求。
+
+### 11.3 通过 LangGraph Server REST API 请求
+
+先创建 thread：
+
+```bash
+curl -X POST "http://127.0.0.1:2024/threads" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+响应中的 `thread_id` 要用于后续请求。假设返回的是 `YOUR_THREAD_ID`，执行 graph 并等待最终状态：
+
+```bash
+curl -X POST "http://127.0.0.1:2024/threads/YOUR_THREAD_ID/runs/wait" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assistant_id": "approval_assistant",
+    "input": {
+      "messages": [],
+      "remaining_steps": 20,
+      "session_id": "YOUR_THREAD_ID",
+      "user_id": "U001",
+      "uid": null,
+      "authorization": null,
+      "user_message": "我要申请采购笔记本电脑",
+      "status": "idle",
+      "trace": []
+    }
+  }'
+```
+
+这里的 `assistant_id` 必须是 `langgraph.json` 中注册的 graph 名称 `approval_assistant`。多轮请求继续使用同一个 `thread_id`，后续 `input` 只需发送本轮要更新的 state：
+
+```json
+{
+  "assistant_id": "approval_assistant",
+  "input": {
+    "user_message": "数量 2 台"
+  }
+}
+```
+
+需要流式返回时，把路径末尾的 `runs/wait` 攺成 `runs/stream`，并在请求体中增加：
+
+```json
+{
+  "stream_mode": "updates"
+}
+```
+
+### 11.4 通过业务 FastAPI 请求
+
+业务调用通常不需要直接拼 `ApprovalState`，使用 `8010` 端口的聊天接口即可：
+
+```bash
+curl -X POST "http://127.0.0.1:8010/api/ai-approval/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "S-purchase-001",
+    "user_id": "U001",
+    "message": "我要申请采购笔记本电脑"
+  }'
+```
+
+`ChatRequest` 参数如下：
+
+| 字段 | 是否必填 | 说明 |
+|---|---|---|
+| `session_id` | 是 | 多轮业务会话 ID。 |
+| `user_id` | 是 | 当前业务用户 ID。 |
+| `message` | 是 | 本轮用户输入。 |
+| `uid` | 真实 ERP 必填 | 可放在 JSON，也可通过 `UID` 请求头传入。 |
+| `authorization` | 真实 ERP 必填 | 可放在 JSON，也可通过 `Authorization` 请求头传入。 |
+| `answer` | 按需 | 前端结构化控件回填对象；服务内部会转换为 graph state 的 `_answer`。 |
+
+真实 ERP 请求推荐把凭证放在请求头：
+
+```bash
+curl -X POST "http://127.0.0.1:8010/api/ai-approval/chat" \
+  -H "Content-Type: application/json" \
+  -H "UID: 863" \
+  -H "Authorization: Bearer your_erp_token_here" \
+  -d '{
+    "session_id": "S-erp-863",
+    "user_id": "863",
+    "message": "我要申请采购笔记本电脑"
+  }'
+```
+
+Studio 顶层图展示的是多 Agent 编排：`memory_agent -> intent_router`，再按意图进入 `user_profile_agent`、`user_info_agent`、`general_chat`、`approval_creation_agent` 或 `daily_report_agent`。`load_context`、`classify`、`collect` 等审批细节已经收敛在 `approval_creation_agent` 子图里；写日志/日报的字段加载和提交确认收敛在日报 agent 里；普通问候、帮助问句和“我的用户信息是什么”不会经过审批节点。
 
 如果当前环境没有 LangGraph CLI，可以先同步开发依赖：
 
@@ -1068,7 +1270,7 @@ Studio 顶层图展示的是多 Agent 编排：`memory_agent -> user_profile_age
 uv sync --dev
 ```
 
-Studio 里直接调的是 `ApprovalState`，不是 FastAPI 的 `ChatRequest`。调试示例放在：
+更多 Studio 调试示例放在：
 
 ```text
 app/graph/studio.py

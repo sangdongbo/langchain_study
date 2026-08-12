@@ -124,6 +124,7 @@ def demo_confirm_date_node(state: ApprovalState) -> ApprovalState:
     return {
         **state,
         "intent": "daily_report",
+        "daily_report_agent": "daily_report_agentic_workflow_demo",
         "daily_report_mode": "agentic_workflow_demo",
         "daily_report_date": report_date,
         "trace": trace,
@@ -382,6 +383,7 @@ def _with_agent_plan(
     return {
         **state,
         "intent": "daily_report",
+        "daily_report_agent": "daily_report_agentic_workflow_demo",
         "daily_report_mode": "agentic_workflow_demo",
         "daily_report_agentic_plan": plan,
         "trace": trace,

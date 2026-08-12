@@ -70,9 +70,6 @@ def first_unselected_node(
 
 def assignee_selection_message(node: ApprovalNode) -> str:
     """构建审批人选择追问文案。"""
-    names = "、".join(assignee.name for assignee in node.candidate_assignees)
-    if names:
-        return f"请选择{node.node_name}审批人，可选：{names}。"
     return f"请选择{node.node_name}审批人。"
 
 

@@ -16,6 +16,8 @@ ApprovalStatus = Literal[
     "error",
 ]
 
+ChatIntent = Literal["approval", "daily_report", "general"]
+
 
 class ChatRequest(BaseModel):
     """Single chat turn request."""
@@ -23,6 +25,8 @@ class ChatRequest(BaseModel):
     session_id: str = Field(min_length=1)
     user_id: str = Field(min_length=1)
     message: str = Field(min_length=1)
+    uid: str | None = None
+    authorization: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -31,6 +35,10 @@ class ChatResponse(BaseModel):
     session_id: str
     status: ApprovalStatus
     assistant_message: str
+    intent: ChatIntent = "general"
+    daily_report_mode: str | None = None
+    daily_report_payload: dict[str, Any] | None = None
+    daily_report_preview: dict[str, Any] | None = None
     approval_type: str | None = None
     collected_slots: dict[str, str] = Field(default_factory=dict)
     missing_fields: list[str] = Field(default_factory=list)

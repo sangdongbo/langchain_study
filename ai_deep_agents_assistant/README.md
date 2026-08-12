@@ -1,6 +1,6 @@
 # AI Deep Agents Approval Assistant
 
-这是 `ai_approval_assistant` 的 Deep Agents 版本示例。
+这是 `ai_approval_assistant` 的 Deep Agents 版本示例，支持审批和日报。
 
 原项目主要用 LangGraph 显式节点实现审批流程：
 
@@ -24,9 +24,14 @@ Deep Agent
 - 支持请假、报销、采购 3 类审批模板
 - 支持模板识别、字段抽取、缺字段追问
 - 支持审批预览
+- 支持日报日期、工作内容收集和日报预览
+- 从 `dev2` 加载日报字段、配置、草稿、收件人和同步数据
+- 支持日报提交前 human-in-the-loop 确认
+- 确认后调用 `POST /oa/dailyReport/add` 真实提交 ERP 日报
 - 用户明确“确认提交”后才恢复中断并提交
 - 使用 `MemorySaver` 做 checkpoint
 - 使用 `interrupt_on={"submit_approval_request": True}` 保护提交工具
+- 使用 `interrupt_on={"submit_daily_report_request": True}` 保护日报提交工具
 
 ## 启动
 
@@ -49,7 +54,10 @@ python -m uvicorn ai_deep_agents_assistant.app.main:app --host 127.0.0.1 --port 
 DEEPSEEK_API_KEY=...
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-chat
+AI_DEEP_AGENT_ERP_BASE_URL=https://dev2.lanerp.com
 ```
+
+真实 ERP 日报请求还要求前端传入当前登录用户的 `uid` 和 `authorization`。
 
 ## 调用示例
 
@@ -62,6 +70,18 @@ Invoke-RestMethod `
 ```
 
 当 Agent 准备提交时，会因为 `submit_approval_request` 被中断。
+
+写日报示例：
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8020/api/ai-approval/chat `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{"session_id":"daily-001","user_id":"U001","message":"写今天日报：完成审批助手开发和接口联调"}'
+```
+
+日报预览生成后，同样回复“确认提交”恢复中断并调用 dev2 ERP 真实提交。
 
 确认提交：
 

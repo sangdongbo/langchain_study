@@ -95,5 +95,7 @@ class ChatResponse(BaseModel):
     idempotency_key: str | None = None
     trace: list[str] = Field(default_factory=list)
     ui_action: dict[str, Any] | None = None
+    daily_report_agent: str | None = None
+    daily_report_mode: str | None = None
     daily_report_payload: dict[str, Any] | None = None
     daily_report_preview: dict[str, Any] | None = None

@@ -55,6 +55,7 @@ def test_agentic_daily_report_demo_node_uses_agent_plan_before_workflow_gates(
 
     result = demo_module.daily_report_agentic_workflow_demo_node(state)
 
+    assert result["daily_report_agent"] == "daily_report_agentic_workflow_demo"
     assert result["daily_report_mode"] == "agentic_workflow_demo"
     assert result["daily_report_date"] == "2026-07-02"
     assert result["status"] == "awaiting_daily_report_confirmation"

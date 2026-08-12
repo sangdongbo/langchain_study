@@ -42,6 +42,8 @@ def daily_report_entry_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_agent",
+            "daily_report_mode": "standard",
             "awaiting_field": None,
             "assistant_message": f"已提交日报。\n\n- 日报编号：{report_id}\n- 当前状态：submitted",
             "ui_action": None,
@@ -51,6 +53,8 @@ def daily_report_entry_node(state: ApprovalState) -> ApprovalState:
     return {
         **state,
         "intent": "daily_report",
+        "daily_report_agent": "daily_report_agent",
+        "daily_report_mode": "standard",
         "trace": [*trace, "daily_report_entry"],
     }
 
@@ -237,11 +241,28 @@ def submit_daily_report_node(state: ApprovalState) -> ApprovalState:
             )
         except DailyReportSubmitError as exc:
             message = str(exc)
+            assistant_message = (
+                f"日报提交失败：{message}\n\n"
+                "请修改日报内容或日期后重新确认。"
+            )
             return {
                 **state,
-                "status": "error",
-                "assistant_message": f"日报提交失败：{message}",
+                # 业务拒绝不应丢失日报编辑上下文。保留确认态后，用户可以
+                # 修改内容、修改日期，或取消本次提交并回到内容编辑器。
+                "status": "awaiting_daily_report_confirmation",
+                "awaiting_field": None,
+                "assistant_message": assistant_message,
                 "field_errors": [{"field": "daily_report", "message": message}],
+                "ui_action": {
+                    **_interrupt_ui_action(
+                        field_key="daily_report_confirmation",
+                        label="修改日报",
+                        input_type="action",
+                        value=None,
+                        message=assistant_message,
+                    ),
+                    "actions": ["modify", "modify_date", "cancel"],
+                },
                 "trace": trace,
                 "_route": "end",
             }
@@ -266,16 +287,28 @@ def submit_daily_report_node(state: ApprovalState) -> ApprovalState:
 
 
 def cancel_daily_report_node(state: ApprovalState) -> ApprovalState:
-    """取消本轮日报提交。"""
+    """取消本次提交动作，并回到日报内容编辑。"""
     trace = [*state.get("trace", []), "cancel_daily_report"]
+    prompted = _ask_for_daily_report_content(
+        {
+            **state,
+            "trace": trace,
+            "field_errors": [],
+            "ui_action": None,
+        },
+        deepcopy(state.get("daily_report_payload") or {}),
+        message="已取消本次提交，请修改日报内容，修改后我会重新生成预览。",
+    )
     return {
+        **prompted,
         **state,
-        "status": "cancelled",
-        "awaiting_field": None,
-        "assistant_message": "已取消本次日报提交。",
-        "ui_action": None,
         "trace": trace,
-        "_route": "end",
+        "status": prompted["status"],
+        "awaiting_field": prompted["awaiting_field"],
+        "assistant_message": prompted["assistant_message"],
+        "field_errors": [],
+        "ui_action": prompted["ui_action"],
+        "_route": prompted["_route"],
     }
 
 
@@ -512,6 +545,8 @@ def _interrupt_state_patch(state: ApprovalState) -> dict:
     return {
         "status": state.get("status"),
         "awaiting_field": state.get("awaiting_field"),
+        "field_errors": deepcopy(state.get("field_errors") or []),
+        "trace": list(state.get("trace") or []),
         "daily_report_date": state.get("daily_report_date") or payload.get("date"),
         "daily_report_payload": deepcopy(payload),
         "daily_report_preview": deepcopy(state.get("daily_report_preview") or {}),

@@ -1,0 +1,12 @@
+Communication job: By the end, department colleagues should understand why a conversational approval assistant was built, how the architecture evolved, what each implementation actually controls, what can be demonstrated today, and why production write operations still require deterministic gates.
+
+Narrative arc:
+1. Platform approval problem and desired user experience.
+2. Evolution from fixed Flow to autonomous Agent to Agentic Workflow.
+3. Fair comparison using the same daily-report goal.
+4. Separate Deep Agents approval exploration.
+5. Live demo instructions and expected observations.
+6. Current effect, real limitations, and next steps.
+
+Timing target: 18 slides, approximately 20 minutes.
+

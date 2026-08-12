@@ -137,3 +137,31 @@ def test_nodes_from_remote_payload_maps_assignee_selection() -> None:
     assert nodes[0].requires_selection is True
     assert nodes[0].multiple is False
     assert [user.name for user in nodes[0].candidate_assignees] == ["张三", "李四"]
+
+
+def test_nodes_from_remote_payload_uses_restricted_assignee_scope() -> None:
+    nodes = nodes_from_remote_payload(
+        {
+            "data": [
+                {
+                    "id": 12204,
+                    "type": "conduct",
+                    "name": "办理",
+                    "handle": {
+                        "type": "submitter_choice",
+                        "is_all_company": 2,
+                        "relate_user": [
+                            {"uid": 999, "name": "上次已选人员"},
+                        ],
+                        "relate_id": [
+                            {"relate_id": 864, "relate_name": "张三"},
+                            {"relate_id": 865, "relate_name": "李四"},
+                        ],
+                    },
+                }
+            ]
+        }
+    )
+
+    assert [user.uid for user in nodes[0].candidate_assignees] == ["864", "865"]
+    assert [user.name for user in nodes[0].candidate_assignees] == ["张三", "李四"]

@@ -56,6 +56,7 @@ def daily_report_create_agent_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_create_agent",
             "daily_report_mode": "autonomous",
             "status": "error",
             "assistant_message": f"自主日报 Agent 处理失败：{message}",
@@ -67,6 +68,7 @@ def daily_report_create_agent_node(state: ApprovalState) -> ApprovalState:
     return {
         **state,
         "intent": "daily_report",
+        "daily_report_agent": "daily_report_create_agent",
         "daily_report_mode": "autonomous",
         "daily_report_agent_messages": _serializable_messages(_result_messages(result))
         or _serializable_messages(state.get("daily_report_agent_messages", [])),

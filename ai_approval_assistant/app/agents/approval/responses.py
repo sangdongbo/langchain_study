@@ -45,6 +45,8 @@ def to_chat_response(state: ApprovalState, crm_approval_service) -> ChatResponse
         idempotency_key=state.get("idempotency_key"),
         trace=state.get("trace", []),
         ui_action=state.get("ui_action"),
+        daily_report_agent=state.get("daily_report_agent"),
+        daily_report_mode=state.get("daily_report_mode"),
         daily_report_payload=state.get("daily_report_payload"),
         daily_report_preview=state.get("daily_report_preview"),
     )

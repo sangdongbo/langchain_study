@@ -118,6 +118,7 @@ def test_daily_report_create_agent_node_adapts_approval_state_to_agent_messages(
         }
     ]
     assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_create_agent"
     assert result["daily_report_mode"] == "autonomous"
     assert result["assistant_message"] == "已生成自主版日报预览，请确认是否提交。"
     assert result["status"] == "awaiting_daily_report_confirmation"

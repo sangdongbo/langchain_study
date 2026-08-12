@@ -22,6 +22,9 @@ def test_langgraph_json_points_to_importable_compiled_graph() -> None:
     assert "approval_creation_agent" in graph.get_graph().nodes
     assert "daily_report_agent" in graph.get_graph().nodes
     assert "daily_report_create_agent" in graph.get_graph().nodes
+    expanded_nodes = graph.get_graph(xray=True).nodes
+    assert any("demo_agent_plan" in node for node in expanded_nodes)
+    assert any("demo_preview_gate" in node for node in expanded_nodes)
     assert "daily_report_chat_agent" not in graph.get_graph().nodes
     assert "daily_report_form_agent" not in graph.get_graph().nodes
     edges = {(edge.source, edge.target) for edge in graph.get_graph().edges}
@@ -55,6 +58,8 @@ def test_intent_router_routes_daily_report_requests_to_daily_report_agent() -> N
     result = module.intent_router_node(state)
 
     assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_agent"
+    assert result["daily_report_mode"] == "standard"
     assert result["_route"] == "daily_report_agent"
 
 
@@ -66,6 +71,7 @@ def test_intent_router_routes_explicit_autonomous_daily_report_requests_to_creat
     result = module.intent_router_node(state)
 
     assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_create_agent"
     assert result["daily_report_mode"] == "autonomous"
     assert result["_route"] == "daily_report_create_agent"
 
@@ -84,7 +90,28 @@ def test_intent_router_keeps_autonomous_daily_report_followup_on_create_agent() 
     result = module.intent_router_node(state)
 
     assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_create_agent"
+    assert result["daily_report_mode"] == "autonomous"
     assert result["_route"] == "daily_report_create_agent"
+
+
+def test_intent_router_keeps_agentic_demo_confirmation_on_demo_agent() -> None:
+    module = importlib.import_module("app.agents.approval_agent")
+    state = module.initial_state("S-daily-demo-followup-router", "863")
+    state.update(
+        {
+            "daily_report_mode": "agentic_workflow_demo",
+            "status": "awaiting_daily_report_confirmation",
+            "user_message": "确认提交",
+        }
+    )
+
+    result = module.intent_router_node(state)
+
+    assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_agentic_workflow_demo"
+    assert result["daily_report_mode"] == "agentic_workflow_demo"
+    assert result["_route"] == "daily_report_agentic_workflow_demo"
 
 
 def test_intent_router_keeps_daily_report_confirmation_on_daily_report_agent() -> None:
@@ -100,6 +127,8 @@ def test_intent_router_keeps_daily_report_confirmation_on_daily_report_agent() -
     result = module.intent_router_node(state)
 
     assert result["intent"] == "daily_report"
+    assert result["daily_report_agent"] == "daily_report_agent"
+    assert result["daily_report_mode"] == "standard"
     assert result["_route"] == "daily_report_agent"
 
 

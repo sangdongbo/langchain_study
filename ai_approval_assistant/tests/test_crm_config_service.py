@@ -14,7 +14,9 @@ def test_crm_endpoint_config_uses_base_url(monkeypatch) -> None:
     monkeypatch.delenv("AI_APPROVAL_ADD_URL", raising=False)
     monkeypatch.delenv("AI_APPROVAL_RELATED_LIST_URL", raising=False)
     monkeypatch.delenv("AI_APPROVAL_HOLIDAY_RULE_URL", raising=False)
+    monkeypatch.delenv("AI_APPROVAL_CALCULATE_HOLIDAY_DURATION_URL", raising=False)
     monkeypatch.delenv("AI_APPROVAL_USERINFO_URL", raising=False)
+    monkeypatch.delenv("AI_APPROVAL_USER_LIST_URL", raising=False)
 
     config = load_crm_endpoint_config()
 
@@ -24,7 +26,9 @@ def test_crm_endpoint_config_uses_base_url(monkeypatch) -> None:
     assert config.add_approval_url == "http://crm.local:8002/api/approval/add"
     assert config.related_list_url == "http://crm.local:8002/api/Company/getRelatedList"
     assert config.holiday_rule_url == "http://crm.local:8002/api/attendance/getHolidayRuleByUser"
+    assert config.calculate_holiday_duration_url == "http://crm.local:8002/api/attendance/calculateHolidayDuration"
     assert config.userinfo_url == "http://crm.local:8002/api/User/userinfo"
+    assert config.user_list_url == "http://crm.local:8002/api/User/getList"
 
 
 def test_crm_endpoint_config_keeps_specific_url_override(monkeypatch) -> None:

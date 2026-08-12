@@ -1,0 +1,1738 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/ksudza",
+    "id": "ksudza",
+    "slide": 4,
+    "layoutId": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "AI Efficiency",
+    "colors": {
+      "accent1": "#3D8DFF",
+      "accent2": "#0F766E",
+      "accent3": "#F59E0B",
+      "accent4": "#DC2626",
+      "accent5": "#7C3AED",
+      "accent6": "#16A34A",
+      "bg1": "#FFFFFF",
+      "bg2": "#F7F7F7",
+      "tx1": "#111111",
+      "tx2": "#5F6368",
+      "dk1": "#000000",
+      "dk2": "#1F2937",
+      "lt1": "#FFFFFF",
+      "lt2": "#EDEDED",
+      "hlink": "#3D8DFF",
+      "folHlink": "#7C3AED"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0rm1ofml",
+      "id": "1",
+      "name": "Google-Shape-532-p58-2",
+      "bbox": [
+        1184.18,
+        659.24,
+        54.48,
+        25.33
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 13.33,
+      "resolvedTextStyle": {
+        "anchor": 3,
+        "fontSize": 13.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "right",
+        "verticalAlignment": "bottom",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "resolvedTextStyle": {
+            "anchor": 3,
+            "fontSize": 13.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "right",
+            "verticalAlignment": "bottom",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "anchor": 3,
+              "fontSize": 13.33,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "right",
+              "verticalAlignment": "bottom",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zqtkvulg",
+      "id": "2",
+      "name": "Google-Shape-533-p58-3",
+      "bbox": [
+        41.33,
+        36.12,
+        1197.33,
+        109.97
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "实施路径：每次演进都在重新分配“谁做决定”",
+      "textPreview": "实施路径：每次演进都在重新分配“谁做决定”",
+      "resolvedFontSize": 38.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 38.67,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "实施路径：每次演进都在重新分配“谁做决定”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "实施路径：每次演进都在重新分配“谁做决定”",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 38.67,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "实施路径：每次演进都在重新分配“谁做决定”",
+              "anchor": 1,
+              "fontSize": 38.67,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/epkjmp4v",
+      "id": "3",
+      "name": "Content-Placeholder-10-4",
+      "bbox": [
+        732,
+        249.33,
+        506.67,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "geometry": "rect",
+      "text": "节点、条件边和顺序由开发者定义。",
+      "textPreview": "节点、条件边和顺序由开发者定义。",
+      "resolvedFontSize": 31.74,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.99,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "节点、条件边和顺序由开发者定义。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "节点、条件边和顺序由开发者定义。",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "节点、条件边和顺序由开发者定义。",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dob2tk3a",
+      "id": "4",
+      "name": "Content-Placeholder-10-5",
+      "bbox": [
+        509.33,
+        249.33,
+        196,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.3"
+      },
+      "geometry": "rect",
+      "text": "固定 Flow",
+      "textPreview": "固定 Flow",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "固定 Flow"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "固定 Flow",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "固定 Flow",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sn21kfmp",
+      "id": "5",
+      "name": "Content-Placeholder-10-6",
+      "bbox": [
+        732,
+        353.33,
+        506.67,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.4"
+      },
+      "geometry": "rect",
+      "text": "模型自己选择工具和下一步。",
+      "textPreview": "模型自己选择工具和下一步。",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "模型自己选择工具和下一步。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "模型自己选择工具和下一步。",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "模型自己选择工具和下一步。",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rmtkral4",
+      "id": "6",
+      "name": "Content-Placeholder-10-7",
+      "bbox": [
+        509.33,
+        353.33,
+        196,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.5"
+      },
+      "geometry": "rect",
+      "text": "自主 Agent",
+      "textPreview": "自主 Agent",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "自主 Agent"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "自主 Agent",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "自主 Agent",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q1kji54j",
+      "id": "7",
+      "name": "Content-Placeholder-10-8",
+      "bbox": [
+        732,
+        457.33,
+        506.67,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.6"
+      },
+      "geometry": "rect",
+      "text": "Agent 负责理解生成，Workflow 负责业务 Gate。",
+      "textPreview": "Agent 负责理解生成，Workflow 负责业务 Gate。",
+      "resolvedFontSize": 28.33,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.89,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agent 负责理解生成，Workflow 负责业务"
+          },
+          {
+            "index": 2,
+            "text": "Gate。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agent 负责理解生成，Workflow 负责业务 Gate。",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agent 负责理解生成，Workflow 负责业务 Gate。",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/50bip0ny",
+      "id": "8",
+      "name": "Content-Placeholder-10-9",
+      "bbox": [
+        509.33,
+        457.33,
+        196,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.7"
+      },
+      "geometry": "rect",
+      "text": "Agentic Workflow",
+      "textPreview": "Agentic Workflow",
+      "resolvedFontSize": 28.33,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.89,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agentic"
+          },
+          {
+            "index": 2,
+            "text": "Workflow"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agentic Workflow",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agentic Workflow",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4z21gvmt",
+      "id": "9",
+      "name": "Content-Placeholder-10-10",
+      "bbox": [
+        732,
+        562.67,
+        506.67,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.8"
+      },
+      "geometry": "rect",
+      "text": "目标驱动、Checkpoint、HITL，探索复杂任务。",
+      "textPreview": "目标驱动、Checkpoint、HITL，探索复杂任务。",
+      "resolvedFontSize": 28.33,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.89,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "目标驱动、Checkpoint、HITL，探索复杂"
+          },
+          {
+            "index": 2,
+            "text": "任务。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "目标驱动、Checkpoint、HITL，探索复杂任务。",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "目标驱动、Checkpoint、HITL，探索复杂任务。",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/axwnq1gr",
+      "id": "10",
+      "name": "Content-Placeholder-10-11",
+      "bbox": [
+        509.33,
+        562.67,
+        196,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.9"
+      },
+      "geometry": "rect",
+      "text": "Deep Agent",
+      "textPreview": "Deep Agent",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Deep Agent"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Deep Agent",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Deep Agent",
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/by5oj6hc",
+      "id": "11",
+      "name": "Google-Shape-534-p58-12",
+      "bbox": [
+        41.33,
+        249.33,
+        374.67,
+        380
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.10"
+      },
+      "geometry": "rect",
+      "text": "演进不是不断换框架\n同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。\n核心变量：执行顺序、工具权限、状态可观测性、人工确认。",
+      "textPreview": "演进不是不断换框架 | 同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。 | 核心变量：执行顺序、工具权限、状态可观测性、人工确认。",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 8,
+        "lines": [
+          {
+            "index": 1,
+            "text": "演进不是不断换框架"
+          },
+          {
+            "index": 2,
+            "text": "同一个目标反复实现，才"
+          },
+          {
+            "index": 3,
+            "text": "能看清哪些逻辑应该交给"
+          },
+          {
+            "index": 4,
+            "text": "模型，哪些规则必须留在"
+          },
+          {
+            "index": 5,
+            "text": "代码里。"
+          },
+          {
+            "index": 6,
+            "text": "核心变量：执行顺序、工"
+          },
+          {
+            "index": 7,
+            "text": "具权限、状态可观测性、"
+          },
+          {
+            "index": 8,
+            "text": "人工确认。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "演进不是不断换框架",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "演进不是不断换框架",
+              "anchor": 1,
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。",
+              "anchor": 1,
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "核心变量：执行顺序、工具权限、状态可观测性、人工确认。",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "核心变量：执行顺序、工具权限、状态可观测性、人工确认。",
+              "anchor": 1,
+              "fontSize": 32,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "codex-grid-layout-library#slide-15",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1238.67,
+          "height": 684.57
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "name": "Google-Shape-532-p58-2",
+            "position": {
+              "left": 1184.18,
+              "top": 659.24
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 54.48
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 25.33
+              }
+            },
+            "intrinsicSize": {
+              "width": 54.48,
+              "height": 25.33
+            },
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "snappedFrame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "children": [],
+            "text": "4",
+            "transform": "none",
+            "element": {
+              "aid": "sh/0rm1ofml",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "name": "Google-Shape-533-p58-3",
+            "position": {
+              "left": 41.33,
+              "top": 36.12
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 109.97
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "children": [],
+            "text": "实施路径：每次演进都在重新分配“谁做决定”",
+            "transform": "none",
+            "element": {
+              "aid": "sh/zqtkvulg",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "text",
+            "name": "Content-Placeholder-10-4",
+            "position": {
+              "left": 732,
+              "top": 249.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 506.67
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 506.67,
+              "height": 68
+            },
+            "frame": {
+              "left": 732,
+              "top": 249.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 732,
+              "top": 249.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "children": [],
+            "text": "节点、条件边和顺序由开发者定义。",
+            "transform": "none",
+            "element": {
+              "aid": "sh/epkjmp4v",
+              "id": "3",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.3",
+            "kind": "text",
+            "name": "Content-Placeholder-10-5",
+            "position": {
+              "left": 509.33,
+              "top": 249.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 196
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 196,
+              "height": 68
+            },
+            "frame": {
+              "left": 509.33,
+              "top": 249.33,
+              "width": 196,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 509.33,
+              "top": 249.33,
+              "width": 196,
+              "height": 68
+            },
+            "children": [],
+            "text": "固定 Flow",
+            "transform": "none",
+            "element": {
+              "aid": "sh/dob2tk3a",
+              "id": "4",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.4",
+            "kind": "text",
+            "name": "Content-Placeholder-10-6",
+            "position": {
+              "left": 732,
+              "top": 353.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 506.67
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 506.67,
+              "height": 68
+            },
+            "frame": {
+              "left": 732,
+              "top": 353.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 732,
+              "top": 353.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "children": [],
+            "text": "模型自己选择工具和下一步。",
+            "transform": "none",
+            "element": {
+              "aid": "sh/sn21kfmp",
+              "id": "5",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.5",
+            "kind": "text",
+            "name": "Content-Placeholder-10-7",
+            "position": {
+              "left": 509.33,
+              "top": 353.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 196
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 196,
+              "height": 68
+            },
+            "frame": {
+              "left": 509.33,
+              "top": 353.33,
+              "width": 196,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 509.33,
+              "top": 353.33,
+              "width": 196,
+              "height": 68
+            },
+            "children": [],
+            "text": "自主 Agent",
+            "transform": "none",
+            "element": {
+              "aid": "sh/rmtkral4",
+              "id": "6",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.6",
+            "kind": "text",
+            "name": "Content-Placeholder-10-8",
+            "position": {
+              "left": 732,
+              "top": 457.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 506.67
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 506.67,
+              "height": 68
+            },
+            "frame": {
+              "left": 732,
+              "top": 457.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 732,
+              "top": 457.33,
+              "width": 506.67,
+              "height": 68
+            },
+            "children": [],
+            "text": "Agent 负责理解生成，Workflow 负责业务 Gate。",
+            "transform": "none",
+            "element": {
+              "aid": "sh/q1kji54j",
+              "id": "7",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.7",
+            "kind": "text",
+            "name": "Content-Placeholder-10-9",
+            "position": {
+              "left": 509.33,
+              "top": 457.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 196
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 196,
+              "height": 68
+            },
+            "frame": {
+              "left": 509.33,
+              "top": 457.33,
+              "width": 196,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 509.33,
+              "top": 457.33,
+              "width": 196,
+              "height": 68
+            },
+            "children": [],
+            "text": "Agentic Workflow",
+            "transform": "none",
+            "element": {
+              "aid": "sh/50bip0ny",
+              "id": "8",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.8",
+            "kind": "text",
+            "name": "Content-Placeholder-10-10",
+            "position": {
+              "left": 732,
+              "top": 562.67
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 506.67
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 506.67,
+              "height": 68
+            },
+            "frame": {
+              "left": 732,
+              "top": 562.67,
+              "width": 506.67,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 732,
+              "top": 562.67,
+              "width": 506.67,
+              "height": 68
+            },
+            "children": [],
+            "text": "目标驱动、Checkpoint、HITL，探索复杂任务。",
+            "transform": "none",
+            "element": {
+              "aid": "sh/4z21gvmt",
+              "id": "9",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.9",
+            "kind": "text",
+            "name": "Content-Placeholder-10-11",
+            "position": {
+              "left": 509.33,
+              "top": 562.67
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 196
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 68
+              }
+            },
+            "intrinsicSize": {
+              "width": 196,
+              "height": 68
+            },
+            "frame": {
+              "left": 509.33,
+              "top": 562.67,
+              "width": 196,
+              "height": 68
+            },
+            "snappedFrame": {
+              "left": 509.33,
+              "top": 562.67,
+              "width": 196,
+              "height": 68
+            },
+            "children": [],
+            "text": "Deep Agent",
+            "transform": "none",
+            "element": {
+              "aid": "sh/axwnq1gr",
+              "id": "10",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.10",
+            "kind": "text",
+            "name": "Google-Shape-534-p58-12",
+            "position": {
+              "left": 41.33,
+              "top": 249.33
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 374.67
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 380
+              }
+            },
+            "intrinsicSize": {
+              "width": 374.67,
+              "height": 380
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 249.33,
+              "width": 374.67,
+              "height": 380
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 249.33,
+              "width": 374.67,
+              "height": 380
+            },
+            "children": [],
+            "text": "演进不是不断换框架同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。核心变量：执行顺序、工具权限、状态可观测性、人工确认。",
+            "transform": "none",
+            "element": {
+              "aid": "sh/by5oj6hc",
+              "id": "11",
+              "kind": "shape"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 732,
+              "top": 249.33,
+              "width": 506.67,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.3",
+            "frame": {
+              "left": 509.33,
+              "top": 249.33,
+              "width": 196,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.4",
+            "frame": {
+              "left": 732,
+              "top": 353.33,
+              "width": 506.67,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.5",
+            "frame": {
+              "left": 509.33,
+              "top": 353.33,
+              "width": 196,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.6",
+            "frame": {
+              "left": 732,
+              "top": 457.33,
+              "width": 506.67,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.7",
+            "frame": {
+              "left": 509.33,
+              "top": 457.33,
+              "width": 196,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.8",
+            "frame": {
+              "left": 732,
+              "top": 562.67,
+              "width": 506.67,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.9",
+            "frame": {
+              "left": 509.33,
+              "top": 562.67,
+              "width": 196,
+              "height": 68
+            }
+          },
+          {
+            "path": "0.10",
+            "frame": {
+              "left": 41.33,
+              "top": 249.33,
+              "width": 374.67,
+              "height": 380
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

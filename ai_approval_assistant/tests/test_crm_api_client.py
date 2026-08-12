@@ -36,6 +36,8 @@ def test_client_methods_wrap_each_crm_endpoint() -> None:
         add_approval_url="https://crm.local/api/approval/add",
         related_list_url="https://crm.local/api/Company/getRelatedList",
         holiday_rule_url="https://crm.local/api/attendance/getHolidayRuleByUser",
+        calculate_holiday_duration_url="https://crm.local/api/attendance/calculateHolidayDuration",
+        user_list_url="https://crm.local/api/User/getList",
     )
     user = _user()
 
@@ -44,6 +46,8 @@ def test_client_methods_wrap_each_crm_endpoint() -> None:
     client.get_approval_nodes(user, "5911", [{"field_key": "content", "value": "x"}])
     client.get_related_list(user, "crmOrder", keyword="SO", page=2, page_size=10)
     client.get_holiday_rules(user)
+    client.calculate_holiday_duration(user, 12, "2026-08-13 11:11:00", "2026-08-15 11:11:00")
+    client.get_user_list(user)
     client.add_approval(user, "5911", node_list=[{"id": 1}], form_data={"content": {"value": "x"}})
 
     assert [request.url.path for request in requests] == [
@@ -52,12 +56,14 @@ def test_client_methods_wrap_each_crm_endpoint() -> None:
         "/api/approval/getNodes",
         "/api/Company/getRelatedList",
         "/api/attendance/getHolidayRuleByUser",
+        "/api/attendance/calculateHolidayDuration",
+        "/api/User/getList",
         "/api/approval/add",
     ]
     assert [request.headers["Authorization"] for request in requests] == [
         "Bearer test-token"
-    ] * 6
-    assert [request.headers["UID"] for request in requests] == ["863"] * 6
+    ] * 8
+    assert [request.headers["UID"] for request in requests] == ["863"] * 8
     assert json.loads(requests[0].content) == {"keyword": "测试外出"}
     assert json.loads(requests[1].content) == {"field_form": "approval_type_5911"}
     assert json.loads(requests[2].content) == {
@@ -76,6 +82,12 @@ def test_client_methods_wrap_each_crm_endpoint() -> None:
     }
     assert json.loads(requests[4].content) == {}
     assert json.loads(requests[5].content) == {
+        "attendance_holiday_config_id": 12,
+        "start_date": "2026-08-13 11:11:00",
+        "end_date": "2026-08-15 11:11:00",
+    }
+    assert json.loads(requests[6].content) == {"keyword": "", "pageSize": 2000}
+    assert json.loads(requests[7].content) == {
         "approval_set_id": 5911,
         "node_list": [{"id": 1}],
         "form_data": {"content": {"value": "x"}},

@@ -1,0 +1,541 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/s9ma65",
+    "id": "s9ma65",
+    "slide": 1,
+    "layoutId": "5571e5f1-8304-499d-9b70-2cc74164fa50",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "76379f97-077d-4edd-bb4e-e3b7e8340763",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "5571e5f1-8304-499d-9b70-2cc74164fa50",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "76379f97-077d-4edd-bb4e-e3b7e8340763",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "76379f97-077d-4edd-bb4e-e3b7e8340763",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jq50z25c",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#0B1020",
+      "lineColor": "#0B1020",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4reh8n6h",
+      "id": "2",
+      "bbox": [
+        0,
+        0,
+        8,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#56D6FF",
+      "lineColor": "#56D6FF",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sni1sn2",
+      "id": "3",
+      "bbox": [
+        820,
+        0,
+        460,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#10182B",
+      "lineColor": "#10182B",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1cz2dof",
+      "id": "4",
+      "bbox": [
+        860,
+        96,
+        270,
+        8
+      ],
+      "geometry": "rect",
+      "fillColor": "#56D6FF",
+      "lineColor": "#56D6FF",
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v2l0vi50",
+      "id": "5",
+      "bbox": [
+        42,
+        48,
+        500,
+        34
+      ],
+      "geometry": "rect",
+      "text": "AI 效能分享会",
+      "textPreview": "AI 效能分享会",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "color": "#A8B6CE",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI 效能分享会"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI 效能分享会",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Aptos",
+            "color": "#A8B6CE",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI 效能分享会",
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#A8B6CE",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3uh4n6l",
+      "id": "6",
+      "bbox": [
+        42,
+        172,
+        730,
+        180
+      ],
+      "geometry": "rect",
+      "text": "从复杂表单\n到一句话提交",
+      "textPreview": "从复杂表单 | 到一句话提交",
+      "resolvedFontSize": 62,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 62,
+        "typeface": "Aptos",
+        "color": "#F5F7FB",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "从复杂表单"
+          },
+          {
+            "index": 2,
+            "text": "到一句话提交"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "从复杂表单",
+          "resolvedTextStyle": {
+            "fontSize": 62,
+            "typeface": "Aptos",
+            "color": "#F5F7FB",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "从复杂表单",
+              "fontSize": 62,
+              "typeface": "Aptos",
+              "color": "#F5F7FB",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "到一句话提交",
+          "resolvedTextStyle": {
+            "fontSize": 62,
+            "typeface": "Aptos",
+            "color": "#F5F7FB",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "到一句话提交",
+              "fontSize": 62,
+              "typeface": "Aptos",
+              "color": "#F5F7FB",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/honixsn6",
+      "id": "7",
+      "bbox": [
+        42,
+        398,
+        690,
+        40
+      ],
+      "geometry": "rect",
+      "text": "审批助手与日报的四种 AI 实现",
+      "textPreview": "审批助手与日报的四种 AI 实现",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "color": "#56D6FF",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "审批助手与日报的四种 AI 实现"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "审批助手与日报的四种 AI 实现",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "typeface": "Aptos",
+            "color": "#56D6FF",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "审批助手与日报的四种 AI 实现",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#56D6FF",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mxczydoj",
+      "id": "8",
+      "bbox": [
+        42,
+        454,
+        780,
+        32
+      ],
+      "geometry": "rect",
+      "text": "Flow  ·  Agent Flow  ·  Agentic Workflow  ·  Deep Agent",
+      "textPreview": "Flow  ·  Agent Flow  ·  Agentic Workflow  ·  Deep Agent",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "color": "#A8B6CE",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Flow  ·  Agent Flow  ·  Agentic Workflow  ·  Deep Agent"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Flow  ·  Agent Flow  ·  Agentic Workflow  ·  Deep Agent",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Aptos",
+            "color": "#A8B6CE",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Flow  ·  Agent Flow  ·  Agentic Workflow  ·  Deep Agent",
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#A8B6CE",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7yl0ri54",
+      "id": "9",
+      "bbox": [
+        42,
+        612,
+        360,
+        26
+      ],
+      "geometry": "rect",
+      "text": "现场分享 / 约 20 分钟",
+      "textPreview": "现场分享 / 约 20 分钟",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 16,
+        "typeface": "Aptos",
+        "color": "#6F819E",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "现场分享 / 约 20 分钟"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "现场分享 / 约 20 分钟",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Aptos",
+            "color": "#6F819E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "现场分享 / 约 20 分钟",
+              "fontSize": 16,
+              "typeface": "Aptos",
+              "color": "#6F819E",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re9crmhk",
+      "id": "10",
+      "bbox": [
+        1090,
+        610,
+        118,
+        54
+      ],
+      "geometry": "rect",
+      "text": "01",
+      "textPreview": "01",
+      "resolvedFontSize": 40,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 40,
+        "typeface": "Aptos",
+        "color": "#56D6FF",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01",
+          "resolvedTextStyle": {
+            "fontSize": 40,
+            "typeface": "Aptos",
+            "color": "#56D6FF",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01",
+              "fontSize": 40,
+              "typeface": "Aptos",
+              "color": "#56D6FF",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

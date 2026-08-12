@@ -917,10 +917,10 @@ def test_daily_report_chat_agent_cancels_from_confirmation(monkeypatch) -> None:
 
     result = daily_report_chat_agent_node(state)
 
-    assert result["status"] == "cancelled"
-    assert result["awaiting_field"] is None
-    assert result["assistant_message"] == "已取消本次日报提交。"
-    assert result["ui_action"] is None
+    assert result["status"] == "collecting"
+    assert result["awaiting_field"] == "daily_report_content"
+    assert result["assistant_message"] == "已取消本次提交，请修改日报内容，修改后我会重新生成预览。"
+    assert result["ui_action"]["field_key"] == "daily_report_content"
     assert service.submit_calls == 0
 
 
@@ -951,9 +951,55 @@ def test_daily_report_chat_agent_returns_error_when_submit_is_rejected(monkeypat
     result = daily_report_chat_agent_node(state)
 
     assert service.submit_calls == 1
-    assert result["status"] == "error"
-    assert result["assistant_message"] == "日报提交失败：请填写汇报人"
+    assert result["status"] == "awaiting_daily_report_confirmation"
+    assert result["assistant_message"] == (
+        "日报提交失败：请填写汇报人\n\n请修改日报内容或日期后重新确认。"
+    )
     assert result["field_errors"] == [{"field": "daily_report", "message": "请填写汇报人"}]
+    assert result["ui_action"]["actions"] == ["modify", "modify_date", "cancel"]
+
+
+def test_daily_report_cancel_after_submit_rejection_opens_content_editor(monkeypatch) -> None:
+    service = FailingDailyReportService()
+    monkeypatch.setattr("app.agents.daily_report_chat_agent.daily_report_service", service)
+    state = initial_state("S-chat-submit-rejected-cancel", "863")
+    state.update(
+        {
+            "uid": "863",
+            "authorization": "Bearer token",
+            "user_message": "确认提交",
+            "status": "awaiting_daily_report_confirmation",
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-22",
+                "content": "提交失败前的工作内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [FORM_FIELDS[1]],
+            },
+        }
+    )
+
+    failed = daily_report_chat_agent_node(state)
+    failed.update(
+        {
+            "user_message": "取消",
+            "_answer": {"field_key": "action", "value": "cancel", "label": "取消"},
+            "trace": [],
+        }
+    )
+    result = daily_report_chat_agent_node(failed)
+
+    assert service.submit_calls == 1
+    assert result["status"] == "collecting"
+    assert result["awaiting_field"] == "daily_report_content"
+    assert result["daily_report_payload"]["content"] == "提交失败前的工作内容"
+    assert result["ui_action"]["field_key"] == "daily_report_content"
+    assert result["ui_action"]["value"] == "提交失败前的工作内容"
+    assert result["field_errors"] == []
 
 
 def test_daily_report_chat_agent_returns_clear_error_when_context_load_times_out(monkeypatch) -> None:

@@ -1,0 +1,1236 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/1g9tin",
+    "id": "1g9tin",
+    "slide": 12,
+    "layoutId": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "AI Efficiency",
+    "colors": {
+      "accent1": "#3D8DFF",
+      "accent2": "#0F766E",
+      "accent3": "#F59E0B",
+      "accent4": "#DC2626",
+      "accent5": "#7C3AED",
+      "accent6": "#16A34A",
+      "bg1": "#FFFFFF",
+      "bg2": "#F7F7F7",
+      "tx1": "#111111",
+      "tx2": "#5F6368",
+      "dk1": "#000000",
+      "dk2": "#1F2937",
+      "lt1": "#FFFFFF",
+      "lt2": "#EDEDED",
+      "hlink": "#3D8DFF",
+      "folHlink": "#7C3AED"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/83qhobml",
+      "id": "1",
+      "name": "comparison-title",
+      "bbox": [
+        41.33,
+        36.12,
+        1197.33,
+        109.97
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "三种日报实现：同一目标，不同执行权",
+      "textPreview": "三种日报实现：同一目标，不同执行权",
+      "resolvedFontSize": 38.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 38.67,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "三种日报实现：同一目标，不同执行权"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "三种日报实现：同一目标，不同执行权",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 38.67,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "三种日报实现：同一目标，不同执行权",
+              "anchor": 1,
+              "fontSize": 38.67,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n2hgf65g",
+      "id": "2",
+      "name": "comparison-subtitle",
+      "bbox": [
+        42.09,
+        112,
+        1197.33,
+        82
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo",
+      "textPreview": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo",
+      "resolvedFontSize": 21.33,
+      "resolvedTextStyle": {
+        "fontSize": 21.33,
+        "typeface": "Helvetica Neue",
+        "color": "#5F6368",
+        "alignment": "left",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo",
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#5F6368",
+            "alignment": "left",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo",
+              "fontSize": 21.33,
+              "typeface": "Helvetica Neue",
+              "color": "#5F6368",
+              "alignment": "left",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/v2xof2h8",
+      "id": "3",
+      "name": "daily-report-comparison-table",
+      "bbox": [
+        41.33,
+        224,
+        1197,
+        414
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "text": "实现 | 顺序控制 | 状态 / 排查 | 成本可控性 | 当前定位\n固定 Flow | Workflow | 节点状态最清晰 | 高 | 稳定主流程\n自主 Agent | Agent | 从消息与 tool calls 反推 | 低 | 自主工具实验\nAgentic Workflow | Agent 建议 + Workflow 决定 | 计划 / 上下文 / 生成 / Gate | 中高 | 受控智能流程\n选择原则 | 写入风险越高，代码控制越多 | 先保证能定位问题 | 限制模型循环 | 不是越智能越好",
+      "textPreview": "实现 | 顺序控制 | 状态 / 排查 | 成本可控性 | 当前定位 | 固定 Flow | Workflow | 节点状态最清晰 | 高 | 稳定主流程 | 自主 Agent | Agent | 从消息与 tool calls 反推 | 低 | 自主工具实验 | Agen...",
+      "rows": 5,
+      "cols": 5,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            41.33,
+            224,
+            180,
+            82.8
+          ],
+          "text": "实现",
+          "textPreview": "实现",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "实现",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "实现"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            221.33,
+            224,
+            245,
+            82.8
+          ],
+          "text": "顺序控制",
+          "textPreview": "顺序控制",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "顺序控制",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "顺序控制"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "column": 3,
+          "bbox": [
+            466.33,
+            224,
+            300,
+            82.8
+          ],
+          "text": "状态 / 排查",
+          "textPreview": "状态 / 排查",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "状态 / 排查",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "状态 / 排查"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 1,
+          "column": 4,
+          "bbox": [
+            766.33,
+            224,
+            170,
+            82.8
+          ],
+          "text": "成本可控性",
+          "textPreview": "成本可控性",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "成本可控性",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "成本可控性"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 1,
+          "column": 5,
+          "bbox": [
+            936.33,
+            224,
+            302,
+            82.8
+          ],
+          "text": "当前定位",
+          "textPreview": "当前定位",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "当前定位",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "当前定位"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            41.33,
+            306.8,
+            180,
+            82.8
+          ],
+          "text": "固定 Flow",
+          "textPreview": "固定 Flow",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "固定 Flow",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "固定 Flow"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            221.33,
+            306.8,
+            245,
+            82.8
+          ],
+          "text": "Workflow",
+          "textPreview": "Workflow",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Workflow",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Workflow"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 2,
+          "column": 3,
+          "bbox": [
+            466.33,
+            306.8,
+            300,
+            82.8
+          ],
+          "text": "节点状态最清晰",
+          "textPreview": "节点状态最清晰",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "节点状态最清晰",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "节点状态最清晰"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 2,
+          "column": 4,
+          "bbox": [
+            766.33,
+            306.8,
+            170,
+            82.8
+          ],
+          "text": "高",
+          "textPreview": "高",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "高",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "高"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 2,
+          "column": 5,
+          "bbox": [
+            936.33,
+            306.8,
+            302,
+            82.8
+          ],
+          "text": "稳定主流程",
+          "textPreview": "稳定主流程",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "稳定主流程",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "稳定主流程"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            41.33,
+            389.6,
+            180,
+            82.8
+          ],
+          "text": "自主 Agent",
+          "textPreview": "自主 Agent",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "自主 Agent",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "自主 Agent"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            221.33,
+            389.6,
+            245,
+            82.8
+          ],
+          "text": "Agent",
+          "textPreview": "Agent",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Agent",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Agent"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "row": 3,
+          "column": 3,
+          "bbox": [
+            466.33,
+            389.6,
+            300,
+            82.8
+          ],
+          "text": "从消息与 tool calls 反推",
+          "textPreview": "从消息与 tool calls 反推",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "从消息与 tool calls 反推",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "从消息与 tool calls 反推"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "row": 3,
+          "column": 4,
+          "bbox": [
+            766.33,
+            389.6,
+            170,
+            82.8
+          ],
+          "text": "低",
+          "textPreview": "低",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "低",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "低"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "row": 3,
+          "column": 5,
+          "bbox": [
+            936.33,
+            389.6,
+            302,
+            82.8
+          ],
+          "text": "自主工具实验",
+          "textPreview": "自主工具实验",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "自主工具实验",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "自主工具实验"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            41.33,
+            472.4,
+            180,
+            82.8
+          ],
+          "text": "Agentic Workflow",
+          "textPreview": "Agentic Workflow",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Agentic Workflow",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Agentic Workflow"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            221.33,
+            472.4,
+            245,
+            82.8
+          ],
+          "text": "Agent 建议 + Workflow 决定",
+          "textPreview": "Agent 建议 + Workflow 决定",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Agent 建议 + Workflow 决定",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Agent 建议 + Workflow 决定"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "row": 4,
+          "column": 3,
+          "bbox": [
+            466.33,
+            472.4,
+            300,
+            82.8
+          ],
+          "text": "计划 / 上下文 / 生成 / Gate",
+          "textPreview": "计划 / 上下文 / 生成 / Gate",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "计划 / 上下文 / 生成 / Gate",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "计划 / 上下文 / 生成 / Gate"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "row": 4,
+          "column": 4,
+          "bbox": [
+            766.33,
+            472.4,
+            170,
+            82.8
+          ],
+          "text": "中高",
+          "textPreview": "中高",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "中高",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "中高"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "row": 4,
+          "column": 5,
+          "bbox": [
+            936.33,
+            472.4,
+            302,
+            82.8
+          ],
+          "text": "受控智能流程",
+          "textPreview": "受控智能流程",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "受控智能流程",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "受控智能流程"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            41.33,
+            555.2,
+            180,
+            82.8
+          ],
+          "text": "选择原则",
+          "textPreview": "选择原则",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "选择原则",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "选择原则"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            221.33,
+            555.2,
+            245,
+            82.8
+          ],
+          "text": "写入风险越高，代码控制越多",
+          "textPreview": "写入风险越高，代码控制越多",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "写入风险越高，代码控制越多",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "写入风险越高，代码控制越多"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "row": 5,
+          "column": 3,
+          "bbox": [
+            466.33,
+            555.2,
+            300,
+            82.8
+          ],
+          "text": "先保证能定位问题",
+          "textPreview": "先保证能定位问题",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "先保证能定位问题",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "先保证能定位问题"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "row": 5,
+          "column": 4,
+          "bbox": [
+            766.33,
+            555.2,
+            170,
+            82.8
+          ],
+          "text": "限制模型循环",
+          "textPreview": "限制模型循环",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "限制模型循环",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "限制模型循环"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "row": 5,
+          "column": 5,
+          "bbox": [
+            936.33,
+            555.2,
+            302,
+            82.8
+          ],
+          "text": "不是越智能越好",
+          "textPreview": "不是越智能越好",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "不是越智能越好",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "不是越智能越好"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0zydgna",
+      "id": "4",
+      "name": "comparison-footer",
+      "bbox": [
+        1184.18,
+        659.24,
+        54.48,
+        25.33
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.3"
+      },
+      "geometry": "rect",
+      "text": "12",
+      "textPreview": "12",
+      "resolvedFontSize": 13.33,
+      "resolvedTextStyle": {
+        "anchor": 3,
+        "fontSize": 13.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "right",
+        "verticalAlignment": "bottom",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "12"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "12",
+          "resolvedTextStyle": {
+            "anchor": 3,
+            "fontSize": 13.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "right",
+            "verticalAlignment": "bottom",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "12",
+              "anchor": 3,
+              "fontSize": 13.33,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "right",
+              "verticalAlignment": "bottom",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "codex-grid-adapted-comparison",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1239.42,
+          "height": 684.57
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "name": "comparison-title",
+            "position": {
+              "left": 41.33,
+              "top": 36.12
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 109.97
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "children": [],
+            "text": "三种日报实现：同一目标，不同执行权",
+            "transform": "none",
+            "element": {
+              "aid": "sh/83qhobml",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "name": "comparison-subtitle",
+            "position": {
+              "left": 42.09,
+              "top": 112
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 82
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 82
+            },
+            "frame": {
+              "left": 42.09,
+              "top": 112,
+              "width": 1197.33,
+              "height": 82
+            },
+            "snappedFrame": {
+              "left": 42.09,
+              "top": 112,
+              "width": 1197.33,
+              "height": 82
+            },
+            "children": [],
+            "text": "公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo",
+            "transform": "none",
+            "element": {
+              "aid": "sh/n2hgf65g",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "table",
+            "name": "daily-report-comparison-table",
+            "position": {
+              "left": 41.33,
+              "top": 224
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 414
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 414
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 224,
+              "width": 1197.33,
+              "height": 414
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 224,
+              "width": 1197.33,
+              "height": 414
+            },
+            "children": [],
+            "rows": 5,
+            "columns": 5,
+            "columnWidths": [
+              180,
+              245,
+              300,
+              170,
+              302
+            ],
+            "element": {
+              "aid": "tb/v2xof2h8",
+              "id": "3",
+              "kind": "table"
+            }
+          },
+          {
+            "path": "0.3",
+            "kind": "text",
+            "name": "comparison-footer",
+            "position": {
+              "left": 1184.18,
+              "top": 659.24
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 54.48
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 25.33
+              }
+            },
+            "intrinsicSize": {
+              "width": 54.48,
+              "height": 25.33
+            },
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "snappedFrame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "children": [],
+            "text": "12",
+            "transform": "none",
+            "element": {
+              "aid": "sh/l0zydgna",
+              "id": "4",
+              "kind": "shape"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 42.09,
+              "top": 112,
+              "width": 1197.33,
+              "height": 82
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 41.33,
+              "top": 224,
+              "width": 1197.33,
+              "height": 414
+            }
+          },
+          {
+            "path": "0.3",
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

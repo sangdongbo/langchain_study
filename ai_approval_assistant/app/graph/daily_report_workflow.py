@@ -104,7 +104,14 @@ def create_daily_report_workflow():
         },
     )
     builder.add_edge("submit_daily_report", END)
-    builder.add_edge("cancel_daily_report", END)
+    builder.add_conditional_edges(
+        "cancel_daily_report",
+        _route,
+        {
+            "interrupt": "interrupt_daily_report",
+            "end": END,
+        },
+    )
     return builder.compile()
 
 

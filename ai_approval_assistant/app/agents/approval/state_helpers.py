@@ -53,6 +53,21 @@ def form_value_from_slots(slots: dict[str, str]) -> list[dict[str, str]]:
     return [{"field_key": key, "value": value} for key, value in slots.items()]
 
 
+def form_value_from_state(state: ApprovalState) -> list[dict[str, object]]:
+    """优先使用结构化 ERP 真值构建 getNodes 的 form_value。"""
+    result: list[dict[str, object]] = []
+    collected_values = state.get("collected_values", {})
+    for key, display_value in state.get("collected_slots", {}).items():
+        structured_value = collected_values.get(key)
+        value = (
+            structured_value.get("value")
+            if isinstance(structured_value, dict) and "value" in structured_value
+            else display_value
+        )
+        result.append({"field_key": key, "value": value})
+    return result
+
+
 def submission_slots(state: ApprovalState) -> dict[str, object]:
     """合并展示字段和结构化字段，供 ERP 提交使用。"""
     slots: dict[str, object] = dict(state.get("collected_slots", {}))

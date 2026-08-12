@@ -1,0 +1,191 @@
+{"kind":"deck","id":"pr/dilk9u","name":"Deck"}
+{"kind":"slide","id":"sl/gd9ckr","slide":1,"title":"从复杂表单到一句话提交","textShapes":3}
+{"kind":"textbox","id":"sh/47il0f6p","slide":1,"name":"Title-3-1","text":"从复杂表单到一句话提交","textPreview":"从复杂表单到一句话提交","textChars":11,"textLines":1,"bbox":[41.33,182.55,992,261.57]}
+{"kind":"textbox","id":"sh/36pkrap4","slide":1,"name":"Subtitle-4-2","text":"审批助手与日报：固定 Flow、自主 Agent、Agentic Workflow、Deep Agent 的实践与演示","textPreview":"审批助手与日报：固定 Flow、自主 Agent、Agentic Workflow、Deep Agent 的实践与演示","textChars":59,"textLines":1,"bbox":[41.33,497.87,598.67,113.41]}
+{"kind":"textbox","id":"sh/25g3y5oz","slide":1,"name":"Subtitle-4-3","text":"AI 应用分享会","textPreview":"AI 应用分享会","textChars":8,"textLines":1,"bbox":[41.33,41.18,598.67,68.15]}
+{"kind":"notes","id":"nt/gd9ckr","slide":1,"text":"建议时长：40 秒\n开场不要先讲框架名。先说业务目标：平台审批和日报入口多、字段复杂，我希望用户用一句自然语言完成信息收集、预览和提交。今天用真实代码展示四种实现的执行权差异。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\agents\\approval_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/oynl6f","slide":2,"title":"2","textShapes":2}
+{"kind":"textbox","id":"sh/0zqdc7q5","slide":2,"name":"Slide-Number-Placeholder-1-2","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/zyhwjm9k","slide":2,"name":"Title-2-3","text":"20 分钟分享路线","textPreview":"20 分钟分享路线","textChars":9,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"table","id":"tb/ze9kbqdw","slide":2,"name":"Table-3-4","rows":6,"cols":2,"preview":"01 | 应用场景：为什么要做问答式审批助手","bbox":[41.33,218.37,1197.34,410.96]}
+{"kind":"notes","id":"nt/oynl6f","slide":2,"text":"建议时长：40 秒\n这六项正好覆盖通知要求的应用场景、实施路径、预期效果、遇到的问题，同时把现场演示放在主线中间，不是最后临时补一个 Demo。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\演示.md\n[/Sources]"}
+{"kind":"slide","id":"sl/o8t0ns","slide":3,"title":"3","textShapes":4}
+{"kind":"textbox","id":"sh/qx0ri503","slide":3,"name":"Google-Shape-532-p58-2","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/d0ratkze","slide":3,"name":"Google-Shape-533-p58-3","text":"应用场景：用户不应该先学会表单，才能完成审批","textPreview":"应用场景：用户不应该先学会表单，才能完成审批","textChars":22,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/czi9kfit","slide":3,"name":"Google-Shape-534-p58-4","text":"现在的操作\n找到入口\n选择模板\n理解字段\n逐项填写\n确认审批人\n提交","textPreview":"现在的操作 | 找到入口 | 选择模板 | 理解字段 | 逐项填写 | 确认审批人 | 提交","textChars":34,"textLines":7,"bbox":[41.33,213.33,581.33,371.11]}
+{"kind":"textbox","id":"sh/3up8nqhc","slide":3,"name":"Content-Placeholder-3-5","text":"希望的体验\n直接说：\n“我要请假三天”\n“把今天完成的工作写进日报”\n\n系统负责追问缺失信息、生成预览，用户只负责最终确认。","textPreview":"希望的体验 | 直接说： | “我要请假三天” | “把今天完成的工作写进日报” |  | 系统负责追问缺失信息、生成预览，用户只负责最终确认。","textChars":62,"textLines":6,"bbox":[656.86,213.33,581.33,371.11]}
+{"kind":"notes","id":"nt/o8t0ns","slide":3,"text":"建议时长：1 分钟\n强调这不是为了炫技，而是减少用户记忆入口和理解复杂表单的成本。AI 的价值是理解自然语言，业务系统仍然要负责字段、校验和提交边界。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/ksudza","slide":4,"title":"4","textShapes":11}
+{"kind":"textbox","id":"sh/0rm1ofml","slide":4,"name":"Google-Shape-532-p58-2","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/zqtkvulg","slide":4,"name":"Google-Shape-533-p58-3","text":"实施路径：每次演进都在重新分配“谁做决定”","textPreview":"实施路径：每次演进都在重新分配“谁做决定”","textChars":21,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/epkjmp4v","slide":4,"name":"Content-Placeholder-10-4","text":"节点、条件边和顺序由开发者定义。","textPreview":"节点、条件边和顺序由开发者定义。","textChars":16,"textLines":1,"bbox":[732,249.33,506.67,68]}
+{"kind":"textbox","id":"sh/dob2tk3a","slide":4,"name":"Content-Placeholder-10-5","text":"固定 Flow","textPreview":"固定 Flow","textChars":7,"textLines":1,"bbox":[509.33,249.33,196,68]}
+{"kind":"textbox","id":"sh/sn21kfmp","slide":4,"name":"Content-Placeholder-10-6","text":"模型自己选择工具和下一步。","textPreview":"模型自己选择工具和下一步。","textChars":13,"textLines":1,"bbox":[732,353.33,506.67,68]}
+{"kind":"textbox","id":"sh/rmtkral4","slide":4,"name":"Content-Placeholder-10-7","text":"自主 Agent","textPreview":"自主 Agent","textChars":8,"textLines":1,"bbox":[509.33,353.33,196,68]}
+{"kind":"textbox","id":"sh/q1kji54j","slide":4,"name":"Content-Placeholder-10-8","text":"Agent 负责理解生成，Workflow 负责业务 Gate。","textPreview":"Agent 负责理解生成，Workflow 负责业务 Gate。","textChars":32,"textLines":1,"bbox":[732,457.33,506.67,68]}
+{"kind":"textbox","id":"sh/50bip0ny","slide":4,"name":"Content-Placeholder-10-9","text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[509.33,457.33,196,68]}
+{"kind":"textbox","id":"sh/4z21gvmt","slide":4,"name":"Content-Placeholder-10-10","text":"目标驱动、Checkpoint、HITL，探索复杂任务。","textPreview":"目标驱动、Checkpoint、HITL，探索复杂任务。","textChars":28,"textLines":1,"bbox":[732,562.67,506.67,68]}
+{"kind":"textbox","id":"sh/axwnq1gr","slide":4,"name":"Content-Placeholder-10-11","text":"Deep Agent","textPreview":"Deep Agent","textChars":10,"textLines":1,"bbox":[509.33,562.67,196,68]}
+{"kind":"textbox","id":"sh/by5oj6hc","slide":4,"name":"Google-Shape-534-p58-12","text":"演进不是不断换框架\n同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。\n核心变量：执行顺序、工具权限、状态可观测性、人工确认。","textPreview":"演进不是不断换框架 | 同一个目标反复实现，才能看清哪些逻辑应该交给模型，哪些规则必须留在代码里。 | 核心变量：执行顺序、工具权限、状态可观测性、人工确认。","textChars":75,"textLines":3,"bbox":[41.33,249.33,374.67,380]}
+{"kind":"notes","id":"nt/ksudza","slide":4,"text":"建议时长：1 分钟\n四个阶段不是简单的强弱排名。固定 Flow 解决能不能稳定跑，自主 Agent 验证能不能自己做，Agentic Workflow 解决怎么安全进入业务，Deep Agent 探索更长任务和线程恢复。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_agentic_workflow_demo.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\agents\\approval_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/9t1c7m","slide":5,"title":"公平对比：同一个日报目标，只改变执行方式","textShapes":19}
+{"kind":"textbox","id":"sh/hkjqdsve","slide":5,"text":"公平对比：同一个日报目标，只改变执行方式","textPreview":"公平对比：同一个日报目标，只改变执行方式","textChars":20,"textLines":1,"bbox":[42,34,1238,686]}
+{"kind":"textbox","id":"sh/uhsr2dc3","slide":5,"text":"现场只做一件事：输入一句话，然后观察谁决定下一步。","textPreview":"现场只做一件事：输入一句话，然后观察谁决定下一步。","textChars":25,"textLines":1,"bbox":[42,104,1238,616]}
+{"kind":"shape","id":"sh/vi18bido","slide":5,"bbox":[42,180,24,24]}
+{"kind":"textbox","id":"sh/8fq903ux","slide":5,"text":"固定 Flow","textPreview":"固定 Flow","textChars":7,"textLines":1,"bbox":[66,204,1214,516]}
+{"kind":"textbox","id":"sh/tgzq98vi","slide":5,"text":"提问","textPreview":"提问","textChars":2,"textLines":1,"bbox":[66,272,1214,448]}
+{"kind":"textbox","id":"sh/6d8rydwr","slide":5,"text":"写日报：\n今天完成审批助手开发","textPreview":"写日报： | 今天完成审批助手开发","textChars":15,"textLines":2,"bbox":[66,310,1214,410]}
+{"kind":"textbox","id":"sh/7eh87ydc","slide":5,"text":"独立 session","textPreview":"独立 session","textChars":10,"textLines":1,"bbox":[66,478,1214,242]}
+{"kind":"textbox","id":"sh/kbq9w3e1","slide":5,"text":"demo-flow-001","textPreview":"demo-flow-001","textChars":13,"textLines":1,"bbox":[66,516,1214,204]}
+{"kind":"shape","id":"sh/lczq58vm","slide":5,"bbox":[444,180,24,24]}
+{"kind":"textbox","id":"sh/d8rudkni","slide":5,"text":"自主 Agent","textPreview":"自主 Agent","textChars":8,"textLines":1,"bbox":[468,204,812,516]}
+{"kind":"textbox","id":"sh/c7it4f6x","slide":5,"text":"提问","textPreview":"提问","textChars":2,"textLines":1,"bbox":[468,272,812,448]}
+{"kind":"textbox","id":"sh/r69cba5s","slide":5,"text":"自主agent写日报：\n今天完成审批助手开发2","textPreview":"自主agent写日报： | 今天完成审批助手开发2","textChars":23,"textLines":2,"bbox":[468,310,812,410]}
+{"kind":"textbox","id":"sh/q50b25o7","slide":5,"text":"独立 session","textPreview":"独立 session","textChars":10,"textLines":1,"bbox":[468,478,812,242]}
+{"kind":"textbox","id":"sh/pk7u90nm","slide":5,"text":"demo-agent-001","textPreview":"demo-agent-001","textChars":14,"textLines":1,"bbox":[468,516,812,204]}
+{"kind":"shape","id":"sh/4jyt0v61","slide":5,"bbox":[846,180,24,24]}
+{"kind":"textbox","id":"sh/3ipc7a5g","slide":5,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[870,204,410,516]}
+{"kind":"textbox","id":"sh/2hgby5ov","slide":5,"text":"提问","textPreview":"提问","textChars":2,"textLines":1,"bbox":[870,272,410,448]}
+{"kind":"textbox","id":"sh/hg7u50na","slide":5,"text":"agentic workflow写日报：\n今天完成审批助手开发3","textPreview":"agentic workflow写日报： | 今天完成审批助手开发3","textChars":32,"textLines":2,"bbox":[870,310,410,410]}
+{"kind":"textbox","id":"sh/gfytwv65","slide":5,"text":"独立 session","textPreview":"独立 session","textChars":10,"textLines":1,"bbox":[870,478,410,242]}
+{"kind":"textbox","id":"sh/8z2tcvel","slide":5,"text":"demo-agentic-001","textPreview":"demo-agentic-001","textChars":16,"textLines":1,"bbox":[870,516,410,204]}
+{"kind":"textbox","id":"sh/t0bul0v6","slide":5,"text":"下一页开始演示：先看输入，再看 trace / messages / Gate。","textPreview":"下一页开始演示：先看输入，再看 trace / messages / Gate。","textChars":40,"textLines":1,"bbox":[42,650,1238,70]}
+{"kind":"textbox","id":"sh/6x0balwv","slide":5,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/9t1c7m","slide":5,"text":"建议时长：50 秒\n三个实验必须使用不同 session_id；同一种流程的‘确认提交’必须继续使用原 session_id。否则活跃会话状态会让路由继续进入上一种 Agent，现场就会出现走错节点或还在等待上一步输入。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\演示.md\n[/Sources]"}
+{"kind":"slide","id":"sl/8y6793","slide":6,"title":"6","textShapes":9}
+{"kind":"textbox","id":"sh/etkju1of","slide":6,"name":"Google-Shape-532-p58-2","text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/1wb25gn6","slide":6,"name":"Google-Shape-533-p58-3","text":"固定 Flow：把业务规则直接写进图里","textPreview":"固定 Flow：把业务规则直接写进图里","textChars":19,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/0v21wb6l","slide":6,"name":"Google-Shape-534-p58-4","text":"开发者控制\n执行顺序","textPreview":"开发者控制 | 执行顺序","textChars":10,"textLines":2,"bbox":[41.33,180.83,581.33,90.83]}
+{"kind":"textbox","id":"sh/nydk7q5w","slide":6,"name":"Content-Placeholder-10-5","text":"固定节点与条件边","textPreview":"固定节点与条件边","textChars":8,"textLines":1,"bbox":[828,313.94,410.67,57.61]}
+{"kind":"shape","id":"sh/mx43ylob","slide":6,"name":"Google-Shape-340-p61-6","bbox":[788.21,316.55,22.32,22.31]}
+{"kind":"textbox","id":"sh/9kv290n2","slide":6,"name":"TextBox-11-7","text":"daily_report_agent 内部是一个独立日报子图：日期、上下文、内容、草稿、预览、提交和取消都有明确节点。\n它的优势不是‘更智能’，而是路径确定、状态清晰、异常可定位。","textPreview":"daily_report_agent 内部是一个独立日报子图：日期、上下文、内容、草稿、预览、提交和取消都有明确节点。 | 它的优势不是‘更智能’，而是路径确定、状态清晰、异常可定位。","textChars":90,"textLines":2,"bbox":[41.33,313.94,581.33,302.85]}
+{"kind":"textbox","id":"sh/ojml0v6h","slide":6,"name":"Content-Placeholder-10-8","text":"保存草稿后才能预览","textPreview":"保存草稿后才能预览","textChars":9,"textLines":1,"bbox":[828,377.94,410.67,57.61]}
+{"kind":"shape","id":"sh/329kvmps","slide":6,"name":"Google-Shape-340-p61-9","bbox":[788.21,380.55,22.32,22.31]}
+{"kind":"textbox","id":"sh/210jmho7","slide":6,"name":"Content-Placeholder-10-10","text":"明确确认后才能提交","textPreview":"明确确认后才能提交","textChars":9,"textLines":1,"bbox":[828,442.5,410.67,57.61]}
+{"kind":"shape","id":"sh/ovih8j25","slide":6,"name":"Google-Shape-340-p61-11","bbox":[788.21,445.1,22.32,22.31]}
+{"kind":"textbox","id":"sh/pwryhojq","slide":6,"name":"Content-Placeholder-10-12","text":"支持修改日期 / 内容 / 取消","textPreview":"支持修改日期 / 内容 / 取消","textChars":16,"textLines":1,"bbox":[828,506.49,410.67,57.61]}
+{"kind":"shape","id":"sh/2t0z69kz","slide":6,"name":"Google-Shape-340-p61-13","bbox":[788.21,509.1,22.32,22.31]}
+{"kind":"textbox","id":"sh/3u9gfe1k","slide":6,"name":"Content-Placeholder-10-14","text":"适合强规则生产流程","textPreview":"适合强规则生产流程","textChars":9,"textLines":1,"bbox":[828,571.83,410.67,57.61]}
+{"kind":"shape","id":"sh/czihcji1","slide":6,"name":"Google-Shape-340-p61-15","bbox":[788.21,574.44,22.32,22.31]}
+{"kind":"notes","id":"nt/8y6793","slide":6,"text":"建议时长：1 分钟\n按业务语言讲节点：系统先识别动作，再加载日报上下文，缺内容就追问，有内容就保存草稿、生成预览，最后等待确认。不要逐个念代码节点名。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/dpfmo1","slide":7,"title":"现场演示 1｜固定 Flow：看路径是否稳定","textShapes":10}
+{"kind":"textbox","id":"sh/lsb6l8bm","slide":7,"text":"现场演示 1｜固定 Flow：看路径是否稳定","textPreview":"现场演示 1｜固定 Flow：看路径是否稳定","textChars":22,"textLines":1,"bbox":[42,34,1238,686]}
+{"kind":"textbox","id":"sh/yp0nadcv","slide":7,"text":"输入","textPreview":"输入","textChars":2,"textLines":1,"bbox":[42,112,1238,608]}
+{"kind":"textbox","id":"sh/zq9ojitg","slide":7,"text":"写日报：今天完成审批助手开发","textPreview":"写日报：今天完成审批助手开发","textChars":14,"textLines":1,"bbox":[42,145,1238,575]}
+{"kind":"textbox","id":"sh/c3i583up","slide":7,"text":"Swagger：8010 / POST /api/ai-approval/chat","textPreview":"Swagger：8010 / POST /api/ai-approval/chat","textChars":41,"textLines":1,"bbox":[42,194,1238,526]}
+{"kind":"textbox","id":"sh/x4r6h8ba","slide":7,"text":"session_id：demo-flow-001","textPreview":"session_id：demo-flow-001","textChars":24,"textLines":1,"bbox":[42,226,1238,494]}
+{"kind":"shape","id":"sh/a10n6tcz","slide":7,"bbox":[42,306,24,24]}
+{"kind":"textbox","id":"sh/b29ofytk","slide":7,"text":"看 trace","textPreview":"看 trace","textChars":7,"textLines":1,"bbox":[70,328,1210,392]}
+{"kind":"textbox","id":"sh/wzm5k7u9","slide":7,"text":"路由进入 daily_report_agent\n节点顺序可直接定位\n失败时知道卡在哪一步","textPreview":"路由进入 daily_report_agent | 节点顺序可直接定位 | 失败时知道卡在哪一步","textChars":44,"textLines":3,"bbox":[70,420,1210,300]}
+{"kind":"shape","id":"sh/hkv6tsbu","slide":7,"bbox":[660,306,24,24]}
+{"kind":"textbox","id":"sh/h0ned4v2","slide":7,"text":"看预览与确认","textPreview":"看预览与确认","textChars":6,"textLines":1,"bbox":[688,328,592,392]}
+{"kind":"textbox","id":"sh/wzed4zeh","slide":7,"text":"先保存草稿，再生成预览\n回复“确认提交”才继续\n同一 session 完成恢复","textPreview":"先保存草稿，再生成预览 | 回复“确认提交”才继续 | 同一 session 完成恢复","textChars":39,"textLines":3,"bbox":[688,420,592,300]}
+{"kind":"textbox","id":"sh/vy5cbudw","slide":7,"text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/dpfmo1","slide":7,"text":"建议时长：1 分 40 秒\n操作：打开 http://127.0.0.1:8010/docs，调用 POST /api/ai-approval/chat。输入页面文字，展示 daily_report_agent、status、daily_report_preview 和 trace；再用同一 session 回复‘确认提交’。失败兜底：不现场排查 ERP，只展示输入、预期 trace、预览和 Gate。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\tools\\daily_report_tools.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\演示.md\n[/Sources]"}
+{"kind":"slide","id":"sl/fq3u0u","slide":8,"title":"8","textShapes":4}
+{"kind":"textbox","id":"sh/sbalob2t","slide":8,"name":"Google-Shape-532-p58-2","text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/ra1kf61o","slide":8,"name":"Google-Shape-533-p58-3","text":"自主 Agent：模型自己决定下一步和调用什么工具","textPreview":"自主 Agent：模型自己决定下一步和调用什么工具","textChars":25,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/q9s3m1k3","slide":8,"name":"Google-Shape-534-p58-4","text":"得到的自由\ncreate_agent / ReAct\n理解用户目标\n选择日报工具\n观察工具结果\n决定继续调用还是回答","textPreview":"得到的自由 | create_agent / ReAct | 理解用户目标 | 选择日报工具 | 观察工具结果 | 决定继续调用还是回答","textChars":58,"textLines":6,"bbox":[41.33,213.33,581.33,371.11]}
+{"kind":"textbox","id":"sh/5oj2dw3i","slide":8,"name":"Content-Placeholder-3-5","text":"仍保留的边界\n必须先确认日期\n必须加载上下文\n保存草稿后展示预览\n提交工具要求 confirmed=true\n外部接口失败不能假装成功","textPreview":"仍保留的边界 | 必须先确认日期 | 必须加载上下文 | 保存草稿后展示预览 | 提交工具要求 confirmed=true | 外部接口失败不能假装成功","textChars":67,"textLines":6,"bbox":[656.86,213.33,581.33,371.11]}
+{"kind":"notes","id":"nt/fq3u0u","slide":8,"text":"建议时长：1 分钟\n自主 Agent 不是完全放开。代码把日报工具注册给模型，但替换了提交工具：guarded_submit_daily_report 要求 confirmed=true。这里的安全主要靠 Prompt + 工具参数守卫，不是固定执行图。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\tools\\daily_report_tools.py\n[/Sources]"}
+{"kind":"slide","id":"sl/sxtns0","slide":9,"title":"现场演示 2｜自主 Agent：看模型如何选择工具","textShapes":10}
+{"kind":"textbox","id":"sh/8be58b25","slide":9,"text":"现场演示 2｜自主 Agent：看模型如何选择工具","textPreview":"现场演示 2｜自主 Agent：看模型如何选择工具","textChars":25,"textLines":1,"bbox":[42,34,1238,686]}
+{"kind":"textbox","id":"sh/7a54z61k","slide":9,"text":"输入","textPreview":"输入","textChars":2,"textLines":1,"bbox":[42,112,1238,608]}
+{"kind":"textbox","id":"sh/69wn61kz","slide":9,"text":"自主agent写日报：今天完成审批助手开发2","textPreview":"自主agent写日报：今天完成审批助手开发2","textChars":22,"textLines":1,"bbox":[42,145,1238,575]}
+{"kind":"textbox","id":"sh/l8nmxwje","slide":9,"text":"Swagger：8010 / POST /api/ai-approval/chat","textPreview":"Swagger：8010 / POST /api/ai-approval/chat","textChars":41,"textLines":1,"bbox":[42,194,1238,526]}
+{"kind":"textbox","id":"sh/k7e54r2t","slide":9,"text":"session_id：demo-agent-001","textPreview":"session_id：demo-agent-001","textChars":25,"textLines":1,"bbox":[42,226,1238,494]}
+{"kind":"shape","id":"sh/j654vm18","slide":9,"bbox":[42,306,24,24]}
+{"kind":"textbox","id":"sh/y5cn2hk3","slide":9,"text":"看 messages","textPreview":"看 messages","textChars":10,"textLines":1,"bbox":[70,328,1210,392]}
+{"kind":"textbox","id":"sh/x43mtcji","slide":9,"text":"daily_report_agent_messages\n模型回答与 ToolMessage\n业务阶段需要从历史反推","textPreview":"daily_report_agent_messages | 模型回答与 ToolMessage | 业务阶段需要从历史反推","textChars":57,"textLines":3,"bbox":[70,420,1210,300]}
+{"kind":"shape","id":"sh/c3u50r2x","slide":9,"bbox":[660,306,24,24]}
+{"kind":"textbox","id":"sh/290jyp03","slide":9,"text":"看工具调用","textPreview":"看工具调用","textChars":5,"textLines":1,"bbox":[688,328,592,392]}
+{"kind":"textbox","id":"sh/3a9kruho","slide":9,"text":"日期 → 上下文 → 草稿 → 预览\n顺序可能随模型变化\nToken 与延迟更难预测","textPreview":"日期 → 上下文 → 草稿 → 预览 | 顺序可能随模型变化 | Token 与延迟更难预测","textChars":42,"textLines":3,"bbox":[688,420,592,300]}
+{"kind":"textbox","id":"sh/ob210zi9","slide":9,"text":"9","textPreview":"9","textChars":1,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/sxtns0","slide":9,"text":"建议时长：1 分 40 秒\n操作与固定 Flow 相同，但换新 session。重点不要只看最后一句回答，要展示 daily_report_agent_messages 或 Studio 中的 tool calls。强调：最终结果可能一样，排查方式和成本模型已经不同。模型/API 不可用时，直接说明这是需要真实模型的实验版。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\演示.md\n[/Sources]"}
+{"kind":"slide","id":"sl/es8whh","slide":10,"title":"10","textShapes":8}
+{"kind":"textbox","id":"sh/tgnmh0v6","slide":10,"name":"Slide-Number-Placeholder-3-2","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/6tw3mlcv","slide":10,"name":"Title-10-3","text":"Agentic Workflow：Agent 提建议，Workflow 决定能不能继续","textPreview":"Agentic Workflow：Agent 提建议，Workflow 决定能不能继续","textChars":43,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"shape","id":"sh/7e54fqdg","slide":10,"name":"Google-Shape-2259-p159-4","bbox":[35.46,560.8,1285.61,0.03]}
+{"kind":"shape","id":"sh/krulkvup","slide":10,"name":"Google-Shape-2260-p159-5","bbox":[35.46,555.18,11.24,11.24]}
+{"kind":"shape","id":"sh/5snmd0va","slide":10,"name":"Google-Shape-2261-p159-6","bbox":[446.38,555.18,11.24,11.24]}
+{"kind":"shape","id":"sh/ipc3ilcj","slide":10,"name":"Google-Shape-2262-p159-7","bbox":[858.38,555.18,11.24,11.24]}
+{"kind":"shape","id":"sh/jql4bqd4","slide":10,"name":"Rounded-Rectangle-19-8","bbox":[41.33,147.17,374.67,380]}
+{"kind":"textbox","id":"sh/4ny5wfu9","slide":10,"name":"Content-Placeholder-8-9","text":"Agent 规划\n理解用户输入\n提取日期表达\n提取工作内容\n给出 next_action","textPreview":"Agent 规划 | 理解用户输入 | 提取日期表达 | 提取工作内容 | 给出 next_action","textChars":44,"textLines":5,"bbox":[73.85,189.69,309.64,269.48]}
+{"kind":"shape","id":"sh/po7mpkve","slide":10,"name":"Rounded-Rectangle-21-10","bbox":[452.33,147.17,374.67,380]}
+{"kind":"textbox","id":"sh/ps7a9ob2","slide":10,"name":"Content-Placeholder-8-11","text":"Workflow 执行\n确认日期\n加载 ERP 上下文\n保存草稿\n进入预览 Gate","textPreview":"Workflow 执行 | 确认日期 | 加载 ERP 上下文 | 保存草稿 | 进入预览 Gate","textChars":42,"textLines":5,"bbox":[484.85,189.69,309.64,269.48]}
+{"kind":"shape","id":"sh/47ytgjah","slide":10,"name":"Rounded-Rectangle-23-12","bbox":[864.83,147.17,374.67,380]}
+{"kind":"textbox","id":"sh/36ps7etc","slide":10,"name":"Content-Placeholder-8-13","text":"Agent 生成 + Gate\n组织日报正文\n保留完整 payload\n等待人工确认\n提交 Gate 最终裁决","textPreview":"Agent 生成 + Gate | 组织日报正文 | 保留完整 payload | 等待人工确认 | 提交 Gate 最终裁决","textChars":55,"textLines":5,"bbox":[897.35,189.69,309.64,269.48]}
+{"kind":"textbox","id":"sh/25gbe9sr","slide":10,"name":"Text-Placeholder-16-14","text":"受控执行","textPreview":"受控执行","textChars":4,"textLines":1,"bbox":[446.38,588.18,272.54,41.15]}
+{"kind":"textbox","id":"sh/h47a54b6","slide":10,"name":"Text-Placeholder-16-15","text":"理解","textPreview":"理解","textChars":2,"textLines":1,"bbox":[41.04,588.18,272.54,41.15]}
+{"kind":"textbox","id":"sh/g3ytczal","slide":10,"name":"Text-Placeholder-16-16","text":"安全写入","textPreview":"安全写入","textChars":4,"textLines":1,"bbox":[863.56,588.18,272.54,41.15]}
+{"kind":"notes","id":"nt/es8whh","slide":10,"text":"建议时长：1 分钟\n最重要的一句话：Agent 负责智能判断和表达空间，Workflow 负责业务顺序和写入权限。当前 Demo 中规划和正文生成采用规则模拟，加载上下文调用现有工具，保存与最终提交用 Demo 状态验证架构。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_agentic_workflow_demo.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_agentic_workflow_demo.py\n[/Sources]"}
+{"kind":"slide","id":"sl/0qq0it","slide":11,"title":"现场演示 3｜Agentic Workflow：看职责分工与 Gate","textShapes":10}
+{"kind":"textbox","id":"sh/vmxcvelk","slide":11,"text":"现场演示 3｜Agentic Workflow：看职责分工与 Gate","textPreview":"现场演示 3｜Agentic Workflow：看职责分工与 Gate","textChars":35,"textLines":1,"bbox":[42,34,1238,686]}
+{"kind":"textbox","id":"sh/wn6d4jmp","slide":11,"text":"输入","textPreview":"输入","textChars":2,"textLines":1,"bbox":[42,112,1238,608]}
+{"kind":"textbox","id":"sh/hozux43a","slide":11,"text":"agentic workflow写日报：今天完成审批助手开发3","textPreview":"agentic workflow写日报：今天完成审批助手开发3","textChars":31,"textLines":1,"bbox":[42,145,1238,575]}
+{"kind":"textbox","id":"sh/ip8vq94v","slide":11,"text":"Swagger：8010 / POST /api/ai-approval/chat","textPreview":"Swagger：8010 / POST /api/ai-approval/chat","textChars":41,"textLines":1,"bbox":[42,194,1238,526]}
+{"kind":"textbox","id":"sh/3qhwzelg","slide":11,"text":"session_id：demo-agentic-001","textPreview":"session_id：demo-agentic-001","textChars":27,"textLines":1,"bbox":[42,226,1238,494]}
+{"kind":"shape","id":"sh/4bqdsjm1","slide":11,"bbox":[42,306,24,24]}
+{"kind":"textbox","id":"sh/5cze1o3m","slide":11,"text":"看结构化状态","textPreview":"看结构化状态","textChars":6,"textLines":1,"bbox":[70,328,1210,392]}
+{"kind":"textbox","id":"sh/yt4vup4r","slide":11,"text":"plan / context / compose 分开保存\nevents 显示 Agent 与 Workflow 交替\ntrace 精确定位阶段","textPreview":"plan / context / compose 分开保存 | events 显示 Agent 与 Workflow 交替 | trace 精确定位阶段","textChars":72,"textLines":3,"bbox":[70,420,1210,300]}
+{"kind":"shape","id":"sh/zudcnulc","slide":11,"bbox":[660,306,24,24]}
+{"kind":"textbox","id":"sh/jaxgrqxs","slide":11,"text":"看 Gate 拦截","textPreview":"看 Gate 拦截","textChars":9,"textLines":1,"bbox":[688,328,592,392]}
+{"kind":"textbox","id":"sh/i9ofylw7","slide":11,"text":"未预览不能提交\n未明确确认不能提交\n确认后进入 demo_submit_gate","textPreview":"未预览不能提交 | 未明确确认不能提交 | 确认后进入 demo_submit_gate","textChars":40,"textLines":3,"bbox":[688,420,592,300]}
+{"kind":"textbox","id":"sh/5czyt0fy","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/0qq0it","slide":11,"text":"建议时长：1 分 40 秒\n展示 trace：demo_agent_plan → demo_confirm_date → demo_load_context → demo_agent_compose → demo_save_draft → demo_preview_gate。然后说明回复‘确认提交’才会进入 demo_submit_gate。必须主动说明保存/提交是 Demo 状态，避免包装成真实 ERP 落地。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_agentic_workflow_demo.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_agentic_workflow_demo.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\演示.md\n[/Sources]"}
+{"kind":"slide","id":"sl/1g9tin","slide":12,"title":"三种日报实现：同一目标，不同执行权","textShapes":3}
+{"kind":"textbox","id":"sh/83qhobml","slide":12,"name":"comparison-title","text":"三种日报实现：同一目标，不同执行权","textPreview":"三种日报实现：同一目标，不同执行权","textChars":17,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/n2hgf65g","slide":12,"name":"comparison-subtitle","text":"公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo","textPreview":"公平比较范围：daily_report_agent、daily_report_create_agent、daily_report_agentic_workflow_demo","textChars":86,"textLines":1,"bbox":[42.09,112,1197.33,82]}
+{"kind":"textbox","id":"sh/l0zydgna","slide":12,"name":"comparison-footer","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"table","id":"tb/v2xof2h8","slide":12,"name":"daily-report-comparison-table","rows":5,"cols":5,"preview":"实现 | 顺序控制 | 状态 / 排查 | 成本可控性 | 当前定位","bbox":[41.33,224,1197.33,414]}
+{"kind":"notes","id":"nt/1g9tin","slide":12,"text":"建议时长：1 分 30 秒\n不要逐格念表。只讲选择标准：业务越确定、写入风险越高，执行顺序越应该由 Workflow 控制；任务越开放、工具风险越低，越可以增加 Agent 决策权。Agentic Workflow 是日报场景当前最值得继续完善的方向。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_agentic_workflow_demo.py\n[/Sources]"}
+{"kind":"slide","id":"sl/8wdqdq","slide":13,"title":"13","textShapes":4}
+{"kind":"textbox","id":"sh/tof6503u","slide":13,"name":"Google-Shape-532-p58-2","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1184.18,659.24,54.48,25.33]}
+{"kind":"textbox","id":"sh/6147a543","slide":13,"name":"Google-Shape-533-p58-3","text":"Deep Agent：这次换成审批场景，探索更长的目标任务","textPreview":"Deep Agent：这次换成审批场景，探索更长的目标任务","textChars":29,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/rmdo3a5o","slide":13,"name":"Google-Shape-534-p58-4","text":"Deep Agents 负责\n根据目标自主调用工具\n查询用户与审批模板\n收集字段并追问缺失项\n生成审批预览\n按 session 保存线程状态","textPreview":"Deep Agents 负责 | 根据目标自主调用工具 | 查询用户与审批模板 | 收集字段并追问缺失项 | 生成审批预览 | 按 session 保存线程状态","textChars":70,"textLines":6,"bbox":[41.33,213.33,581.33,371.11]}
+{"kind":"textbox","id":"sh/gr6pgfm5","slide":13,"name":"Content-Placeholder-3-5","text":"业务系统仍负责\n模板与必填字段\n校验与审批节点计算\nMock 提交与幂等\nsubmit_approval_request 前 interrupt_on\n人工批准后才能恢复","textPreview":"业务系统仍负责 | 模板与必填字段 | 校验与审批节点计算 | Mock 提交与幂等 | submit_approval_request 前 interrupt_on | 人工批准后才能恢复","textChars":85,"textLines":6,"bbox":[656.86,213.33,581.33,371.11]}
+{"kind":"notes","id":"nt/8wdqdq","slide":13,"text":"建议时长：1 分钟\n这里不要和前三种做完全同场景性能对比，因为 Deep Agent 项目实现的是审批，不是日报。它的价值是展示真实 Deep Agents、checkpoint 和 interrupt_on；业务服务仍是确定性的 mock backend。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\agents\\approval_agent.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\tools\\approval_tools.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\services\\approval_service.py\n[/Sources]"}
+{"kind":"slide","id":"sl/lc5aav","slide":14,"title":"现场演示 4｜Deep Agent：看 Checkpoint 与 Human-in-the-loop","textShapes":10}
+{"kind":"textbox","id":"sh/2tsfatcb","slide":14,"text":"现场演示 4｜Deep Agent：看 Checkpoint 与 Human-in-the-loop","textPreview":"现场演示 4｜Deep Agent：看 Checkpoint 与 Human-in-the-loop","textChars":50,"textLines":1,"bbox":[42,34,1238,686]}
+{"kind":"textbox","id":"sh/pwjyl8bm","slide":14,"text":"输入","textPreview":"输入","textChars":2,"textLines":1,"bbox":[42,112,1238,608]}
+{"kind":"textbox","id":"sh/ovaxc3u1","slide":14,"text":"我要报销差旅费，金额 5200 元，因为去上海拜访客户，发票已提供","textPreview":"我要报销差旅费，金额 5200 元，因为去上海拜访客户，发票已提供","textChars":33,"textLines":1,"bbox":[42,145,1238,575]}
+{"kind":"textbox","id":"sh/bi1gnyts","slide":14,"text":"Swagger：8020 / POST /api/ai-approval/chat","textPreview":"Swagger：8020 / POST /api/ai-approval/chat","textChars":41,"textLines":1,"bbox":[42,194,1238,526]}
+{"kind":"textbox","id":"sh/qxsfedc7","slide":14,"text":"session_id：demo-deep-001","textPreview":"session_id：demo-deep-001","textChars":24,"textLines":1,"bbox":[42,226,1238,494]}
+{"kind":"shape","id":"sh/dk3yp8by","slide":14,"bbox":[42,306,24,24]}
+{"kind":"textbox","id":"sh/cjuxg3ud","slide":14,"text":"第一轮","textPreview":"第一轮","textChars":3,"textLines":1,"bbox":[70,328,1210,392]}
+{"kind":"textbox","id":"sh/zmlgrito","slide":14,"text":"调用用户 / 模板 / 草稿工具\n生成预览与高金额警告\n危险工具前触发 interrupt","textPreview":"调用用户 / 模板 / 草稿工具 | 生成预览与高金额警告 | 危险工具前触发 interrupt","textChars":45,"textLines":3,"bbox":[70,420,1210,300]}
+{"kind":"shape","id":"sh/ylczidc3","slide":14,"bbox":[660,306,24,24]}
+{"kind":"textbox","id":"sh/43m9oz6d","slide":14,"text":"确认提交","textPreview":"确认提交","textChars":4,"textLines":1,"bbox":[688,328,592,392]}
+{"kind":"textbox","id":"sh/54vah4ny","slide":14,"text":"同一 session 回复“确认提交”\nCommand(resume) 批准中断\n恢复线程并完成 Mock 提交","textPreview":"同一 session 回复“确认提交” | Command(resume) 批准中断 | 恢复线程并完成 Mock 提交","textChars":56,"textLines":3,"bbox":[688,420,592,300]}
+{"kind":"textbox","id":"sh/i14rmpon","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/lc5aav","slide":14,"text":"建议时长：2 分钟\n先启动 ai_deep_agents_assistant：.\\start_windows.ps1 -Port 8020，打开 http://127.0.0.1:8020/docs。第一轮展示 trace 工具名、awaiting_confirmation 和 interrupt；第二轮用同一 session 回复‘确认提交’，展示恢复后 submitted。网络或模型不稳定时，用截图/录屏兜底。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\README.md\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\services\\chat_service.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\agents\\approval_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/kezspr","slide":15,"title":"15","textShapes":6}
+{"kind":"textbox","id":"sh/lwrmlofm","slide":15,"name":"Slide-Number-Placeholder-1-2","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1184.17,659.17,54.5,25.33]}
+{"kind":"textbox","id":"sh/y9g3a9gv","slide":15,"name":"Title-2-3","text":"四种实现不是排行榜，而是四种执行权配置","textPreview":"四种实现不是排行榜，而是四种执行权配置","textChars":19,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/zapkjexg","slide":15,"name":"Content-Placeholder-9-4","text":"固定 Flow\n规则明确、写入风险高。\n适合生产强流程。","textPreview":"固定 Flow | 规则明确、写入风险高。 | 适合生产强流程。","textChars":28,"textLines":3,"bbox":[41.33,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/c7yl8jy5","slide":15,"name":"Content-Placeholder-10-5","text":"自主 Agent\n目标开放、允许路径变化。\n适合工具调用实验。","textPreview":"自主 Agent | 目标开放、允许路径变化。 | 适合工具调用实验。","textChars":31,"textLines":3,"bbox":[656.86,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/d872h4fq","slide":15,"name":"Content-Placeholder-9-6","text":"Agentic Workflow\n既需要自然语言理解，也必须控制写入顺序。\n适合受控智能业务。","textPreview":"Agentic Workflow | 既需要自然语言理解，也必须控制写入顺序。 | 适合受控智能业务。","textChars":47,"textLines":3,"bbox":[41.33,421.73,581.33,172.51]}
+{"kind":"textbox","id":"sh/q5g369gz","slide":15,"name":"Content-Placeholder-10-7","text":"Deep Agent\n复杂目标、长线程、工具较多。\n当前适合学习探索与辅助任务。","textPreview":"Deep Agent | 复杂目标、长线程、工具较多。 | 当前适合学习探索与辅助任务。","textChars":40,"textLines":3,"bbox":[656.86,421.73,581.33,172.51]}
+{"kind":"notes","id":"nt/kezspr","slide":15,"text":"建议时长：1 分钟\n这一页回答‘最终怎么选’。不是框架越新越好，而是看业务确定性、写入风险、状态要求和成本预算。审批与 ERP 写入的生产主控仍建议保留 Workflow。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\README.md\n[/Sources]"}
+{"kind":"slide","id":"sl/zxxqrq","slide":16,"title":"16","textShapes":6}
+{"kind":"textbox","id":"sh/q9sr2xwb","slide":16,"name":"Slide-Number-Placeholder-1-2","text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1184.17,659.17,54.5,25.33]}
+{"kind":"textbox","id":"sh/dcjqdcv2","slide":16,"name":"Title-2-3","text":"预期效果：当前先证明体验和安全边界，而不是虚构效率数字","textPreview":"预期效果：当前先证明体验和安全边界，而不是虚构效率数字","textChars":27,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/cba947eh","slide":16,"name":"Content-Placeholder-9-4","text":"问答入口\n用户用自然语言表达审批或日报目标。","textPreview":"问答入口 | 用户用自然语言表达审批或日报目标。","textChars":22,"textLines":2,"bbox":[41.33,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/361872d0","slide":16,"name":"Content-Placeholder-10-5","text":"已实现能力\n请假审批；日报内容、草稿、预览与确认。","textPreview":"已实现能力 | 请假审批；日报内容、草稿、预览与确认。","textChars":25,"textLines":2,"bbox":[656.86,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/2587yxwf","slide":16,"name":"Content-Placeholder-9-6","text":"可观察过程\n响应中返回 Agent 身份、状态、trace、preview。","textPreview":"可观察过程 | 响应中返回 Agent 身份、状态、trace、preview。","textChars":38,"textLines":2,"bbox":[41.33,421.73,581.33,172.51]}
+{"kind":"textbox","id":"sh/p8jq9cv6","slide":16,"name":"Content-Placeholder-10-7","text":"可验证边界\n提交前人工确认；错误接口不假装成功。","textPreview":"可验证边界 | 提交前人工确认；错误接口不假装成功。","textChars":24,"textLines":2,"bbox":[656.86,421.73,581.33,172.51]}
+{"kind":"notes","id":"nt/zxxqrq","slide":16,"text":"建议时长：1 分钟\n不要说‘效率提升 80%’这类没有测量的数据。当前成果是功能验证与架构验证。下一步才测平均完成轮次、工具调用成功率、响应时间、Token 成本和失败重试率。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/jypbti","slide":17,"title":"17","textShapes":6}
+{"kind":"textbox","id":"sh/a5c3mxsn","slide":17,"name":"Slide-Number-Placeholder-1-2","text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1184.17,659.17,54.5,25.33]}
+{"kind":"textbox","id":"sh/x83mhcry","slide":17,"name":"Title-2-3","text":"遇到的问题：真正困难的是状态、边界和演示稳定性","textPreview":"遇到的问题：真正困难的是状态、边界和演示稳定性","textChars":23,"textLines":1,"bbox":[41.33,36.12,1197.33,109.97]}
+{"kind":"textbox","id":"sh/c7ulo7at","slide":17,"name":"Content-Placeholder-9-4","text":"Flow 节点膨胀\n规则越多，条件边和修改分支越重。","textPreview":"Flow 节点膨胀 | 规则越多，条件边和修改分支越重。","textChars":26,"textLines":2,"bbox":[41.33,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/zal4j294","slide":17,"name":"Content-Placeholder-10-5","text":"Agent 不确定性\n工具顺序、循环次数、Token 与延迟难预测。","textPreview":"Agent 不确定性 | 工具顺序、循环次数、Token 与延迟难预测。","textChars":34,"textLines":2,"bbox":[656.86,213.33,581.33,172.5]}
+{"kind":"textbox","id":"sh/y9c3qxsj","slide":17,"name":"Content-Placeholder-9-6","text":"会话状态串线\n复用 session 可能继续进入上一种 Agent；演示必须隔离。","textPreview":"会话状态串线 | 复用 session 可能继续进入上一种 Agent；演示必须隔离。","textChars":41,"textLines":2,"bbox":[41.33,421.73,581.33,172.51]}
+{"kind":"textbox","id":"sh/lcnmlcra","slide":17,"name":"Content-Placeholder-10-7","text":"Demo 与生产边界\nAgentic 保存/提交为 Demo；Deep Agent 后端为 Mock，必须如实说明。","textPreview":"Demo 与生产边界 | Agentic 保存/提交为 Demo；Deep Agent 后端为 Mock，必须如实说明。","textChars":58,"textLines":2,"bbox":[656.86,421.73,581.33,172.51]}
+{"kind":"notes","id":"nt/jypbti","slide":17,"text":"建议时长：1 分 10 秒\n结合真实踩坑讲：Flow 可靠但越来越重；Agent 灵活但排查困难；多种 Agent 共存时，活跃会话状态优先于关键词；演示型实现必须主动说明真实接口、规则模拟和 Mock 的边界。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\daily_report_workflow.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_create_agent.py\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\agents\\daily_report_agentic_workflow_demo.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\app\\services\\approval_service.py\n[/Sources]"}
+{"kind":"slide","id":"sl/6wgzjw","slide":18,"title":"结论","textShapes":4}
+{"kind":"textbox","id":"sh/1c3a5snq","slide":18,"text":"结论","textPreview":"结论","textChars":2,"textLines":1,"bbox":[42,42,1238,678]}
+{"kind":"textbox","id":"sh/e9crux4z","slide":18,"text":"AI 负责理解，代码负责边界","textPreview":"AI 负责理解，代码负责边界","textChars":14,"textLines":1,"bbox":[42,220,1238,500]}
+{"kind":"textbox","id":"sh/fal8325k","slide":18,"text":"固定 Flow：先把业务跑稳\nAgentic Workflow：让 AI 安全进入流程\nDeep Agent：探索更复杂、更长的目标任务","textPreview":"固定 Flow：先把业务跑稳 | Agentic Workflow：让 AI 安全进入流程 | Deep Agent：探索更复杂、更长的目标任务","textChars":68,"textLines":3,"bbox":[42,400,1238,320]}
+{"kind":"textbox","id":"sh/snu9snmt","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1184,659,96,61]}
+{"kind":"notes","id":"nt/6wgzjw","slide":18,"text":"建议时长：40 秒\n回到开场：用户只想一句话完成任务，但后台不能因此失去业务规则。最终原则是让 AI 获得合适的决策权，而不是最大决策权。\n\n[Sources]\n- D:\\PythonProject\\LearnOne\\ai_approval_assistant\\app\\graph\\workflow.py\n- D:\\PythonProject\\LearnOne\\ai_deep_agents_assistant\\README.md\n[/Sources]"}

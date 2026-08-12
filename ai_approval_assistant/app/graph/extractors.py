@@ -107,9 +107,7 @@ def _extract_field_value(field: ApprovalField, text: str) -> str | None:
             value = next((group for group in match.groups() if group), match.group(0))
             return _normalize_value(field, value)
     if field.type == "enum":
-        for option in field.options:
-            if option in text:
-                return option
+        return _extract_enum_option(field, text)
     if field.type == "number" and _field_mentioned(field, text):
         return _extract_first_number(text)
     if field.type == "date" and _field_mentioned(field, text):
@@ -124,12 +122,9 @@ def _raw_value_for_awaiting(field: ApprovalField, text: str) -> str | None:
     if not cleaned:
         return None
     if field.type == "enum":
-        for option in field.options:
-            if option in cleaned:
-                return option
-        if not field.options:
+        if not field.options and not field.option_values:
             return cleaned
-        return None
+        return _extract_enum_option(field, cleaned)
     if field.type == "number":
         return _extract_first_number(cleaned)
     if field.type == "date":
@@ -142,6 +137,64 @@ def _field_mentioned(field: ApprovalField, text: str) -> bool:
     """判断文本中是否出现字段标签或别名。"""
     markers = [field.label, *field.aliases]
     return any((marker and marker in text for marker in markers))
+
+
+def _extract_enum_option(field: ApprovalField, text: str) -> str | None:
+    """从枚举字段中识别用户输入的选项。
+
+    ERP 的动态选项经常把余额或时长拼到展示名称中，例如“年假（10天）”。
+    用户通常只会说“年假”，因此除了完整标签外，还尝试匹配括号前的核心名称。
+    只有核心名称唯一时才自动选择，避免多个同名假期被误选。
+    """
+    option_values = field.option_values or [
+        {"label": option, "value": option} for option in field.options
+    ]
+    if not option_values:
+        return None
+
+    text = text.strip()
+    exact_matches = [
+        item
+        for item in option_values
+        if str(item.get("label") or "").strip()
+        and str(item.get("label") or "").strip() in text
+    ]
+    if exact_matches:
+        # Prefer the longest label when one option is a prefix of another.
+        exact_matches.sort(
+            key=lambda item: len(str(item.get("label") or "")), reverse=True
+        )
+        return str(exact_matches[0]["label"]).strip()
+
+    core_matches: list[tuple[str, dict[str, object]]] = []
+    for item in option_values:
+        label = str(item.get("label") or "").strip()
+        core = _enum_option_core(label)
+        if not core:
+            continue
+        candidates = [core]
+        # “调休” is a common shorthand for an option labelled “调休假”。
+        if core.endswith("假") and len(core) > 2:
+            candidates.append(core[:-1])
+        for candidate in candidates:
+            if candidate and candidate in text:
+                core_matches.append((candidate, item))
+                break
+
+    # A short/core label can correspond to more than one option (for example,
+    # two annual-leave balances), so only auto-select an unambiguous match.
+    matched_labels = {str(item.get("label") or "").strip() for _, item in core_matches}
+    if len(matched_labels) != 1:
+        return None
+    return next(iter(matched_labels))
+
+
+def _enum_option_core(label: str) -> str:
+    """去掉动态选项名称中的余额/时长括号，得到可用于问答匹配的核心名。"""
+    for marker in ("（", "(", "【", "["):
+        if marker in label:
+            return label.split(marker, 1)[0].strip()
+    return label.strip()
 
 
 def _normalize_value(field: ApprovalField, value: str) -> str:

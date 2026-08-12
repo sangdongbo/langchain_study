@@ -57,6 +57,7 @@ from app.agents.approval.selection import select_template_candidate
 from app.agents.approval.submission import build_idempotency_key
 from app.agents.approval.state_helpers import (
     clear_dependent_fields,
+    form_value_from_state,
     form_value_from_slots,
     nodes_from_state,
     slots_from_structured_answer,
@@ -112,10 +113,21 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
     """顶层意图路由：决定本轮交给哪个业务 Agent 处理。"""
     text = state.get("user_message", "")
     trace = [*state.get("trace", []), "intent_router"]
+    if _has_active_agentic_demo_daily_report_context(state):
+        return {
+            **state,
+            "intent": "daily_report",
+            "daily_report_agent": "daily_report_agentic_workflow_demo",
+            "daily_report_mode": "agentic_workflow_demo",
+            "trace": trace,
+            "_route": "daily_report_agentic_workflow_demo",
+        }
     if _has_active_autonomous_daily_report_context(state):
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_create_agent",
+            "daily_report_mode": "autonomous",
             "trace": trace,
             "_route": "daily_report_create_agent",
         }
@@ -123,6 +135,8 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_agent",
+            "daily_report_mode": "standard",
             "trace": trace,
             "_route": "daily_report_agent",
         }
@@ -132,6 +146,7 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_agentic_workflow_demo",
             "daily_report_mode": "agentic_workflow_demo",
             "trace": trace,
             "_route": "daily_report_agentic_workflow_demo",
@@ -140,6 +155,7 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_create_agent",
             "daily_report_mode": "autonomous",
             "trace": trace,
             "_route": "daily_report_create_agent",
@@ -148,6 +164,8 @@ def intent_router_node(state: ApprovalState) -> ApprovalState:
         return {
             **state,
             "intent": "daily_report",
+            "daily_report_agent": "daily_report_agent",
+            "daily_report_mode": "standard",
             "trace": trace,
             "_route": "daily_report_agent",
         }
@@ -558,6 +576,30 @@ def collect_node(state: ApprovalState) -> ApprovalState:
         )
         for key, value in llm_slots.items():
             slots.setdefault(key, value)
+
+    # 文本抽取返回展示标签；远程枚举还需要把对应的真实 value 保留下来，
+    # 供 getNodes 和提交接口使用（例如“年假（10天）”对应假期规则 ID）。
+    for field in template.fields:
+        if (
+            field.type != "enum"
+            or field.name not in slots
+            or field.name in collected_values
+        ):
+            continue
+        label = str(slots[field.name])
+        option = next(
+            (
+                item
+                for item in field.option_values
+                if str(item.get("label") or "").strip() == label
+            ),
+            None,
+        )
+        if option is not None and "value" in option:
+            collected_values[field.name] = {
+                "label": label,
+                "value": option.get("value"),
+            }
     missing_field = _first_missing_field(template, slots)
     if missing_field:
         question = next(
@@ -633,7 +675,7 @@ def assignee_node(state: ApprovalState) -> ApprovalState:
     if not nodes:
         nodes = crm_approval_service.get_approval_nodes(
             approval_set_id=template.template_id,
-            form_value=_form_value_from_slots(state.get("collected_slots", {})),
+            form_value=form_value_from_state(state),
             user=user,
         )
     selected_assignees = dict(state.get("selected_assignees", {}))
@@ -927,6 +969,18 @@ def _has_active_daily_report_context(state: ApprovalState) -> bool:
         "awaiting_daily_report_form",
         "awaiting_daily_report_confirmation",
     }
+
+
+def _has_active_agentic_demo_daily_report_context(state: ApprovalState) -> bool:
+    return state.get("daily_report_mode") == "agentic_workflow_demo" and (
+        state.get("awaiting_field") == "daily_report_content"
+        or state.get("status")
+        in {
+            "collecting",
+            "awaiting_daily_report_confirmation",
+            "daily_report_submitted",
+        }
+    )
 
 
 def _has_active_autonomous_daily_report_context(state: ApprovalState) -> bool:

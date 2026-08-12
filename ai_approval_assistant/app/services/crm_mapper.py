@@ -142,7 +142,7 @@ def nodes_from_remote_payload(payload: dict[str, Any]) -> list[ApprovalNode]:
             continue
         handle = _remote_node_handle(item.get("handle"))
         handle_type = str(handle.get("type") or "").strip() or None
-        candidates = _assignees_from_remote(handle.get("relate_user") or [])
+        candidates = _candidate_assignees_from_handle(handle)
         requires_selection = handle_type == "submitter_choice"
         selected = [] if requires_selection else candidates
         nodes.append(
@@ -186,8 +186,13 @@ def _assignees_from_remote(items: list[Any]) -> list[ApprovalAssignee]:
     for item in items:
         if not isinstance(item, dict):
             continue
-        uid = str(item.get("uid") or "").strip()
-        name = str(item.get("display_name") or item.get("name") or "").strip()
+        uid = str(item.get("uid") or item.get("id") or item.get("relate_id") or "").strip()
+        name = str(
+            item.get("display_name")
+            or item.get("name")
+            or item.get("relate_name")
+            or ""
+        ).strip()
         if not uid or not name:
             continue
         assignees.append(
@@ -198,6 +203,19 @@ def _assignees_from_remote(items: list[Any]) -> list[ApprovalAssignee]:
             )
         )
     return assignees
+
+
+def _candidate_assignees_from_handle(handle: dict[str, Any]) -> list[ApprovalAssignee]:
+    """按 ERP 页面语义解析发起人自选节点的可选人员。"""
+    if (
+        str(handle.get("type") or "").strip() == "submitter_choice"
+        and int(handle.get("is_all_company") or 0) == 2
+    ):
+        candidates = _assignees_from_remote(handle.get("relate_id") or [])
+        if candidates:
+            return list({assignee.uid: assignee for assignee in candidates}.values())
+    candidates = _assignees_from_remote(handle.get("relate_user") or [])
+    return list({assignee.uid: assignee for assignee in candidates}.values())
 
 
 def _flatten_remote_fields(

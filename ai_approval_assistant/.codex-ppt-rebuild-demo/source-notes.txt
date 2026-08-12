@@ -1,0 +1,15 @@
+No external web sources or external visual assets were used.
+All technical claims and demo instructions come from the user's local source code and documentation:
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\graph\workflow.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\graph\daily_report_workflow.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\agents\daily_report_create_agent.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\graph\daily_report_agentic_workflow_demo.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\agents\daily_report_agentic_workflow_demo.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\app\tools\daily_report_tools.py
+- D:\PythonProject\LearnOne\ai_approval_assistant\演示.md
+- D:\PythonProject\LearnOne\ai_deep_agents_assistant\app\agents\approval_agent.py
+- D:\PythonProject\LearnOne\ai_deep_agents_assistant\app\tools\approval_tools.py
+- D:\PythonProject\LearnOne\ai_deep_agents_assistant\app\services\chat_service.py
+- D:\PythonProject\LearnOne\ai_deep_agents_assistant\app\services\approval_service.py
+- D:\PythonProject\LearnOne\ai_deep_agents_assistant\README.md
+

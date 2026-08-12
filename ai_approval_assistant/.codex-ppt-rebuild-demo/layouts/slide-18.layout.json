@@ -1,0 +1,670 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/6wgzjw",
+    "id": "6wgzjw",
+    "slide": 18,
+    "layoutId": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "AI Efficiency",
+    "colors": {
+      "accent1": "#3D8DFF",
+      "accent2": "#0F766E",
+      "accent3": "#F59E0B",
+      "accent4": "#DC2626",
+      "accent5": "#7C3AED",
+      "accent6": "#16A34A",
+      "bg1": "#FFFFFF",
+      "bg2": "#F7F7F7",
+      "tx1": "#111111",
+      "tx2": "#5F6368",
+      "dk1": "#000000",
+      "dk2": "#1F2937",
+      "lt1": "#FFFFFF",
+      "lt2": "#EDEDED",
+      "hlink": "#3D8DFF",
+      "folHlink": "#7C3AED"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1c3a5snq",
+      "id": "1",
+      "bbox": [
+        42,
+        42,
+        1238,
+        678
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "结论",
+      "textPreview": "结论",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "结论"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "结论",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 30,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "结论",
+              "anchor": 1,
+              "fontSize": 30,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e9crux4z",
+      "id": "2",
+      "bbox": [
+        42,
+        220,
+        1238,
+        500
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "AI 负责理解，代码负责边界",
+      "textPreview": "AI 负责理解，代码负责边界",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 56,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI 负责理解，代码负责边界"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI 负责理解，代码负责边界",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 56,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI 负责理解，代码负责边界",
+              "anchor": 1,
+              "fontSize": 56,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fal8325k",
+      "id": "3",
+      "bbox": [
+        42,
+        400,
+        1238,
+        320
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "geometry": "rect",
+      "text": "固定 Flow：先把业务跑稳\nAgentic Workflow：让 AI 安全进入流程\nDeep Agent：探索更复杂、更长的目标任务",
+      "textPreview": "固定 Flow：先把业务跑稳 | Agentic Workflow：让 AI 安全进入流程 | Deep Agent：探索更复杂、更长的目标任务",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "固定 Flow：先把业务跑稳"
+          },
+          {
+            "index": 2,
+            "text": "Agentic Workflow：让 AI 安全进入流程"
+          },
+          {
+            "index": 3,
+            "text": "Deep Agent：探索更复杂、更长的目标任务"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "固定 Flow：先把业务跑稳\nAgentic Workflow：让 AI 安全进入流程\nDeep Agent：探索更复杂、更长的目标任务",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 25,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "固定 Flow：先把业务跑稳\nAgentic Workflow：让 AI 安全进入流程\nDeep Agent：探索更复杂、更长的目标任务",
+              "anchor": 1,
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/snu9snmt",
+      "id": "4",
+      "bbox": [
+        1184,
+        659,
+        96,
+        61
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.3"
+      },
+      "geometry": "rect",
+      "text": "18",
+      "textPreview": "18",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "18"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "18",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 13,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "right",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "18",
+              "anchor": 1,
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "right",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "conclusion",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1197.33,
+          "height": 674.6
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 42
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 60,
+              "height": 36
+            },
+            "frame": {
+              "left": 42,
+              "top": 42,
+              "width": 1238,
+              "height": 678
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 42,
+              "width": 1238,
+              "height": 678
+            },
+            "children": [],
+            "text": "结论",
+            "transform": "none",
+            "element": {
+              "aid": "sh/1c3a5snq",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 220
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 675.17,
+              "height": 67.2
+            },
+            "frame": {
+              "left": 42,
+              "top": 220,
+              "width": 1238,
+              "height": 500
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 220,
+              "width": 1238,
+              "height": 500
+            },
+            "children": [],
+            "text": "AI 负责理解，代码负责边界",
+            "transform": "none",
+            "element": {
+              "aid": "sh/e9crux4z",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 400
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 468.83,
+              "height": 90
+            },
+            "frame": {
+              "left": 42,
+              "top": 400,
+              "width": 1238,
+              "height": 320
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 400,
+              "width": 1238,
+              "height": 320
+            },
+            "children": [],
+            "text": "固定 Flow：先把业务跑稳\nAgentic Workflow：让 AI 安全进入流程\nDeep Agent：探索更复杂、更长的目标任务",
+            "transform": "none",
+            "element": {
+              "aid": "sh/fal8325k",
+              "id": "3",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.3",
+            "kind": "text",
+            "position": {
+              "left": 1184,
+              "top": 659
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 13.33,
+              "height": 15.6
+            },
+            "frame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            },
+            "snappedFrame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            },
+            "children": [],
+            "text": "18",
+            "transform": "none",
+            "element": {
+              "aid": "sh/snu9snmt",
+              "id": "4",
+              "kind": "shape"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 42,
+              "top": 42,
+              "width": 1238,
+              "height": 678
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 42,
+              "top": 220,
+              "width": 1238,
+              "height": 500
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 42,
+              "top": 400,
+              "width": 1238,
+              "height": 320
+            }
+          },
+          {
+            "path": "0.3",
+            "frame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

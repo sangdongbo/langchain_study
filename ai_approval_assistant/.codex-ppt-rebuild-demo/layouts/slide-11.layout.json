@@ -1,0 +1,1632 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/0qq0it",
+    "id": "0qq0it",
+    "slide": 11,
+    "layoutId": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "AI Efficiency",
+    "colors": {
+      "accent1": "#3D8DFF",
+      "accent2": "#0F766E",
+      "accent3": "#F59E0B",
+      "accent4": "#DC2626",
+      "accent5": "#7C3AED",
+      "accent6": "#16A34A",
+      "bg1": "#FFFFFF",
+      "bg2": "#F7F7F7",
+      "tx1": "#111111",
+      "tx2": "#5F6368",
+      "dk1": "#000000",
+      "dk2": "#1F2937",
+      "lt1": "#FFFFFF",
+      "lt2": "#EDEDED",
+      "hlink": "#3D8DFF",
+      "folHlink": "#7C3AED"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vmxcvelk",
+      "id": "1",
+      "bbox": [
+        42,
+        34,
+        1238,
+        686
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "现场演示 3｜Agentic Workflow：看职责分工与 Gate",
+      "textPreview": "现场演示 3｜Agentic Workflow：看职责分工与 Gate",
+      "resolvedFontSize": 38,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 38,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "现场演示 3｜Agentic Workflow：看职责分工与 Gate"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "现场演示 3｜Agentic Workflow：看职责分工与 Gate",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 38,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "现场演示 3｜Agentic Workflow：看职责分工与 Gate",
+              "anchor": 1,
+              "fontSize": 38,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wn6d4jmp",
+      "id": "2",
+      "bbox": [
+        42,
+        112,
+        1238,
+        608
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "输入",
+      "textPreview": "输入",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "Aptos",
+        "color": "#5F6368",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "输入"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "输入",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 20,
+            "typeface": "Aptos",
+            "color": "#5F6368",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "输入",
+              "anchor": 1,
+              "fontSize": 20,
+              "typeface": "Aptos",
+              "color": "#5F6368",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hozux43a",
+      "id": "3",
+      "bbox": [
+        42,
+        145,
+        1238,
+        575
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "geometry": "rect",
+      "text": "agentic workflow写日报：今天完成审批助手开发3",
+      "textPreview": "agentic workflow写日报：今天完成审批助手开发3",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "agentic workflow写日报：今天完成审批助手开发3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "agentic workflow写日报：今天完成审批助手开发3",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 26,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "agentic workflow写日报：今天完成审批助手开发3",
+              "anchor": 1,
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ip8vq94v",
+      "id": "4",
+      "bbox": [
+        42,
+        194,
+        1238,
+        526
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.3"
+      },
+      "geometry": "rect",
+      "text": "Swagger：8010 / POST /api/ai-approval/chat",
+      "textPreview": "Swagger：8010 / POST /api/ai-approval/chat",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "color": "#5F6368",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Swagger：8010 / POST /api/ai-approval/chat"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Swagger：8010 / POST /api/ai-approval/chat",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 18,
+            "typeface": "Aptos",
+            "color": "#5F6368",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Swagger：8010 / POST /api/ai-approval/chat",
+              "anchor": 1,
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#5F6368",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3qhwzelg",
+      "id": "5",
+      "bbox": [
+        42,
+        226,
+        1238,
+        494
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.4"
+      },
+      "geometry": "rect",
+      "text": "session_id：demo-agentic-001",
+      "textPreview": "session_id：demo-agentic-001",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Aptos",
+        "color": "#5F6368",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "session_id：demo-agentic-001"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "session_id：demo-agentic-001",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 18,
+            "typeface": "Aptos",
+            "color": "#5F6368",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "session_id：demo-agentic-001",
+              "anchor": 1,
+              "fontSize": 18,
+              "typeface": "Aptos",
+              "color": "#5F6368",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4bqdsjm1",
+      "id": "6",
+      "bbox": [
+        42,
+        306,
+        24,
+        24
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.5"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#EAF2FF"
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5cze1o3m",
+      "id": "7",
+      "bbox": [
+        70,
+        328,
+        1210,
+        392
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.6"
+      },
+      "geometry": "rect",
+      "text": "看结构化状态",
+      "textPreview": "看结构化状态",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "看结构化状态"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "看结构化状态",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 28,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "看结构化状态",
+              "anchor": 1,
+              "fontSize": 28,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yt4vup4r",
+      "id": "8",
+      "bbox": [
+        70,
+        420,
+        1210,
+        300
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.7"
+      },
+      "geometry": "rect",
+      "text": "plan / context / compose 分开保存\nevents 显示 Agent 与 Workflow 交替\ntrace 精确定位阶段",
+      "textPreview": "plan / context / compose 分开保存 | events 显示 Agent 与 Workflow 交替 | trace 精确定位阶段",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "plan / context / compose 分开保存"
+          },
+          {
+            "index": 2,
+            "text": "events 显示 Agent 与 Workflow 交替"
+          },
+          {
+            "index": 3,
+            "text": "trace 精确定位阶段"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "plan / context / compose 分开保存\nevents 显示 Agent 与 Workflow 交替\ntrace 精确定位阶段",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 21,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "plan / context / compose 分开保存\nevents 显示 Agent 与 Workflow 交替\ntrace 精确定位阶段",
+              "anchor": 1,
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zudcnulc",
+      "id": "9",
+      "bbox": [
+        660,
+        306,
+        24,
+        24
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.8"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#EAF7F3"
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jaxgrqxs",
+      "id": "10",
+      "bbox": [
+        688,
+        328,
+        592,
+        392
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.9"
+      },
+      "geometry": "rect",
+      "text": "看 Gate 拦截",
+      "textPreview": "看 Gate 拦截",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "看 Gate 拦截"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "看 Gate 拦截",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 28,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "看 Gate 拦截",
+              "anchor": 1,
+              "fontSize": 28,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i9ofylw7",
+      "id": "11",
+      "bbox": [
+        688,
+        420,
+        592,
+        300
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.10"
+      },
+      "geometry": "rect",
+      "text": "未预览不能提交\n未明确确认不能提交\n确认后进入 demo_submit_gate",
+      "textPreview": "未预览不能提交 | 未明确确认不能提交 | 确认后进入 demo_submit_gate",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "未预览不能提交"
+          },
+          {
+            "index": 2,
+            "text": "未明确确认不能提交"
+          },
+          {
+            "index": 3,
+            "text": "确认后进入 demo_submit_gate"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "未预览不能提交\n未明确确认不能提交\n确认后进入 demo_submit_gate",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 21,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "未预览不能提交\n未明确确认不能提交\n确认后进入 demo_submit_gate",
+              "anchor": 1,
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5czyt0fy",
+      "id": "12",
+      "bbox": [
+        1184,
+        659,
+        96,
+        61
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.11"
+      },
+      "geometry": "rect",
+      "text": "11",
+      "textPreview": "11",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "Aptos",
+        "color": "#111111",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "11"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "11",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 13,
+            "typeface": "Aptos",
+            "color": "#111111",
+            "alignment": "right",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "11",
+              "anchor": 1,
+              "fontSize": 13,
+              "typeface": "Aptos",
+              "color": "#111111",
+              "alignment": "right",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "demo-slide-11",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1197.33,
+          "height": 674.6
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 34
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 839.33,
+              "height": 45.6
+            },
+            "frame": {
+              "left": 42,
+              "top": 34,
+              "width": 1238,
+              "height": 686
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 34,
+              "width": 1238,
+              "height": 686
+            },
+            "children": [],
+            "text": "现场演示 3｜Agentic Workflow：看职责分工与 Gate",
+            "transform": "none",
+            "element": {
+              "aid": "sh/vmxcvelk",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 112
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 40,
+              "height": 24
+            },
+            "frame": {
+              "left": 42,
+              "top": 112,
+              "width": 1238,
+              "height": 608
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 112,
+              "width": 1238,
+              "height": 608
+            },
+            "children": [],
+            "text": "输入",
+            "transform": "none",
+            "element": {
+              "aid": "sh/wn6d4jmp",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 145
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 558.5,
+              "height": 31.2
+            },
+            "frame": {
+              "left": 42,
+              "top": 145,
+              "width": 1238,
+              "height": 575
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 145,
+              "width": 1238,
+              "height": 575
+            },
+            "children": [],
+            "text": "agentic workflow写日报：今天完成审批助手开发3",
+            "transform": "none",
+            "element": {
+              "aid": "sh/hozux43a",
+              "id": "3",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.3",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 194
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 329.83,
+              "height": 21.6
+            },
+            "frame": {
+              "left": 42,
+              "top": 194,
+              "width": 1238,
+              "height": 526
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 194,
+              "width": 1238,
+              "height": 526
+            },
+            "children": [],
+            "text": "Swagger：8010 / POST /api/ai-approval/chat",
+            "transform": "none",
+            "element": {
+              "aid": "sh/ip8vq94v",
+              "id": "4",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.4",
+            "kind": "text",
+            "position": {
+              "left": 42,
+              "top": 226
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 227.67,
+              "height": 21.6
+            },
+            "frame": {
+              "left": 42,
+              "top": 226,
+              "width": 1238,
+              "height": 494
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 226,
+              "width": 1238,
+              "height": 494
+            },
+            "children": [],
+            "text": "session_id：demo-agentic-001",
+            "transform": "none",
+            "element": {
+              "aid": "sh/3qhwzelg",
+              "id": "5",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.5",
+            "kind": "shape",
+            "position": {
+              "left": 42,
+              "top": 306
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 24
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 24
+              }
+            },
+            "intrinsicSize": {
+              "width": 24,
+              "height": 24
+            },
+            "frame": {
+              "left": 42,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            },
+            "snappedFrame": {
+              "left": 42,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            },
+            "children": [],
+            "geometry": "roundRect",
+            "element": {
+              "aid": "sh/4bqdsjm1",
+              "id": "6",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.6",
+            "kind": "text",
+            "position": {
+              "left": 70,
+              "top": 328
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 168,
+              "height": 33.6
+            },
+            "frame": {
+              "left": 70,
+              "top": 328,
+              "width": 1210,
+              "height": 392
+            },
+            "snappedFrame": {
+              "left": 70,
+              "top": 328,
+              "width": 1210,
+              "height": 392
+            },
+            "children": [],
+            "text": "看结构化状态",
+            "transform": "none",
+            "element": {
+              "aid": "sh/5cze1o3m",
+              "id": "7",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.7",
+            "kind": "text",
+            "position": {
+              "left": 70,
+              "top": 420
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 318.33,
+              "height": 75.6
+            },
+            "frame": {
+              "left": 70,
+              "top": 420,
+              "width": 1210,
+              "height": 300
+            },
+            "snappedFrame": {
+              "left": 70,
+              "top": 420,
+              "width": 1210,
+              "height": 300
+            },
+            "children": [],
+            "text": "plan / context / compose 分开保存\nevents 显示 Agent 与 Workflow 交替\ntrace 精确定位阶段",
+            "transform": "none",
+            "element": {
+              "aid": "sh/yt4vup4r",
+              "id": "8",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.8",
+            "kind": "shape",
+            "position": {
+              "left": 660,
+              "top": 306
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 24
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 24
+              }
+            },
+            "intrinsicSize": {
+              "width": 24,
+              "height": 24
+            },
+            "frame": {
+              "left": 660,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            },
+            "snappedFrame": {
+              "left": 660,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            },
+            "children": [],
+            "geometry": "roundRect",
+            "element": {
+              "aid": "sh/zudcnulc",
+              "id": "9",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.9",
+            "kind": "text",
+            "position": {
+              "left": 688,
+              "top": 328
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 150.5,
+              "height": 33.6
+            },
+            "frame": {
+              "left": 688,
+              "top": 328,
+              "width": 592,
+              "height": 392
+            },
+            "snappedFrame": {
+              "left": 688,
+              "top": 328,
+              "width": 592,
+              "height": 392
+            },
+            "children": [],
+            "text": "看 Gate 拦截",
+            "transform": "none",
+            "element": {
+              "aid": "sh/jaxgrqxs",
+              "id": "10",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.10",
+            "kind": "text",
+            "position": {
+              "left": 688,
+              "top": 420
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 275.67,
+              "height": 75.6
+            },
+            "frame": {
+              "left": 688,
+              "top": 420,
+              "width": 592,
+              "height": 300
+            },
+            "snappedFrame": {
+              "left": 688,
+              "top": 420,
+              "width": 592,
+              "height": 300
+            },
+            "children": [],
+            "text": "未预览不能提交\n未明确确认不能提交\n确认后进入 demo_submit_gate",
+            "transform": "none",
+            "element": {
+              "aid": "sh/i9ofylw7",
+              "id": "11",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.11",
+            "kind": "text",
+            "position": {
+              "left": 1184,
+              "top": 659
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "hug"
+              },
+              "height": {
+                "mode": "hug"
+              }
+            },
+            "intrinsicSize": {
+              "width": 13.33,
+              "height": 15.6
+            },
+            "frame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            },
+            "snappedFrame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            },
+            "children": [],
+            "text": "11",
+            "transform": "none",
+            "element": {
+              "aid": "sh/5czyt0fy",
+              "id": "12",
+              "kind": "shape"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 42,
+              "top": 34,
+              "width": 1238,
+              "height": 686
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 42,
+              "top": 112,
+              "width": 1238,
+              "height": 608
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 42,
+              "top": 145,
+              "width": 1238,
+              "height": 575
+            }
+          },
+          {
+            "path": "0.3",
+            "frame": {
+              "left": 42,
+              "top": 194,
+              "width": 1238,
+              "height": 526
+            }
+          },
+          {
+            "path": "0.4",
+            "frame": {
+              "left": 42,
+              "top": 226,
+              "width": 1238,
+              "height": 494
+            }
+          },
+          {
+            "path": "0.5",
+            "frame": {
+              "left": 42,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "path": "0.6",
+            "frame": {
+              "left": 70,
+              "top": 328,
+              "width": 1210,
+              "height": 392
+            }
+          },
+          {
+            "path": "0.7",
+            "frame": {
+              "left": 70,
+              "top": 420,
+              "width": 1210,
+              "height": 300
+            }
+          },
+          {
+            "path": "0.8",
+            "frame": {
+              "left": 660,
+              "top": 306,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "path": "0.9",
+            "frame": {
+              "left": 688,
+              "top": 328,
+              "width": 592,
+              "height": 392
+            }
+          },
+          {
+            "path": "0.10",
+            "frame": {
+              "left": 688,
+              "top": 420,
+              "width": 592,
+              "height": 300
+            }
+          },
+          {
+            "path": "0.11",
+            "frame": {
+              "left": 1184,
+              "top": 659,
+              "width": 96,
+              "height": 61
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

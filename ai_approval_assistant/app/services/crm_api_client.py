@@ -28,6 +28,8 @@ class CrmApiClient:
         add_approval_url: str | None = None,
         related_list_url: str | None = None,
         holiday_rule_url: str | None = None,
+        calculate_holiday_duration_url: str | None = None,
+        user_list_url: str | None = None,
         clock: Any | None = None,
         log_writer: DebugLogWriter | None = None,
     ) -> None:
@@ -41,6 +43,11 @@ class CrmApiClient:
         self._add_approval_url = add_approval_url or endpoint_config.add_approval_url
         self._related_list_url = related_list_url or endpoint_config.related_list_url
         self._holiday_rule_url = holiday_rule_url or endpoint_config.holiday_rule_url
+        self._calculate_holiday_duration_url = (
+            calculate_holiday_duration_url
+            or endpoint_config.calculate_holiday_duration_url
+        )
+        self._user_list_url = user_list_url or endpoint_config.user_list_url
 
     def list_approvals(self, user: UserContext, keyword: str = "") -> dict[str, Any]:
         """调用 /api/approval/list 查询审批模板。"""
@@ -109,6 +116,39 @@ class CrmApiClient:
             self._holiday_rule_url,
             user,
             {},
+        )
+
+    def calculate_holiday_duration(
+        self,
+        user: UserContext,
+        holiday_rule_id: int,
+        start_date: str,
+        end_date: str,
+    ) -> dict[str, Any]:
+        """调用 ERP 正式请假时长计算接口。"""
+        return self._post_crm_json(
+            "attendance.calculateHolidayDuration",
+            self._calculate_holiday_duration_url,
+            user,
+            {
+                "attendance_holiday_config_id": holiday_rule_id,
+                "start_date": start_date,
+                "end_date": end_date,
+            },
+        )
+
+    def get_user_list(
+        self,
+        user: UserContext,
+        keyword: str = "",
+        page_size: int = 2000,
+    ) -> dict[str, Any]:
+        """调用 /api/User/getList 获取公司内可选人员。"""
+        return self._post_crm_json(
+            "user.getList",
+            self._user_list_url,
+            user,
+            {"keyword": keyword, "pageSize": page_size},
         )
 
     def add_approval(
@@ -185,7 +225,17 @@ class CrmApiClient:
         }
         if isinstance(data, list):
             summary["data_count"] = len(data)
-            summary["data_sample"] = data[:2]
+            if event == "user.getList":
+                summary["data_sample"] = [
+                    {
+                        "uid": item.get("uid") or item.get("id"),
+                        "name": item.get("name") or item.get("display_name"),
+                    }
+                    for item in data[:2]
+                    if isinstance(item, dict)
+                ]
+            else:
+                summary["data_sample"] = data[:2]
         elif isinstance(data, dict):
             summary["data_keys"] = list(data.keys())[:20]
             summary["data_sample"] = data

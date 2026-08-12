@@ -52,8 +52,8 @@ function Assert-PortAvailable {
 
     $Processes = $Listeners | ForEach-Object { "$($_.OwningProcess)" }
     Write-Host "Port $LocalPort is already in use by process id(s): $($Processes -join ', ')." -ForegroundColor Red
-    Write-Host "ai_approval_assistant 默认使用 8010；ai_deep_agents_assistant 默认使用 8020。" -ForegroundColor Yellow
-    Write-Host "请换一个 -Port，例如: .\start_windows.ps1 -Port 8021" -ForegroundColor Yellow
+    Write-Host "ai_approval_assistant uses port 8010; ai_deep_agents_assistant uses port 8020 by default." -ForegroundColor Yellow
+    Write-Host "Choose another port, for example: .\start_windows.ps1 -Port 8021" -ForegroundColor Yellow
     exit 1
 }
 

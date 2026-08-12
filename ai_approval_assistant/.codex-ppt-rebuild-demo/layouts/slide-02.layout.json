@@ -1,0 +1,774 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/oynl6f",
+    "id": "oynl6f",
+    "slide": 2,
+    "layoutId": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "AI Efficiency",
+    "colors": {
+      "accent1": "#3D8DFF",
+      "accent2": "#0F766E",
+      "accent3": "#F59E0B",
+      "accent4": "#DC2626",
+      "accent5": "#7C3AED",
+      "accent6": "#16A34A",
+      "bg1": "#FFFFFF",
+      "bg2": "#F7F7F7",
+      "tx1": "#111111",
+      "tx2": "#5F6368",
+      "dk1": "#000000",
+      "dk2": "#1F2937",
+      "lt1": "#FFFFFF",
+      "lt2": "#EDEDED",
+      "hlink": "#3D8DFF",
+      "folHlink": "#7C3AED"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "a3d08218-b899-484f-820d-8f73c0b71b0d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "4a44b2b6-dcb1-4bfb-9584-84b182d93e5b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0zqdc7q5",
+      "id": "1",
+      "name": "Slide-Number-Placeholder-1-2",
+      "bbox": [
+        1184.18,
+        659.24,
+        54.48,
+        25.33
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 13.33,
+      "resolvedTextStyle": {
+        "anchor": 3,
+        "fontSize": 13.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "right",
+        "verticalAlignment": "bottom",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "resolvedTextStyle": {
+            "anchor": 3,
+            "fontSize": 13.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "right",
+            "verticalAlignment": "bottom",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "anchor": 3,
+              "fontSize": 13.33,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "right",
+              "verticalAlignment": "bottom",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zyhwjm9k",
+      "id": "2",
+      "name": "Title-2-3",
+      "bbox": [
+        41.33,
+        36.12,
+        1197.33,
+        109.97
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "20 分钟分享路线",
+      "textPreview": "20 分钟分享路线",
+      "resolvedFontSize": 38.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 38.67,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "20 分钟分享路线"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "20 分钟分享路线",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 38.67,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "20 分钟分享路线",
+              "anchor": 1,
+              "fontSize": 38.67,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "left",
+              "verticalAlignment": "top",
+              "autoFit": "shrinkText",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/ze9kbqdw",
+      "id": "3",
+      "name": "Table-3-4",
+      "bbox": [
+        41.33,
+        218.37,
+        1197.33,
+        410.96
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "text": "01 | 应用场景：为什么要做问答式审批助手\n02 | 实施路径：从 Flow 到 Agent，再到混合架构\n03 | 同一日报目标：三种实现逐一演示\n04 | Deep Agent：审批场景的独立探索\n05 | 预期效果：当前已经实现什么\n06 | 遇到的问题：哪些边界还不能交给 AI",
+      "textPreview": "01 | 应用场景：为什么要做问答式审批助手 | 02 | 实施路径：从 Flow 到 Agent，再到混合架构 | 03 | 同一日报目标：三种实现逐一演示 | 04 | Deep Agent：审批场景的独立探索 | 05 | 预期效果：当前已经实现什么 | 06 | 遇...",
+      "rows": 6,
+      "cols": 2,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            41.33,
+            218.37,
+            92.23,
+            68.49
+          ],
+          "text": "01",
+          "textPreview": "01",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "01",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "01"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            133.56,
+            218.37,
+            1105.1,
+            68.49
+          ],
+          "text": "应用场景：为什么要做问答式审批助手",
+          "textPreview": "应用场景：为什么要做问答式审批助手",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "应用场景：为什么要做问答式审批助手",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "应用场景：为什么要做问答式审批助手"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            41.33,
+            286.86,
+            92.23,
+            68.49
+          ],
+          "text": "02",
+          "textPreview": "02",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "02",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "02"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            133.56,
+            286.86,
+            1105.1,
+            68.49
+          ],
+          "text": "实施路径：从 Flow 到 Agent，再到混合架构",
+          "textPreview": "实施路径：从 Flow 到 Agent，再到混合架构",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "实施路径：从 Flow 到 Agent，再到混合架构",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "实施路径：从 Flow 到 Agent，再到混合架构"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            41.33,
+            355.36,
+            92.23,
+            68.49
+          ],
+          "text": "03",
+          "textPreview": "03",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "03",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "03"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            133.56,
+            355.36,
+            1105.1,
+            68.49
+          ],
+          "text": "同一日报目标：三种实现逐一演示",
+          "textPreview": "同一日报目标：三种实现逐一演示",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "同一日报目标：三种实现逐一演示",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "同一日报目标：三种实现逐一演示"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            41.33,
+            423.85,
+            92.23,
+            68.49
+          ],
+          "text": "04",
+          "textPreview": "04",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "04",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "04"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            133.56,
+            423.85,
+            1105.1,
+            68.49
+          ],
+          "text": "Deep Agent：审批场景的独立探索",
+          "textPreview": "Deep Agent：审批场景的独立探索",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Deep Agent：审批场景的独立探索",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Deep Agent：审批场景的独立探索"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            41.33,
+            492.34,
+            92.23,
+            68.49
+          ],
+          "text": "05",
+          "textPreview": "05",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "05",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "05"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            133.56,
+            492.34,
+            1105.1,
+            68.49
+          ],
+          "text": "预期效果：当前已经实现什么",
+          "textPreview": "预期效果：当前已经实现什么",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "预期效果：当前已经实现什么",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "预期效果：当前已经实现什么"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 6,
+          "column": 1,
+          "bbox": [
+            41.33,
+            560.84,
+            92.23,
+            68.49
+          ],
+          "text": "06",
+          "textPreview": "06",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "06",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "06"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 6,
+          "column": 2,
+          "bbox": [
+            133.56,
+            560.84,
+            1105.1,
+            68.49
+          ],
+          "text": "遇到的问题：哪些边界还不能交给 AI",
+          "textPreview": "遇到的问题：哪些边界还不能交给 AI",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "遇到的问题：哪些边界还不能交给 AI",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "遇到的问题：哪些边界还不能交给 AI"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "codex-grid-layout-library#slide-03",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1238.67,
+          "height": 684.57
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "name": "Slide-Number-Placeholder-1-2",
+            "position": {
+              "left": 1184.18,
+              "top": 659.24
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 54.48
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 25.33
+              }
+            },
+            "intrinsicSize": {
+              "width": 54.48,
+              "height": 25.33
+            },
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "snappedFrame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "children": [],
+            "text": "2",
+            "transform": "none",
+            "element": {
+              "aid": "sh/0zqdc7q5",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "name": "Title-2-3",
+            "position": {
+              "left": 41.33,
+              "top": 36.12
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 109.97
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            },
+            "children": [],
+            "text": "20 分钟分享路线",
+            "transform": "none",
+            "element": {
+              "aid": "sh/zyhwjm9k",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "table",
+            "name": "Table-3-4",
+            "position": {
+              "left": 41.33,
+              "top": 218.37
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.34
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 410.96
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.34,
+              "height": 410.96
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 218.37,
+              "width": 1197.34,
+              "height": 410.96
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 218.37,
+              "width": 1197.34,
+              "height": 410.96
+            },
+            "children": [],
+            "rows": 6,
+            "columns": 2,
+            "columnWidths": [
+              92.23,
+              1105.1
+            ],
+            "element": {
+              "aid": "tb/ze9kbqdw",
+              "id": "3",
+              "kind": "table"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 41.33,
+              "top": 36.12,
+              "width": 1197.33,
+              "height": 109.97
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 41.33,
+              "top": 218.37,
+              "width": 1197.34,
+              "height": 410.96
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

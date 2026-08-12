@@ -111,6 +111,55 @@ def test_remote_approval_list_can_search_by_keyword() -> None:
     assert json.loads(requests[0].content) == {"keyword": "测试外出"}
 
 
+def test_remote_approval_search_retries_with_approval_keyword_for_natural_language() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        body = json.loads(request.content)
+        if body.get("keyword") != "请假":
+            return httpx.Response(200, json={"code": 200, "message": "success", "data": []})
+        return httpx.Response(
+            200,
+            json={
+                "code": 200,
+                "message": "success",
+                "data": [
+                    {
+                        "id": 1371,
+                        "name": "行政",
+                        "approvals": [{"id": 6408, "name": "审批编辑-请假控件组"}],
+                    }
+                ],
+            },
+        )
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        approval_list_url="https://dev2.lanerp.com/api/approval/list",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    templates = service.search_available_templates(
+        user, "我要请假，从明天开始请3天年假，原因是家中有事。"
+    )
+
+    assert [template.template_id for template in templates] == ["6408"]
+    assert [json.loads(request.content)["keyword"] for request in requests] == [
+        "我要请假，从明天开始请3天年假，原因是家中有事。",
+        "请假",
+    ]
+
+
 def test_remote_template_detail_reuses_searched_template_without_relisting() -> None:
     requests: list[httpx.Request] = []
 
@@ -1389,6 +1438,78 @@ def test_get_nodes_parses_submitter_choice_when_handle_is_list() -> None:
     assert [user.name for user in nodes[0].candidate_assignees] == ["张三", "李四"]
 
 
+def test_get_nodes_loads_company_users_for_unrestricted_submitter_choice() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path == "/api/approval/getNodes":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {
+                            "id": 12204,
+                            "type": "conduct",
+                            "name": "办理",
+                            "handle": {
+                                "type": "submitter_choice",
+                                "is_single": 1,
+                                "is_all_company": 1,
+                                "relate_user": [],
+                                "relate_id": [],
+                            },
+                        }
+                    ],
+                },
+            )
+        if request.url.path == "/api/User/getList":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": [
+                        {"uid": 864, "name": "张三", "avatar": "a.png"},
+                        {"uid": 865, "name": "李四", "avatar": "b.png"},
+                    ],
+                },
+            )
+        raise AssertionError(f"Unexpected request path: {request.url.path}")
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        get_nodes_url="https://dev2.lanerp.com/api/approval/getNodes",
+        user_list_url="https://dev2.lanerp.com/api/User/getList",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    nodes = service.get_approval_nodes(
+        approval_set_id="5904",
+        form_value=[{"field_key": "rest_content", "value": "请假"}],
+        user=user,
+    )
+
+    assert [request.url.path for request in requests] == [
+        "/api/approval/getNodes",
+        "/api/User/getList",
+    ]
+    assert json.loads(requests[1].content) == {"keyword": "", "pageSize": 2000}
+    assert [assignee.uid for assignee in nodes[0].candidate_assignees] == ["864", "865"]
+    assert [assignee.name for assignee in nodes[0].candidate_assignees] == ["张三", "李四"]
+
+
 def test_remote_submit_posts_approval_add_payload() -> None:
     requests: list[httpx.Request] = []
 
@@ -1541,3 +1662,111 @@ def test_remote_submit_preserves_structured_form_data() -> None:
         "rest_prove": [],
         "rest_rule_json": {"value": 13, "label": "事假"},
     }
+
+
+def test_remote_leave_submit_calculates_rest_rule_json_before_add() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path == "/api/attendance/getHolidayRuleByUser":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "获取成功",
+                    "data": [
+                        {
+                            "id": 12,
+                            "name": "年假",
+                            "time_unit": "day",
+                            "balance_rule": 1,
+                            "balance": 10,
+                            "is_comp_leave": 0,
+                            "is_paid": 1,
+                            "json_rule": {"record_date_type": ["work"]},
+                        }
+                    ],
+                },
+            )
+        if request.url.path == "/api/attendance/calculateHolidayDuration":
+            return httpx.Response(
+                200,
+                json={
+                    "code": 200,
+                    "message": "success",
+                    "data": {
+                        "all_duration": 2,
+                        "time_unit": "day",
+                        "holiday_day_list": [
+                            {"date": "2026-08-13", "duration": 1, "time_unit": "day"},
+                            {"date": "2026-08-14", "duration": 1, "time_unit": "day"},
+                        ],
+                        "web_show_day_list": [],
+                    },
+                },
+            )
+        if request.url.path == "/api/approval/add":
+            return httpx.Response(
+                200,
+                json={"code": 200, "message": "success", "data": {"id": 9988}},
+            )
+        raise AssertionError(f"Unexpected request path: {request.url.path}")
+
+    service = CrmApprovalService(
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        holiday_rule_url="https://dev2.lanerp.com/api/attendance/getHolidayRuleByUser",
+        calculate_holiday_duration_url="https://dev2.lanerp.com/api/attendance/calculateHolidayDuration",
+        add_approval_url="https://dev2.lanerp.com/api/approval/add",
+    )
+    user = UserContext(
+        user_id="863",
+        name="User 863",
+        company_id="",
+        dept_id="",
+        role="",
+        manager_id="",
+        authorization="Bearer test-token",
+        uid="863",
+    )
+
+    service.submit_approval(
+        "remote_5904",
+        {
+            "rest_holiday_rule_id": {"label": "年假（10天）", "value": 12},
+            "rest_start_time": {"label": "2026-08-13 11:11", "value": "2026-08-13 11:11:00"},
+            "rest_end_time": {"label": "2026-08-15 11:11", "value": "2026-08-15 11:11:00"},
+            "rest_duration": {"label": "1111", "value": "1111"},
+            "rest_content": {"label": "321", "value": "321"},
+        },
+        user,
+        idempotency_key="ai-approval:test",
+        approval_set_id="5904",
+        approval_nodes=[],
+        selected_assignees={},
+    )
+
+    assert [request.url.path for request in requests] == [
+        "/api/attendance/getHolidayRuleByUser",
+        "/api/attendance/calculateHolidayDuration",
+        "/api/approval/add",
+    ]
+    duration_body = json.loads(requests[1].content)
+    assert duration_body == {
+        "attendance_holiday_config_id": 12,
+        "start_date": "2026-08-13",
+        "end_date": "2026-08-15",
+    }
+    add_body = json.loads(requests[2].content)
+    assert add_body["form_data"]["rest_start_time"] == {
+        "label": "2026-08-13",
+        "value": "2026-08-13",
+        "text": "2026-08-13",
+        "time_unit": "05:00",
+        "real_date": "2026-08-13",
+    }
+    assert add_body["form_data"]["rest_end_time"]["real_date"] == "2026-08-16"
+    assert add_body["form_data"]["rest_duration"] == {"label": "2", "value": 2}
+    assert add_body["form_data"]["rest_prove"] == []
+    assert add_body["form_data"]["rest_rule_json"]["id"] == 12
+    assert len(add_body["form_data"]["rest_rule_json"]["holiday_day_list"]) == 2

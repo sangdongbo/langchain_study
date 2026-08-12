@@ -14,11 +14,11 @@ from app.agents.approval_agent import (
     user_info_agent_node,
     user_profile_agent_node,
 )
-from app.agents.daily_report_agentic_workflow_demo import (
-    daily_report_agentic_workflow_demo_node,
-)
 from app.agents.daily_report_create_agent import daily_report_create_agent_node
 from app.graph.approval_workflow import create_approval_creation_workflow
+from app.graph.daily_report_agentic_workflow_demo import (
+    create_daily_report_agentic_workflow_demo,
+)
 from app.graph.daily_report_workflow import create_daily_report_workflow
 from app.graph.state import ApprovalState
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -35,11 +35,11 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder.add_node("intent_router", intent_router_node)
     builder.add_node("user_info_agent", user_info_agent_node)
     builder.add_node("approval_creation_agent", create_approval_creation_workflow())
-    builder.add_node("daily_report_agent", create_daily_report_workflow())
-    builder.add_node("daily_report_create_agent", daily_report_create_agent_node)
-    builder.add_node(
+    builder.add_node("daily_report_agent", create_daily_report_workflow()) # 普通提交日报
+    builder.add_node("daily_report_create_agent", daily_report_create_agent_node) # 自助agent 提交日报
+    builder.add_node( # agentic workflow demo，演示 agentic workflow 的能力
         "daily_report_agentic_workflow_demo",
-        daily_report_agentic_workflow_demo_node,
+        create_daily_report_agentic_workflow_demo(),
     )
     builder.add_node("general_chat", general_chat_node)
     builder.add_edge(START, "memory_agent")

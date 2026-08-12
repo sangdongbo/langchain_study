@@ -1851,8 +1851,8 @@ def test_flow_asks_assignee_selection_before_preview(monkeypatch) -> None:
         "value_schema": None,
     }
     assert "请选择办理审批人" in body["assistant_message"]
-    assert "张三" in body["assistant_message"]
-    assert "李四" in body["assistant_message"]
+    assert "张三" not in body["assistant_message"]
+    assert "李四" not in body["assistant_message"]
     assert "assignee" in body["trace"]
 
 
@@ -2364,6 +2364,64 @@ def test_daily_report_confirmation_modify_date_button_opens_date_editor() -> Non
     assert body["awaiting_field_key"] == "daily_report_date"
     assert body["awaiting_input"]["value"] == "2026-06-23"
     assert body["daily_report_payload"]["date"] == "2026-06-23"
+
+
+def test_daily_report_confirmation_cancel_button_opens_content_editor() -> None:
+    session_state_service.clear("S-daily-report-confirmation-cancel-button")
+    state = initial_state("S-daily-report-confirmation-cancel-button", "863")
+    state.update(
+        {
+            "session_id": "S-daily-report-confirmation-cancel-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "status": "awaiting_daily_report_confirmation",
+            "intent": "daily_report",
+            "ui_action": {
+                "type": "interrupt",
+                "field_key": "daily_report_confirmation",
+                "input_type": "action",
+                "actions": ["modify", "modify_date", "cancel"],
+            },
+            "daily_report_payload": {
+                "type": 1,
+                "date": "2026-06-23",
+                "content": "提交失败前的日志内容",
+                "files": [],
+                "at_uids": [],
+                "recipients": [{"relate_id": 959}],
+                "cc_recipients": [],
+                "extends": {},
+                "extend_fields": [],
+            },
+            "field_errors": [
+                {"field": "daily_report", "message": "当天日报已提交"}
+            ],
+        }
+    )
+    session_state_service.save(state)
+
+    response = client.post(
+        "/api/ai-approval/chat",
+        json={
+            "session_id": "S-daily-report-confirmation-cancel-button",
+            "user_id": "863",
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "message": "取消",
+            "answer": {"field_key": "action", "label": "取消", "value": "cancel"},
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "collecting"
+    assert body["awaiting_field_key"] == "daily_report_content"
+    assert body["awaiting_input"]["value"] == "提交失败前的日志内容"
+    assert body["field_errors"] == []
+    assert "daily_report_action" in body["trace"]
+    assert "cancel_daily_report" in body["trace"]
+    assert body["trace"][-1] == "langgraph_interrupt"
 
 
 def test_daily_report_initial_content_interrupt_resumes_with_answer(monkeypatch) -> None:
