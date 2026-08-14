@@ -1,0 +1,8 @@
+{
+  "source": "D:/PythonProject/LearnOne/.codex_tmp/ppt_rag_logic_20260814/source-deck.pptx",
+  "outputSlides": [
+    { "output": "1-34", "source": "1-34", "action": "preserve" },
+    { "output": 35, "source": 33, "action": "duplicate-and-edit", "purpose": "agent workflow" },
+    { "output": 36, "source": 35, "action": "preserve-and-renumber", "purpose": "closing" }
+  ]
+}

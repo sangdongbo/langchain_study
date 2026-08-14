@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import traceback
+from collections.abc import Iterator
+from typing import Any
 
 from langgraph.types import Command
 
@@ -89,6 +91,128 @@ class ChatApplicationService:
             )
             write_debug_log("chat.response", response.model_dump())
             return response
+
+    def stream_turn(self, request: ChatRequest) -> Iterator[dict[str, Any]]:
+        """以事件形式执行一轮聊天，供 SSE 接口消费。
+
+        LangGraph 节点本身仍然负责业务状态和副作用；这里仅把节点更新、
+        interrupt 和最终的稳定响应转换成可序列化事件，不向客户端暴露内部状态。
+        """
+        write_debug_log("chat.request", request.model_dump())
+
+        state = initial_state(request.session_id, request.user_id)
+        try:
+            state = session_state_service.load(request.session_id, request.user_id)
+
+            if self._should_reset_local_state_for_remote_credentials(state, request):
+                state = initial_state(request.session_id, request.user_id)
+
+            state["session_id"] = request.session_id
+            state["user_id"] = request.user_id
+            state["uid"] = request.uid
+            state["authorization"] = request.authorization
+            state["user_message"] = request.message.strip()
+            state["_answer"] = request.answer
+            state["trace"] = []
+
+            graph = get_workflow()
+            config = self._graph_config(request.session_id)
+            graph_input = (
+                Command(resume=self._resume_value(request.answer))
+                if self._should_resume_interrupt(state, request)
+                else state
+            )
+
+            yield {
+                "type": "started",
+                "data": {"session_id": request.session_id},
+            }
+
+            interrupt_result: dict[str, Any] | None = None
+            for chunk in graph.stream(
+                graph_input,
+                config=config,
+                stream_mode="updates",
+            ):
+                if not isinstance(chunk, dict):
+                    continue
+                if "__interrupt__" in chunk:
+                    interrupt_result = chunk
+                    payload = self._interrupt_event_payload(chunk)
+                    if payload:
+                        yield {"type": "interrupt", "data": payload}
+                    continue
+                for node, update in chunk.items():
+                    yield {
+                        "type": "progress",
+                        "data": self._progress_event_payload(node, update),
+                    }
+
+            snapshot_values = graph.get_state(config).values
+            result: ApprovalState = snapshot_values
+            if interrupt_result is not None:
+                result = self._state_from_interrupt(
+                    state,
+                    request,
+                    interrupt_result,
+                    snapshot_values,
+                )
+
+            response = to_chat_response(result, crm_approval_service)
+            append_assistant_message(result, response.assistant_message)
+            session_state_service.save(result)
+            self._record_time_travel_checkpoint(result, request.message.strip())
+            write_debug_log("chat.response", response.model_dump())
+
+            yield {
+                "type": "done",
+                "data": response.model_dump(mode="json"),
+            }
+        except Exception as exc:
+            response = self._error_response(request, state, exc)
+            write_debug_log(
+                "chat.error",
+                {
+                    "session_id": request.session_id,
+                    "user_id": request.user_id,
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                    "trace": state.get("trace", []),
+                    "traceback": traceback.format_exc(),
+                },
+            )
+            write_debug_log("chat.response", response.model_dump())
+            yield {"type": "done", "data": response.model_dump(mode="json")}
+
+    @staticmethod
+    def _progress_event_payload(node: Any, update: Any) -> dict[str, Any]:
+        """提取节点更新中的安全摘要，避免把完整 AgentState 发给前端。"""
+        payload: dict[str, Any] = {"node": str(node)}
+        if not isinstance(update, dict):
+            return payload
+        for key in ("status", "assistant_message", "approval_type", "awaiting_field"):
+            value = update.get(key)
+            if value is not None:
+                payload[key] = value
+        trace = update.get("trace")
+        if isinstance(trace, list):
+            payload["trace"] = trace
+        return payload
+
+    @staticmethod
+    def _interrupt_event_payload(chunk: dict[str, Any]) -> dict[str, Any]:
+        """将 LangGraph interrupt 转成可发送的 JSON 摘要。"""
+        interrupts = chunk.get("__interrupt__") or []
+        interrupt = interrupts[0] if interrupts else None
+        payload = getattr(interrupt, "value", None)
+        if not isinstance(payload, dict):
+            return {}
+        return {
+            key: value
+            for key, value in payload.items()
+            if key != "_state_patch"
+            and isinstance(value, (str, int, float, bool, list, dict, type(None)))
+        }
 
     def _error_response(
         self, request: ChatRequest, state: ApprovalState, exc: Exception

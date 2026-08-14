@@ -1,0 +1,24 @@
+{
+  "slideCount": 35,
+  "masters": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "placeholders": []
+    }
+  ],
+  "layouts": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "parentLayoutId": "",
+      "placeholders": []
+    },
+    {
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "placeholders": []
+    }
+  ]
+}

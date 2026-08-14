@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 
 from fastapi.testclient import TestClient
@@ -21,6 +22,28 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_chat_stream_returns_sse_progress_and_final_response() -> None:
+    session_state_service.clear("S-stream")
+
+    response = client.post(
+        "/api/ai-approval/chat/stream",
+        json={
+            "session_id": "S-stream",
+            "user_id": "U001",
+            "message": "我要申请采购笔记本电脑",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert response.headers["cache-control"] == "no-cache"
+    assert "event: started" in response.text
+    assert "event: progress" in response.text
+    assert "event: done" in response.text
+    done_data = response.text.split("event: done\ndata: ", 1)[1].split("\n\n", 1)[0]
+    assert json.loads(done_data)["awaiting_field_key"] == "quantity"
 
 
 def test_expense_flow_previews_then_submits_after_confirmation() -> None:

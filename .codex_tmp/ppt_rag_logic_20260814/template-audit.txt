@@ -1,0 +1,12 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版.pptx
+Working copy: D:/PythonProject/LearnOne/.codex_tmp/ppt_rag_logic_20260814/source-deck.pptx
+Slide count inspected: 35
+Primary visual template for the new slide: source slide 33
+Preserved design language: burgundy header, cream background, rounded cards, six-step horizontal flow, three supporting cards, bottom-right page number.
+Narrative audit for the RAG ending:
+- Slide 32: three-layer responsibility boundaries (RAG / ERP Tool / LangGraph)
+- Slide 33: enterprise retrieval path
+- Slide 34: capability selection by ERP question type
+- New slide 35: end-to-end agent workflow
+- Slide 36: closing / thank you
+Conflict resolution: replace the slide 32 example workflow with a responsibility-boundary summary, so the new workflow slide is the only full execution flow.

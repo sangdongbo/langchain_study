@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "erp_rag_assistant": "ai_erp_rag_assistant.app.graph.studio:graph"
+  },
+  "env": ".env"
+}

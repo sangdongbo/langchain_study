@@ -1,0 +1,4 @@
+No visual-template deviation.
+The new slide duplicates source slide 33 and changes copy only.
+Slide 32 changes only the two lines inside the existing bottom callout.
+The closing slide changes only its page number from 35 to 36.

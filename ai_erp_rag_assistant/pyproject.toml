@@ -1,0 +1,26 @@
+[project]
+name = "ai-erp-rag-assistant"
+version = "0.1.0"
+description = "ERP assistant demo combining enterprise RAG, ERP tools and LangGraph."
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.136.3",
+    "langgraph>=1.2.0",
+    "langchain-openai>=0.3.0",
+    "langchain-core>=0.3.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.12.5",
+    "pymilvus>=2.6.0",
+    "pypdf>=6.0.0",
+    "python-dotenv>=1.2.2",
+    "uvicorn>=0.47.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

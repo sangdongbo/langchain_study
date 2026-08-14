@@ -1,5 +1,11 @@
 from __future__ import annotations
+
+import json
+from collections.abc import Iterator
+
 from fastapi import APIRouter, Header
+from fastapi.responses import StreamingResponse
+
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_application_service import chat_application_service
 
@@ -23,3 +29,35 @@ def chat(
         )
     # 业务编排交给应用服务层，避免 router 直接耦合 LangGraph 执行细节。
     return chat_application_service.run_turn(request)
+
+
+@router.post("/chat/stream")
+def chat_stream(
+    request: ChatRequest,
+    authorization: str | None = Header(default=None),
+    uid: str | None = Header(default=None, alias="UID"),
+) -> StreamingResponse:
+    """以 Server-Sent Events 流式返回工作流进度和最终聊天响应。"""
+    if (not request.authorization and authorization) or (not request.uid and uid):
+        request = request.model_copy(
+            update={
+                "authorization": request.authorization or authorization,
+                "uid": request.uid or uid,
+            }
+        )
+
+    def events() -> Iterator[str]:
+        for event in chat_application_service.stream_turn(request):
+            event_type = str(event.get("type", "message"))
+            data = json.dumps(event.get("data", {}), ensure_ascii=False, default=str)
+            yield f"event: {event_type}\ndata: {data}\n\n"
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

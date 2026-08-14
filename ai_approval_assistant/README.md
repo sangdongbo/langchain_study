@@ -1248,6 +1248,27 @@ curl -X POST "http://127.0.0.1:8010/api/ai-approval/chat" \
 | `authorization` | 真实 ERP 必填 | 可放在 JSON，也可通过 `Authorization` 请求头传入。 |
 | `answer` | 按需 | 前端结构化控件回填对象；服务内部会转换为 graph state 的 `_answer`。 |
 
+需要实时接收工作流进度时，使用 SSE 接口 `POST /api/ai-approval/chat/stream`。接口会持续返回以下事件：
+
+- `started`：本轮会话开始。
+- `progress`：某个 LangGraph 节点完成，携带节点名和安全的状态摘要。
+- `interrupt`：需要前端弹出结构化输入控件时返回，字段格式与普通接口的 `ui_action` 一致。
+- `done`：本轮最终结果，`data` 是完整的 `ChatResponse` JSON；前端应以此事件更新会话状态。
+
+示例：
+
+```bash
+curl -N -X POST "http://127.0.0.1:8010/api/ai-approval/chat/stream" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "S-stream-001",
+    "user_id": "U001",
+    "message": "我要申请采购笔记本电脑"
+  }'
+```
+
+原 `POST /api/ai-approval/chat` 保持一次性 JSON 响应，便于已有客户端平滑迁移。
+
 真实 ERP 请求推荐把凭证放在请求头：
 
 ```bash

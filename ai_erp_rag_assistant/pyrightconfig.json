@@ -1,0 +1,8 @@
+{
+  "include": ["app", "scripts", "tests"],
+  "exclude": ["**/__pycache__", ".venv"],
+  "extraPaths": [".."],
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic"
+}

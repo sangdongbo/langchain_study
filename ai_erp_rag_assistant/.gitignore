@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+logs/
+
+# Private company documents and generated index inputs stay local.
+data/knowledge/source/*
+data/knowledge/processed/*
+!data/knowledge/source/.gitkeep
+!data/knowledge/processed/.gitkeep
