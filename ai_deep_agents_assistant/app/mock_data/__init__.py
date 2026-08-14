@@ -1,2 +1,1 @@
-"""Mock data for local approval demos."""
-
+"""本地审批演示使用的模拟数据。"""

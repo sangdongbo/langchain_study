@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class DailyReportPreview(BaseModel):
-    """Human-readable daily report preview."""
+    """供人工阅读的日报预览。"""
 
     report_type: int = 1
     date: str
@@ -14,7 +14,7 @@ class DailyReportPreview(BaseModel):
 
 
 class DailyReportDraft(BaseModel):
-    """Deterministic draft returned to the Deep Agent."""
+    """返回给 Deep Agent 的确定性草稿。"""
 
     payload: dict[str, object] = Field(default_factory=dict)
     missing_fields: list[str] = Field(default_factory=list)
@@ -23,7 +23,7 @@ class DailyReportDraft(BaseModel):
 
 
 class DailyReportSubmitResult(BaseModel):
-    """ERP daily report submission result."""
+    """ERP 日报提交结果。"""
 
     request_id: str | None = None
     status: Literal["submitted"] = "submitted"

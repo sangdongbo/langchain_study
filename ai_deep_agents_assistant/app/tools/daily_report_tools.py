@@ -11,7 +11,7 @@ from ai_deep_agents_assistant.app.services.request_context import (
 
 
 def get_current_daily_report_date() -> str:
-    """Return the backend-calculated current daily report date."""
+    """返回由后端计算的当前日报日期。"""
     return json.dumps({"date": daily_report_service.current_date()}, ensure_ascii=False)
 
 
@@ -19,7 +19,7 @@ def collect_daily_report_draft(
     message: str,
     existing_payload_json: str = "{}",
 ) -> str:
-    """Collect daily report date/content and return the next question or preview."""
+    """收集日报日期和内容，并返回下一个问题或预览。"""
     try:
         existing_payload = json.loads(existing_payload_json) if existing_payload_json else {}
     except json.JSONDecodeError:
@@ -33,14 +33,14 @@ def collect_daily_report_draft(
 
 
 def build_daily_report_preview(payload_json: str) -> str:
-    """Build a daily report preview after required fields are complete."""
+    """在必填字段完整后生成日报预览。"""
     payload = json.loads(payload_json)
     preview = daily_report_service.build_preview(payload)
     return json.dumps(preview.model_dump(), ensure_ascii=False)
 
 
 def submit_daily_report_request(payload_json: str, user_id: str) -> str:
-    """Submit a daily report. This tool must be interrupted for human approval."""
+    """提交日报；此工具必须在人工确认环节中断。"""
     payload = json.loads(payload_json)
     user = get_erp_request_context()
     if user.user_id != user_id:

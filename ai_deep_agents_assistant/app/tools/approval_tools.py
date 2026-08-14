@@ -6,13 +6,13 @@ from ai_deep_agents_assistant.app.services.approval_service import approval_serv
 
 
 def get_current_user_context(user_id: str) -> str:
-    """Get current user profile and organization context."""
+    """获取当前用户资料及组织上下文。"""
     user = approval_service.get_user_context(user_id)
     return json.dumps(user.model_dump(), ensure_ascii=False)
 
 
 def list_approval_templates(keyword: str = "") -> str:
-    """List approval templates available to the current user."""
+    """列出当前用户可用的审批模板。"""
     templates = approval_service.list_templates(keyword)
     payload = [
         {
@@ -37,7 +37,7 @@ def collect_approval_draft(
     approval_type: str | None = None,
     existing_slots_json: str = "{}",
 ) -> str:
-    """Infer approval type, extract slots, and return next missing field or preview."""
+    """识别审批类型、提取字段，并返回下一个待补充字段或预览。"""
     try:
         existing_slots = json.loads(existing_slots_json) if existing_slots_json else {}
     except json.JSONDecodeError:
@@ -51,14 +51,14 @@ def collect_approval_draft(
 
 
 def build_approval_preview(approval_type: str, slots_json: str) -> str:
-    """Build approval preview after required fields are complete."""
+    """在必填字段完整后生成审批预览。"""
     slots = json.loads(slots_json)
     preview, warnings = approval_service.build_preview(approval_type, slots)
     return json.dumps({"preview": preview.model_dump(), "warnings": warnings}, ensure_ascii=False)
 
 
 def submit_approval_request(approval_type: str, slots_json: str, user_id: str) -> str:
-    """Submit an approval request. This tool must be interrupted for human approval."""
+    """提交审批申请；此工具必须在人工确认环节中断。"""
     slots = json.loads(slots_json)
     result = approval_service.submit(approval_type, slots, user_id)
     return json.dumps(result.model_dump(), ensure_ascii=False)

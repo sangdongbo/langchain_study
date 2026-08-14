@@ -21,18 +21,17 @@ from ai_deep_agents_assistant.app.schemas.approval import (
 
 
 class ApprovalService:
-    """Deterministic approval backend used by Deep Agent tools.
+    """供 Deep Agent 工具调用的确定性审批后端。
 
-    The LLM is allowed to explain, plan and ask questions. This service owns the
-    business rules: template definitions, required fields, validation, preview and
-    mock submission.
+    LLM 仅负责解释、规划和提问；模板定义、必填字段、校验、预览和模拟提交等
+    业务规则由本服务负责。
     """
 
     def __init__(self) -> None:
         self._submitted_by_key: dict[str, SubmitResult] = {}
 
     def get_user_context(self, user_id: str) -> UserContext:
-        """Return current user context."""
+        """返回当前用户上下文。"""
         data = USERS.get(
             user_id,
             {
@@ -47,7 +46,7 @@ class ApprovalService:
         return UserContext(**data)
 
     def list_templates(self, keyword: str = "") -> list[ApprovalTemplate]:
-        """List templates, optionally filtered by keyword."""
+        """列出模板，并可按关键字过滤。"""
         keyword = keyword.strip()
         templates = [ApprovalTemplate(**deepcopy(item)) for item in APPROVAL_TEMPLATES.values()]
         if not keyword:
@@ -59,14 +58,14 @@ class ApprovalService:
         ]
 
     def get_template(self, approval_type: str) -> ApprovalTemplate:
-        """Get a template by approval type."""
+        """按审批类型获取模板。"""
         data = APPROVAL_TEMPLATES.get(approval_type)
         if not data:
             raise ValueError(f"Unknown approval_type: {approval_type}")
         return ApprovalTemplate(**deepcopy(data))
 
     def infer_template(self, message: str) -> ApprovalTemplate | None:
-        """Infer the best template from user message."""
+        """从用户消息中推断最匹配的模板。"""
         candidates = []
         for template in self.list_templates():
             score = 0
@@ -87,7 +86,7 @@ class ApprovalService:
         approval_type: str | None = None,
         existing_slots: dict[str, str] | None = None,
     ) -> ApprovalDraft:
-        """Extract fields and build the next approval draft state."""
+        """提取字段并生成下一步审批草稿状态。"""
         template = self.get_template(approval_type) if approval_type else self.infer_template(message)
         if template is None:
             return ApprovalDraft(
@@ -119,7 +118,7 @@ class ApprovalService:
         )
 
     def extract_slots(self, template: ApprovalTemplate, message: str) -> dict[str, str]:
-        """Extract form slots with template regexes and small rule fallbacks."""
+        """使用模板正则及少量规则兜底提取表单字段。"""
         slots: dict[str, str] = {}
         for field in template.fields:
             for option in field.options:
@@ -140,7 +139,7 @@ class ApprovalService:
         return slots
 
     def validate(self, approval_type: str, slots: dict[str, str]) -> tuple[bool, list[str], list[str]]:
-        """Validate required fields and simple business rules."""
+        """校验必填字段和基础业务规则。"""
         template = self.get_template(approval_type)
         errors: list[str] = []
         warnings: list[str] = []
@@ -160,7 +159,7 @@ class ApprovalService:
         return not errors, errors, warnings
 
     def build_preview(self, approval_type: str, slots: dict[str, str]) -> tuple[ApprovalPreview, list[str]]:
-        """Build submit preview."""
+        """生成提交预览。"""
         valid, errors, warnings = self.validate(approval_type, slots)
         if not valid:
             raise ValueError("; ".join(errors))
@@ -179,7 +178,7 @@ class ApprovalService:
         return preview, warnings
 
     def submit(self, approval_type: str, slots: dict[str, str], user_id: str) -> SubmitResult:
-        """Mock approval submission with idempotency."""
+        """执行带幂等保障的模拟审批提交。"""
         preview, _ = self.build_preview(approval_type, slots)
         idempotency_key = self._idempotency_key(user_id, approval_type, slots)
         if idempotency_key in self._submitted_by_key:

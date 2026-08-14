@@ -9,7 +9,7 @@ FieldType = Literal["text", "number", "date", "enum"]
 
 
 class UserContext(BaseModel):
-    """User context used by the mock approval backend."""
+    """模拟审批后端使用的用户上下文。"""
 
     user_id: str
     name: str
@@ -20,7 +20,7 @@ class UserContext(BaseModel):
 
 
 class ApprovalField(BaseModel):
-    """Single approval form field."""
+    """单个审批表单字段。"""
 
     name: str
     label: str
@@ -33,7 +33,7 @@ class ApprovalField(BaseModel):
 
 
 class ApprovalTemplate(BaseModel):
-    """Approval template metadata and fields."""
+    """审批模板元数据及字段。"""
 
     template_id: str
     approval_type: str
@@ -45,7 +45,7 @@ class ApprovalTemplate(BaseModel):
 
 
 class PreviewField(BaseModel):
-    """Field shown in the submit preview."""
+    """提交预览中展示的字段。"""
 
     name: str
     label: str
@@ -53,7 +53,7 @@ class PreviewField(BaseModel):
 
 
 class ApprovalPreview(BaseModel):
-    """Human-readable approval preview before submission."""
+    """提交前供人工阅读的审批预览。"""
 
     approval_type: str
     title: str
@@ -63,7 +63,7 @@ class ApprovalPreview(BaseModel):
 
 
 class SubmitResult(BaseModel):
-    """Mock approval submit result."""
+    """模拟审批提交结果。"""
 
     request_id: str
     status: str
@@ -72,7 +72,7 @@ class SubmitResult(BaseModel):
 
 
 class ApprovalDraft(BaseModel):
-    """Internal deterministic draft used by tools."""
+    """工具使用的内部确定性草稿。"""
 
     approval_type: str | None = None
     collected_slots: dict[str, str] = Field(default_factory=dict)
@@ -81,4 +81,3 @@ class ApprovalDraft(BaseModel):
     preview: ApprovalPreview | None = None
     warnings: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
-

@@ -30,7 +30,7 @@ _approval_deep_agent = None
 
 
 def create_approval_deep_agent():
-    """Create the Deep Agents approval assistant graph."""
+    """创建 Deep Agents 审批助手图。"""
     return create_deep_agent(
         model=build_chat_model(),
         tools=[*APPROVAL_TOOLS, *DAILY_REPORT_TOOLS],
@@ -44,10 +44,10 @@ def create_approval_deep_agent():
 
 
 def get_approval_deep_agent():
-    """Return a lazily-created Deep Agents graph.
+    """返回延迟创建的 Deep Agents 图。
 
-    Lazy creation keeps imports cheap for IDEs, tests and FastAPI startup checks.
-    The real DeepSeek model is built only when the chat service actually runs.
+    延迟创建可降低 IDE、测试和 FastAPI 启动检查时的导入开销。
+    仅在聊天服务实际运行时创建真实的 DeepSeek 模型。
     """
     global _approval_deep_agent
     if _approval_deep_agent is None:

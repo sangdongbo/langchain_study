@@ -14,12 +14,15 @@ from ai_deep_agents_assistant.app.services.request_context import (
 
 
 class DeepAgentsChatService:
-    """Application service that adapts Deep Agents output to the chat API."""
+    """将 Deep Agents 输出适配为聊天 API 响应的应用服务。"""
 
     def run_turn(self, request: ChatRequest) -> ChatResponse:
-        """Run one chat turn in a durable Deep Agents thread."""
+        """在可持久化的 Deep Agents 会话中执行一轮对话。"""
+        # 延迟获取带 MemorySaver 检查点的图实例，避免应用启动时创建模型连接。
         approval_deep_agent = get_approval_deep_agent()
+        # 同一 session_id 始终映射到同一 LangGraph 线程，用于保留草稿和人工确认中断点。
         config = {"configurable": {"thread_id": request.session_id}}
+        # 将 ERP 凭证保存到当前请求上下文，供日报工具访问，避免传入模型提示词。
         context_token = set_erp_request_context(
             request.user_id,
             request.uid,
@@ -27,22 +30,27 @@ class DeepAgentsChatService:
         )
         try:
             if request.message.strip() == "确认提交":
+                # 恢复上一轮因危险提交工具而暂停的图，并批准该次工具调用。
                 result = approval_deep_agent.invoke(
                     Command(resume={"decisions": [{"type": "approve"}]}),
                     config=config,
                 )
             else:
+                # 普通对话携带最小的会话身份信息，供 Agent 选择审批或日报工具。
                 user_content = (
                     f"user_id={request.user_id}\n"
                     f"session_id={request.session_id}\n"
                     f"用户消息：{request.message}"
                 )
+                # 执行新的图节点；工具调用和中断状态会由检查点按线程持久化。
                 result = approval_deep_agent.invoke(
                     {"messages": [{"role": "user", "content": user_content}]},
                     config=config,
                 )
         finally:
+            # 无论图执行成功或抛出异常，都恢复 ContextVar，防止凭证泄漏到其他请求。
             reset_erp_request_context(context_token)
+        # 将 LangGraph 原始消息、工具轨迹和中断信息整理为前端聊天响应。
         return self._to_response(request, result)
 
     def _to_response(self, request: ChatRequest, result: dict[str, Any]) -> ChatResponse:

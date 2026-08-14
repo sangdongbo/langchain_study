@@ -20,7 +20,7 @@ DEFAULT_SYNC_TYPES = [
 
 
 class DailyReportApiError(RuntimeError):
-    """ERP daily report request failure with endpoint context."""
+    """携带接口上下文的 ERP 日报请求异常。"""
 
 
 class DailyReportApiClient:

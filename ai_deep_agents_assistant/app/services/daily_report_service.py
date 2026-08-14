@@ -17,11 +17,11 @@ from ai_deep_agents_assistant.app.services.request_context import ErpRequestCont
 
 
 class DailyReportSubmitError(ValueError):
-    """ERP rejected the daily report submission."""
+    """ERP 拒绝日报提交时抛出的异常。"""
 
 
 class DailyReportService:
-    """Deterministic daily report rules backed by real ERP endpoints."""
+    """基于真实 ERP 接口的确定性日报处理规则。"""
 
     def __init__(self, api_client: DailyReportApiClient | None = None) -> None:
         self._api_client = api_client or DailyReportApiClient()

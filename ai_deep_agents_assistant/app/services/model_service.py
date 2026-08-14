@@ -11,7 +11,7 @@ from ai_deep_agents_assistant.app.services.env_config import (
 
 
 def build_chat_model() -> ChatOpenAI:
-    """Build the real DeepSeek chat model used by Deep Agents."""
+    """创建 Deep Agents 使用的真实 DeepSeek 聊天模型。"""
     load_project_env()
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:

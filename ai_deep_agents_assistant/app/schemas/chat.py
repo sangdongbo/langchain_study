@@ -20,7 +20,7 @@ ChatIntent = Literal["approval", "daily_report", "general"]
 
 
 class ChatRequest(BaseModel):
-    """Single chat turn request."""
+    """单轮聊天请求。"""
 
     session_id: str = Field(min_length=1)
     user_id: str = Field(min_length=1)
@@ -30,7 +30,7 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Single chat turn response."""
+    """单轮聊天响应。"""
 
     session_id: str
     status: ApprovalStatus
