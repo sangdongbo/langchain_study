@@ -1,0 +1,42 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/c7uhcr6t","slide":23,"title":"附录：聊天助手顶层路由图","textShapes":24}
+{"kind":"shape","id":"sh/v6hofqt0","slide":23,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/90vqdczq","slide":23,"text":"附录：聊天助手顶层路由图","textPreview":"附录：聊天助手顶层路由图","textChars":12,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8zm9k7y5","slide":23,"text":"LANGGRAPH STUDIO","textPreview":"LANGGRAPH STUDIO","textChars":16,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/v2d8fmhw","slide":23,"text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/a14rmhgb","slide":23,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/w3m9o7yh","slide":23,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/jqd8jmhs","slide":23,"text":"节点职责（与代码对应）","textPreview":"节点职责（与代码对应）","textChars":11,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/ip4rqhgn","slide":23,"bbox":[1008,180,1.5,462]}
+{"kind":"textbox","id":"sh/sby90zm1","slide":23,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,216,40.2]}
+{"kind":"textbox","id":"sh/tc7at436","slide":23,"text":"进入主图 / 本轮处理结束","textPreview":"进入主图 / 本轮处理结束","textChars":13,"textLines":1,"bbox":[1020,185,198,40.2]}
+{"kind":"shape","id":"sh/69gry94v","slide":23,"bbox":[782,227.2,436,1]}
+{"kind":"textbox","id":"sh/rapsrelg","slide":23,"text":"memory_agent","textPreview":"memory_agent","textChars":12,"textLines":1,"bbox":[782,232.2,216,40.2]}
+{"kind":"textbox","id":"sh/0fi94jmx","slide":23,"text":"记录输入，补充短期记忆","textPreview":"记录输入，补充短期记忆","textChars":11,"textLines":1,"bbox":[1020,232.2,198,40.2]}
+{"kind":"shape","id":"sh/1graxo3i","slide":23,"bbox":[782,274.4,436,1]}
+{"kind":"textbox","id":"sh/edgr294r","slide":23,"text":"intent_router","textPreview":"intent_router","textChars":13,"textLines":1,"bbox":[782,279.4,216,40.2]}
+{"kind":"textbox","id":"sh/fepsvelc","slide":23,"text":"按意图与会话状态分配业务 Agent","textPreview":"按意图与会话状态分配业务 Agent","textChars":18,"textLines":1,"bbox":[1020,279.4,198,40.2]}
+{"kind":"shape","id":"sh/oji9832t","slide":23,"bbox":[782,321.6,436,1]}
+{"kind":"textbox","id":"sh/p4ra1o3e","slide":23,"text":"user_profile_agent","textPreview":"user_profile_agent","textChars":18,"textLines":1,"bbox":[782,326.6,216,40.2]}
+{"kind":"textbox","id":"sh/x0nalovi","slide":23,"text":"加载当前用户和直属上级","textPreview":"加载当前用户和直属上级","textChars":11,"textLines":1,"bbox":[1020,326.6,198,40.2]}
+{"kind":"shape","id":"sh/wze9cjud","slide":23,"bbox":[782,368.8,436,1]}
+{"kind":"textbox","id":"sh/by58jeds","slide":23,"text":"user_info_agent","textPreview":"user_info_agent","textChars":15,"textLines":1,"bbox":[782,373.8,216,40.2]}
+{"kind":"textbox","id":"sh/axwratc7","slide":23,"text":"回答用户、上级和部门问题","textPreview":"回答用户、上级和部门问题","textChars":12,"textLines":1,"bbox":[1020,373.8,198,40.2]}
+{"kind":"shape","id":"sh/l47ap8vu","slide":23,"bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/k3y9g3u9","slide":23,"text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[782,421,216,40.2]}
+{"kind":"textbox","id":"sh/j2psnydo","slide":23,"text":"进入审批发起子流程","textPreview":"进入审批发起子流程","textChars":9,"textLines":1,"bbox":[1020,421,198,40.2]}
+{"kind":"shape","id":"sh/y1gretc3","slide":23,"bbox":[782,463.2,436,1]}
+{"kind":"textbox","id":"sh/183qd4vq","slide":23,"text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[782,468.2,216,40.2]}
+{"kind":"textbox","id":"sh/07u94ze5","slide":23,"text":"进入标准日报子流程","textPreview":"进入标准日报子流程","textChars":9,"textLines":1,"bbox":[1020,468.2,198,40.2]}
+{"kind":"shape","id":"sh/qds7e5sn","slide":23,"bbox":[782,510.4,436,1]}
+{"kind":"textbox","id":"sh/re1onat8","slide":23,"text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[782,515.4,216,40.2]}
+{"kind":"textbox","id":"sh/szapgfat","slide":23,"text":"自主调用日报工具完成任务","textPreview":"自主调用日报工具完成任务","textChars":12,"textLines":1,"bbox":[1020,515.4,198,40.2]}
+{"kind":"shape","id":"sh/d0j6pkbe","slide":23,"bbox":[782,557.6,436,1]}
+{"kind":"textbox","id":"sh/e1s7ipsz","slide":23,"text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[782,562.6,216,40.2]}
+{"kind":"textbox","id":"sh/f2lorutk","slide":23,"text":"演示 Agent 规划与流程闸门","textPreview":"演示 Agent 规划与流程闸门","textChars":16,"textLines":1,"bbox":[1020,562.6,198,40.2]}
+{"kind":"shape","id":"sh/03upkfa5","slide":23,"bbox":[782,604.8,436,1]}
+{"kind":"textbox","id":"sh/1436tkba","slide":23,"text":"general_chat","textPreview":"general_chat","textChars":12,"textLines":1,"bbox":[782,609.8,216,40.2]}
+{"kind":"textbox","id":"sh/u58n6lcv","slide":23,"text":"处理闲聊并保留业务上下文","textPreview":"处理闲聊并保留业务上下文","textChars":12,"textLines":1,"bbox":[1020,609.8,198,40.2]}
+{"kind":"image","id":"im/0nm5svyt","slide":23,"name":"","bbox":[58,238.37,672,321.26]}
+{"kind":"notes","id":"nt/c7uhcr6t","slide":23,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-a168231d-4563-4e49-8319-92fa1617d4ed.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}

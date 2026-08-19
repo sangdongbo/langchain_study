@@ -25,6 +25,7 @@ class ChatResponse(BaseModel):
     errors: list[str] = Field(default_factory=list)
     pending_question: str = ""
     erp_mode: str = ""
+    erp_write_mode: str = ""
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     erp_data: dict[str, Any] = Field(default_factory=dict)
     preview: dict[str, Any] | None = None

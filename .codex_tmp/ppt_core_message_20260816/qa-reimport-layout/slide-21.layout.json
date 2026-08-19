@@ -1,0 +1,1645 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/m1wvqtk3",
+    "id": "m1wvqtk3",
+    "slide": 21,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F6F1E8",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fi5kn6d0",
+      "id": "39",
+      "bbox": [
+        0,
+        0,
+        1280,
+        116
+      ],
+      "geometry": "rect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1gbmxs7a",
+      "id": "2",
+      "bbox": [
+        72,
+        29,
+        1030,
+        60
+      ],
+      "geometry": "rect",
+      "text": "核心结论：AI 增加自然语言入口，ERP 保证可信执行",
+      "textPreview": "核心结论：AI 增加自然语言入口，ERP 保证可信执行",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "核心结论：AI 增加自然语言入口，ERP 保证可信执行"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "核心结论：AI 增加自然语言入口，ERP 保证可信执行",
+          "resolvedTextStyle": {
+            "fontSize": 38,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "核心结论：AI 增加自然语言入口，ERP 保证可信执行",
+              "fontSize": 38,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0f2lon6p",
+      "id": "3",
+      "bbox": [
+        1000,
+        48,
+        205,
+        26
+      ],
+      "geometry": "rect",
+      "text": "CORE TAKEAWAYS",
+      "textPreview": "CORE TAKEAWAYS",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CORE TAKEAWAYS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CORE TAKEAWAYS",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#E8D9DD",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "CORE TAKEAWAYS",
+              "fontSize": 13,
+              "color": "#E8D9DD",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ra9kryp8",
+      "id": "4",
+      "bbox": [
+        1170,
+        674,
+        42,
+        20
+      ],
+      "geometry": "rect",
+      "text": "21",
+      "textPreview": "21",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "21"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "21",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#A66C6B",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "21",
+              "fontSize": 12,
+              "color": "#A66C6B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qp03yt8n",
+      "id": "5",
+      "bbox": [
+        72,
+        151,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3E8E5",
+      "lineColor": "#74364A",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcb2t87y",
+      "id": "6",
+      "bbox": [
+        92,
+        173,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sb2lk36t",
+      "id": "7",
+      "bbox": [
+        92,
+        185,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "01",
+      "textPreview": "01",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6d432pc",
+      "id": "8",
+      "bbox": [
+        163,
+        171,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "AI没有替代ERP，而是为ERP增加自然语言业务入口。",
+      "textPreview": "AI没有替代ERP，而是为ERP增加自然语言业务入口。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI没有替代ERP，而是为ERP增加自然语言业务入口"
+          },
+          {
+            "index": 2,
+            "text": "。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI没有替代ERP，而是为ERP增加自然语言业务入口。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI没有替代ERP，而是为ERP增加自然语言业务入口。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/al43uxor",
+      "id": "9",
+      "bbox": [
+        72,
+        262,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3E8E5",
+      "lineColor": "#74364A",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4jax4nqd",
+      "id": "10",
+      "bbox": [
+        92,
+        284,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5kjydsri",
+      "id": "11",
+      "bbox": [
+        92,
+        296,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "02",
+      "textPreview": "02",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ixsf2d87",
+      "id": "12",
+      "bbox": [
+        163,
+        282,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "首批选择审批和日报，因为高频、典型、容易验证闭环。",
+      "textPreview": "首批选择审批和日报，因为高频、典型、容易验证闭环。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "首批选择审批和日报，因为高频、典型、容易验证"
+          },
+          {
+            "index": 2,
+            "text": "闭环。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "首批选择审批和日报，因为高频、典型、容易验证闭环。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "首批选择审批和日报，因为高频、典型、容易验证闭环。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jy1gbi9s",
+      "id": "13",
+      "bbox": [
+        72,
+        373,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#EAF3EC",
+      "lineColor": "#3E7551",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wvax03q1",
+      "id": "14",
+      "bbox": [
+        92,
+        395,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hwjy98rm",
+      "id": "15",
+      "bbox": [
+        92,
+        407,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "03",
+      "textPreview": "03",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "03"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/utsfyt8v",
+      "id": "16",
+      "bbox": [
+        163,
+        393,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "用户只说业务目标，AI负责理解和补充信息。",
+      "textPreview": "用户只说业务目标，AI负责理解和补充信息。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "用户只说业务目标，AI负责理解和补充信息。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "用户只说业务目标，AI负责理解和补充信息。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "用户只说业务目标，AI负责理解和补充信息。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vu1w7y9g",
+      "id": "17",
+      "bbox": [
+        72,
+        484,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#EAF3EC",
+      "lineColor": "#3E7551",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8rqxw3q5",
+      "id": "18",
+      "bbox": [
+        92,
+        506,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9sze58rq",
+      "id": "19",
+      "bbox": [
+        92,
+        518,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/porutkje",
+      "id": "20",
+      "bbox": [
+        163,
+        504,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "ERP继续负责权限、规则、字段和最终写入。",
+      "textPreview": "ERP继续负责权限、规则、字段和最终写入。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ERP继续负责权限、规则、字段和最终写入。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ERP继续负责权限、规则、字段和最终写入。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ERP继续负责权限、规则、字段和最终写入。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/onid0f2t",
+      "id": "21",
+      "bbox": [
+        654,
+        151,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFF1DF",
+      "lineColor": "#BF7326",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nm9cru18",
+      "id": "22",
+      "bbox": [
+        674,
+        173,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2l0vypkn",
+      "id": "23",
+      "bbox": [
+        674,
+        185,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "05",
+      "textPreview": "05",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "05"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "05",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "05",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1kru5kj2",
+      "id": "24",
+      "bbox": [
+        745,
+        171,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。",
+      "textPreview": "LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LangChain提供基础组件，LangGraph负责流程，Deep"
+          },
+          {
+            "index": 2,
+            "text": "Agents探索自主规划。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。",
+              "fontSize": 17,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0jidwf2x",
+      "id": "25",
+      "bbox": [
+        654,
+        262,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFF1DF",
+      "lineColor": "#BF7326",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fi9c3a1c",
+      "id": "26",
+      "bbox": [
+        674,
+        284,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ehgvu5kr",
+      "id": "27",
+      "bbox": [
+        674,
+        296,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "06",
+      "textPreview": "06",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "06"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "06",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "06",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lgbe14jm",
+      "id": "28",
+      "bbox": [
+        745,
+        282,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。",
+      "textPreview": "最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "最终选择LangGraph，是因为ERP更需要可控、可恢"
+          },
+          {
+            "index": 2,
+            "text": "复和可审计。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kf2d8zi1",
+      "id": "29",
+      "bbox": [
+        654,
+        373,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F9E9E7",
+      "lineColor": "#B44842",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ipcjmhw7",
+      "id": "30",
+      "bbox": [
+        674,
+        395,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#B44842",
+      "lineColor": "#B44842",
+      "lineWidth": 0
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqlkfmds",
+      "id": "31",
+      "bbox": [
+        674,
+        407,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "07",
+      "textPreview": "07",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "07"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "07",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "07",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4ru1o7ed",
+      "id": "32",
+      "bbox": [
+        745,
+        393,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "当前最大问题是动态字段、流程分支和状态复杂度。",
+      "textPreview": "当前最大问题是动态字段、流程分支和状态复杂度。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "当前最大问题是动态字段、流程分支和状态复杂度"
+          },
+          {
+            "index": 2,
+            "text": "。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "当前最大问题是动态字段、流程分支和状态复杂度。",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "当前最大问题是动态字段、流程分支和状态复杂度。",
+              "fontSize": 18,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5c32hcvy",
+      "id": "33",
+      "bbox": [
+        654,
+        484,
+        554,
+        94
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#F3E8E5",
+      "lineColor": "#74364A",
+      "lineWidth": 1.3
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ulcjixwb",
+      "id": "34",
+      "bbox": [
+        674,
+        506,
+        50,
+        50
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vml0b2dw",
+      "id": "35",
+      "bbox": [
+        674,
+        518,
+        50,
+        25
+      ],
+      "geometry": "rect",
+      "text": "08",
+      "textPreview": "08",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "08"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "08",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "08",
+              "fontSize": 17,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wnu1k7e1",
+      "id": "36",
+      "bbox": [
+        745,
+        504,
+        431,
+        58
+      ],
+      "geometry": "rect",
+      "text": "下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。",
+      "textPreview": "下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "下一步要把试点沉淀为统一Schema、统一Tool和统一观"
+          },
+          {
+            "index": 2,
+            "text": "测体系。"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。",
+              "fontSize": 17,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ho3idcvm",
+      "id": "37",
+      "bbox": [
+        74,
+        619,
+        1132,
+        56
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 38,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ehwje1cf",
+      "id": "38",
+      "bbox": [
+        102,
+        634,
+        1076,
+        28
+      ],
+      "geometry": "rect",
+      "text": "用户从“找功能、填表单”转向“说目标、确认结果”",
+      "textPreview": "用户从“找功能、填表单”转向“说目标、确认结果”",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "用户从“找功能、填表单”转向“说目标、确认结果”"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "用户从“找功能、填表单”转向“说目标、确认结果”",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "用户从“找功能、填表单”转向“说目标、确认结果”",
+              "fontSize": 22,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

@@ -1,0 +1,27 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/14bup87q","slide":17,"title":"两个高频场景，验证 AI 能否完成业务闭环","textShapes":17}
+{"kind":"shape","id":"sh/lwnq5gf6","slide":17,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1c7e50ni","slide":17,"text":"两个高频场景，验证 AI 能否完成业务闭环","textPreview":"两个高频场景，验证 AI 能否完成业务闭环","textChars":21,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/gbedwfmx","slide":17,"text":"ERP × AI · BUSINESS LOOP","textPreview":"ERP × AI · BUSINESS LOOP","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/rm5czq50","slide":17,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/6lwvql4v","slide":17,"bbox":[72,154,538,403]}
+{"kind":"textbox","id":"sh/t8ne10n6","slide":17,"text":"场景一：聊天请假","textPreview":"场景一：聊天请假","textChars":8,"textLines":1,"bbox":[106,184,310,35]}
+{"kind":"textbox","id":"sh/snedsvml","slide":17,"text":"用户输入","textPreview":"用户输入","textChars":4,"textLines":1,"bbox":[106,247,135,27]}
+{"kind":"shape","id":"sh/jilcvq54","slide":17,"bbox":[106,281,230,56]}
+{"kind":"textbox","id":"sh/ihcvml4j","slide":17,"text":"我要请假","textPreview":"我要请假","textChars":4,"textLines":1,"bbox":[128,296,186,32]}
+{"kind":"textbox","id":"sh/4by9or6l","slide":17,"text":"继续补充：请假类型、开始时间、结束时间","textPreview":"继续补充：请假类型、开始时间、结束时间","textChars":19,"textLines":1,"bbox":[106,356,430,28]}
+{"kind":"textbox","id":"sh/pc7qhwn6","slide":17,"text":"闭环结果","textPreview":"闭环结果","textChars":4,"textLines":1,"bbox":[106,411,135,27]}
+{"kind":"textbox","id":"sh/29grm1of","slide":17,"text":"动态追问 → 字段校验 → 审批预览 → 确认提交","textPreview":"动态追问 → 字段校验 → 审批预览 → 确认提交","textChars":25,"textLines":1,"bbox":[106,449,440,47]}
+{"kind":"textbox","id":"sh/3ap8fm50","slide":17,"text":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textPreview":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textChars":25,"textLines":1,"bbox":[106,514,440,27]}
+{"kind":"shape","id":"sh/gnepkr69","slide":17,"bbox":[670,154,538,403]}
+{"kind":"textbox","id":"sh/honqdwnu","slide":17,"text":"场景二：聊天发日报","textPreview":"场景二：聊天发日报","textChars":9,"textLines":1,"bbox":[704,184,335,35]}
+{"kind":"textbox","id":"sh/ulw7ihoj","slide":17,"text":"用户输入","textPreview":"用户输入","textChars":4,"textLines":1,"bbox":[704,247,135,27]}
+{"kind":"shape","id":"sh/fm58bm54","slide":17,"bbox":[704,281,438,64]}
+{"kind":"textbox","id":"sh/0ji9wb6t","slide":17,"text":"写今天日报：完成审批助手开发和接口联调","textPreview":"写今天日报：完成审批助手开发和接口联调","textChars":19,"textLines":1,"bbox":[726,296,394,40]}
+{"kind":"textbox","id":"sh/14rqpgne","slide":17,"text":"闭环结果","textPreview":"闭环结果","textChars":4,"textLines":1,"bbox":[704,379,135,27]}
+{"kind":"textbox","id":"sh/90nq9gfi","slide":17,"text":"加载上下文 → 生成草稿 → 预览 → 确认提交","textPreview":"加载上下文 → 生成草稿 → 预览 → 确认提交","textChars":24,"textLines":1,"bbox":[704,417,440,47]}
+{"kind":"textbox","id":"sh/8ze9gbyx","slide":17,"text":"关键观察：日报内容可以自然表达，业务字段仍然保留","textPreview":"关键观察：日报内容可以自然表达，业务字段仍然保留","textChars":24,"textLines":1,"bbox":[704,482,440,27]}
+{"kind":"shape","id":"sh/ny5876xc","slide":17,"bbox":[81,596,1119,57]}
+{"kind":"textbox","id":"sh/mxw7e1gr","slide":17,"text":"验证标准：自然语言输入、信息补全、人工确认与 ERP 结果反馈","textPreview":"验证标准：自然语言输入、信息补全、人工确认与 ERP 结果反馈","textChars":31,"textLines":1,"bbox":[108,612,1065,28]}
+{"kind":"notes","id":"nt/14bup87q","slide":17,"text":"【只记一句】两个场景都不是单轮问答，而是从自然语言理解走到了 ERP 可确认的业务结果。\n\n【可直接照读】聊天请假会根据真实配置补充请假类型和时间，字段完整后生成审批预览，只有明确确认后才提交；聊天发日报会加载业务上下文、生成草稿和预览，再等待用户确认。大家重点看四点：自然语言入口、动态补充信息、提交前人工确认，以及 ERP 结果反馈。\n\n【现场演示提示】可以在本页讲完后切到实际系统，演示控制在约 2 分钟；如果现场环境异常，直接使用后面的 LangGraph Studio 附录说明同一条输入、预览、确认和提交路径。\n\n【时间建议】PPT 讲解约 30 秒，现场演示约 2 分钟\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/演示.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/api/chat.py\n[/Sources]"}

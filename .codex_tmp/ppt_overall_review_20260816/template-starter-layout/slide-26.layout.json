@@ -1,0 +1,1256 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/kbjkb4",
+    "id": "kbjkb4",
+    "slide": 26,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F6F1E8",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qp4napo7",
+      "id": "27",
+      "bbox": [
+        0,
+        0,
+        1280,
+        116
+      ],
+      "geometry": "rect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xgjmls3m",
+      "id": "2",
+      "bbox": [
+        72,
+        29,
+        1030,
+        60
+      ],
+      "geometry": "rect",
+      "text": "标准日报子图：准备上下文与收集信息",
+      "textPreview": "标准日报子图：准备上下文与收集信息",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "标准日报子图：准备上下文与收集信息"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "标准日报子图：准备上下文与收集信息",
+          "resolvedTextStyle": {
+            "fontSize": 38,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "标准日报子图：准备上下文与收集信息",
+              "fontSize": 38,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wfalcn2h",
+      "id": "3",
+      "bbox": [
+        1000,
+        48,
+        205,
+        26
+      ],
+      "geometry": "rect",
+      "text": "DAILY REPORT AGENT · 1/2",
+      "textPreview": "DAILY REPORT AGENT · 1/2",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DAILY REPORT AGENT · 1/2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DAILY REPORT AGENT · 1/2",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#E8D9DD",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "DAILY REPORT AGENT · 1/2",
+              "fontSize": 13,
+              "color": "#E8D9DD",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2l4n2ls",
+      "id": "4",
+      "bbox": [
+        1170,
+        674,
+        42,
+        20
+      ],
+      "geometry": "rect",
+      "text": "26",
+      "textPreview": "26",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "26"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "26",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#A66C6B",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "26",
+              "fontSize": 12,
+              "color": "#A66C6B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ihc3exk7",
+      "id": "5",
+      "bbox": [
+        44,
+        146,
+        700,
+        506
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#C9B7AE",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 6,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/apkji1cv",
+      "id": "28",
+      "bbox": [
+        58,
+        194.63,
+        672,
+        408.74
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image4.png",
+        "contentType": "image/png",
+        "byteLength": 122381
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image4.png",
+        "contentType": "image/png",
+        "byteLength": 122381
+      }
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/k3ulg72d",
+      "id": "7",
+      "bbox": [
+        766,
+        138,
+        468,
+        522
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#C9B7AE",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z6hkbylo",
+      "id": "8",
+      "bbox": [
+        782,
+        150,
+        436,
+        28
+      ],
+      "geometry": "rect",
+      "text": "节点职责：准备与编辑",
+      "textPreview": "节点职责：准备与编辑",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "节点职责：准备与编辑"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "节点职责：准备与编辑",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#74364A",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "节点职责：准备与编辑",
+              "fontSize": 20,
+              "color": "#74364A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yl832t43",
+      "id": "9",
+      "bbox": [
+        1012,
+        180,
+        1.5,
+        462
+      ],
+      "geometry": "rect",
+      "fillColor": "#C9B7AE",
+      "lineColor": "#C9B7AE",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kvyhs7yh",
+      "id": "10",
+      "bbox": [
+        782,
+        185,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "START / END",
+      "textPreview": "START / END",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "START / END"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "START / END",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "START / END",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lw7y1cz2",
+      "id": "11",
+      "bbox": [
+        1024,
+        185,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "进入日报子图 / 本轮处理结束",
+      "textPreview": "进入日报子图 / 本轮处理结束",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "进入日报子图 /"
+          },
+          {
+            "index": 2,
+            "text": "本轮处理结束"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "进入日报子图 / 本轮处理结束",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "进入日报子图 / 本轮处理结束",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y9gzqxgb",
+      "id": "12",
+      "bbox": [
+        782,
+        258.67,
+        436,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#EFEAE4",
+      "lineColor": "#EFEAE4",
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jupgz2hw",
+      "id": "13",
+      "bbox": [
+        782,
+        263.67,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "daily_report_entry",
+      "textPreview": "daily_report_entry",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "daily_report_entry"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "daily_report_entry",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "daily_report_entry",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8zihwryt",
+      "id": "14",
+      "bbox": [
+        1024,
+        263.67,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "初始化标准日报模式和会话状态",
+      "textPreview": "初始化标准日报模式和会话状态",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "初始化标准日报模式和"
+          },
+          {
+            "index": 2,
+            "text": "会话状态"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "初始化标准日报模式和会话状态",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "初始化标准日报模式和会话状态",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t0ry5czy",
+      "id": "15",
+      "bbox": [
+        782,
+        337.33,
+        436,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#EFEAE4",
+      "lineColor": "#EFEAE4",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6xgzuhgn",
+      "id": "16",
+      "bbox": [
+        782,
+        342.33,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "daily_report_action",
+      "textPreview": "daily_report_action",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "daily_report_action"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "daily_report_action",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "daily_report_action",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7ypg3mh8",
+      "id": "17",
+      "bbox": [
+        1024,
+        342.33,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "判断加载、补内容、改日期或提交",
+      "textPreview": "判断加载、补内容、改日期或提交",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "判断加载、补内容、改"
+          },
+          {
+            "index": 2,
+            "text": "日期或提交"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "判断加载、补内容、改日期或提交",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "判断加载、补内容、改日期或提交",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o3exkny9",
+      "id": "18",
+      "bbox": [
+        782,
+        416,
+        436,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#EFEAE4",
+      "lineColor": "#EFEAE4",
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4nytszu",
+      "id": "19",
+      "bbox": [
+        782,
+        421,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "load_daily_report_context",
+      "textPreview": "load_daily_report_context",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "load_daily_report_context"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "load_daily_report_context",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "load_daily_report_context",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5ov61knm",
+      "id": "20",
+      "bbox": [
+        1024,
+        421,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "加载字段、配置、草稿和同步数据",
+      "textPreview": "加载字段、配置、草稿和同步数据",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "加载字段、配置、草稿"
+          },
+          {
+            "index": 2,
+            "text": "和同步数据"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "加载字段、配置、草稿和同步数据",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "加载字段、配置、草稿和同步数据",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4nm58f61",
+      "id": "21",
+      "bbox": [
+        782,
+        494.67,
+        436,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#EFEAE4",
+      "lineColor": "#EFEAE4",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3mdoza5g",
+      "id": "22",
+      "bbox": [
+        782,
+        499.67,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "collect_daily_report_content",
+      "textPreview": "collect_daily_report_content",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "collect_daily_report_content"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "collect_daily_report_content",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "collect_daily_report_content",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/il4n65ov",
+      "id": "23",
+      "bbox": [
+        1024,
+        499.67,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "收集或修改日报工作内容",
+      "textPreview": "收集或修改日报工作内容",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "收集或修改日报工作内"
+          },
+          {
+            "index": 2,
+            "text": "容"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "收集或修改日报工作内容",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "收集或修改日报工作内容",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcf654ni",
+      "id": "24",
+      "bbox": [
+        782,
+        573.33,
+        436,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#EFEAE4",
+      "lineColor": "#EFEAE4",
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sr65cz6x",
+      "id": "25",
+      "bbox": [
+        782,
+        578.33,
+        220,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "collect_daily_report_date",
+      "textPreview": "collect_daily_report_date",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "collect_daily_report_date"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "collect_daily_report_date",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "collect_daily_report_date",
+              "fontSize": 16,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqxo3u5c",
+      "id": "26",
+      "bbox": [
+        1024,
+        578.33,
+        194,
+        71.67
+      ],
+      "geometry": "rect",
+      "text": "收集日期并重载当天上下文",
+      "textPreview": "收集日期并重载当天上下文",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "收集日期并重载当天上"
+          },
+          {
+            "index": 2,
+            "text": "下文"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "收集日期并重载当天上下文",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "收集日期并重载当天上下文",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

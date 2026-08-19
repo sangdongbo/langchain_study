@@ -1,0 +1,7 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践.pptx
+Slide count: 34
+Slide size: 1280 × 720
+Visual system: warm off-white background, burgundy title band, two-column and process-card layouts, Calibri typography.
+Source inventory: all 34 slides were imported, rendered, structurally inspected, and reviewed in a contact sheet.
+Insertion contract: preserve slide count and master/layout hierarchy. Replace blank slide 17 with a duplicate of source slide 19, and replace blank slide 27 with a duplicate of source slide 12. Edit only inherited text boxes and speaker notes on those duplicated slides.
+

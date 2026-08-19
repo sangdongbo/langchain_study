@@ -1,0 +1,31 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/i5o3q10v","slide":29,"title":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textShapes":17}
+{"kind":"shape","id":"sh/lw3ato3a","slide":29,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/tk36hwby","slide":29,"text":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textPreview":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textChars":26,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8jup8rad","slide":29,"text":"ENTERPRISE RAG · ARCHITECTURE 1/3","textPreview":"ENTERPRISE RAG · ARCHITECTURE 1/3","textChars":33,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/vmlojmto","slide":29,"text":"29","textPreview":"29","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/ulc7a1s3","slide":29,"bbox":[73,151,1134,102]}
+{"kind":"shape","id":"sh/h8n6lwbu","slide":29,"bbox":[96,180,42,42]}
+{"kind":"textbox","id":"sh/g7upcra9","slide":29,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[96,186,42,28]}
+{"kind":"textbox","id":"sh/bq1o72tk","slide":29,"text":"知识源治理","textPreview":"知识源治理","textChars":5,"textLines":1,"bbox":[158,170,205,33]}
+{"kind":"textbox","id":"sh/apsnyxcz","slide":29,"text":"制度 · SOP · 操作手册 · FAQ · ERP 字段说明与审批规则","textPreview":"制度 · SOP · 操作手册 · FAQ · ERP 字段说明与审批规则","textChars":37,"textLines":1,"bbox":[377,167,790,32]}
+{"kind":"textbox","id":"sh/kf2tw7a1","slide":29,"text":"版本、更新时间、责任人、原文位置必须可追溯","textPreview":"版本、更新时间、责任人、原文位置必须可追溯","textChars":21,"textLines":1,"bbox":[377,207,790,26]}
+{"kind":"shape","id":"sh/5gbupcrm","slide":29,"bbox":[612,255,55,20]}
+{"kind":"shape","id":"sh/idkbuxsv","slide":29,"bbox":[73,275,1134,102]}
+{"kind":"shape","id":"sh/jetc329g","slide":29,"bbox":[96,304,42,42]}
+{"kind":"textbox","id":"sh/s32t07ax","slide":29,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[96,310,42,28]}
+{"kind":"textbox","id":"sh/t4butcri","slide":29,"text":"检索与安全底座","textPreview":"检索与安全底座","textChars":7,"textLines":1,"bbox":[158,294,205,33]}
+{"kind":"textbox","id":"sh/6hkbyhs7","slide":29,"text":"Milvus Dense + BM25 混合检索 · RRF / Weighted 融合 · Reranker 精排","textPreview":"Milvus Dense + BM25 混合检索 · RRF / Weighted 融合 · Reranker 精排","textChars":58,"textLines":1,"bbox":[377,291,790,32]}
+{"kind":"textbox","id":"sh/7itcr29s","slide":29,"text":"tenant / company / department / ACL 在检索服务层强制过滤","textPreview":"tenant / company / department / ACL 在检索服务层强制过滤","textChars":46,"textLines":1,"bbox":[377,331,790,26]}
+{"kind":"shape","id":"sh/87itonat","slide":29,"bbox":[612,379,55,20]}
+{"kind":"shape","id":"sh/98ruxsre","slide":29,"bbox":[73,399,1134,102]}
+{"kind":"shape","id":"sh/p4jal432","slide":29,"bbox":[96,428,42,42]}
+{"kind":"textbox","id":"sh/o3a9sj2h","slide":29,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[96,434,42,28]}
+{"kind":"textbox","id":"sh/n21sjelc","slide":29,"text":"ERP 业务协同","textPreview":"ERP 业务协同","textChars":8,"textLines":1,"bbox":[158,418,205,33]}
+{"kind":"textbox","id":"sh/218rq9kr","slide":29,"text":"RAG 回答规则 · ERP Tool 查询实时数据 · LangGraph 控制下一步动作","textPreview":"RAG 回答规则 · ERP Tool 查询实时数据 · LangGraph 控制下一步动作","textChars":46,"textLines":1,"bbox":[377,415,790,32]}
+{"kind":"textbox","id":"sh/x8japo3e","slide":29,"text":"预览、人工确认、正式提交和审计仍由业务流程负责","textPreview":"预览、人工确认、正式提交和审计仍由业务流程负责","textChars":23,"textLines":1,"bbox":[377,455,790,26]}
+{"kind":"shape","id":"sh/c7a9wj2t","slide":29,"bbox":[74,548,1132,112]}
+{"kind":"textbox","id":"sh/b61snel8","slide":29,"text":"企业级 RAG 的核心不是“模型知道更多”","textPreview":"企业级 RAG 的核心不是“模型知道更多”","textChars":21,"textLines":1,"bbox":[105,568,1070,31]}
+{"kind":"textbox","id":"sh/a5sru9kn","slide":29,"text":"而是知识有治理、检索有权限、回答有证据、执行有边界","textPreview":"而是知识有治理、检索有权限、回答有证据、执行有边界","textChars":25,"textLines":1,"bbox":[105,607,1070,29]}
+{"kind":"notes","id":"nt/i5o3q10v","slide":29,"text":"【只记一句】企业级 RAG 的重点不是向量库，而是知识治理、权限、来源和业务边界。\n\n【可直接照读】企业级 RAG 不是把几份文档放进向量库，再做一个知识库聊天。它首先要治理知识源，包括制度、SOP、操作手册、ERP 字段说明和审批规则，并记录版本、更新时间、责任人和原文位置。其次，检索时必须在服务端强制加入租户、公司、部门和 ACL 权限，再通过混合检索与重排找到证据。最后还要明确边界：RAG 回答规则和知识，ERP Tool 查询实时数据，LangGraph 控制预览、确认、提交和审计。\n\n【ERP 示例】员工问“差旅报销需要哪些材料”，走 RAG；问“我的报销单现在到谁审批”，走 ERP Tool；说“帮我发起报销”，进入 LangGraph 业务流程。\n\n【时间建议】约 75 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs/docs/rag_demo_sources/approval_rag_guide.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}

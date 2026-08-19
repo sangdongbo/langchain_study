@@ -1,0 +1,60 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/vaxsvy10","slide":15,"title":"四种方案不是替代关系，而是按任务选择","textShapes":30}
+{"kind":"shape","id":"sh/z250nm5s","slide":15,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/547mhg3m","slide":15,"text":"四种方案不是替代关系，而是按任务选择","textPreview":"四种方案不是替代关系，而是按任务选择","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/k3y5ov21","slide":15,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/76p4jqls","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/65gnqlk7","slide":15,"bbox":[55,167,195,62]}
+{"kind":"textbox","id":"sh/t87ml0ji","slide":15,"text":"方案","textPreview":"方案","textChars":2,"textLines":1,"bbox":[65,184,175,28]}
+{"kind":"shape","id":"sh/s7y5sv2x","slide":15,"bbox":[250,167,285,62]}
+{"kind":"textbox","id":"sh/na5476l8","slide":15,"text":"适合场景","textPreview":"适合场景","textChars":4,"textLines":1,"bbox":[260,184,265,28]}
+{"kind":"shape","id":"sh/m9c3e1kn","slide":15,"bbox":[535,167,180,62]}
+{"kind":"textbox","id":"sh/wrm9kvep","slide":15,"text":"可控性","textPreview":"可控性","textChars":3,"textLines":1,"bbox":[545,184,160,28]}
+{"kind":"shape","id":"sh/hsvat0fa","slide":15,"bbox":[715,167,180,62]}
+{"kind":"textbox","id":"sh/upkrilwj","slide":15,"text":"灵活性","textPreview":"灵活性","textChars":3,"textLines":1,"bbox":[725,184,160,28]}
+{"kind":"shape","id":"sh/vqdsrqx4","slide":15,"bbox":[895,167,260,62]}
+{"kind":"textbox","id":"sh/4vm9ovel","slide":15,"text":"当前定位","textPreview":"当前定位","textChars":4,"textLines":1,"bbox":[905,184,240,28]}
+{"kind":"shape","id":"sh/5wvax0f6","slide":15,"bbox":[55,229,195,91]}
+{"kind":"textbox","id":"sh/it4rm5wv","slide":15,"text":"审批助手","textPreview":"审批助手","textChars":4,"textLines":1,"bbox":[67,253,171,46]}
+{"kind":"shape","id":"sh/judsvqxg","slide":15,"bbox":[250,229,285,91]}
+{"kind":"textbox","id":"sh/0z29cbyh","slide":15,"text":"动态审批、真实提交","textPreview":"动态审批、真实提交","textChars":9,"textLines":1,"bbox":[262,253,261,46]}
+{"kind":"shape","id":"sh/l0bqlgf2","slide":15,"bbox":[535,229,180,91]}
+{"kind":"textbox","id":"sh/1kjyt83e","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,253,156,46]}
+{"kind":"shape","id":"sh/gjax03m9","slide":15,"bbox":[715,229,180,91]}
+{"kind":"textbox","id":"sh/fi1grylo","slide":15,"text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[727,253,156,46]}
+{"kind":"shape","id":"sh/ehsfyt43","slide":15,"bbox":[895,229,260,91]}
+{"kind":"textbox","id":"sh/p8jyx83q","slide":15,"text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,253,236,46]}
+{"kind":"shape","id":"sh/o7ah4nm5","slide":15,"bbox":[55,320,195,91]}
+{"kind":"textbox","id":"sh/361gvilk","slide":15,"text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[67,344,171,46]}
+{"kind":"shape","id":"sh/25sf2d4z","slide":15,"bbox":[250,320,285,91]}
+{"kind":"textbox","id":"sh/dc3y1s3m","slide":15,"text":"步骤明确、风险较高","textPreview":"步骤明确、风险较高","textChars":9,"textLines":1,"bbox":[262,344,261,46]}
+{"kind":"shape","id":"sh/cbuh8nmh","slide":15,"bbox":[535,320,180,91]}
+{"kind":"textbox","id":"sh/uh4v2pkj","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,344,156,46]}
+{"kind":"shape","id":"sh/vixcvu14","slide":15,"bbox":[715,320,180,91]}
+{"kind":"textbox","id":"sh/wj6d4z2p","slide":15,"text":"中低","textPreview":"中低","textChars":2,"textLines":1,"bbox":[727,344,156,46]}
+{"kind":"shape","id":"sh/hkfexkja","slide":15,"bbox":[895,320,260,91]}
+{"kind":"textbox","id":"sh/ilov6pkv","slide":15,"text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,344,236,46]}
+{"kind":"shape","id":"sh/jmxwzu1g","slide":15,"bbox":[55,411,195,91]}
+{"kind":"textbox","id":"sh/4n6d8z21","slide":15,"text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[67,435,171,46]}
+{"kind":"shape","id":"sh/5ofe14j6","slide":15,"bbox":[250,411,285,91]}
+{"kind":"textbox","id":"sh/6p8va9kr","slide":15,"text":"输入开放、路径不固定","textPreview":"输入开放、路径不固定","textChars":10,"textLines":1,"bbox":[262,435,261,46]}
+{"kind":"shape","id":"sh/rqhw3e1c","slide":15,"bbox":[535,411,180,91]}
+{"kind":"textbox","id":"sh/f6dcnetg","slide":15,"text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[547,435,156,46]}
+{"kind":"shape","id":"sh/e54ve9cv","slide":15,"bbox":[715,411,180,91]}
+{"kind":"textbox","id":"sh/18vup4bm","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,435,156,46]}
+{"kind":"shape","id":"sh/07mdgzu1","slide":15,"bbox":[895,411,260,91]}
+{"kind":"textbox","id":"sh/nadwrets","slide":15,"text":"能力探索","textPreview":"能力探索","textChars":4,"textLines":1,"bbox":[907,435,236,46]}
+{"kind":"shape","id":"sh/294vi9c7","slide":15,"bbox":[55,502,195,91]}
+{"kind":"textbox","id":"sh/pwfetobi","slide":15,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[67,526,171,46]}
+{"kind":"shape","id":"sh/ovmdkjud","slide":15,"bbox":[250,502,285,91]}
+{"kind":"textbox","id":"sh/3etcfut8","slide":15,"text":"复杂任务、需要安全闸门","textPreview":"复杂任务、需要安全闸门","textChars":11,"textLines":1,"bbox":[262,526,261,46]}
+{"kind":"shape","id":"sh/idkv6pc3","slide":15,"bbox":[535,502,180,91]}
+{"kind":"textbox","id":"sh/87e10r6p","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,526,156,46]}
+{"kind":"shape","id":"sh/987itwnu","slide":15,"bbox":[715,502,180,91]}
+{"kind":"textbox","id":"sh/m5wjyhoj","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,526,156,46]}
+{"kind":"shape","id":"sh/n650rm54","slide":15,"bbox":[895,502,260,91]}
+{"kind":"textbox","id":"sh/03e1w76d","slide":15,"text":"演进方向","textPreview":"演进方向","textChars":4,"textLines":1,"bbox":[907,526,236,46]}
+{"kind":"textbox","id":"sh/l4nipcny","slide":15,"text":"选择原则","textPreview":"选择原则","textChars":4,"textLines":1,"bbox":[81,626,130,27]}
+{"kind":"textbox","id":"sh/y1wjuho7","slide":15,"text":"越接近写入和审批，越需要显式流程；越偏理解、规划与生成，越适合 Agent","textPreview":"越接近写入和审批，越需要显式流程；越偏理解、规划与生成，越适合 Agent","textChars":37,"textLines":1,"bbox":[204,624,965,31]}
+{"kind":"notes","id":"nt/vaxsvy10","slide":15,"text":"【只记一句】四种方案是按风险和开放程度选择，不是互相替代。\n\n【可直接照读】审批和标准日报已经具备生产落地的特征，因为流程和提交边界清晰；自主日报更适合能力探索，灵活性高但需要更多约束；Agentic Workflow是演进方向，用自主规划处理开放任务，再用流程闸门保证安全。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

@@ -1,0 +1,394 @@
+{
+  "outputSlides": [
+    {
+      "outputSlide": 1,
+      "sourceSlide": 1,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 2,
+      "sourceSlide": 2,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 3,
+      "sourceSlide": 3,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 4,
+      "sourceSlide": 4,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 5,
+      "sourceSlide": 5,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 6,
+      "sourceSlide": 6,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 7,
+      "sourceSlide": 7,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 8,
+      "sourceSlide": 8,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 9,
+      "sourceSlide": 9,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 10,
+      "sourceSlide": 10,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 11,
+      "sourceSlide": 11,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 12,
+      "sourceSlide": 12,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 13,
+      "sourceSlide": 13,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 14,
+      "sourceSlide": 14,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 15,
+      "sourceSlide": 15,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 16,
+      "sourceSlide": 16,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 17,
+      "sourceSlide": 19,
+      "narrativeRole": "unresolved risks and future optimization",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/9gb6xgbi",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/vitozqt8",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/xkbq10be",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/jmd83atk",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/cri1gnql",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/qpgjex8f",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/0vi1k7qx",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/et0jix8r",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/oj21o7qt",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/x07i1cji",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/vep0z21c",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/54ri5wje",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/j2p03m1o",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/l8nitsja",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/07ehknip",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/belg3yh8",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/dg3y58zy",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/zilg7yh4",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/lk3y98za",
+          "action": "rewrite"
+        }
+      ]
+    },
+    {
+      "outputSlide": 18,
+      "sourceSlide": 18,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 19,
+      "sourceSlide": 19,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 20,
+      "sourceSlide": 20,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 21,
+      "sourceSlide": 21,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 22,
+      "sourceSlide": 22,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 23,
+      "sourceSlide": 23,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 24,
+      "sourceSlide": 24,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 25,
+      "sourceSlide": 25,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 26,
+      "sourceSlide": 26,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 27,
+      "sourceSlide": 12,
+      "narrativeRole": "daily_report_create_agent explanation",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/1gbm9s3a",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/ra943il8",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/dcbm583y",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/b6d4f2lc",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/a543mx4r",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/xw3q94ne",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/bulo7u58",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/9sj65kn2",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/nq1o3a5w",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/hkbm5wzu",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/fit436ho",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/tgrm1wzy",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/7u94zmhs",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/6t0n6hg7",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/dcv6dgz2",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/alwbitsn",
+          "action": "rewrite"
+        }
+      ]
+    },
+    {
+      "outputSlide": 28,
+      "sourceSlide": 28,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 29,
+      "sourceSlide": 29,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 30,
+      "sourceSlide": 30,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 31,
+      "sourceSlide": 31,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 32,
+      "sourceSlide": 32,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 33,
+      "sourceSlide": 33,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 34,
+      "sourceSlide": 34,
+      "narrativeRole": "preserve source slide",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    }
+  ],
+  "omittedSourceSlides": [
+    {
+      "sourceSlide": 17,
+      "reason": "blank placeholder replaced by source slide 19 pattern"
+    },
+    {
+      "sourceSlide": 27,
+      "reason": "blank placeholder replaced by source slide 12 pattern"
+    }
+  ]
+}

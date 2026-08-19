@@ -1,0 +1,39 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/hgzapcr6","slide":13,"title":"标准日报助手：固定流程优先保证稳定","textShapes":24}
+{"kind":"shape","id":"sh/tgn2l8vu","slide":13,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/q50nydsj","slide":13,"text":"标准日报助手：固定流程优先保证稳定","textPreview":"标准日报助手：固定流程优先保证稳定","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/bq9orito","slide":13,"text":"DAILY REPORT AGENT","textPreview":"DAILY REPORT AGENT","textChars":18,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/o3i5w3ad","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/p4r6p8by","slide":13,"bbox":[74,158,425,410]}
+{"kind":"textbox","id":"sh/21gnuts7","slide":13,"text":"典型对话","textPreview":"典型对话","textChars":4,"textLines":1,"bbox":[106,188,230,34]}
+{"kind":"shape","id":"sh/32ponyts","slide":13,"bbox":[108,246,344,90]}
+{"kind":"textbox","id":"sh/gzy5s3a1","slide":13,"text":"帮我写今天日报：完成客户拜访和报价整理","textPreview":"帮我写今天日报：完成客户拜访和报价整理","textChars":19,"textLines":1,"bbox":[130,261,300,66]}
+{"kind":"shape","id":"sh/1076lobm","slide":13,"bbox":[154,364,308,60]}
+{"kind":"textbox","id":"sh/hcfy9k3u","slide":13,"text":"已加载今天的日报配置和草稿。","textPreview":"已加载今天的日报配置和草稿。","textChars":14,"textLines":1,"bbox":[176,379,264,36]}
+{"kind":"shape","id":"sh/gb6x0zm9","slide":13,"bbox":[154,450,308,60]}
+{"kind":"textbox","id":"sh/vaxg7ulo","slide":13,"text":"预览已生成，请确认提交。","textPreview":"预览已生成，请确认提交。","textChars":12,"textLines":1,"bbox":[176,465,264,36]}
+{"kind":"textbox","id":"sh/u9ofyp43","slide":13,"text":"稳定执行链路","textPreview":"稳定执行链路","textChars":6,"textLines":1,"bbox":[576,158,350,34]}
+{"kind":"shape","id":"sh/t8fy5k3i","slide":13,"bbox":[584,213,42,42]}
+{"kind":"textbox","id":"sh/876xwfmx","slide":13,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[584,219,42,28]}
+{"kind":"textbox","id":"sh/7mdg3als","slide":13,"text":"加载上下文","textPreview":"加载上下文","textChars":5,"textLines":1,"bbox":[642,211,210,27]}
+{"kind":"textbox","id":"sh/6l4fu547","slide":13,"text":"字段、配置、草稿、同步数据","textPreview":"字段、配置、草稿、同步数据","textChars":13,"textLines":1,"bbox":[843,213,350,38]}
+{"kind":"shape","id":"sh/lkvy103m","slide":13,"bbox":[584,291,42,42]}
+{"kind":"textbox","id":"sh/kjmxsfm1","slide":13,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[584,297,42,28]}
+{"kind":"textbox","id":"sh/cnqh8fux","slide":13,"text":"补充内容","textPreview":"补充内容","textChars":4,"textLines":1,"bbox":[642,289,210,27]}
+{"kind":"textbox","id":"sh/xozyhkbi","slide":13,"text":"日期与工作内容","textPreview":"日期与工作内容","textChars":7,"textLines":1,"bbox":[843,291,350,38]}
+{"kind":"shape","id":"sh/q18f65cr","slide":13,"bbox":[584,369,42,42]}
+{"kind":"textbox","id":"sh/bmhgfatc","slide":13,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[584,375,42,28]}
+{"kind":"textbox","id":"sh/oz6x4vul","slide":13,"text":"保存草稿","textPreview":"保存草稿","textChars":4,"textLines":1,"bbox":[642,367,210,27]}
+{"kind":"textbox","id":"sh/p0zyd0b6","slide":13,"text":"保留 ERP 原始业务字段","textPreview":"保留 ERP 原始业务字段","textChars":13,"textLines":1,"bbox":[843,369,350,38]}
+{"kind":"shape","id":"sh/2xof2lcv","slide":13,"bbox":[584,447,42,42]}
+{"kind":"textbox","id":"sh/3yxgbqdg","slide":13,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[584,453,42,28]}
+{"kind":"textbox","id":"sh/8vahgzu5","slide":13,"text":"生成预览","textPreview":"生成预览","textChars":4,"textLines":1,"bbox":[642,445,210,27]}
+{"kind":"textbox","id":"sh/9wjyp4bq","slide":13,"text":"展示接收人、抄送人和自定义字段","textPreview":"展示接收人、抄送人和自定义字段","textChars":15,"textLines":1,"bbox":[843,447,350,38]}
+{"kind":"shape","id":"sh/jqlkfyds","slide":13,"bbox":[584,525,42,42]}
+{"kind":"textbox","id":"sh/ipcjmtw7","slide":13,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[584,531,42,28]}
+{"kind":"textbox","id":"sh/5cn2h8vy","slide":13,"text":"确认提交","textPreview":"确认提交","textChars":4,"textLines":1,"bbox":[642,523,210,27]}
+{"kind":"textbox","id":"sh/4re1o3ed","slide":13,"text":"明确确认后才写入 ERP","textPreview":"明确确认后才写入 ERP","textChars":12,"textLines":1,"bbox":[843,525,350,38]}
+{"kind":"shape","id":"sh/re5kjydo","slide":13,"bbox":[74,601,1124,56]}
+{"kind":"textbox","id":"sh/6dwjqtw3","slide":13,"text":"适合步骤明确、提交风险较高、需要持续恢复的业务流程","textPreview":"适合步骤明确、提交风险较高、需要持续恢复的业务流程","textChars":25,"textLines":1,"bbox":[107,616,1058,28]}
+{"kind":"notes","id":"nt/hgzapcr6","slide":13,"text":"【只记一句】标准日报优先用固定流程，先保证稳定和可恢复。\n\n【可直接照读】用户说“帮我写今天日报”，系统加载当天配置、已有草稿和同步数据，收集工作内容，保存草稿，生成预览，确认后提交。这个场景步骤比较明确，所以把流程显式化，便于控制风险，也便于出现中断后继续。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}

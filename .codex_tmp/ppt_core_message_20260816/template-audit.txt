@@ -1,0 +1,8 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版-整体优化版.pptx
+Slide count: 33
+Slide size: 1280 × 720
+Visual system: warm off-white background, burgundy title band, dark burgundy and green accents, Calibri typography.
+Structure: all slides retain the source master and Title Slide layout; edits are limited to inherited slide-local text boxes and speaker notes.
+Insertion contract: no new slides, shapes, images, charts, or tables. Slides 1, 21, and 33 receive focused text rewrites; all other slides are preserved.
+Placeholder audit: the source inspection reports no unresolved visible placeholders in the edited slides. Final QA must confirm no empty placeholders after export.
+

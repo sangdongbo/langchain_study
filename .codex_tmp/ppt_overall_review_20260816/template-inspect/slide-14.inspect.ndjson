@@ -1,0 +1,34 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6lsnupw7","slide":14,"title":"自主日报助手：让 Agent 决定下一步做什么","textShapes":17}
+{"kind":"shape","id":"sh/bup4rils","slide":14,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc7eds76","slide":14,"text":"自主日报助手：让 Agent 决定下一步做什么","textPreview":"自主日报助手：让 Agent 决定下一步做什么","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/wbydknq1","slide":14,"text":"DAILY REPORT CREATE AGENT","textPreview":"DAILY REPORT CREATE AGENT","textChars":25,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/jepwf2pc","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/idgvmx8r","slide":14,"bbox":[72,166,452,383]}
+{"kind":"textbox","id":"sh/5grehs7i","slide":14,"text":"输入不再要求固定格式","textPreview":"输入不再要求固定格式","textChars":10,"textLines":1,"bbox":[108,198,380,35]}
+{"kind":"shape","id":"sh/kfidonqx","slide":14,"bbox":[112,267,360,66]}
+{"kind":"textbox","id":"sh/zi5c3y98","slide":14,"text":"把今天的客户跟进整理成日报","textPreview":"把今天的客户跟进整理成日报","textChars":13,"textLines":1,"bbox":[134,282,316,42]}
+{"kind":"textbox","id":"sh/ehwvat8n","slide":14,"text":"Agent 自主判断","textPreview":"Agent 自主判断","textChars":10,"textLines":1,"bbox":[112,376,190,30]}
+{"kind":"shape","id":"sh/c3e1gjyd","slide":14,"bbox":[116,420,9,9]}
+{"kind":"textbox","id":"sh/x4ni9ofy","slide":14,"text":"先确认日期","textPreview":"先确认日期","textChars":5,"textLines":1,"bbox":[139,412,327,33]}
+{"kind":"shape","id":"sh/a1wze9g7","slide":14,"bbox":[116,457,9,9]}
+{"kind":"textbox","id":"sh/b2507exs","slide":14,"text":"需要加载哪些 ERP 数据","textPreview":"需要加载哪些 ERP 数据","textChars":13,"textLines":1,"bbox":[139,449,327,33]}
+{"kind":"shape","id":"sh/kre1k3y9","slide":14,"bbox":[116,494,9,9]}
+{"kind":"textbox","id":"sh/ls7idofu","slide":14,"text":"是否继续追问内容","textPreview":"是否继续追问内容","textChars":8,"textLines":1,"bbox":[139,486,327,33]}
+{"kind":"shape","id":"sh/y5wjitgj","slide":14,"bbox":[116,531,9,9]}
+{"kind":"textbox","id":"sh/z650byxo","slide":14,"text":"何时生成预览","textPreview":"何时生成预览","textChars":6,"textLines":1,"bbox":[139,523,327,33]}
+{"kind":"shape","id":"sh/0buh8zy5","slide":14,"bbox":[559,321,74,42]}
+{"kind":"shape","id":"sh/1w3i14fq","slide":14,"bbox":[654,166,548,383]}
+{"kind":"textbox","id":"sh/hsvy50re","slide":14,"text":"能力提升","textPreview":"能力提升","textChars":4,"textLines":1,"bbox":[692,198,180,33]}
+{"kind":"shape","id":"sh/grmxwvqt","slide":14,"bbox":[698,265,9,9]}
+{"kind":"textbox","id":"sh/fqdg3q98","slide":14,"text":"适应更自然、更开放的用户表达","textPreview":"适应更自然、更开放的用户表达","textChars":14,"textLines":1,"bbox":[721,257,419,57]}
+{"kind":"shape","id":"sh/up4fal83","slide":14,"bbox":[698,326,9,9]}
+{"kind":"textbox","id":"sh/pwvy90rq","slide":14,"text":"减少固定流程中的人工分支设计","textPreview":"减少固定流程中的人工分支设计","textChars":14,"textLines":1,"bbox":[721,318,419,57]}
+{"kind":"shape","id":"sh/4vmh0vq5","slide":14,"bbox":[698,387,9,9]}
+{"kind":"textbox","id":"sh/3udg7q9k","slide":14,"text":"可按上下文自主调用日报工具","textPreview":"可按上下文自主调用日报工具","textChars":13,"textLines":1,"bbox":[721,379,419,57]}
+{"kind":"textbox","id":"sh/2t4fyl8z","slide":14,"text":"仍需保留的边界","textPreview":"仍需保留的边界","textChars":7,"textLines":1,"bbox":[692,430,210,30]}
+{"kind":"textbox","id":"sh/d0fydk7m","slide":14,"text":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textPreview":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textChars":27,"textLines":1,"bbox":[697,476,442,42]}
+{"kind":"shape","id":"sh/cz6h4fq1","slide":14,"bbox":[79,600,1116,57]}
+{"kind":"textbox","id":"sh/atg3idk7","slide":14,"text":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textPreview":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textChars":30,"textLines":1,"bbox":[110,615,1054,29]}
+{"kind":"notes","id":"nt/6lsnupw7","slide":14,"text":"【只记一句】自主日报让 Agent 决定下一步，但写入边界仍然固定。\n\n【可直接照读】当用户只说“把今天客户跟进整理成日报”时，输入并不完整，Agent需要判断是否先确认日期、加载哪些 ERP 数据、是否继续追问以及何时生成预览。它提升了自然表达的适应性，但不能编造内容、跳过预览或自动提交。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}

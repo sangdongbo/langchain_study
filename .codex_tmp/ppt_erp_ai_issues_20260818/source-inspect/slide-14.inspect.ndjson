@@ -1,0 +1,60 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6lsnupw7","slide":14,"title":"四种方案不是替代关系，而是按任务选择","textShapes":30}
+{"kind":"shape","id":"sh/zqh0zuts","slide":14,"name":"矩形 56","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc7eds76","slide":14,"name":"矩形 1","text":"四种方案不是替代关系，而是按任务选择","textPreview":"四种方案不是替代关系，而是按任务选择","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/wbydknq1","slide":14,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/jepwf2pc","slide":14,"name":"矩形 3","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/idgvmx8r","slide":14,"name":"矩形 4","bbox":[55,167,195,62]}
+{"kind":"textbox","id":"sh/5grehs7i","slide":14,"name":"矩形 5","text":"方案","textPreview":"方案","textChars":2,"textLines":1,"bbox":[65,184,175,28]}
+{"kind":"shape","id":"sh/kfidonqx","slide":14,"name":"矩形 6","bbox":[250,167,285,62]}
+{"kind":"textbox","id":"sh/zi5c3y98","slide":14,"name":"矩形 7","text":"适合场景","textPreview":"适合场景","textChars":4,"textLines":1,"bbox":[260,184,265,28]}
+{"kind":"shape","id":"sh/ehwvat8n","slide":14,"name":"矩形 8","bbox":[535,167,180,62]}
+{"kind":"textbox","id":"sh/c3e1gjyd","slide":14,"name":"矩形 9","text":"可控性","textPreview":"可控性","textChars":3,"textLines":1,"bbox":[545,184,160,28]}
+{"kind":"shape","id":"sh/x4ni9ofy","slide":14,"name":"矩形 10","bbox":[715,167,180,62]}
+{"kind":"textbox","id":"sh/a1wze9g7","slide":14,"name":"矩形 11","text":"灵活性","textPreview":"灵活性","textChars":3,"textLines":1,"bbox":[725,184,160,28]}
+{"kind":"shape","id":"sh/b2507exs","slide":14,"name":"矩形 12","bbox":[895,167,260,62]}
+{"kind":"textbox","id":"sh/kre1k3y9","slide":14,"name":"矩形 13","text":"当前定位","textPreview":"当前定位","textChars":4,"textLines":1,"bbox":[905,184,240,28]}
+{"kind":"shape","id":"sh/ls7idofu","slide":14,"name":"矩形 14","bbox":[55,229,195,91]}
+{"kind":"textbox","id":"sh/y5wjitgj","slide":14,"name":"矩形 15","text":"审批助手","textPreview":"审批助手","textChars":4,"textLines":1,"bbox":[67,253,171,46]}
+{"kind":"shape","id":"sh/z650byxo","slide":14,"name":"矩形 16","bbox":[250,229,285,91]}
+{"kind":"textbox","id":"sh/0buh8zy5","slide":14,"name":"矩形 17","text":"动态审批、真实提交","textPreview":"动态审批、真实提交","textChars":9,"textLines":1,"bbox":[262,253,261,46]}
+{"kind":"shape","id":"sh/1w3i14fq","slide":14,"name":"矩形 18","bbox":[535,229,180,91]}
+{"kind":"textbox","id":"sh/hsvy50re","slide":14,"name":"矩形 19","text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,253,156,46]}
+{"kind":"shape","id":"sh/grmxwvqt","slide":14,"name":"矩形 20","bbox":[715,229,180,91]}
+{"kind":"textbox","id":"sh/fqdg3q98","slide":14,"name":"矩形 21","text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[727,253,156,46]}
+{"kind":"shape","id":"sh/up4fal83","slide":14,"name":"矩形 22","bbox":[895,229,260,91]}
+{"kind":"textbox","id":"sh/pwvy90rq","slide":14,"name":"矩形 23","text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,253,236,46]}
+{"kind":"shape","id":"sh/4vmh0vq5","slide":14,"name":"矩形 24","bbox":[55,320,195,91]}
+{"kind":"textbox","id":"sh/3udg7q9k","slide":14,"name":"矩形 25","text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[67,344,171,46]}
+{"kind":"shape","id":"sh/2t4fyl8z","slide":14,"name":"矩形 26","bbox":[250,320,285,91]}
+{"kind":"textbox","id":"sh/d0fydk7m","slide":14,"name":"矩形 27","text":"步骤明确、风险较高","textPreview":"步骤明确、风险较高","textChars":9,"textLines":1,"bbox":[262,344,261,46]}
+{"kind":"shape","id":"sh/cz6h4fq1","slide":14,"name":"矩形 28","bbox":[535,320,180,91]}
+{"kind":"textbox","id":"sh/atg3idk7","slide":14,"name":"矩形 29","text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,344,156,46]}
+{"kind":"shape","id":"sh/bup4rils","slide":14,"name":"矩形 30","bbox":[715,320,180,91]}
+{"kind":"textbox","id":"sh/cvylkn2d","slide":14,"name":"矩形 31","text":"中低","textPreview":"中低","textChars":2,"textLines":1,"bbox":[727,344,156,46]}
+{"kind":"shape","id":"sh/xw7mts3y","slide":14,"name":"矩形 32","bbox":[895,320,260,91]}
+{"kind":"textbox","id":"sh/yxgnmxkj","slide":14,"name":"矩形 33","text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,344,236,46]}
+{"kind":"shape","id":"sh/jyp4fil4","slide":14,"name":"矩形 34","bbox":[55,411,195,91]}
+{"kind":"textbox","id":"sh/kzy5on2p","slide":14,"name":"矩形 35","text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[67,435,171,46]}
+{"kind":"shape","id":"sh/lkrmhsju","slide":14,"name":"矩形 36","bbox":[250,411,285,91]}
+{"kind":"textbox","id":"sh/6l0nqxkf","slide":14,"name":"矩形 37","text":"输入开放、路径不固定","textPreview":"输入开放、路径不固定","textChars":10,"textLines":1,"bbox":[262,435,261,46]}
+{"kind":"shape","id":"sh/7m94j210","slide":14,"name":"矩形 38","bbox":[535,411,180,91]}
+{"kind":"textbox","id":"sh/fi5432t4","slide":14,"name":"矩形 39","text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[547,435,156,46]}
+{"kind":"shape","id":"sh/uhw3axcj","slide":14,"name":"矩形 40","bbox":[715,411,180,91]}
+{"kind":"textbox","id":"sh/h4nm5sba","slide":14,"name":"矩形 41","text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,435,156,46]}
+{"kind":"shape","id":"sh/gjelc7up","slide":14,"name":"矩形 42","bbox":[895,411,260,91]}
+{"kind":"textbox","id":"sh/365472tg","slide":14,"name":"矩形 43","text":"能力探索","textPreview":"能力探索","textChars":4,"textLines":1,"bbox":[907,435,236,46]}
+{"kind":"shape","id":"sh/25w3excv","slide":14,"name":"矩形 44","bbox":[55,502,195,91]}
+{"kind":"textbox","id":"sh/p87m9cb6","slide":14,"name":"矩形 45","text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[67,526,171,46]}
+{"kind":"shape","id":"sh/47y5g7u1","slide":14,"name":"矩形 46","bbox":[250,502,285,91]}
+{"kind":"textbox","id":"sh/jal4vidw","slide":14,"name":"矩形 47","text":"复杂任务、需要安全闸门","textPreview":"复杂任务、需要安全闸门","textChars":11,"textLines":1,"bbox":[262,526,261,46]}
+{"kind":"shape","id":"sh/i9c32dcr","slide":14,"name":"矩形 48","bbox":[535,502,180,91]}
+{"kind":"textbox","id":"sh/ofq1cja9","slide":14,"name":"矩形 49","text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,526,156,46]}
+{"kind":"shape","id":"sh/9gji5oru","slide":14,"name":"矩形 50","bbox":[715,502,180,91]}
+{"kind":"textbox","id":"sh/mt8ja9sj","slide":14,"name":"矩形 51","text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,526,156,46]}
+{"kind":"shape","id":"sh/neh03eto","slide":14,"name":"矩形 52","bbox":[895,502,260,91]}
+{"kind":"textbox","id":"sh/0rq18zad","slide":14,"name":"矩形 53","text":"演进方向","textPreview":"演进方向","textChars":4,"textLines":1,"bbox":[907,526,236,46]}
+{"kind":"textbox","id":"sh/1szi14by","slide":14,"name":"矩形 54","text":"选择原则","textPreview":"选择原则","textChars":4,"textLines":1,"bbox":[81,626,130,27]}
+{"kind":"textbox","id":"sh/ep8j6ps7","slide":14,"name":"矩形 55","text":"执行和审批需要明确流程，理解、规划和生成更适合交给 Agent。","textPreview":"执行和审批需要明确流程，理解、规划和生成更适合交给 Agent。","textChars":32,"textLines":1,"bbox":[190,624.6,965,31]}
+{"kind":"notes","id":"nt/6lsnupw7","slide":14,"text":"【只记一句】四种方案是按风险和开放程度选择，不是互相替代。\n\n【可直接照读】审批和标准日报已经具备生产落地的特征，因为流程和提交边界清晰；自主日报更适合能力探索，灵活性高但需要更多约束；Agentic Workflow是演进方向，用自主规划处理开放任务，再用流程闸门保证安全。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

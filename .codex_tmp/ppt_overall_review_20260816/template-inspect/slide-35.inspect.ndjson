@@ -1,0 +1,53 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/1obmtofm","slide":35,"title":"一次请求，如何从聊天走到 ERP","textShapes":28}
+{"kind":"shape","id":"sh/dcb254zq","slide":35,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/idonexon","slide":35,"text":"一次请求，如何从聊天走到 ERP","textPreview":"一次请求，如何从聊天走到 ERP","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/3ex47ip8","slide":35,"text":"ENTERPRISE RAG · AGENT WORKFLOW 4/4","textPreview":"ENTERPRISE RAG · AGENT WORKFLOW 4/4","textChars":35,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/gb6lcn6x","slide":35,"text":"35","textPreview":"35","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/hcfm5s72","slide":35,"bbox":[224,263,21,22]}
+{"kind":"shape","id":"sh/u943ador","slide":35,"bbox":[55,179,170,160]}
+{"kind":"shape","id":"sh/vad43ipc","slide":35,"bbox":[118,197,42,42]}
+{"kind":"textbox","id":"sh/87ml836l","slide":35,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[118,203,42,28]}
+{"kind":"textbox","id":"sh/t8vm1876","slide":35,"text":"用户提问","textPreview":"用户提问","textChars":4,"textLines":1,"bbox":[67,250,146,28]}
+{"kind":"textbox","id":"sh/5of6xcbi","slide":35,"text":"自然语言\n表达业务目标","textPreview":"自然语言 | 表达业务目标","textChars":11,"textLines":2,"bbox":[67,283,146,43]}
+{"kind":"shape","id":"sh/4n65o7ax","slide":35,"bbox":[419,263,21,22]}
+{"kind":"shape","id":"sh/3mxov2tc","slide":35,"bbox":[250,179,170,160]}
+{"kind":"shape","id":"sh/ilonmxsr","slide":35,"bbox":[313,197,42,42]}
+{"kind":"textbox","id":"sh/hkv6tsb6","slide":35,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[313,203,42,28]}
+{"kind":"textbox","id":"sh/gjm5knal","slide":35,"text":"LLM 理解","textPreview":"LLM 理解","textChars":6,"textLines":1,"bbox":[262,250,146,28]}
+{"kind":"textbox","id":"sh/vidorit0","slide":35,"text":"识别意图\n抽取业务字段","textPreview":"识别意图 | 抽取业务字段","textChars":11,"textLines":2,"bbox":[262,283,146,43]}
+{"kind":"shape","id":"sh/uh4nidsv","slide":35,"bbox":[614,263,21,22]}
+{"kind":"shape","id":"sh/tgv6psba","slide":35,"bbox":[445,179,170,160]}
+{"kind":"shape","id":"sh/8fm5gnap","slide":35,"bbox":[508,197,42,42]}
+{"kind":"textbox","id":"sh/kzq5wnil","slide":35,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[508,203,42,28]}
+{"kind":"textbox","id":"sh/l0z65sj6","slide":35,"text":"路由选择","textPreview":"路由选择","textChars":4,"textLines":1,"bbox":[457,250,146,28]}
+{"kind":"textbox","id":"sh/yxonud0f","slide":35,"text":"制度问答\n实时查询 · 业务动作","textPreview":"制度问答 | 实时查询 · 业务动作","textChars":16,"textLines":2,"bbox":[457,283,146,43]}
+{"kind":"shape","id":"sh/zyxo3i10","slide":35,"bbox":[809,263,21,22]}
+{"kind":"shape","id":"sh/cv65s3i9","slide":35,"bbox":[640,179,170,160]}
+{"kind":"shape","id":"sh/xwf618ju","slide":35,"bbox":[703,197,42,42]}
+{"kind":"textbox","id":"sh/a9onqdkj","slide":35,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[703,203,42,28]}
+{"kind":"textbox","id":"sh/buxozy1o","slide":35,"text":"能力调用","textPreview":"能力调用","textChars":4,"textLines":1,"bbox":[652,250,146,28]}
+{"kind":"textbox","id":"sh/wrap47it","slide":35,"text":"RAG 检索\n或 ERP Tool","textPreview":"RAG 检索 | 或 ERP Tool","textChars":17,"textLines":2,"bbox":[652,283,146,43]}
+{"kind":"shape","id":"sh/hsj6dcjy","slide":35,"bbox":[1004,263,21,22]}
+{"kind":"shape","id":"sh/ry50jqpc","slide":35,"bbox":[835,179,170,160]}
+{"kind":"shape","id":"sh/qxwzq5o7","slide":35,"bbox":[898,197,42,42]}
+{"kind":"textbox","id":"sh/d0nil07i","slide":35,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[898,203,42,28]}
+{"kind":"textbox","id":"sh/czehsv6x","slide":35,"text":"LangGraph 控制","textPreview":"LangGraph 控制","textChars":12,"textLines":1,"bbox":[847,250,146,28]}
+{"kind":"textbox","id":"sh/z250napo","slide":35,"text":"追问 · 校验\n预览 · 确认","textPreview":"追问 · 校验 | 预览 · 确认","textChars":15,"textLines":2,"bbox":[847,283,146,43]}
+{"kind":"shape","id":"sh/e1wzu5o3","slide":35,"bbox":[1030,179,170,160]}
+{"kind":"shape","id":"sh/147ipk7u","slide":35,"bbox":[1093,197,42,42]}
+{"kind":"textbox","id":"sh/03y1wf69","slide":35,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1093,203,42,28]}
+{"kind":"textbox","id":"sh/v6l0b6pk","slide":35,"text":"返回结果","textPreview":"返回结果","textChars":4,"textLines":1,"bbox":[1042,250,146,28]}
+{"kind":"textbox","id":"sh/u5czil8z","slide":35,"text":"证据回答\n或写入 ERP","textPreview":"证据回答 | 或写入 ERP","textChars":12,"textLines":2,"bbox":[1042,283,146,43]}
+{"kind":"textbox","id":"sh/mpgzylgv","slide":35,"text":"三个关键边界","textPreview":"三个关键边界","textChars":6,"textLines":1,"bbox":[75,389,300,31]}
+{"kind":"shape","id":"sh/7ap0rqx0","slide":35,"bbox":[72,435,352,148]}
+{"kind":"textbox","id":"sh/8byh0vyl","slide":35,"text":"LLM Agent","textPreview":"LLM Agent","textChars":9,"textLines":1,"bbox":[93,456,310,28]}
+{"kind":"textbox","id":"sh/9c7itgf6","slide":35,"text":"负责理解与规划，不直接修改 ERP","textPreview":"负责理解与规划，不直接修改 ERP","textChars":17,"textLines":1,"bbox":[93,496,310,62]}
+{"kind":"shape","id":"sh/udgj2lwr","slide":35,"bbox":[450,435,352,148]}
+{"kind":"textbox","id":"sh/vep0vqxc","slide":35,"text":"RAG + Milvus","textPreview":"RAG + Milvus","textChars":12,"textLines":1,"bbox":[471,456,310,28]}
+{"kind":"textbox","id":"sh/wfy14vex","slide":35,"text":"只在权限范围内检索制度和文档","textPreview":"只在权限范围内检索制度和文档","textChars":14,"textLines":1,"bbox":[471,496,310,62]}
+{"kind":"shape","id":"sh/hgrix0fi","slide":35,"bbox":[828,435,352,148]}
+{"kind":"textbox","id":"sh/ih0j65wn","slide":35,"text":"ERP Tool + LangGraph","textPreview":"ERP Tool + LangGraph","textChars":20,"textLines":1,"bbox":[849,456,310,28]}
+{"kind":"textbox","id":"sh/ji90zax8","slide":35,"text":"ERP 提供实时事实，LangGraph 控制业务写入","textPreview":"ERP 提供实时事实，LangGraph 控制业务写入","textChars":27,"textLines":1,"bbox":[849,496,310,62]}
+{"kind":"notes","id":"nt/1obmtofm","slide":35,"text":"【只记一句】用户只说业务目标，Agent 负责理解和选路，RAG 或 ERP Tool 负责执行，LangGraph 负责追问、确认和写入控制。\n\n【可直接照读】用户从前端输入自然语言后，LLM 先识别这是制度问答、实时查询还是业务动作；制度问题进入 RAG，实时数据和动态模板通过 ERP Tool 获取；如果要执行审批，LangGraph 会继续补充字段、校验、生成预览，并在用户确认后才写入 ERP。整个过程可以返回执行计划、工具调用、检索证据和 ERP 结果，方便现场演示和问题排查。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/services/milvus_service.py\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/services/erp_client.py\n[/Sources]"}

@@ -1,0 +1,34 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/gny5sjyp","slide":16,"title":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textShapes":18}
+{"kind":"shape","id":"sh/sb2l47at","slide":16,"name":"矩形 30","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/8z2h8bq1","slide":16,"name":"矩形 1","text":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textPreview":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/9kby1g7m","slide":16,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ytkf2h8j","slide":16,"name":"矩形 3","text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/zutgvm94","slide":16,"name":"圆角矩形 4","bbox":[78,165,349,143]}
+{"kind":"shape","id":"sh/kv2h4rqp","slide":16,"name":"矩形 5","bbox":[103,181,89,57]}
+{"kind":"textbox","id":"sh/lwbyxwra","slide":16,"name":"矩形 6","text":"注册节点","textPreview":"注册节点","textChars":4,"textLines":1,"bbox":[203,190,195,31]}
+{"kind":"textbox","id":"sh/ip4zel83","slide":16,"name":"矩形 7","text":"顶层 9 + 审批 14 + 标准日报 10 + Agentic 7","textPreview":"顶层 9 + 审批 14 + 标准日报 10 + Agentic 7","textChars":34,"textLines":1,"bbox":[103,247,299,41]}
+{"kind":"shape","id":"sh/3qdg7qpo","slide":16,"name":"圆角矩形 8","bbox":[458,165,349,143]}
+{"kind":"shape","id":"sh/fm1gzq5o","slide":16,"name":"矩形 9","bbox":[483,181,89,57]}
+{"kind":"textbox","id":"sh/e1sf65o3","slide":16,"name":"矩形 10","text":"审批复核路由","textPreview":"审批复核路由","textChars":6,"textLines":1,"bbox":[549.27,190,195,31]}
+{"kind":"textbox","id":"sh/1ojy10ne","slide":16,"name":"矩形 11","text":"decision_review 需要处理 多类分支","textPreview":"decision_review 需要处理 多类分支","textChars":25,"textLines":1,"bbox":[483,247,299,41]}
+{"kind":"shape","id":"sh/gnax8v6t","slide":16,"name":"圆角矩形 12","bbox":[838,165,349,143]}
+{"kind":"shape","id":"sh/nqlg3a5k","slide":16,"name":"矩形 13","bbox":[863,181,89,57]}
+{"kind":"textbox","id":"sh/2pcfa5oz","slide":16,"name":"矩形 14","text":"日报恢复路线","textPreview":"日报恢复路线","textChars":6,"textLines":1,"bbox":[934.8,190,195,31]}
+{"kind":"textbox","id":"sh/ps3y5knq","slide":16,"name":"矩形 15","text":"interrupt_daily_report resume 后有 很多类去向","textPreview":"interrupt_daily_report resume 后有 很多类去向","textChars":38,"textLines":1,"bbox":[863,247,299,41]}
+{"kind":"shape","id":"sh/oruhcf65","slide":16,"name":"圆角矩形 16","bbox":[78,341,543,112]}
+{"kind":"textbox","id":"sh/bulg7u5g","slide":16,"name":"矩形 17","text":"审批组件太多","textPreview":"审批组件太多","textChars":6,"textLines":1,"bbox":[103,358,190,30]}
+{"kind":"textbox","id":"sh/atczepob","slide":16,"name":"矩形 18","text":"字段、选项和审批规则都可能按公司动态配置。","textPreview":"字段、选项和审批规则都可能按公司动态配置。","textChars":21,"textLines":1,"bbox":[296,358,296,64]}
+{"kind":"shape","id":"sh/mpgj6t8j","slide":16,"name":"圆角矩形 19","bbox":[659,341,543,112]}
+{"kind":"textbox","id":"sh/7qp0zepo","slide":16,"name":"矩形 20","text":"if-else 持续增长","textPreview":"if-else 持续增长","textChars":12,"textLines":1,"bbox":[684,358,190,30]}
+{"kind":"textbox","id":"sh/8by18jq9","slide":16,"name":"矩形 21","text":"新建、继续、修改、取消、确认与字段缺失都要分流。","textPreview":"新建、继续、修改、取消、确认与字段缺失都要分流。","textChars":24,"textLines":1,"bbox":[877,358,296,64]}
+{"kind":"shape","id":"sh/9c7i1o7u","slide":16,"name":"圆角矩形 22","bbox":[78,481,543,112]}
+{"kind":"textbox","id":"sh/ylwj2987","slide":16,"name":"矩形 23","text":"状态相互影响","textPreview":"状态相互影响","textChars":6,"textLines":1,"bbox":[103,498,190,30]}
+{"kind":"textbox","id":"sh/zm50veps","slide":16,"name":"矩形 24","text":"多轮对话、人工中断、恢复和重复提交需要协同。","textPreview":"多轮对话、人工中断、恢复和重复提交需要协同。","textChars":22,"textLines":1,"bbox":[296,498,296,64]}
+{"kind":"shape","id":"sh/kne14jqd","slide":16,"name":"圆角矩形 25","bbox":[659,481,543,112]}
+{"kind":"textbox","id":"sh/lo7ixo7y","slide":16,"name":"矩形 26","text":"故障定位困难","textPreview":"故障定位困难","textChars":6,"textLines":1,"bbox":[684,498,190,30]}
+{"kind":"textbox","id":"sh/ih0jedob","slide":16,"name":"矩形 27","text":"需要区分模型、路由、状态恢复与 ERP 接口问题。","textPreview":"需要区分模型、路由、状态恢复与 ERP 接口问题。","textChars":25,"textLines":1,"bbox":[877,498,296,64]}
+{"kind":"shape","id":"sh/ji9k7ypw","slide":16,"name":"圆角矩形 28","bbox":[80,630,1120,44]}
+{"kind":"textbox","id":"sh/tcbmdcre","slide":16,"name":"矩形 29","text":"根本原因：动态配置 × 多轮对话 × 状态流转 × ERP 写入风险同时叠加","textPreview":"根本原因：动态配置 × 多轮对话 × 状态流转 × ERP 写入风险同时叠加","textChars":38,"textLines":1,"bbox":[104,641,1072,24]}
+{"kind":"notes","id":"nt/gny5sjyp","slide":16,"text":"【只记一句】复杂度来自配置、状态和安全边界叠加。\n\n【可直接照读】审批组件太多，每个组件字段不同；LangGraph中 if-else 持续增加；多轮对话、人工中断和恢复让节点状态相互影响；出现问题时还要区分模型、路由、状态和 ERP 接口。当前四类工作流一共注册了约 40 个节点：顶层 9 个、审批子图 14 个、标准日报 10 个、Agentic Workflow 7 个。这个数字能直观说明，聊天入口很简单，业务执行并不简单。\n\n【时间建议】约 75 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

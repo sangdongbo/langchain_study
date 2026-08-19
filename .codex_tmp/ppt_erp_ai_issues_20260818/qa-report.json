@@ -1,0 +1,16 @@
+{
+  "slideCount": 34,
+  "outOfBounds": 0,
+  "emptyPlaceholders": 0,
+  "layoutWarnings": 0,
+  "contentErrors": [],
+  "notesWithoutSources": [],
+  "keyTitles": {
+    "16": "遇到的问题：动态配置与流程状态叠加后迅速变复杂",
+    "17": "本次未处理：可信性与运行治理仍需补齐",
+    "18": "问题排查：需要从“看结果”升级为“看完整链路”",
+    "26": "标准日报子图：草稿、预览与提交恢复",
+    "27": "daily_report_create_agent：自主规划的日报实验版",
+    "28": "附录：Agentic Workflow 子图"
+  }
+}

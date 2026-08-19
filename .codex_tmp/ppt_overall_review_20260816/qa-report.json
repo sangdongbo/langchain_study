@@ -1,0 +1,18 @@
+{
+  "slideCount": 33,
+  "outOfBounds": 0,
+  "pageMarkerErrors": [],
+  "stalePhrases": [],
+  "layoutWarnings": 0,
+  "notesWithoutSources": [],
+  "keyTitles": {
+    "slide16": "预期效果：聊天请假、聊天发日报，并且过程可控",
+    "slide17": "两个高频场景，验证 AI 能否完成业务闭环",
+    "slide18": "遇到的问题：动态配置与流程状态叠加后迅速变复杂",
+    "slide29": "企业级 RAG：连接 ERP 知识、权限与业务上下文",
+    "slide30": "Milvus：承载企业级混合检索与多租户隔离",
+    "slide31": "企业选型：先建立 Milvus RAG 基线，再验证图检索增益",
+    "slide32": "一次请求，如何从聊天走到 ERP",
+    "slide33": "谢谢"
+  }
+}

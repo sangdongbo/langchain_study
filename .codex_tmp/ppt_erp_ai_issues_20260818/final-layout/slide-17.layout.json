@@ -1,0 +1,1619 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/swjf0x",
+    "id": "swjf0x",
+    "slide": 17,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#F6F1E8",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wvuxcrix",
+      "id": "38",
+      "name": "矩形 37",
+      "bbox": [
+        0,
+        0,
+        1280,
+        116
+      ],
+      "geometry": "rect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1ojudg",
+      "id": "2",
+      "name": "矩形 1",
+      "bbox": [
+        72,
+        29,
+        1030,
+        60
+      ],
+      "geometry": "rect",
+      "text": "本次未处理：可信性与运行治理仍需补齐",
+      "textPreview": "本次未处理：可信性与运行治理仍需补齐",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "本次未处理：可信性与运行治理仍需补齐"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "本次未处理：可信性与运行治理仍需补齐",
+          "resolvedTextStyle": {
+            "fontSize": 38,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "本次未处理：可信性与运行治理仍需补齐",
+              "fontSize": 38,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6ds7qpcv",
+      "id": "3",
+      "name": "矩形 2",
+      "bbox": [
+        1000,
+        48,
+        205,
+        26
+      ],
+      "geometry": "rect",
+      "text": "ERP × AI PRACTICE",
+      "textPreview": "ERP × AI PRACTICE",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ERP × AI PRACTICE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ERP × AI PRACTICE",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#E8D9DD",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ERP × AI PRACTICE",
+              "fontSize": 13,
+              "color": "#E8D9DD",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5cj6hkvq",
+      "id": "4",
+      "name": "矩形 3",
+      "bbox": [
+        1170,
+        674,
+        42,
+        20
+      ],
+      "geometry": "rect",
+      "text": "17",
+      "textPreview": "17",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "17"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "17",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#A66C6B",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "17",
+              "fontSize": 12,
+              "color": "#A66C6B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4bapofu5",
+      "id": "5",
+      "name": "圆角矩形 4",
+      "bbox": [
+        77,
+        161,
+        526,
+        342
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#EAF3EC",
+      "lineColor": "#3E7551",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqhofudk",
+      "id": "6",
+      "name": "矩形 5",
+      "bbox": [
+        111,
+        191,
+        430,
+        36
+      ],
+      "geometry": "rect",
+      "text": "可信性边界",
+      "textPreview": "可信性边界",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "可信性边界"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "可信性边界",
+          "resolvedTextStyle": {
+            "fontSize": 26,
+            "color": "#3E7551",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "可信性边界",
+              "fontSize": 26,
+              "color": "#3E7551",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ip87mpcz",
+      "id": "7",
+      "name": "椭圆 6",
+      "bbox": [
+        116,
+        265,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p83qtobu",
+      "id": "8",
+      "name": "矩形 7",
+      "bbox": [
+        139,
+        257,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "记忆只保留会话状态",
+      "textPreview": "记忆只保留会话状态",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "记忆只保留会话状态"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "记忆只保留会话状态",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "记忆只保留会话状态",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o7up0ju9",
+      "id": "9",
+      "name": "椭圆 8",
+      "bbox": [
+        116,
+        313,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dw3m54f",
+      "id": "10",
+      "name": "矩形 9",
+      "bbox": [
+        139,
+        305,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "业务事实实时查询 ERP",
+      "textPreview": "业务事实实时查询 ERP",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "业务事实实时查询 ERP"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "业务事实实时查询 ERP",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "业务事实实时查询 ERP",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7e5kfa50",
+      "id": "11",
+      "name": "椭圆 10",
+      "bbox": [
+        116,
+        361,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sfylofml",
+      "id": "12",
+      "name": "矩形 11",
+      "bbox": [
+        139,
+        353,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "权限以当前用户为准",
+      "textPreview": "权限以当前用户为准",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "权限以当前用户为准"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "权限以当前用户为准",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "权限以当前用户为准",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tg72hknq",
+      "id": "13",
+      "name": "椭圆 12",
+      "bbox": [
+        116,
+        409,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ipwji5o3",
+      "id": "14",
+      "name": "矩形 13",
+      "bbox": [
+        139,
+        401,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "字段与客户信息禁止编造",
+      "textPreview": "字段与客户信息禁止编造",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "字段与客户信息禁止编造"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "字段与客户信息禁止编造",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "字段与客户信息禁止编造",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jq5kba5o",
+      "id": "15",
+      "name": "椭圆 14",
+      "bbox": [
+        116,
+        457,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#3E7551",
+      "lineColor": "#3E7551",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/krelkf69",
+      "id": "16",
+      "name": "矩形 15",
+      "bbox": [
+        139,
+        449,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "关键写入必须预览确认",
+      "textPreview": "关键写入必须预览确认",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "关键写入必须预览确认"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "关键写入必须预览确认",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "关键写入必须预览确认",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5sn2d0nu",
+      "id": "17",
+      "name": "圆角矩形 16",
+      "bbox": [
+        677,
+        161,
+        526,
+        342
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFF1DF",
+      "lineColor": "#BF7326",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lg3up4n",
+      "id": "18",
+      "name": "矩形 17",
+      "bbox": [
+        711,
+        191,
+        430,
+        36
+      ],
+      "geometry": "rect",
+      "text": "可观测与运行时治理",
+      "textPreview": "可观测与运行时治理",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "可观测与运行时治理"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "可观测与运行时治理",
+          "resolvedTextStyle": {
+            "fontSize": 26,
+            "color": "#BF7326",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "可观测与运行时治理",
+              "fontSize": 26,
+              "color": "#BF7326",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3m9knu58",
+      "id": "19",
+      "name": "椭圆 18",
+      "bbox": [
+        716,
+        265,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zq10fmlk",
+      "id": "20",
+      "name": "矩形 19",
+      "bbox": [
+        739,
+        257,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "Trace 记录节点与路由",
+      "textPreview": "Trace 记录节点与路由",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Trace 记录节点与路由"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Trace 记录节点与路由",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Trace 记录节点与路由",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/epszmh4z",
+      "id": "21",
+      "name": "椭圆 20",
+      "bbox": [
+        716,
+        313,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lsjihw3q",
+      "id": "22",
+      "name": "矩形 21",
+      "bbox": [
+        739,
+        305,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "日志记录 Tool 参数与结果",
+      "textPreview": "日志记录 Tool 参数与结果",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "日志记录 Tool 参数与结果"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "日志记录 Tool 参数与结果",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "日志记录 Tool 参数与结果",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0rahorm5",
+      "id": "23",
+      "name": "椭圆 22",
+      "bbox": [
+        716,
+        361,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nu10j6lg",
+      "id": "24",
+      "name": "矩形 23",
+      "bbox": [
+        739,
+        353,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "指标监控延迟与成功率",
+      "textPreview": "指标监控延迟与成功率",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "指标监控延迟与成功率"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "指标监控延迟与成功率",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "指标监控延迟与成功率",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mtszq14v",
+      "id": "25",
+      "name": "椭圆 24",
+      "bbox": [
+        716,
+        409,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9w3ilg3m",
+      "id": "26",
+      "name": "矩形 25",
+      "bbox": [
+        739,
+        401,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "评测覆盖幻觉与权限越界",
+      "textPreview": "评测覆盖幻觉与权限越界",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "评测覆盖幻觉与权限越界"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "评测覆盖幻觉与权限越界",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "评测覆盖幻觉与权限越界",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8vahsb21",
+      "id": "27",
+      "name": "椭圆 26",
+      "bbox": [
+        716,
+        457,
+        9,
+        9
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#BF7326",
+      "lineColor": "#BF7326",
+      "lineWidth": 0
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vyl0n6ls",
+      "id": "28",
+      "name": "矩形 27",
+      "bbox": [
+        739,
+        449,
+        407,
+        44
+      ],
+      "geometry": "rect",
+      "text": "Runtime 提供超时、重试、降级",
+      "textPreview": "Runtime 提供超时、重试、降级",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Runtime 提供超时、重试、降级"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Runtime 提供超时、重试、降级",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "color": "#282523",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Runtime 提供超时、重试、降级",
+              "fontSize": 20,
+              "color": "#282523"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/axczu1k7",
+      "id": "29",
+      "name": "矩形 28",
+      "bbox": [
+        82,
+        548,
+        160,
+        30
+      ],
+      "geometry": "rect",
+      "text": "后续优化",
+      "textPreview": "后续优化",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "后续优化"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "后续优化",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#74364A",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "后续优化",
+              "fontSize": 23,
+              "color": "#74364A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/snehkbi5",
+      "id": "30",
+      "name": "圆角矩形 29",
+      "bbox": [
+        82,
+        594,
+        260,
+        65
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#74364A",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tonydgjq",
+      "id": "31",
+      "name": "矩形 30",
+      "bbox": [
+        92,
+        613,
+        240,
+        28
+      ],
+      "geometry": "rect",
+      "text": "记忆分层",
+      "textPreview": "记忆分层",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "记忆分层"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "记忆分层",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#74364A",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "记忆分层",
+              "fontSize": 18,
+              "color": "#74364A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6lczil0f",
+      "id": "32",
+      "name": "圆角矩形 31",
+      "bbox": [
+        367,
+        594,
+        260,
+        65
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#74364A",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7mlgb61k",
+      "id": "33",
+      "name": "矩形 32",
+      "bbox": [
+        377,
+        613,
+        240,
+        28
+      ],
+      "geometry": "rect",
+      "text": "证据引用与校验",
+      "textPreview": "证据引用与校验",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "证据引用与校验"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "证据引用与校验",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#74364A",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "证据引用与校验",
+              "fontSize": 18,
+              "color": "#74364A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzuhgbi9",
+      "id": "34",
+      "name": "圆角矩形 33",
+      "bbox": [
+        652,
+        594,
+        260,
+        65
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#74364A",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/503y9gju",
+      "id": "35",
+      "name": "矩形 34",
+      "bbox": [
+        662,
+        613,
+        240,
+        28
+      ],
+      "geometry": "rect",
+      "text": "LangSmith 全链路观测",
+      "textPreview": "LangSmith 全链路观测",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LangSmith 全链路观测"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LangSmith 全链路观测",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#74364A",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LangSmith 全链路观测",
+              "fontSize": 18,
+              "color": "#74364A",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ixcze103",
+      "id": "36",
+      "name": "圆角矩形 35",
+      "bbox": [
+        937,
+        594,
+        260,
+        65
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 1.2
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jylg761o",
+      "id": "37",
+      "name": "矩形 36",
+      "bbox": [
+        947,
+        613,
+        240,
+        28
+      ],
+      "geometry": "rect",
+      "text": "Agent Runtime 治理",
+      "textPreview": "Agent Runtime 治理",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agent Runtime 治理"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agent Runtime 治理",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agent Runtime 治理",
+              "fontSize": 18,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

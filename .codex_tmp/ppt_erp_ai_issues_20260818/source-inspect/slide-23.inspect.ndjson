@@ -1,0 +1,36 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/c7uhcr6t","slide":23,"title":"审批子图：入口、上下文与路由决策","textShapes":20}
+{"kind":"shape","id":"sh/d0j6pkbe","slide":23,"name":"矩形 32","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/90vqdczq","slide":23,"name":"矩形 1","text":"审批子图：入口、上下文与路由决策","textPreview":"审批子图：入口、上下文与路由决策","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8zm9k7y5","slide":23,"name":"矩形 2","text":"APPROVAL CREATION AGENT · 1/2","textPreview":"APPROVAL CREATION AGENT · 1/2","textChars":29,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/v2d8fmhw","slide":23,"name":"矩形 3","text":"24","textPreview":"24","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/a14rmhgb","slide":23,"name":"圆角矩形 4","bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/w3m9o7yh","slide":23,"name":"圆角矩形 6","bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/jqd8jmhs","slide":23,"name":"矩形 7","text":"节点职责：入口与路由","textPreview":"节点职责：入口与路由","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/ip4rqhgn","slide":23,"name":"矩形 8","bbox":[997,180,1.5,462]}
+{"kind":"textbox","id":"sh/sby90zm1","slide":23,"name":"矩形 9","text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,205,52]}
+{"kind":"textbox","id":"sh/tc7at436","slide":23,"name":"矩形 10","text":"进入审批子图 / 本轮处理结束","textPreview":"进入审批子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[1009,185,209,52]}
+{"kind":"shape","id":"sh/69gry94v","slide":23,"name":"矩形 11","bbox":[782,239,436,1]}
+{"kind":"textbox","id":"sh/rapsrelg","slide":23,"name":"矩形 12","text":"approval_creation_entry","textPreview":"approval_creation_entry","textChars":23,"textLines":1,"bbox":[782,244,205,52]}
+{"kind":"textbox","id":"sh/0fi94jmx","slide":23,"name":"矩形 13","text":"标记进入审批发起流程","textPreview":"标记进入审批发起流程","textChars":10,"textLines":1,"bbox":[1009,244,209,52]}
+{"kind":"shape","id":"sh/1graxo3i","slide":23,"name":"矩形 14","bbox":[782,298,436,1]}
+{"kind":"textbox","id":"sh/edgr294r","slide":23,"name":"矩形 15","text":"load_context","textPreview":"load_context","textChars":12,"textLines":1,"bbox":[782,303,205,52]}
+{"kind":"textbox","id":"sh/fepsvelc","slide":23,"name":"矩形 16","text":"加载用户上下文和可用审批模板","textPreview":"加载用户上下文和可用审批模板","textChars":14,"textLines":1,"bbox":[1009,303,209,52]}
+{"kind":"shape","id":"sh/oji9832t","slide":23,"name":"矩形 17","bbox":[782,357,436,1]}
+{"kind":"textbox","id":"sh/p4ra1o3e","slide":23,"name":"矩形 18","text":"classify","textPreview":"classify","textChars":8,"textLines":1,"bbox":[782,362,205,52]}
+{"kind":"textbox","id":"sh/x0nalovi","slide":23,"name":"矩形 19","text":"识别模板、会话状态和用户动作","textPreview":"识别模板、会话状态和用户动作","textChars":14,"textLines":1,"bbox":[1009,362,209,52]}
+{"kind":"shape","id":"sh/wze9cjud","slide":23,"name":"矩形 20","bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/by58jeds","slide":23,"name":"矩形 21","text":"decision_review","textPreview":"decision_review","textChars":15,"textLines":1,"bbox":[782,421,205,52]}
+{"kind":"textbox","id":"sh/axwratc7","slide":23,"name":"矩形 22","text":"复核路由与提交条件，限制循环","textPreview":"复核路由与提交条件，限制循环","textChars":14,"textLines":1,"bbox":[1009,421,209,52]}
+{"kind":"shape","id":"sh/l47ap8vu","slide":23,"name":"矩形 23","bbox":[782,475,436,1]}
+{"kind":"textbox","id":"sh/k3y9g3u9","slide":23,"name":"矩形 24","text":"clarify","textPreview":"clarify","textChars":7,"textLines":1,"bbox":[782,480,205,52]}
+{"kind":"textbox","id":"sh/j2psnydo","slide":23,"name":"矩形 25","text":"返回缺失、冲突或模板选择提示","textPreview":"返回缺失、冲突或模板选择提示","textChars":14,"textLines":1,"bbox":[1009,480,209,52]}
+{"kind":"shape","id":"sh/y1gretc3","slide":23,"name":"矩形 26","bbox":[782,534,436,1]}
+{"kind":"textbox","id":"sh/183qd4vq","slide":23,"name":"矩形 27","text":"general_chat","textPreview":"general_chat","textChars":12,"textLines":1,"bbox":[782,539,205,52]}
+{"kind":"textbox","id":"sh/07u94ze5","slide":23,"name":"矩形 28","text":"处理非审批问题并保留审批上下文","textPreview":"处理非审批问题并保留审批上下文","textChars":15,"textLines":1,"bbox":[1009,539,209,52]}
+{"kind":"shape","id":"sh/qds7e5sn","slide":23,"name":"矩形 29","bbox":[782,593,436,1]}
+{"kind":"textbox","id":"sh/re1onat8","slide":23,"name":"矩形 30","text":"resume","textPreview":"resume","textChars":6,"textLines":1,"bbox":[782,598,205,52]}
+{"kind":"textbox","id":"sh/szapgfat","slide":23,"name":"矩形 31","text":"提示当前等待项，帮助继续审批","textPreview":"提示当前等待项，帮助继续审批","textChars":14,"textLines":1,"bbox":[1009,598,209,52]}
+{"kind":"image","id":"im/1or2pcvu","slide":23,"name":"图片 39","bbox":[58,221.73,672,354.55]}
+{"kind":"notes","id":"nt/c7uhcr6t","slide":23,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-39e93d19-0368-48e9-9041-d15d064c8b2e.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n[/Sources]"}

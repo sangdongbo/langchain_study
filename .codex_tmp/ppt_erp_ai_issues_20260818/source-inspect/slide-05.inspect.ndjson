@@ -1,0 +1,8 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"主流 ERP 的 AI：从“助手”走向业务智能体","textShapes":2}
+{"kind":"shape","id":"sh/ji5kf2ho","slide":5,"name":"矩形 34","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/dgbulwnm","slide":5,"name":"矩形 1","text":"主流 ERP 的 AI：从“助手”走向业务智能体","textPreview":"主流 ERP 的 AI：从“助手”走向业务智能体","textChars":24,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"name":"矩形 2","text":"ERP × AI · 2026","textPreview":"ERP × AI · 2026","textChars":15,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"image","id":"im/rix0bu9s","slide":5,"name":"图片 39","bbox":[165.56,142,952.89,536]}
+{"kind":"notes","id":"nt/i107q5of","slide":5,"text":"[Sources]\n- Kingdee AI Suite: https://www.kingdee.com/products/ai_suite_cn.html\n- Yonyou BIP / enterprise AI: https://www.yonyou.com/\n- SAP Joule: https://www.sap.com/products/artificial-intelligence.html\n- Oracle AI for Fusion Applications: https://www.oracle.com/applications/ai/\n- Microsoft Dynamics 365 Business Central AI: https://learn.microsoft.com/en-us/dynamics365/business-central/ai-overview\n- Digiwin: https://www.digiwin.com/\n- Yonyou YonSuite: https://www.yonsuite.com/\n- Grasp / 管家婆: https://www.grasp.com.cn/\n\n注：产品名称与可用能力因版、地区、授权方式而异；本页用于介绍代表性平台与典型 ERP + AI 场景。\n[/Sources]"}

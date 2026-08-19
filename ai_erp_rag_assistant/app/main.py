@@ -21,6 +21,9 @@ def health() -> dict[str, str]:
         "milvus_uri": settings.milvus_uri,
         "milvus_collection": settings.milvus_collection,
         "erp_mode": settings.erp_mode,
+        "erp_read_mode": settings.erp_read_mode,
+        "erp_write_mode": settings.erp_write_mode,
+        "erp_skip_userinfo_validation": str(settings.erp_skip_userinfo_validation).lower(),
         "llm_configured": str(bool(settings.llm_api_key)).lower(),
         "embedding_configured": str(bool(settings.embedding_api_key)).lower(),
     }

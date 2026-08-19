@@ -1,0 +1,41 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/nid43ytk","slide":19,"title":"优化方向：稳定流程标准化，开放判断 Agent 化","textShapes":20}
+{"kind":"shape","id":"sh/ul8fm9gf","slide":19,"name":"矩形 37","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/9gb6xgbi","slide":19,"name":"矩形 1","text":"优化方向：稳定流程标准化，开放判断 Agent 化","textPreview":"优化方向：稳定流程标准化，开放判断 Agent 化","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8v2pobax","slide":19,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/vitozqt8","slide":19,"name":"矩形 3","text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/ahk7qls3","slide":19,"name":"圆角矩形 4","bbox":[77,161,526,342]}
+{"kind":"textbox","id":"sh/xkbq10be","slide":19,"name":"矩形 5","text":"适合保留在流程中的内容","textPreview":"适合保留在流程中的内容","textChars":11,"textLines":1,"bbox":[111,191,430,36]}
+{"kind":"shape","id":"sh/wj2psvat","slide":19,"name":"椭圆 6","bbox":[116,265,9,9]}
+{"kind":"textbox","id":"sh/jmd83atk","slide":19,"name":"矩形 7","text":"字段是否完整","textPreview":"字段是否完整","textChars":6,"textLines":1,"bbox":[139,257,407,44]}
+{"kind":"shape","id":"sh/il47u5sz","slide":19,"name":"椭圆 8","bbox":[116,313,9,9]}
+{"kind":"textbox","id":"sh/cri1gnql","slide":19,"name":"矩形 9","text":"业务校验是否通过","textPreview":"业务校验是否通过","textChars":8,"textLines":1,"bbox":[139,305,407,44]}
+{"kind":"shape","id":"sh/dsri9sr6","slide":19,"name":"椭圆 10","bbox":[116,361,9,9]}
+{"kind":"textbox","id":"sh/qpgjex8f","slide":19,"name":"矩形 11","text":"是否已经生成预览","textPreview":"是否已经生成预览","textChars":8,"textLines":1,"bbox":[139,353,407,44]}
+{"kind":"shape","id":"sh/rqp07290","slide":19,"name":"椭圆 12","bbox":[116,409,9,9]}
+{"kind":"textbox","id":"sh/0vi1k7qx","slide":19,"name":"矩形 13","text":"用户是否明确确认","textPreview":"用户是否明确确认","textChars":8,"textLines":1,"bbox":[139,401,407,44]}
+{"kind":"shape","id":"sh/1gridcr2","slide":19,"name":"椭圆 14","bbox":[116,457,9,9]}
+{"kind":"textbox","id":"sh/et0jix8r","slide":19,"name":"矩形 15","text":"写入是否幂等、可审计","textPreview":"写入是否幂等、可审计","textChars":10,"textLines":1,"bbox":[139,449,407,44]}
+{"kind":"shape","id":"sh/zu90b29c","slide":19,"name":"圆角矩形 16","bbox":[677,161,526,342]}
+{"kind":"textbox","id":"sh/oj21o7qt","slide":19,"name":"矩形 17","text":"适合交给 Agent 的内容","textPreview":"适合交给 Agent 的内容","textChars":14,"textLines":1,"bbox":[711,191,430,36]}
+{"kind":"shape","id":"sh/9kb2hcre","slide":19,"name":"椭圆 18","bbox":[716,265,9,9]}
+{"kind":"textbox","id":"sh/x07i1cji","slide":19,"name":"矩形 19","text":"理解用户真实目标","textPreview":"理解用户真实目标","textChars":8,"textLines":1,"bbox":[739,257,407,44]}
+{"kind":"shape","id":"sh/wfy1s7ix","slide":19,"name":"椭圆 20","bbox":[716,313,9,9]}
+{"kind":"textbox","id":"sh/vep0z21c","slide":19,"name":"矩形 21","text":"从自然语言提取信息","textPreview":"从自然语言提取信息","textChars":9,"textLines":1,"bbox":[739,305,407,44]}
+{"kind":"shape","id":"sh/adgjqx0r","slide":19,"name":"椭圆 22","bbox":[716,361,9,9]}
+{"kind":"textbox","id":"sh/54ri5wje","slide":19,"name":"矩形 23","text":"决定需要查询哪些上下文","textPreview":"决定需要查询哪些上下文","textChars":11,"textLines":1,"bbox":[739,353,407,44]}
+{"kind":"shape","id":"sh/k3y1wri9","slide":19,"name":"椭圆 24","bbox":[716,409,9,9]}
+{"kind":"textbox","id":"sh/j2p03m1o","slide":19,"name":"矩形 25","text":"组织日报和业务摘要","textPreview":"组织日报和业务摘要","textChars":9,"textLines":1,"bbox":[739,401,407,44]}
+{"kind":"shape","id":"sh/i1gjuh03","slide":19,"name":"椭圆 26","bbox":[716,457,9,9]}
+{"kind":"textbox","id":"sh/l8nitsja","slide":19,"name":"矩形 27","text":"面对开放任务制定下一步","textPreview":"面对开放任务制定下一步","textChars":11,"textLines":1,"bbox":[739,449,407,44]}
+{"kind":"textbox","id":"sh/07ehknip","slide":19,"name":"矩形 28","text":"配套改进","textPreview":"配套改进","textChars":4,"textLines":1,"bbox":[82,548,160,30]}
+{"kind":"shape","id":"sh/qdsfutgn","slide":19,"name":"圆角矩形 29","bbox":[82,594,260,65]}
+{"kind":"textbox","id":"sh/belg3yh8","slide":19,"name":"矩形 30","text":"规则配置化","textPreview":"规则配置化","textChars":5,"textLines":1,"bbox":[92,613,240,28]}
+{"kind":"shape","id":"sh/cfuxw3yt","slide":19,"name":"圆角矩形 31","bbox":[367,594,260,65]}
+{"kind":"textbox","id":"sh/dg3y58zy","slide":19,"name":"矩形 32","text":"节点单一职责","textPreview":"节点单一职责","textChars":6,"textLines":1,"bbox":[377,613,240,28]}
+{"kind":"shape","id":"sh/yhcfydgj","slide":19,"name":"圆角矩形 33","bbox":[652,594,260,65]}
+{"kind":"textbox","id":"sh/zilg7yh4","slide":19,"name":"矩形 34","text":"统一 ERP 工具","textPreview":"统一 ERP 工具","textChars":9,"textLines":1,"bbox":[662,613,240,28]}
+{"kind":"shape","id":"sh/0jux03yp","slide":19,"name":"圆角矩形 35","bbox":[937,594,260,65]}
+{"kind":"textbox","id":"sh/lk3y98za","slide":19,"name":"矩形 36","text":"LangSmith 全链路观测","textPreview":"LangSmith 全链路观测","textChars":15,"textLines":1,"bbox":[947,613,240,28]}
+{"kind":"notes","id":"nt/nid43ytk","slide":19,"text":"【只记一句】优化原则是把稳定规则流程化，把开放判断 Agent 化。\n\n【可直接照读】字段完整性、业务校验、预览确认、幂等和审计必须留在 Workflow 中；理解目标、提取信息、选择上下文和组织内容可以交给 Agent。配套动作包括规则配置化、节点单一职责、统一 ERP Tool 和全链路观测。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n[/Sources]"}

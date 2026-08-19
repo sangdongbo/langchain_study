@@ -1,0 +1,39 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/5onypobq","slide":22,"title":"下一步：从两个场景沉淀 ERP 智能化底座","textShapes":19}
+{"kind":"shape","id":"sh/1k7i1knu","slide":22,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/6987itcr","slide":22,"text":"下一步：从两个场景沉淀 ERP 智能化底座","textPreview":"下一步：从两个场景沉淀 ERP 智能化底座","textChars":21,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/7a18rydc","slide":22,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/k7qpgjul","slide":22,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/58zqpov6","slide":22,"bbox":[423,328,58,38]}
+{"kind":"shape","id":"sh/il87etcv","slide":22,"bbox":[813,328,58,38]}
+{"kind":"shape","id":"sh/jmh8nyd0","slide":22,"bbox":[73,187,350,342]}
+{"kind":"textbox","id":"sh/43u9snu5","slide":22,"text":"近期","textPreview":"近期","textChars":2,"textLines":1,"bbox":[103,216,90,30]}
+{"kind":"textbox","id":"sh/p43q1sva","slide":22,"text":"完善审批与日报闭环","textPreview":"完善审批与日报闭环","textChars":9,"textLines":1,"bbox":[103,264,290,70]}
+{"kind":"shape","id":"sh/p4z6tcri","slide":22,"bbox":[107,373,9,9]}
+{"kind":"textbox","id":"sh/436507qx","slide":22,"text":"动态字段适配","textPreview":"动态字段适配","textChars":6,"textLines":1,"bbox":[130,365,263,45]}
+{"kind":"shape","id":"sh/3ixor29c","slide":22,"bbox":[107,422,9,9]}
+{"kind":"textbox","id":"sh/2honyx8r","slide":22,"text":"确认与错误恢复","textPreview":"确认与错误恢复","textChars":7,"textLines":1,"bbox":[130,414,263,45]}
+{"kind":"shape","id":"sh/hgf6pcr6","slide":22,"bbox":[107,471,9,9]}
+{"kind":"textbox","id":"sh/gf65w7ql","slide":22,"text":"链路观测","textPreview":"链路观测","textChars":4,"textLines":1,"bbox":[130,463,263,45]}
+{"kind":"shape","id":"sh/fexon290","slide":22,"bbox":[463,187,350,342]}
+{"kind":"textbox","id":"sh/udonux8v","slide":22,"text":"中期","textPreview":"中期","textChars":2,"textLines":1,"bbox":[493,216,90,30]}
+{"kind":"textbox","id":"sh/1cj61w7q","slide":22,"text":"沉淀通用能力","textPreview":"沉淀通用能力","textChars":6,"textLines":1,"bbox":[493,264,290,70]}
+{"kind":"shape","id":"sh/0bap8rq5","slide":22,"bbox":[497,373,9,9]}
+{"kind":"textbox","id":"sh/krihkz2d","slide":22,"text":"统一业务 Schema","textPreview":"统一业务 Schema","textChars":11,"textLines":1,"bbox":[520,365,263,45]}
+{"kind":"shape","id":"sh/lsrit4jy","slide":22,"bbox":[497,422,9,9]}
+{"kind":"textbox","id":"sh/yp0zipk7","slide":22,"text":"统一 ERP Tool","textPreview":"统一 ERP Tool","textChars":11,"textLines":1,"bbox":[520,414,263,45]}
+{"kind":"shape","id":"sh/jq90ru1s","slide":22,"bbox":[497,471,9,9]}
+{"kind":"textbox","id":"sh/wnihgf2h","slide":22,"text":"公司级配置适配","textPreview":"公司级配置适配","textChars":7,"textLines":1,"bbox":[520,463,263,45]}
+{"kind":"shape","id":"sh/xoripkj2","slide":22,"bbox":[853,187,350,342]}
+{"kind":"textbox","id":"sh/al0zepkb","slide":22,"text":"长期","textPreview":"长期","textChars":2,"textLines":1,"bbox":[883,216,90,30]}
+{"kind":"textbox","id":"sh/bm9gnu1w","slide":22,"text":"扩展更多 ERP 场景","textPreview":"扩展更多 ERP 场景","textChars":11,"textLines":1,"bbox":[883,264,290,70]}
+{"kind":"shape","id":"sh/ozyhcf25","slide":22,"bbox":[887,373,9,9]}
+{"kind":"textbox","id":"sh/907ylkjq","slide":22,"text":"订单与库存","textPreview":"订单与库存","textChars":5,"textLines":1,"bbox":[910,365,263,45]}
+{"kind":"shape","id":"sh/rup0va5s","slide":22,"bbox":[887,422,9,9]}
+{"kind":"textbox","id":"sh/qtwz2547","slide":22,"text":"客户跟进","textPreview":"客户跟进","textChars":4,"textLines":1,"bbox":[910,414,263,45]}
+{"kind":"shape","id":"sh/dw7ixkni","slide":22,"bbox":[887,471,9,9]}
+{"kind":"textbox","id":"sh/cvy14fmx","slide":22,"text":"经营分析与任务执行","textPreview":"经营分析与任务执行","textChars":9,"textLines":1,"bbox":[910,463,263,45]}
+{"kind":"shape","id":"sh/zyp0za5o","slide":22,"bbox":[74,577,1132,83]}
+{"kind":"textbox","id":"sh/exgj6p43","slide":22,"text":"以 LangGraph 作为主框架：让 AI 理解任务，让 ERP 流程稳定、可控、可追踪","textPreview":"以 LangGraph 作为主框架：让 AI 理解任务，让 ERP 流程稳定、可控、可追踪","textChars":45,"textLines":1,"bbox":[103,598,1074,42]}
+{"kind":"notes","id":"nt/5onypobq","slide":22,"text":"【只记一句】下一步是把两个试点沉淀成可复用底座。\n\n【可直接照读】近期完善审批与日报的动态字段、错误恢复和链路观测；中期沉淀统一业务 Schema、ERP Tool和公司级配置适配；长期扩展订单、库存、客户跟进和经营分析。最终目标是让 AI 理解任务，让 ERP 流程稳定、可控、可追踪。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}

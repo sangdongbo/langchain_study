@@ -1,0 +1,39 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/nax4b2dk","slide":33,"title":"后续学习与探索：从工作流走向企业级 AI 底座","textShapes":19}
+{"kind":"shape","id":"sh/47m1sbe9","slide":33,"name":"矩形 35","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/lk3m50nq","slide":33,"name":"矩形 1","text":"后续学习与探索：从工作流走向企业级 AI 底座","textPreview":"后续学习与探索：从工作流走向企业级 AI 底座","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0jalwfm5","slide":33,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/nml47a5w","slide":33,"name":"矩形 3","text":"33","textPreview":"33","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/mlc3y54b","slide":33,"name":"右箭头 4","bbox":[423,328,58,38]}
+{"kind":"shape","id":"sh/9o3m9knm","slide":33,"name":"右箭头 5","bbox":[813,328,58,38]}
+{"kind":"shape","id":"sh/8nul0fmh","slide":33,"name":"圆角矩形 6","bbox":[73,187,350,342]}
+{"kind":"textbox","id":"sh/vql4bu5s","slide":33,"name":"矩形 7","text":"近期","textPreview":"近期","textChars":2,"textLines":1,"bbox":[103,216,90,30]}
+{"kind":"textbox","id":"sh/apc32p47","slide":33,"name":"矩形 8","text":"强化 AI 工程化","textPreview":"强化 AI 工程化","textChars":9,"textLines":1,"bbox":[103,264,290,70]}
+{"kind":"shape","id":"sh/grad8zah","slide":33,"name":"椭圆 9","bbox":[107,373,9,9]}
+{"kind":"textbox","id":"sh/hsjuhkb2","slide":33,"name":"矩形 10","text":"Structured Output 与 Schema","textPreview":"Structured Output 与 Schema","textChars":26,"textLines":1,"bbox":[130,365,263,45]}
+{"kind":"shape","id":"sh/upsv6psb","slide":33,"name":"椭圆 11","bbox":[107,422,9,9]}
+{"kind":"textbox","id":"sh/vq1cfutw","slide":33,"name":"矩形 12","text":"Tool Calling 与幂等","textPreview":"Tool Calling 与幂等","textChars":16,"textLines":1,"bbox":[130,414,263,45]}
+{"kind":"shape","id":"sh/4vadczad","slide":33,"name":"椭圆 13","bbox":[107,471,9,9]}
+{"kind":"textbox","id":"sh/5w3ul4by","slide":33,"name":"矩形 14","text":"LangSmith 评测体系","textPreview":"LangSmith 评测体系","textChars":14,"textLines":1,"bbox":[130,463,263,45]}
+{"kind":"shape","id":"sh/itsvapsn","slide":33,"name":"圆角矩形 15","bbox":[463,187,350,342]}
+{"kind":"textbox","id":"sh/3u1cjut8","slide":33,"name":"矩形 16","text":"中期","textPreview":"中期","textChars":2,"textLines":1,"bbox":[493,216,90,30]}
+{"kind":"textbox","id":"sh/czudgjap","slide":33,"name":"矩形 17","text":"深入 LangGraph 编排","textPreview":"深入 LangGraph 编排","textChars":15,"textLines":1,"bbox":[493,264,290,70]}
+{"kind":"shape","id":"sh/dk3ep4ba","slide":33,"name":"椭圆 18","bbox":[497,373,9,9]}
+{"kind":"textbox","id":"sh/lgzu94je","slide":33,"name":"矩形 19","text":"State 与 Checkpoint","textPreview":"State 与 Checkpoint","textChars":18,"textLines":1,"bbox":[520,365,263,45]}
+{"kind":"shape","id":"sh/0fqd0z2t","slide":33,"name":"椭圆 20","bbox":[497,422,9,9]}
+{"kind":"textbox","id":"sh/zehc7u18","slide":33,"name":"矩形 21","text":"Subgraph 与节点复用","textPreview":"Subgraph 与节点复用","textChars":14,"textLines":1,"bbox":[520,414,263,45]}
+{"kind":"shape","id":"sh/yd8vy9kn","slide":33,"name":"椭圆 22","bbox":[497,471,9,9]}
+{"kind":"textbox","id":"sh/9kjudoja","slide":33,"name":"矩形 23","text":"Human-in-the-loop","textPreview":"Human-in-the-loop","textChars":17,"textLines":1,"bbox":[520,463,263,45]}
+{"kind":"shape","id":"sh/8jad4j2p","slide":33,"name":"圆角矩形 24","bbox":[853,187,350,342]}
+{"kind":"textbox","id":"sh/nihcbe1k","slide":33,"name":"矩形 25","text":"长期","textPreview":"长期","textChars":2,"textLines":1,"bbox":[883,216,90,30]}
+{"kind":"textbox","id":"sh/mh8v29kz","slide":33,"name":"矩形 26","text":"探索企业级 RAG","textPreview":"探索企业级 RAG","textChars":9,"textLines":1,"bbox":[883,264,290,70]}
+{"kind":"shape","id":"sh/pofu1k36","slide":33,"name":"椭圆 27","bbox":[887,373,9,9]}
+{"kind":"textbox","id":"sh/4n6tsf2l","slide":33,"name":"矩形 28","text":"混合检索与 Rerank","textPreview":"混合检索与 Rerank","textChars":12,"textLines":1,"bbox":[910,365,263,45]}
+{"kind":"shape","id":"sh/uhkjm1w7","slide":33,"name":"椭圆 29","bbox":[887,422,9,9]}
+{"kind":"textbox","id":"sh/vit0f6ds","slide":33,"name":"矩形 30","text":"权限过滤与知识治理","textPreview":"权限过滤与知识治理","textChars":9,"textLines":1,"bbox":[910,414,263,45]}
+{"kind":"shape","id":"sh/gj21ored","slide":33,"name":"椭圆 31","bbox":[887,471,9,9]}
+{"kind":"textbox","id":"sh/h4bihwvy","slide":33,"name":"矩形 32","text":"GraphRAG / LightRAG 评测","textPreview":"GraphRAG / LightRAG 评测","textChars":22,"textLines":1,"bbox":[910,463,263,45]}
+{"kind":"shape","id":"sh/i5kjq1w3","slide":33,"name":"圆角矩形 33","bbox":[74,577,1132,83]}
+{"kind":"textbox","id":"sh/36d0j6do","slide":33,"name":"矩形 34","text":"学习目标：补齐 ERP 智能化所需的稳定性、评测、治理与规模化能力","textPreview":"学习目标：补齐 ERP 智能化所需的稳定性、评测、治理与规模化能力","textChars":33,"textLines":1,"bbox":[103,598,1074,42]}
+{"kind":"notes","id":"nt/nax4b2dk","slide":33,"text":"【只记一句】下一阶段不是继续堆框架，而是补齐 ERP 智能化所需的工程化、流程治理和企业知识能力。\n\n【可直接照读】后续学习与探索主要分三个方向。近期重点强化 AI 工程化，包括 Structured Output、统一 Schema、Tool Calling 的幂等设计，以及通过 LangSmith 建立评测体系；中期继续深入 LangGraph，重点学习 State、Checkpoint、Subgraph、节点复用和 Human-in-the-loop，把复杂流程拆得更清晰；长期重点探索企业级 RAG，包括混合检索、Rerank、权限过滤、知识治理，并用真实评测判断 GraphRAG 或 LightRAG 是否值得引入。最终目标不是掌握更多名词，而是把这些能力沉淀成可评测、可治理、可规模化的 ERP 智能化底座。\n\n【时间建议】约 70 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/docs/python_langchain_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs/python_milvus_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_graphrag_lightrag_notes.md\n[/Sources]"}

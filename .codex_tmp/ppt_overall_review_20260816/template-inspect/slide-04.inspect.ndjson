@@ -1,0 +1,27 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"现场演示：用两条对话证明业务闭环","textShapes":17}
+{"kind":"shape","id":"sh/1wbapc7q","slide":4,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":4,"text":"现场演示：用两条对话证明业务闭环","textPreview":"现场演示：用两条对话证明业务闭环","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0ba143al","slide":4,"text":"LIVE DEMO · 2–3 MIN","textPreview":"LIVE DEMO · 2–3 MIN","textChars":19,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/rm1k7yt4","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/ql8jytsj","slide":4,"bbox":[72,154,538,403]}
+{"kind":"textbox","id":"sh/doj29oba","slide":4,"text":"演示一：聊天请假","textPreview":"演示一：聊天请假","textChars":8,"textLines":1,"bbox":[106,184,310,35]}
+{"kind":"textbox","id":"sh/sna103ap","slide":4,"text":"现场输入","textPreview":"现场输入","textChars":4,"textLines":1,"bbox":[106,247,135,27]}
+{"kind":"shape","id":"sh/3ihk3et8","slide":4,"bbox":[106,281,230,56]}
+{"kind":"textbox","id":"sh/ih8ju9sn","slide":4,"text":"我要请假","textPreview":"我要请假","textChars":4,"textLines":1,"bbox":[128,296,186,32]}
+{"kind":"textbox","id":"sh/kbm987y5","slide":4,"text":"继续补充：请假类型、开始时间、结束时间","textPreview":"继续补充：请假类型、开始时间、结束时间","textChars":19,"textLines":1,"bbox":[106,356,430,28]}
+{"kind":"textbox","id":"sh/5cva1cfq","slide":4,"text":"展示结果","textPreview":"展示结果","textChars":4,"textLines":1,"bbox":[106,411,135,27]}
+{"kind":"textbox","id":"sh/i94r6xgz","slide":4,"text":"动态追问 → 字段校验 → 审批预览 → 确认提交","textPreview":"动态追问 → 字段校验 → 审批预览 → 确认提交","textChars":25,"textLines":1,"bbox":[106,449,440,47]}
+{"kind":"textbox","id":"sh/jadsz2xk","slide":4,"text":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textPreview":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textChars":25,"textLines":1,"bbox":[106,514,440,27]}
+{"kind":"shape","id":"sh/w72947yt","slide":4,"bbox":[670,154,538,403]}
+{"kind":"textbox","id":"sh/x8vaxsfe","slide":4,"text":"演示二：聊天发日报","textPreview":"演示二：聊天发日报","textChars":9,"textLines":1,"bbox":[704,184,335,35]}
+{"kind":"textbox","id":"sh/a5kr2xg3","slide":4,"text":"现场输入","textPreview":"现场输入","textChars":4,"textLines":1,"bbox":[704,247,135,27]}
+{"kind":"shape","id":"sh/v6tsv2xo","slide":4,"bbox":[704,281,438,64]}
+{"kind":"textbox","id":"sh/g36tgryd","slide":4,"text":"写今天日报：完成审批助手开发和接口联调","textPreview":"写今天日报：完成审批助手开发和接口联调","textChars":19,"textLines":1,"bbox":[726,296,394,40]}
+{"kind":"textbox","id":"sh/h4fa9wfy","slide":4,"text":"展示结果","textPreview":"展示结果","textChars":4,"textLines":1,"bbox":[704,379,135,27]}
+{"kind":"textbox","id":"sh/p0batw72","slide":4,"text":"加载上下文 → 生成草稿 → 预览 → 确认提交","textPreview":"加载上下文 → 生成草稿 → 预览 → 确认提交","textChars":24,"textLines":1,"bbox":[704,417,440,47]}
+{"kind":"textbox","id":"sh/oz29krqh","slide":4,"text":"关键观察：日报内容可以自然表达，业务字段仍然保留","textPreview":"关键观察：日报内容可以自然表达，业务字段仍然保留","textChars":24,"textLines":1,"bbox":[704,482,440,27]}
+{"kind":"shape","id":"sh/3ytsrmpw","slide":4,"bbox":[81,596,1119,57]}
+{"kind":"textbox","id":"sh/2xkrih8b","slide":4,"text":"演示原则：先展示输入与结果，再解释背后的 Agent、Workflow 和 ERP Tool","textPreview":"演示原则：先展示输入与结果，再解释背后的 Agent、Workflow 和 ERP Tool","textChars":46,"textLines":1,"bbox":[108,612,1065,28]}
+{"kind":"notes","id":"nt/jyx0ra1s","slide":4,"text":"【只记一句】现场用两条对话证明：AI 不只是回答，而是真的走完 ERP 业务闭环。\n\n【演示前准备】提前启动 ai_approval_assistant，优先打开现有聊天页面；没有聊天前端时打开 http://127.0.0.1:8010/docs。测试或 mock 环境可以确认提交，生产环境只演示到预览。每条演示使用新的 session_id，避免继承上一次状态。\n\n【可直接照读】下面我不讲代码，直接看实际效果。第一条输入“我要请假”，系统会按真实配置追问请假类型和时间，字段完整后生成审批预览，明确确认后才提交。第二条输入“写今天日报：完成审批助手开发和接口联调”，系统加载当天上下文、生成草稿和预览，再等待确认。大家重点看三个点：自然语言入口、动态补充信息、提交前人工确认。\n\n【异常备用】如果接口或网络临时异常，立刻停止刷新，直接用后面的 LangGraph Studio 截图说明同一条路径，并明确说明“现场环境异常，不影响已经完成的流程验证”。\n\n【时间建议】约 2 分 30 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/演示.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/api/chat.py\n- FastAPI Swagger demo entry: http://127.0.0.1:8010/docs\n- Deep Agents demo entry: http://127.0.0.1:8020/docs\n- Backup plan: if live service is unavailable, use the prepared LangGraph Studio screenshots and explain the same input → preview → confirmation path.\n[/Sources]"}

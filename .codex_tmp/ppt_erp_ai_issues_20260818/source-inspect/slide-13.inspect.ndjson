@@ -1,0 +1,35 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/hgzapcr6","slide":13,"title":"Agentic Workflow：把自主规划与流程闸门组合起来","textShapes":21}
+{"kind":"shape","id":"sh/5cn2h8vy","slide":13,"name":"矩形 31","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/q50nydsj","slide":13,"name":"矩形 1","text":"Agentic Workflow：把自主规划与流程闸门组合起来","textPreview":"Agentic Workflow：把自主规划与流程闸门组合起来","textChars":31,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/bq9orito","slide":13,"name":"矩形 2","text":"AGENTIC WORKFLOW DEMO","textPreview":"AGENTIC WORKFLOW DEMO","textChars":21,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/o3i5w3ad","slide":13,"name":"矩形 3","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/p4r6p8by","slide":13,"name":"矩形 4","text":"Agent 负责开放性工作","textPreview":"Agent 负责开放性工作","textChars":13,"textLines":1,"bbox":[92,158,430,35]}
+{"kind":"textbox","id":"sh/21gnuts7","slide":13,"name":"矩形 5","text":"Workflow 负责确定性边界","textPreview":"Workflow 负责确定性边界","textChars":16,"textLines":1,"bbox":[760,158,430,35]}
+{"kind":"shape","id":"sh/32ponyts","slide":13,"name":"圆角矩形 6","bbox":[92,226,438,82]}
+{"kind":"textbox","id":"sh/gzy5s3a1","slide":13,"name":"矩形 7","text":"理解目标","textPreview":"理解目标","textChars":4,"textLines":1,"bbox":[118,239,126,28]}
+{"kind":"textbox","id":"sh/1076lobm","slide":13,"name":"矩形 8","text":"识别用户要写什么日报","textPreview":"识别用户要写什么日报","textChars":10,"textLines":1,"bbox":[245,240,250,42]}
+{"kind":"shape","id":"sh/hcfy9k3u","slide":13,"name":"圆角矩形 9","bbox":[92,337,438,82]}
+{"kind":"textbox","id":"sh/gb6x0zm9","slide":13,"name":"矩形 10","text":"制定计划","textPreview":"制定计划","textChars":4,"textLines":1,"bbox":[118,350,126,28]}
+{"kind":"textbox","id":"sh/vaxg7ulo","slide":13,"name":"矩形 11","text":"明确需要哪些上下文","textPreview":"明确需要哪些上下文","textChars":9,"textLines":1,"bbox":[245,351,250,42]}
+{"kind":"shape","id":"sh/u9ofyp43","slide":13,"name":"圆角矩形 12","bbox":[92,448,438,82]}
+{"kind":"textbox","id":"sh/t8fy5k3i","slide":13,"name":"矩形 13","text":"整理内容","textPreview":"整理内容","textChars":4,"textLines":1,"bbox":[118,461,126,28]}
+{"kind":"textbox","id":"sh/876xwfmx","slide":13,"name":"矩形 14","text":"结合用户输入生成正文","textPreview":"结合用户输入生成正文","textChars":10,"textLines":1,"bbox":[245,462,250,42]}
+{"kind":"shape","id":"sh/7mdg3als","slide":13,"name":"右箭头 15","bbox":[573,337,110,45]}
+{"kind":"textbox","id":"sh/6l4fu547","slide":13,"name":"矩形 16","text":"建议下一步","textPreview":"建议下一步","textChars":5,"textLines":1,"bbox":[567,390,120,27]}
+{"kind":"shape","id":"sh/lkvy103m","slide":13,"name":"圆角矩形 17","bbox":[752,216,438,68]}
+{"kind":"textbox","id":"sh/kjmxsfm1","slide":13,"name":"矩形 18","text":"保存草稿","textPreview":"保存草稿","textChars":4,"textLines":1,"bbox":[777,226,126,27]}
+{"kind":"textbox","id":"sh/cnqh8fux","slide":13,"name":"矩形 19","text":"由流程执行写入","textPreview":"由流程执行写入","textChars":7,"textLines":1,"bbox":[910,228,250,35]}
+{"kind":"shape","id":"sh/xozyhkbi","slide":13,"name":"圆角矩形 20","bbox":[752,307,438,68]}
+{"kind":"textbox","id":"sh/q18f65cr","slide":13,"name":"矩形 21","text":"生成预览","textPreview":"生成预览","textChars":4,"textLines":1,"bbox":[777,317,126,27]}
+{"kind":"textbox","id":"sh/bmhgfatc","slide":13,"name":"矩形 22","text":"展示完整业务信息","textPreview":"展示完整业务信息","textChars":8,"textLines":1,"bbox":[910,319,250,35]}
+{"kind":"shape","id":"sh/oz6x4vul","slide":13,"name":"圆角矩形 23","bbox":[752,398,438,68]}
+{"kind":"textbox","id":"sh/p0zyd0b6","slide":13,"name":"矩形 24","text":"人工确认","textPreview":"人工确认","textChars":4,"textLines":1,"bbox":[777,408,126,27]}
+{"kind":"textbox","id":"sh/2xof2lcv","slide":13,"name":"矩形 25","text":"暂停等待用户动作","textPreview":"暂停等待用户动作","textChars":8,"textLines":1,"bbox":[910,410,250,35]}
+{"kind":"shape","id":"sh/3yxgbqdg","slide":13,"name":"圆角矩形 26","bbox":[752,489,438,68]}
+{"kind":"textbox","id":"sh/8vahgzu5","slide":13,"name":"矩形 27","text":"提交闸门","textPreview":"提交闸门","textChars":4,"textLines":1,"bbox":[777,499,126,27]}
+{"kind":"textbox","id":"sh/9wjyp4bq","slide":13,"name":"矩形 28","text":"确认后才允许执行","textPreview":"确认后才允许执行","textChars":8,"textLines":1,"bbox":[910,501,250,35]}
+{"kind":"shape","id":"sh/jqlkfyds","slide":13,"name":"圆角矩形 29","bbox":[94,611,1095,48]}
+{"kind":"textbox","id":"sh/ipcjmtw7","slide":13,"name":"矩形 30","text":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textPreview":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textChars":36,"textLines":1,"bbox":[126,623,1031,25]}
+{"kind":"notes","id":"nt/hgzapcr6","slide":13,"text":"【只记一句】开放性工作交给 Agent，确定性写入交给 Workflow。\n\n【可直接照读】Agent可以理解目标、制定计划和组织正文；Workflow负责保存草稿、生成预览、等待确认和执行提交。这个 Agentic Workflow demo 体现的是一种折中：让模型有灵活性，但把高风险动作放在明确的流程闸门之后。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agentic_workflow_demo.py\n[/Sources]"}

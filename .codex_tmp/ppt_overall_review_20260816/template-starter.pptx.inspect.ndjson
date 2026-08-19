@@ -1,0 +1,1157 @@
+{"kind":"deck","id":"pr/ytkd76","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/o171vw","slide":1,"title":"ERP 与 AI 融合实践","textShapes":12}
+{"kind":"shape","id":"sh/yd0je5gb","slide":1,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/sz294jyt","slide":1,"bbox":[0,0,1280,218]}
+{"kind":"textbox","id":"sh/t0badofe","slide":1,"text":"ERP 与 AI 融合实践","textPreview":"ERP 与 AI 融合实践","textChars":13,"textLines":1,"bbox":[78,56,900,78]}
+{"kind":"textbox","id":"sh/u1kr6tgz","slide":1,"text":"从聊天发起审批，到聊天填写日报","textPreview":"从聊天发起审批，到聊天填写日报","textChars":15,"textLines":1,"bbox":[82,137,820,46]}
+{"kind":"textbox","id":"sh/f2tsfyxk","slide":1,"text":"让用户直接表达业务目标，让 AI 在 ERP 规则内协助完成操作","textPreview":"让用户直接表达业务目标，让 AI 在 ERP 规则内协助完成操作","textChars":32,"textLines":1,"bbox":[82,284,820,88]}
+{"kind":"shape","id":"sh/g32983y5","slide":1,"bbox":[82,445,252,116]}
+{"kind":"textbox","id":"sh/h4bah8fq","slide":1,"text":"智能审批","textPreview":"智能审批","textChars":4,"textLines":1,"bbox":[100,469,216,32]}
+{"kind":"textbox","id":"sh/a5gru9gv","slide":1,"text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[97,516,222,27]}
+{"kind":"shape","id":"sh/v6ps3exg","slide":1,"bbox":[368,445,252,116]}
+{"kind":"textbox","id":"sh/v6dkfux4","slide":1,"text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[386,469,216,32]}
+{"kind":"textbox","id":"sh/u54jmpwj","slide":1,"text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[383,516,222,27]}
+{"kind":"shape","id":"sh/h8v2h4fu","slide":1,"bbox":[654,445,252,116]}
+{"kind":"textbox","id":"sh/w7m1oze9","slide":1,"text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[672,469,216,32]}
+{"kind":"textbox","id":"sh/72tkbaxs","slide":1,"text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[669,516,222,27]}
+{"kind":"shape","id":"sh/m1kji5g7","slide":1,"bbox":[940,445,252,116]}
+{"kind":"textbox","id":"sh/94b2dkfy","slide":1,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[958,469,216,32]}
+{"kind":"textbox","id":"sh/8321kfed","slide":1,"text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[955,516,222,27]}
+{"kind":"textbox","id":"sh/zetk7axw","slide":1,"text":"AI APPROVAL ASSISTANT · 场景实践分享","textPreview":"AI APPROVAL ASSISTANT · 场景实践分享","textChars":30,"textLines":1,"bbox":[82,646,520,22]}
+{"kind":"notes","id":"nt/o171vw","slide":1,"text":"【只记一句】ERP 和 AI 的结合，目标不是做一个会聊天的机器人，而是让用户用自然语言完成真实业务动作。\n\n【可直接照读】今天分享的是 ERP 与 AI 的结合实践，重点放在两个具体动作：聊天发起审批、聊天填写日报。我们验证了 approval_creation_agent、daily_report_agent、daily_report_create_agent 和 daily_report_agentic_workflow_demo 四类实现，最后把 LangGraph 作为 ERP 主流程框架。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- Visual style references supplied by the user: C:/Users/EDY/Pictures/1.jpg–16.jpg\n[/Sources]"}
+{"kind":"slide","id":"sl/fmdwdy","slide":2,"title":"本次分享围绕四个核心问题展开","textShapes":20}
+{"kind":"shape","id":"sh/gvmhsnup","slide":2,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/gvit4z6l","slide":2,"text":"本次分享围绕四个核心问题展开","textPreview":"本次分享围绕四个核心问题展开","textChars":14,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/1wrux476","slide":2,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/65gbypoj","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/r6pcrap4","slide":2,"bbox":[76,174,544,194]}
+{"kind":"textbox","id":"sh/s7yt0f6p","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[106,199,70,39]}
+{"kind":"textbox","id":"sh/tsrutk7a","slide":2,"text":"应用场景","textPreview":"应用场景","textChars":4,"textLines":1,"bbox":[189,200,300,36]}
+{"kind":"textbox","id":"sh/i1gbu58n","slide":2,"text":"AI 与 ERP 如何结合？","textPreview":"AI 与 ERP 如何结合？","textChars":14,"textLines":1,"bbox":[107,259,480,30]}
+{"kind":"textbox","id":"sh/j2pcnaps","slide":2,"text":"聊天发起审批、聊天填写日报","textPreview":"聊天发起审批、聊天填写日报","textChars":13,"textLines":1,"bbox":[107,301,480,48]}
+{"kind":"shape","id":"sh/vapw3e90","slide":2,"bbox":[660,174,544,194]}
+{"kind":"textbox","id":"sh/u9gfu9sf","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[690,199,70,39]}
+{"kind":"textbox","id":"sh/hcre5or6","slide":2,"text":"实施路径","textPreview":"实施路径","textChars":4,"textLines":1,"bbox":[773,200,300,36]}
+{"kind":"textbox","id":"sh/wbyxwjal","slide":2,"text":"如何把想法做成可用能力？","textPreview":"如何把想法做成可用能力？","textChars":12,"textLines":1,"bbox":[691,259,480,30]}
+{"kind":"textbox","id":"sh/jy9wre9w","slide":2,"text":"开发聊天助手，接入 ERP，并用 LangGraph 编排","textPreview":"开发聊天助手，接入 ERP，并用 LangGraph 编排","textChars":29,"textLines":1,"bbox":[691,301,480,48]}
+{"kind":"shape","id":"sh/ix0fytsb","slide":2,"bbox":[76,407,544,194]}
+{"kind":"textbox","id":"sh/50retor2","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[106,432,70,39]}
+{"kind":"textbox","id":"sh/4zix0jah","slide":2,"text":"预期效果","textPreview":"预期效果","textChars":4,"textLines":1,"bbox":[189,433,300,36]}
+{"kind":"textbox","id":"sh/z25wvu9s","slide":2,"text":"最终希望实现什么？","textPreview":"最终希望实现什么？","textChars":9,"textLines":1,"bbox":[107,492,480,30]}
+{"kind":"textbox","id":"sh/y1wvmps7","slide":2,"text":"聊天请假、聊天发日报，形成可确认的业务闭环","textPreview":"聊天请假、聊天发日报，形成可确认的业务闭环","textChars":21,"textLines":1,"bbox":[107,534,480,48]}
+{"kind":"shape","id":"sh/2x4zuxcv","slide":2,"bbox":[660,407,544,194]}
+{"kind":"textbox","id":"sh/3yd032tg","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[690,432,70,39]}
+{"kind":"textbox","id":"sh/ozmhw7u1","slide":2,"text":"遇到的问题","textPreview":"遇到的问题","textChars":5,"textLines":1,"bbox":[773,433,300,36]}
+{"kind":"textbox","id":"sh/p0vi5cb6","slide":2,"text":"实际开发为什么变复杂？","textPreview":"实际开发为什么变复杂？","textChars":11,"textLines":1,"bbox":[691,492,480,30]}
+{"kind":"textbox","id":"sh/etkzqdcj","slide":2,"text":"动态组件、if-else 增长、节点复杂、排查困难","textPreview":"动态组件、if-else 增长、节点复杂、排查困难","textChars":25,"textLines":1,"bbox":[691,534,480,48]}
+{"kind":"textbox","id":"sh/fut0zit4","slide":2,"text":"核心目标：让用户直接表达业务目标，让 AI 在 ERP 的数据、规则和权限边界内协助执行","textPreview":"核心目标：让用户直接表达业务目标，让 AI 在 ERP 的数据、规则和权限边界内协助执行","textChars":44,"textLines":1,"bbox":[82,637,1110,30]}
+{"kind":"notes","id":"nt/fmdwdy","slide":2,"text":"【只记一句】今天只回答四个问题：场景、路径、效果、问题。\n\n【可直接照读】整场分享围绕四个问题展开。第一，AI 为什么要进入 ERP；第二，如何通过聊天助手落地；第三，目前已经实现了哪些可用能力；第四，为什么看起来只是请假和日报，最后却出现了很多节点和分支。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}
+{"kind":"slide","id":"sl/f8za5t","slide":3,"title":"首批场景聚焦两个高频动作：审批与日报","textShapes":20}
+{"kind":"shape","id":"sh/yd8rmp47","slide":3,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/nalwjexw","slide":3,"text":"首批场景聚焦两个高频动作：审批与日报","textPreview":"首批场景聚焦两个高频动作：审批与日报","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/29cva9gb","slide":3,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/xgnepofy","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/cfedg3yd","slide":3,"bbox":[78,161,530,335]}
+{"kind":"textbox","id":"sh/be5wnyx8","slide":3,"text":"聊天发起审批","textPreview":"聊天发起审批","textChars":6,"textLines":1,"bbox":[112,193,260,40]}
+{"kind":"textbox","id":"sh/adwvetgn","slide":3,"text":"一句话表达需求，助手根据真实审批配置逐步引导","textPreview":"一句话表达需求，助手根据真实审批配置逐步引导","textChars":22,"textLines":1,"bbox":[112,239,440,56]}
+{"kind":"shape","id":"sh/l47et8fa","slide":3,"bbox":[113,315,322,62]}
+{"kind":"textbox","id":"sh/k3exk3yp","slide":3,"text":"我明天下午请假 2 小时","textPreview":"我明天下午请假 2 小时","textChars":12,"textLines":1,"bbox":[135,330,278,38]}
+{"kind":"shape","id":"sh/yp0fm183","slide":3,"bbox":[218,397,346,62]}
+{"kind":"textbox","id":"sh/zq9gv6po","slide":3,"text":"请选择请假类型，并确认开始时间。","textPreview":"请选择请假类型，并确认开始时间。","textChars":16,"textLines":1,"bbox":[240,412,302,38]}
+{"kind":"shape","id":"sh/krixobq9","slide":3,"bbox":[672,161,530,335]}
+{"kind":"textbox","id":"sh/lsryxg7u","slide":3,"text":"聊天填写日报","textPreview":"聊天填写日报","textChars":6,"textLines":1,"bbox":[706,193,260,40]}
+{"kind":"textbox","id":"sh/mtkfql8f","slide":3,"text":"用自然语言描述工作，助手加载 ERP 上下文并形成预览","textPreview":"用自然语言描述工作，助手加载 ERP 上下文并形成预览","textChars":27,"textLines":1,"bbox":[706,239,440,56]}
+{"kind":"shape","id":"sh/7utgz6pk","slide":3,"bbox":[706,315,427,68]}
+{"kind":"textbox","id":"sh/8v2xsbq5","slide":3,"text":"帮我写今天日报：完成客户拜访和报价整理","textPreview":"帮我写今天日报：完成客户拜访和报价整理","textChars":19,"textLines":1,"bbox":[728,330,383,44]}
+{"kind":"shape","id":"sh/9wby1g7q","slide":3,"bbox":[806,404,350,58]}
+{"kind":"textbox","id":"sh/2xgfeh8v","slide":3,"text":"日报草稿已生成，确认后提交。","textPreview":"日报草稿已生成，确认后提交。","textChars":14,"textLines":1,"bbox":[828,419,306,34]}
+{"kind":"textbox","id":"sh/3ypwnmpg","slide":3,"text":"当前项目用四种方案验证不同业务复杂度下的 AI 编排方式","textPreview":"当前项目用四种方案验证不同业务复杂度下的 AI 编排方式","textChars":28,"textLines":1,"bbox":[83,540,850,36]}
+{"kind":"shape","id":"sh/r2lcvi58","slide":3,"bbox":[83,596,263,70]}
+{"kind":"textbox","id":"sh/61cvmdon","slide":3,"text":"审批","textPreview":"审批","textChars":2,"textLines":1,"bbox":[98,606,233,25]}
+{"kind":"textbox","id":"sh/t4nuxsne","slide":3,"text":"显式流程","textPreview":"显式流程","textChars":4,"textLines":1,"bbox":[98,635,233,21]}
+{"kind":"shape","id":"sh/s3edon6t","slide":3,"bbox":[374,596,263,70]}
+{"kind":"textbox","id":"sh/jylcry5c","slide":3,"text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[389,606,233,25]}
+{"kind":"textbox","id":"sh/idcvidor","slide":3,"text":"稳定执行","textPreview":"稳定执行","textChars":4,"textLines":1,"bbox":[389,635,233,21]}
+{"kind":"shape","id":"sh/503ut8n2","slide":3,"bbox":[665,596,263,70]}
+{"kind":"textbox","id":"sh/4zudk36x","slide":3,"text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[680,606,233,25]}
+{"kind":"textbox","id":"sh/3upc325g","slide":3,"text":"Agent 决策","textPreview":"Agent 决策","textChars":8,"textLines":1,"bbox":[680,635,233,21]}
+{"kind":"shape","id":"sh/29wvuxov","slide":3,"bbox":[956,596,263,70]}
+{"kind":"textbox","id":"sh/kfq9ozmd","slide":3,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[971,606,233,25]}
+{"kind":"textbox","id":"sh/lgzax43y","slide":3,"text":"自主 + 闸门","textPreview":"自主 + 闸门","textChars":7,"textLines":1,"bbox":[971,635,233,21]}
+{"kind":"notes","id":"nt/f8za5t","slide":3,"text":"【只记一句】首批场景选审批和日报，是因为频率高、规则清晰、容易验证闭环。\n\n【可直接照读】用户不需要先找到 ERP 菜单，也不需要记住表单字段，只要表达业务目标。审批场景验证动态字段与确认提交，日报场景验证上下文加载、草稿、预览和提交。四种方案分别对应显式流程、稳定执行、Agent 决策和自主加闸门。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/lgbdbu","slide":4,"title":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textShapes":24}
+{"kind":"shape","id":"sh/1cbm90vu","slide":4,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/jylgz6ds","slide":4,"text":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textPreview":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ixcz6lcn","slide":4,"text":"GLOBAL AI ADOPTION · 2025","textPreview":"GLOBAL AI ADOPTION · 2025","textChars":25,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/tony50va","slide":4,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/snehcvup","slide":4,"text":"88%","textPreview":"88%","textChars":3,"textLines":1,"bbox":[78,156,210,76]}
+{"kind":"textbox","id":"sh/rmlg3qd4","slide":4,"text":"至少一个业务职能常态化使用 AI","textPreview":"至少一个业务职能常态化使用 AI","textChars":16,"textLines":1,"bbox":[82,229,338,51]}
+{"kind":"textbox","id":"sh/6lczalcj","slide":4,"text":"2024 年为 78%，一年提升 10 个百分点","textPreview":"2024 年为 78%，一年提升 10 个百分点","textChars":24,"textLines":1,"bbox":[82,284,390,29]}
+{"kind":"shape","id":"sh/9sjytwvq","slide":4,"bbox":[82,337,510,52]}
+{"kind":"shape","id":"sh/8rah0ru5","slide":4,"bbox":[82,337,449,52]}
+{"kind":"textbox","id":"sh/qdk7ep07","slide":4,"text":"88% 已使用","textPreview":"88% 已使用","textChars":7,"textLines":1,"bbox":[98,349,170,27]}
+{"kind":"textbox","id":"sh/reto7a1s","slide":4,"text":"但规模化仍是少数","textPreview":"但规模化仍是少数","textChars":8,"textLines":1,"bbox":[82,435,420,36]}
+{"kind":"shape","id":"sh/sf2pgfid","slide":4,"bbox":[82,489,510,47]}
+{"kind":"shape","id":"sh/d0b69kjy","slide":4,"bbox":[82,489,170,47]}
+{"kind":"textbox","id":"sh/e1k7ip0j","slide":4,"text":"约 1/3 已规模化","textPreview":"约 1/3 已规模化","textChars":10,"textLines":1,"bbox":[98,499,205,27]}
+{"kind":"textbox","id":"sh/f2tobu14","slide":4,"text":"近 2/3 尚未开始企业级扩展","textPreview":"近 2/3 尚未开始企业级扩展","textChars":15,"textLines":1,"bbox":[307,500,270,26]}
+{"kind":"shape","id":"sh/03mpkzip","slide":4,"bbox":[650,167,255,190]}
+{"kind":"textbox","id":"sh/14vqd4ju","slide":4,"text":"62%","textPreview":"62%","textChars":3,"textLines":1,"bbox":[672,189,211,61]}
+{"kind":"textbox","id":"sh/2547m90f","slide":4,"text":"试验或使用 AI Agent","textPreview":"试验或使用 AI Agent","textChars":14,"textLines":1,"bbox":[672,258,211,43]}
+{"kind":"textbox","id":"sh/n6d8fu10","slide":4,"text":"23% 已扩展 · 39% 试验中","textPreview":"23% 已扩展 · 39% 试验中","textChars":17,"textLines":1,"bbox":[670,310,215,30]}
+{"kind":"shape","id":"sh/zaxo3ex8","slide":4,"bbox":[927,167,255,190]}
+{"kind":"textbox","id":"sh/y94nu9gn","slide":4,"text":"39%","textPreview":"39%","textChars":3,"textLines":1,"bbox":[949,189,211,61]}
+{"kind":"textbox","id":"sh/lcf654fe","slide":4,"text":"报告企业级 EBIT 影响","textPreview":"报告企业级 EBIT 影响","textChars":13,"textLines":1,"bbox":[949,258,211,43]}
+{"kind":"textbox","id":"sh/kb65wjyt","slide":4,"text":"价值影响仍未成为多数","textPreview":"价值影响仍未成为多数","textChars":10,"textLines":1,"bbox":[947,310,215,30]}
+{"kind":"shape","id":"sh/b6dozuxc","slide":4,"bbox":[650,391,255,190]}
+{"kind":"textbox","id":"sh/a54nqpgr","slide":4,"text":"51%","textPreview":"51%","textChars":3,"textLines":1,"bbox":[672,413,211,61]}
+{"kind":"textbox","id":"sh/x8v614f2","slide":4,"text":"遇到至少一种负面后果","textPreview":"遇到至少一种负面后果","textChars":10,"textLines":1,"bbox":[672,482,211,43]}
+{"kind":"textbox","id":"sh/c7m5szyh","slide":4,"text":"近三分之一提到 AI 不准确","textPreview":"近三分之一提到 AI 不准确","textChars":14,"textLines":1,"bbox":[670,534,215,30]}
+{"kind":"shape","id":"sh/n2dovux0","slide":4,"bbox":[927,391,255,190]}
+{"kind":"textbox","id":"sh/2hknmpgf","slide":4,"text":"6%","textPreview":"6%","textChars":2,"textLines":1,"bbox":[949,413,211,61]}
+{"kind":"textbox","id":"sh/snilwved","slide":4,"text":"被归为 AI 高绩效组织","textPreview":"被归为 AI 高绩效组织","textChars":12,"textLines":1,"bbox":[949,482,211,43]}
+{"kind":"textbox","id":"sh/d8r25gvy","slide":4,"text":"更重视流程重构与规模化","textPreview":"更重视流程重构与规模化","textChars":11,"textLines":1,"bbox":[947,534,215,30]}
+{"kind":"shape","id":"sh/ql03ulw7","slide":4,"bbox":[80,608,1120,51]}
+{"kind":"textbox","id":"sh/rm9k3qds","slide":4,"text":"结论：真正的竞争点不是“接入模型”，而是把 AI 嵌入业务流程并形成可控执行","textPreview":"结论：真正的竞争点不是“接入模型”，而是把 AI 嵌入业务流程并形成可控执行","textChars":38,"textLines":1,"bbox":[106,621,1068,27]}
+{"kind":"textbox","id":"sh/0b2l0ve9","slide":4,"text":"数据来源：McKinsey《The state of AI in 2025》（2025，n=1,993，覆盖 105 个国家）","textPreview":"数据来源：McKinsey《The state of AI in 2025》（2025，n=1,993，覆盖 105 个国家）","textChars":63,"textLines":1,"bbox":[82,665,1090,16]}
+{"kind":"notes","id":"nt/lgbdbu","slide":4,"text":"【只记一句】AI 接入已经普及，但规模化产生价值仍然困难。\n\n【可直接照读】麦肯锡 2025 年调研显示，88% 的组织已经常态化使用 AI，但接近三分之二还没有开始企业级规模化。62% 正在试验或使用 AI Agent，只有 39% 报告了企业级 EBIT 影响。核心差距不在模型，而在能否嵌入真实流程。\n\n【时间建议】约 45 秒\n\n[Sources]\n- McKinsey, The state of AI in 2025: Agents, innovation, and transformation (survey of 1,993 participants across 105 nations): https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai\n[/Sources]"}
+{"kind":"slide","id":"sl/izj960","slide":5,"title":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textShapes":26}
+{"kind":"shape","id":"sh/pcb2d47u","slide":5,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/5kritovy","slide":5,"text":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textPreview":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/4ji1kjed","slide":5,"text":"PWC GLOBAL CEO SURVEY · 2026","textPreview":"PWC GLOBAL CEO SURVEY · 2026","textChars":28,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/rm9kvyd4","slide":5,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ql0jmtwj","slide":5,"text":"4,454 位 CEO · 95 个国家和地区","textPreview":"4,454 位 CEO · 95 个国家和地区","textChars":23,"textLines":1,"bbox":[81,151,640,35]}
+{"kind":"textbox","id":"sh/dor2x8va","slide":5,"text":"调研时间：2025 年 9 月 30 日—11 月 10 日","textPreview":"调研时间：2025 年 9 月 30 日—11 月 10 日","textChars":30,"textLines":1,"bbox":[81,191,520,27]}
+{"kind":"shape","id":"sh/sni1o3ep","slide":5,"bbox":[78,242,258,145]}
+{"kind":"textbox","id":"sh/zqtkzid0","slide":5,"text":"30%","textPreview":"30%","textChars":3,"textLines":1,"bbox":[96,260,222,61]}
+{"kind":"textbox","id":"sh/epkjqdwv","slide":5,"text":"AI 带来收入增长","textPreview":"AI 带来收入增长","textChars":9,"textLines":1,"bbox":[96,329,222,35]}
+{"kind":"shape","id":"sh/kv2xovax","slide":5,"bbox":[365,242,258,145]}
+{"kind":"textbox","id":"sh/5wbyh0bi","slide":5,"text":"26%","textPreview":"26%","textChars":3,"textLines":1,"bbox":[383,260,222,61]}
+{"kind":"textbox","id":"sh/ytkfmlcr","slide":5,"text":"AI 带来成本下降","textPreview":"AI 带来成本下降","textChars":9,"textLines":1,"bbox":[383,329,222,35]}
+{"kind":"shape","id":"sh/jutgfqtc","slide":5,"bbox":[652,242,258,145]}
+{"kind":"textbox","id":"sh/sz2xsvat","slide":5,"text":"56%","textPreview":"56%","textChars":3,"textLines":1,"bbox":[670,260,222,61]}
+{"kind":"textbox","id":"sh/t0vyl0be","slide":5,"text":"既未增收也未降本","textPreview":"既未增收也未降本","textChars":8,"textLines":1,"bbox":[670,329,222,35]}
+{"kind":"shape","id":"sh/6xkfqls3","slide":5,"bbox":[939,242,258,145]}
+{"kind":"textbox","id":"sh/7ytgjqt8","slide":5,"text":"12%","textPreview":"12%","textChars":3,"textLines":1,"bbox":[957,260,222,61]}
+{"kind":"textbox","id":"sh/gnmhwfa5","slide":5,"text":"同时实现增收与降本","textPreview":"同时实现增收与降本","textChars":9,"textLines":1,"bbox":[957,329,222,35]}
+{"kind":"textbox","id":"sh/hovypkbq","slide":5,"text":"AI 在业务领域“大范围应用”的比例仍然不高","textPreview":"AI 在业务领域“大范围应用”的比例仍然不高","textChars":22,"textLines":1,"bbox":[82,427,780,35]}
+{"kind":"textbox","id":"sh/pkry903u","slide":5,"text":"获客 / 需求生成","textPreview":"获客 / 需求生成","textChars":9,"textLines":1,"bbox":[82,470,190,24]}
+{"kind":"shape","id":"sh/ojix0f29","slide":5,"bbox":[280,473,700,18]}
+{"kind":"shape","id":"sh/3i9g7alo","slide":5,"bbox":[280,473,616,18]}
+{"kind":"textbox","id":"sh/2h0fy5k3","slide":5,"text":"22%","textPreview":"22%","textChars":3,"textLines":1,"bbox":[998,469,70,26]}
+{"kind":"textbox","id":"sh/d8bydk3q","slide":5,"text":"支持服务","textPreview":"支持服务","textChars":4,"textLines":1,"bbox":[82,498,190,24]}
+{"kind":"shape","id":"sh/c72x4f25","slide":5,"bbox":[280,501,700,18]}
+{"kind":"shape","id":"sh/b6tgbalk","slide":5,"bbox":[280,501,560,18]}
+{"kind":"textbox","id":"sh/q50f25kf","slide":5,"text":"20%","textPreview":"20%","textChars":3,"textLines":1,"bbox":[998,497,70,26]}
+{"kind":"textbox","id":"sh/tc7y1g3m","slide":5,"text":"产品、服务与体验","textPreview":"产品、服务与体验","textChars":8,"textLines":1,"bbox":[82,526,190,24]}
+{"kind":"shape","id":"sh/sbyxsb21","slide":5,"bbox":[280,529,700,18]}
+{"kind":"shape","id":"sh/y5c3mxwn","slide":5,"bbox":[280,529,532,18]}
+{"kind":"textbox","id":"sh/j6l4f2x8","slide":5,"text":"19%","textPreview":"19%","textChars":3,"textLines":1,"bbox":[998,525,70,26]}
+{"kind":"textbox","id":"sh/k7ulo7et","slide":5,"text":"战略决策","textPreview":"战略决策","textChars":4,"textLines":1,"bbox":[82,554,190,24]}
+{"kind":"shape","id":"sh/l83mhsfy","slide":5,"bbox":[280,557,700,18]}
+{"kind":"shape","id":"sh/69c3qxwj","slide":5,"bbox":[280,557,420,18]}
+{"kind":"textbox","id":"sh/7a54j2x4","slide":5,"text":"15%","textPreview":"15%","textChars":3,"textLines":1,"bbox":[998,553,70,26]}
+{"kind":"textbox","id":"sh/8be5s7ep","slide":5,"text":"需求履约","textPreview":"需求履约","textChars":4,"textLines":1,"bbox":[82,582,190,24]}
+{"kind":"shape","id":"sh/tcnmlcfa","slide":5,"bbox":[280,585,700,18]}
+{"kind":"shape","id":"sh/mds3edwf","slide":5,"bbox":[280,585,364,18]}
+{"kind":"textbox","id":"sh/ne14nix0","slide":5,"text":"13%","textPreview":"13%","textChars":3,"textLines":1,"bbox":[998,581,70,26]}
+{"kind":"textbox","id":"sh/3atkbupo","slide":5,"text":"孤立功能难以产生可衡量价值：需要业务流程、数据基础、风险机制和组织采用共同推进","textPreview":"孤立功能难以产生可衡量价值：需要业务流程、数据基础、风险机制和组织采用共同推进","textChars":39,"textLines":1,"bbox":[82,624,1110,25]}
+{"kind":"textbox","id":"sh/29kjip83","slide":5,"text":"数据来源：PwC《29th Global CEO Survey: Leading through uncertainty in the age of AI》（2026，n=4,454，覆盖 95 个国家和地区）","textPreview":"数据来源：PwC《29th Global CEO Survey: Leading through uncertainty in the age of AI》（2026，n=4,454，覆盖 95 个国家和地区）","textChars":105,"textLines":1,"bbox":[82,660,1100,16]}
+{"kind":"notes","id":"nt/izj960","slide":5,"text":"【只记一句】企业在持续投入 AI，但大多数还没有同时获得增收和降本。\n\n【可直接照读】PwC 2026 全球 CEO 调研显示，30% 表示 AI 带来收入增长，26% 表示成本下降，但 56% 既未增收也未降本，只有 12% 同时实现两种收益。这说明孤立功能不等于业务价值，需要流程、数据与责任边界共同落地。\n\n【时间建议】约 45 秒\n\n[Sources]\n- PwC, 29th Global CEO Survey: Leading through uncertainty in the age of AI (4,454 CEOs across 95 countries and territories): https://www.pwc.com/gx/en/issues/c-suite-insights/ceo-survey.html\n[/Sources]"}
+{"kind":"slide","id":"sl/m1u9bz","slide":6,"title":"实施路径：从业务试点到可复用聊天助手","textShapes":19}
+{"kind":"shape","id":"sh/nedsvu5o","slide":6,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/9onax8ji","slide":6,"text":"实施路径：从业务试点到可复用聊天助手","textPreview":"实施路径：从业务试点到可复用聊天助手","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8ne9o3ix","slide":6,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/vq5szi18","slide":6,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/upwrqd03","slide":6,"bbox":[72,172,346,183]}
+{"kind":"textbox","id":"sh/hsna1sje","slide":6,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[97,194,62,35]}
+{"kind":"textbox","id":"sh/wre9snit","slide":6,"text":"选择试点场景","textPreview":"选择试点场景","textChars":6,"textLines":1,"bbox":[163,194,225,34]}
+{"kind":"textbox","id":"sh/je5s3i1k","slide":6,"text":"先做审批与日报，验证查询、补充信息和写入闭环","textPreview":"先做审批与日报，验证查询、补充信息和写入闭环","textChars":22,"textLines":1,"bbox":[100,254,290,69]}
+{"kind":"shape","id":"sh/idwrud0z","slide":6,"bbox":[467,172,346,183]}
+{"kind":"textbox","id":"sh/w369sfel","slide":6,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[492,194,62,35]}
+{"kind":"textbox","id":"sh/x4fa1kv6","slide":6,"text":"接入 ERP 上下文","textPreview":"接入 ERP 上下文","textChars":10,"textLines":1,"bbox":[558,194,225,34]}
+{"kind":"textbox","id":"sh/a14rq5wf","slide":6,"text":"打通用户权限、审批模板、动态字段、日报配置与草稿","textPreview":"打通用户权限、审批模板、动态字段、日报配置与草稿","textChars":24,"textLines":1,"bbox":[495,254,290,69]}
+{"kind":"shape","id":"sh/v2xszad0","slide":6,"bbox":[862,172,346,183]}
+{"kind":"textbox","id":"sh/kr69wfuh","slide":6,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[887,194,62,35]}
+{"kind":"textbox","id":"sh/5sfa5kv2","slide":6,"text":"封装业务能力","textPreview":"封装业务能力","textChars":6,"textLines":1,"bbox":[953,194,225,34]}
+{"kind":"textbox","id":"sh/i5oru5wr","slide":6,"text":"将查询、校验、保存、预览和提交封装为统一 Tool","textPreview":"将查询、校验、保存、预览和提交封装为统一 Tool","textChars":25,"textLines":1,"bbox":[890,254,290,69]}
+{"kind":"shape","id":"sh/jqxs3adc","slide":6,"bbox":[271,424,346,183]}
+{"kind":"textbox","id":"sh/svq90zut","slide":6,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[296,446,62,35]}
+{"kind":"textbox","id":"sh/twza94ve","slide":6,"text":"使用 LangGraph 编排","textPreview":"使用 LangGraph 编排","textChars":15,"textLines":1,"bbox":[362,446,225,34]}
+{"kind":"textbox","id":"sh/1cvatkni","slide":6,"text":"管理多轮状态、流程节点、人工确认、暂停与恢复","textPreview":"管理多轮状态、流程节点、人工确认、暂停与恢复","textChars":22,"textLines":1,"bbox":[299,506,290,69]}
+{"kind":"shape","id":"sh/0bm9kzmx","slide":6,"bbox":[666,424,346,183]}
+{"kind":"textbox","id":"sh/fqdsru5c","slide":6,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[691,446,62,35]}
+{"kind":"textbox","id":"sh/ep4rip4r","slide":6,"text":"观测与迭代","textPreview":"观测与迭代","textChars":5,"textLines":1,"bbox":[757,446,225,34]}
+{"kind":"textbox","id":"sh/pgfax4ne","slide":6,"text":"通过 LangSmith 定位模型、路由、状态与 ERP 接口问题","textPreview":"通过 LangSmith 定位模型、路由、状态与 ERP 接口问题","textChars":33,"textLines":1,"bbox":[694,506,290,69]}
+{"kind":"textbox","id":"sh/ofm9ozmt","slide":6,"text":"实施原则：AI 负责理解与组织，LangGraph 负责状态与流程，ERP 负责真实规则与最终执行","textPreview":"实施原则：AI 负责理解与组织，LangGraph 负责状态与流程，ERP 负责真实规则与最终执行","textChars":49,"textLines":1,"bbox":[86,642,1108,28]}
+{"kind":"notes","id":"nt/m1u9bz","slide":6,"text":"【只记一句】实施路径是先选场景，再接数据，再封装工具，最后用 LangGraph 编排和观测。\n\n【可直接照读】我们没有从“大而全的企业助手”开始，而是先选择审批和日报两个高频动作。接着接入用户权限、审批模板、动态字段和日报配置，再把查询、校验、保存、预览、提交封装成统一 Tool。LangGraph 管理状态和流程，LangSmith帮助定位问题，形成从试点到复用的路径。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}
+{"kind":"slide","id":"sl/daweq7","slide":7,"title":"三层关系：基础组件、运行时与 Agent 套件","textShapes":12}
+{"kind":"shape","id":"sh/utoze907","slide":7,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/c3atsr69","slide":7,"text":"三层关系：基础组件、运行时与 Agent 套件","textPreview":"三层关系：基础组件、运行时与 Agent 套件","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/x4jalwne","slide":7,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/y5sbu1oz","slide":7,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/z61sn65k","slide":7,"text":"不是三套互相替代的框架，而是不同层级的能力组合","textPreview":"不是三套互相替代的框架，而是不同层级的能力组合","textChars":23,"textLines":1,"bbox":[82,157,900,34]}
+{"kind":"shape","id":"sh/k7atwr65","slide":7,"bbox":[220,219,840,88]}
+{"kind":"textbox","id":"sh/l83upwnq","slide":7,"text":"Deep Agents  ·  应用层 / Agent Harness","textPreview":"Deep Agents  ·  应用层 / Agent Harness","textChars":35,"textLines":1,"bbox":[255,246,770,34]}
+{"kind":"textbox","id":"sh/e98bixov","slide":7,"text":"提供任务规划、子智能体、文件与长任务等高级能力","textPreview":"提供任务规划、子智能体、文件与长任务等高级能力","textChars":23,"textLines":1,"bbox":[285,283,710,24]}
+{"kind":"shape","id":"sh/fahsb25g","slide":7,"bbox":[616,316,48,38]}
+{"kind":"textbox","id":"sh/rmhgfy1k","slide":7,"text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,352,100,24]}
+{"kind":"shape","id":"sh/ql8zmt0f","slide":7,"bbox":[220,389,840,88]}
+{"kind":"textbox","id":"sh/dojyh8jq","slide":7,"text":"LangGraph  ·  运行时 / Agent Runtime","textPreview":"LangGraph  ·  运行时 / Agent Runtime","textChars":33,"textLines":1,"bbox":[255,416,770,34]}
+{"kind":"textbox","id":"sh/snqho3i5","slide":7,"text":"负责状态管理、持久化执行、循环分支与人工中断","textPreview":"负责状态管理、持久化执行、循环分支与人工中断","textChars":22,"textLines":1,"bbox":[285,453,710,24]}
+{"kind":"shape","id":"sh/3yhgby1o","slide":7,"bbox":[616,486,48,38]}
+{"kind":"textbox","id":"sh/ix8zit03","slide":7,"text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,522,100,24]}
+{"kind":"shape","id":"sh/5kzydoju","slide":7,"bbox":[220,559,840,88]}
+{"kind":"textbox","id":"sh/4jqhk3i9","slide":7,"text":"LangChain  ·  基础层 / Agent Framework","textPreview":"LangChain  ·  基础层 / Agent Framework","textChars":35,"textLines":1,"bbox":[255,586,770,34]}
+{"kind":"textbox","id":"sh/vuxg7e1s","slide":7,"text":"提供模型适配、Prompt、Tool、消息与链式调用等基础构件","textPreview":"提供模型适配、Prompt、Tool、消息与链式调用等基础构件","textChars":31,"textLines":1,"bbox":[285,623,710,24]}
+{"kind":"notes","id":"nt/daweq7","slide":7,"text":"【只记一句】三者是分层组合，最终主流程选 LangGraph。\n\n【可直接照读】LangChain提供模型和 Tool 等基础构件；LangGraph负责状态、分支和人工中断；Deep Agents提供更高层的自主规划。ERP 涉及真实写入，所以先保证流程可控。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/pyproject.toml\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- C:/Users/EDY/Pictures/16.jpg\n[/Sources]"}
+{"kind":"slide","id":"sl/hohd79","slide":8,"title":"核心对比：ERP 场景更看重可控执行与状态管理","textShapes":28}
+{"kind":"shape","id":"sh/83uxoved","slide":8,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/yh43ypwb","slide":8,"text":"核心对比：ERP 场景更看重可控执行与状态管理","textPreview":"核心对比：ERP 场景更看重可控执行与状态管理","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/zid4rudw","slide":8,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/cfmlwfe5","slide":8,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/xgvmpkfq","slide":8,"bbox":[55,166,210,60]}
+{"kind":"textbox","id":"sh/ad43u5wz","slide":8,"text":"维度","textPreview":"维度","textChars":2,"textLines":1,"bbox":[65,182,190,28]}
+{"kind":"shape","id":"sh/bed4naxk","slide":8,"bbox":[265,166,270,60]}
+{"kind":"textbox","id":"sh/gbq58zep","slide":8,"text":"LangChain","textPreview":"LangChain","textChars":9,"textLines":1,"bbox":[275,182,250,28]}
+{"kind":"shape","id":"sh/hczm14vu","slide":8,"bbox":[535,166,270,60]}
+{"kind":"textbox","id":"sh/xcfypgri","slide":8,"text":"LangGraph","textPreview":"LangGraph","textChars":9,"textLines":1,"bbox":[545,182,250,28]}
+{"kind":"shape","id":"sh/wb6hgbad","slide":8,"bbox":[805,166,270,60]}
+{"kind":"textbox","id":"sh/bqxgn69s","slide":8,"text":"Deep Agents","textPreview":"Deep Agents","textChars":11,"textLines":1,"bbox":[815,182,250,28]}
+{"kind":"shape","id":"sh/apoze1s7","slide":8,"bbox":[55,226,210,78]}
+{"kind":"textbox","id":"sh/9ofylwrm","slide":8,"text":"定位","textPreview":"定位","textChars":2,"textLines":1,"bbox":[67,246,186,40]}
+{"kind":"shape","id":"sh/onmxcra1","slide":8,"bbox":[265,226,270,78]}
+{"kind":"textbox","id":"sh/nmdgj69g","slide":8,"text":"基础开发框架","textPreview":"基础开发框架","textChars":6,"textLines":1,"bbox":[277,246,246,40]}
+{"kind":"shape","id":"sh/ml4fa1sv","slide":8,"bbox":[535,226,270,78]}
+{"kind":"textbox","id":"sh/tkzyx0rq","slide":8,"text":"状态图运行时","textPreview":"状态图运行时","textChars":6,"textLines":1,"bbox":[547,246,246,40]}
+{"kind":"shape","id":"sh/sjqhoval","slide":8,"bbox":[805,226,270,78]}
+{"kind":"textbox","id":"sh/czi9g32t","slide":8,"text":"高级 Agent 套件","textPreview":"高级 Agent 套件","textChars":11,"textLines":1,"bbox":[817,246,246,40]}
+{"kind":"shape","id":"sh/d0ra983e","slide":8,"bbox":[55,304,210,78]}
+{"kind":"textbox","id":"sh/qx0retkn","slide":8,"text":"控制流","textPreview":"控制流","textChars":3,"textLines":1,"bbox":[67,324,186,40]}
+{"kind":"shape","id":"sh/ry9s7yl8","slide":8,"bbox":[265,304,270,78]}
+{"kind":"textbox","id":"sh/4vy9cj2x","slide":8,"text":"链式调用为主","textPreview":"链式调用为主","textChars":6,"textLines":1,"bbox":[277,324,246,40]}
+{"kind":"shape","id":"sh/pw7a5o32","slide":8,"bbox":[535,304,270,78]}
+{"kind":"textbox","id":"sh/29gratkr","slide":8,"text":"显式状态图","textPreview":"显式状态图","textChars":5,"textLines":1,"bbox":[547,324,246,40]}
+{"kind":"shape","id":"sh/3ups3elc","slide":8,"bbox":[805,304,270,78]}
+{"kind":"textbox","id":"sh/g7y98jml","slide":8,"text":"自主规划 + 工具","textPreview":"自主规划 + 工具","textChars":9,"textLines":1,"bbox":[817,324,246,40]}
+{"kind":"shape","id":"sh/h87a1o36","slide":8,"bbox":[55,382,210,78]}
+{"kind":"textbox","id":"sh/j25sre5s","slide":8,"text":"持久化","textPreview":"持久化","textChars":3,"textLines":1,"bbox":[67,402,186,40]}
+{"kind":"shape","id":"sh/i1wbi9on","slide":8,"bbox":[265,382,270,78]}
+{"kind":"textbox","id":"sh/54nat4ny","slide":8,"text":"需自行组合","textPreview":"需自行组合","textChars":5,"textLines":1,"bbox":[277,402,246,40]}
+{"kind":"shape","id":"sh/k3etkj6d","slide":8,"bbox":[535,382,270,78]}
+{"kind":"textbox","id":"sh/76psve54","slide":8,"text":"原生支持检查点","textPreview":"原生支持检查点","textChars":7,"textLines":1,"bbox":[547,402,246,40]}
+{"kind":"shape","id":"sh/65wbm9oj","slide":8,"bbox":[805,382,270,78]}
+{"kind":"textbox","id":"sh/ts7axona","slide":8,"text":"构建在 LangGraph 上","textPreview":"构建在 LangGraph 上","textChars":15,"textLines":1,"bbox":[817,402,246,40]}
+{"kind":"shape","id":"sh/s7ytoj6p","slide":8,"bbox":[55,460,210,78]}
+{"kind":"textbox","id":"sh/fupszy50","slide":8,"text":"人工干预","textPreview":"人工干预","textChars":4,"textLines":1,"bbox":[67,480,186,40]}
+{"kind":"shape","id":"sh/utgbqtof","slide":8,"bbox":[265,460,270,78]}
+{"kind":"textbox","id":"sh/edovmxcr","slide":8,"text":"需自行实现","textPreview":"需自行实现","textChars":5,"textLines":1,"bbox":[277,480,246,40]}
+{"kind":"shape","id":"sh/fexcv2dc","slide":8,"bbox":[535,460,270,78]}
+{"kind":"textbox","id":"sh/0z6do7ux","slide":8,"text":"interrupt / resume","textPreview":"interrupt / resume","textChars":18,"textLines":1,"bbox":[547,480,246,40]}
+{"kind":"shape","id":"sh/10fuxcvi","slide":8,"bbox":[805,460,270,78]}
+{"kind":"textbox","id":"sh/218vqhc3","slide":8,"text":"支持危险工具中断","textPreview":"支持危险工具中断","textChars":8,"textLines":1,"bbox":[817,480,246,40]}
+{"kind":"shape","id":"sh/n2hczmd8","slide":8,"bbox":[55,538,210,78]}
+{"kind":"textbox","id":"sh/o3qds7ut","slide":8,"text":"适合任务","textPreview":"适合任务","textChars":4,"textLines":1,"bbox":[67,558,186,40]}
+{"kind":"shape","id":"sh/p4ze1cve","slide":8,"bbox":[265,538,270,78]}
+{"kind":"textbox","id":"sh/i54vedwj","slide":8,"text":"简单问答、原型","textPreview":"简单问答、原型","textChars":7,"textLines":1,"bbox":[277,558,246,40]}
+{"kind":"shape","id":"sh/36dcnid4","slide":8,"bbox":[535,538,270,78]}
+{"kind":"textbox","id":"sh/l03ytgfm","slide":8,"text":"审批、业务流程","textPreview":"审批、业务流程","textChars":7,"textLines":1,"bbox":[547,558,246,40]}
+{"kind":"shape","id":"sh/kzaxkbe1","slide":8,"bbox":[805,538,270,78]}
+{"kind":"textbox","id":"sh/zy1gr6xg","slide":8,"text":"长任务、复杂研究","textPreview":"长任务、复杂研究","textChars":8,"textLines":1,"bbox":[817,558,246,40]}
+{"kind":"shape","id":"sh/yxsfilwb","slide":8,"bbox":[82,632,1116,42]}
+{"kind":"textbox","id":"sh/to3yx0fy","slide":8,"text":"对 ERP 审批和日报而言，状态可追踪、流程可暂停、写操作可拦截，比“代码更少”更重要","textPreview":"对 ERP 审批和日报而言，状态可追踪、流程可暂停、写操作可拦截，比“代码更少”更重要","textChars":43,"textLines":1,"bbox":[109,642,1062,22]}
+{"kind":"notes","id":"nt/hohd79","slide":8,"text":"【只记一句】ERP 场景更看重可控执行，而不是代码看起来更少。\n\n【可直接照读】LangChain适合简单调用，LangGraph适合有状态和人工确认的流程，Deep Agents适合开放长任务。审批和日报需要暂停、恢复和安全写入，因此 LangGraph 更贴合主流程。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_deep_agents_assistant/app/agents/approval_agent.py\n- C:/Users/EDY/Pictures/5.jpg\n- C:/Users/EDY/Pictures/7.jpg\n[/Sources]"}
+{"kind":"slide","id":"sl/ammegj","slide":9,"title":"最终选型：ERP 主流程采用 LangGraph","textShapes":24}
+{"kind":"shape","id":"sh/1ozql4vi","slide":9,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/it43mlkz","slide":9,"text":"最终选型：ERP 主流程采用 LangGraph","textPreview":"最终选型：ERP 主流程采用 LangGraph","textChars":24,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/jud4vqlk","slide":9,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/sz6lsf21","slide":9,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/tkfm103m","slide":9,"text":"为什么选择 LangGraph 作为主框架？","textPreview":"为什么选择 LangGraph 作为主框架？","textChars":22,"textLines":1,"bbox":[82,159,610,35]}
+{"kind":"shape","id":"sh/6x43q5kv","slide":9,"bbox":[90,222,42,42]}
+{"kind":"textbox","id":"sh/ryd4zalg","slide":9,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,228,42,28]}
+{"kind":"textbox","id":"sh/832lgb2x","slide":9,"text":"流程清晰","textPreview":"流程清晰","textChars":4,"textLines":1,"bbox":[150,226,145,27]}
+{"kind":"textbox","id":"sh/9ob2pg3i","slide":9,"text":"审批、日报都需要明确的业务阶段","textPreview":"审批、日报都需要明确的业务阶段","textChars":15,"textLines":1,"bbox":[300,226,352,34]}
+{"kind":"shape","id":"sh/dszuloz6","slide":9,"bbox":[90,297,42,42]}
+{"kind":"textbox","id":"sh/crqtsjil","slide":9,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[90,303,42,28]}
+{"kind":"textbox","id":"sh/rqhcjehg","slide":9,"text":"状态可控","textPreview":"状态可控","textChars":4,"textLines":1,"bbox":[150,301,145,27]}
+{"kind":"textbox","id":"sh/qp8bq90v","slide":9,"text":"支持多轮对话、暂停、恢复和人工确认","textPreview":"支持多轮对话、暂停、恢复和人工确认","textChars":17,"textLines":1,"bbox":[300,301,352,34]}
+{"kind":"shape","id":"sh/1gjupozi","slide":9,"bbox":[90,372,42,42]}
+{"kind":"textbox","id":"sh/0fatwjyx","slide":9,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[90,378,42,28]}
+{"kind":"textbox","id":"sh/zu1cnyhc","slide":9,"text":"便于排查","textPreview":"便于排查","textChars":4,"textLines":1,"bbox":[150,376,145,27]}
+{"kind":"textbox","id":"sh/et8butgr","slide":9,"text":"可以观察节点路径、状态变化和失败位置","textPreview":"可以观察节点路径、状态变化和失败位置","textChars":18,"textLines":1,"bbox":[300,376,352,34]}
+{"kind":"shape","id":"sh/9kjut8ze","slide":9,"bbox":[90,447,42,42]}
+{"kind":"textbox","id":"sh/ojad03yt","slide":9,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[90,453,42,28]}
+{"kind":"textbox","id":"sh/sz25cbah","slide":9,"text":"适配 ERP","textPreview":"适配 ERP","textChars":6,"textLines":1,"bbox":[150,451,145,27]}
+{"kind":"textbox","id":"sh/t0bmlgb2","slide":9,"text":"更容易承载动态字段、校验和提交闸门","textPreview":"更容易承载动态字段、校验和提交闸门","textChars":17,"textLines":1,"bbox":[300,451,352,34]}
+{"kind":"shape","id":"sh/6xkna1sb","slide":9,"bbox":[753,195,433,349]}
+{"kind":"textbox","id":"sh/7yt4j6tw","slide":9,"text":"最终分工","textPreview":"最终分工","textChars":4,"textLines":1,"bbox":[785,226,150,32]}
+{"kind":"textbox","id":"sh/g3m5gbad","slide":9,"text":"LangChain","textPreview":"LangChain","textChars":9,"textLines":1,"bbox":[786,290,145,27]}
+{"kind":"textbox","id":"sh/h4v6pgby","slide":9,"text":"基础组件：模型、Prompt、Tool","textPreview":"基础组件：模型、Prompt、Tool","textChars":19,"textLines":1,"bbox":[942,290,215,28]}
+{"kind":"textbox","id":"sh/u1knelsn","slide":9,"text":"LangGraph","textPreview":"LangGraph","textChars":9,"textLines":1,"bbox":[786,357,145,27]}
+{"kind":"textbox","id":"sh/f2don6ts","slide":9,"text":"主框架：ERP 流程、状态、人工确认","textPreview":"主框架：ERP 流程、状态、人工确认","textChars":18,"textLines":1,"bbox":[942,357,215,44]}
+{"kind":"textbox","id":"sh/w7i54ra9","slide":9,"text":"Deep Agents","textPreview":"Deep Agents","textChars":11,"textLines":1,"bbox":[786,432,145,27]}
+{"kind":"textbox","id":"sh/x8rmdwbu","slide":9,"text":"探索方向：自主规划、复杂任务","textPreview":"探索方向：自主规划、复杂任务","textChars":14,"textLines":1,"bbox":[942,432,215,35]}
+{"kind":"shape","id":"sh/z2h8judc","slide":9,"bbox":[81,603,1119,54]}
+{"kind":"textbox","id":"sh/e1o7apcr","slide":9,"text":"结论：不是放弃 Agent，而是先用 LangGraph 把 ERP 业务底座做稳","textPreview":"结论：不是放弃 Agent，而是先用 LangGraph 把 ERP 业务底座做稳","textChars":41,"textLines":1,"bbox":[112,617,1055,29]}
+{"kind":"notes","id":"nt/ammegj","slide":9,"text":"【只记一句】最终分工是 LangChain 做基础，LangGraph做主流程，Deep Agents做探索。\n\n【可直接照读】选择 LangGraph 是因为流程清晰、状态可持久化、路径便于排查，并且能把 ERP 校验和提交做成明确闸门。\n\n【时间建议】约 40 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- C:/Users/EDY/Pictures/1.jpg\n- C:/Users/EDY/Pictures/13.jpg\n[/Sources]"}
+{"kind":"slide","id":"sl/qitdg9","slide":10,"title":"聊天发起审批：用户只描述需求，助手完成流程引导","textShapes":22}
+{"kind":"shape","id":"sh/3y9kvals","slide":10,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/3i9ofyd8","slide":10,"text":"聊天发起审批：用户只描述需求，助手完成流程引导","textPreview":"聊天发起审批：用户只描述需求，助手完成流程引导","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ix0n6dw3","slide":10,"text":"APPROVAL CREATION AGENT","textPreview":"APPROVAL CREATION AGENT","textChars":23,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/dob6lsvq","slide":10,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/sn25cne5","slide":10,"text":"用户体验","textPreview":"用户体验","textChars":4,"textLines":1,"bbox":[78,156,300,35]}
+{"kind":"shape","id":"sh/rmtojidk","slide":10,"bbox":[86,216,380,64]}
+{"kind":"textbox","id":"sh/qlknadwz","slide":10,"text":"我明天下午请假 2 小时","textPreview":"我明天下午请假 2 小时","textChars":12,"textLines":1,"bbox":[108,231,336,40]}
+{"kind":"shape","id":"sh/1sv6psvm","slide":10,"bbox":[174,304,304,58]}
+{"kind":"textbox","id":"sh/0rm5gne1","slide":10,"text":"请选择请假类型。","textPreview":"请选择请假类型。","textChars":8,"textLines":1,"bbox":[196,319,260,34]}
+{"kind":"shape","id":"sh/2lczi1sf","slide":10,"bbox":[86,388,186,56]}
+{"kind":"textbox","id":"sh/3mlgb6t0","slide":10,"text":"调休","textPreview":"调休","textChars":2,"textLines":1,"bbox":[108,403,142,32]}
+{"kind":"shape","id":"sh/onuhkbal","slide":10,"bbox":[165,468,350,66]}
+{"kind":"textbox","id":"sh/po3idgb6","slide":10,"text":"审批预览已生成，确认后提交。","textPreview":"审批预览已生成，确认后提交。","textChars":14,"textLines":1,"bbox":[187,483,306,42]}
+{"kind":"textbox","id":"sh/qpwzmlsb","slide":10,"text":"助手完成的四件事","textPreview":"助手完成的四件事","textChars":8,"textLines":1,"bbox":[618,156,400,35]}
+{"kind":"shape","id":"sh/bq50fqtw","slide":10,"bbox":[620,220,42,42]}
+{"kind":"textbox","id":"sh/crehovah","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[620,226,42,28]}
+{"kind":"textbox","id":"sh/dsnih0b2","slide":10,"text":"识别审批模板","textPreview":"识别审批模板","textChars":6,"textLines":1,"bbox":[678,219,452,30]}
+{"kind":"textbox","id":"sh/6tszahs7","slide":10,"text":"结合用户身份和当前公司配置","textPreview":"结合用户身份和当前公司配置","textChars":13,"textLines":1,"bbox":[678,251,452,48]}
+{"kind":"shape","id":"sh/7u1g3mts","slide":10,"bbox":[620,310,42,42]}
+{"kind":"textbox","id":"sh/vyxwbi9k","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[620,316,42,28]}
+{"kind":"textbox","id":"sh/axovid8z","slide":10,"text":"动态补充信息","textPreview":"动态补充信息","textChars":6,"textLines":1,"bbox":[678,309,452,30]}
+{"kind":"textbox","id":"sh/x0zedsrq","slide":10,"text":"按实际表单追问日期、时长、原因等字段","textPreview":"按实际表单追问日期、时长、原因等字段","textChars":18,"textLines":1,"bbox":[678,341,452,48]}
+{"kind":"shape","id":"sh/wzqdknq5","slide":10,"bbox":[620,400,42,42]}
+{"kind":"textbox","id":"sh/naxw7i98","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[620,406,42,28]}
+{"kind":"textbox","id":"sh/m9oved83","slide":10,"text":"应用 ERP 流程","textPreview":"应用 ERP 流程","textChars":9,"textLines":1,"bbox":[678,399,452,30]}
+{"kind":"textbox","id":"sh/9wfe9sre","slide":10,"text":"校验字段，并获取真实审批节点与办理人","textPreview":"校验字段，并获取真实审批节点与办理人","textChars":18,"textLines":1,"bbox":[678,431,452,48]}
+{"kind":"shape","id":"sh/8v6dgnqt","slide":10,"bbox":[620,490,42,42]}
+{"kind":"textbox","id":"sh/761wj29s","slide":10,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[620,496,42,28]}
+{"kind":"textbox","id":"sh/658fqx87","slide":10,"text":"预览后提交","textPreview":"预览后提交","textChars":5,"textLines":1,"bbox":[678,489,452,30]}
+{"kind":"textbox","id":"sh/4zi1of2d","slide":10,"text":"用户明确确认，才执行最终写入","textPreview":"用户明确确认，才执行最终写入","textChars":14,"textLines":1,"bbox":[678,521,452,48]}
+{"kind":"shape","id":"sh/p0r2xk3y","slide":10,"bbox":[80,601,1115,56]}
+{"kind":"textbox","id":"sh/2x0jm5k7","slide":10,"text":"核心价值：用户不必先理解 ERP 表单，系统仍然遵守原有审批规则","textPreview":"核心价值：用户不必先理解 ERP 表单，系统仍然遵守原有审批规则","textChars":32,"textLines":1,"bbox":[111,616,1053,29]}
+{"kind":"notes","id":"nt/qitdg9","slide":10,"text":"【只记一句】聊天发起审批的关键是动态适配，而不是把请假话术写死。\n\n【可直接照读】用户说“我明天下午请假两小时”，助手先识别审批模板，再根据公司配置追问缺失字段，校验后生成预览，只有用户明确确认才写入 ERP。用户看到的是一句话入口，系统内部仍然遵守原来的字段、审批人和权限规则。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}
+{"kind":"slide","id":"sl/7psg8q","slide":11,"title":"审批最难的不是聊天，而是适配动态配置","textShapes":21}
+{"kind":"shape","id":"sh/j69ovil0","slide":11,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/bqhwnuxs","slide":11,"text":"审批最难的不是聊天，而是适配动态配置","textPreview":"审批最难的不是聊天，而是适配动态配置","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/qp8vupw7","slide":11,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/lwjetofu","slide":11,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/0vad0je9","slide":11,"text":"同一个“请假”，不同公司可能完全不同","textPreview":"同一个“请假”，不同公司可能完全不同","textChars":18,"textLines":1,"bbox":[82,158,700,37]}
+{"kind":"shape","id":"sh/zu1wrexo","slide":11,"bbox":[82,219,450,280]}
+{"kind":"textbox","id":"sh/yt8vy9w3","slide":11,"text":"公司 A","textPreview":"公司 A","textChars":4,"textLines":1,"bbox":[112,245,150,32]}
+{"kind":"shape","id":"sh/10fuhkfq","slide":11,"bbox":[116,308,9,9]}
+{"kind":"textbox","id":"sh/gz6dofe5","slide":11,"text":"请假类型","textPreview":"请假类型","textChars":4,"textLines":1,"bbox":[139,300,347,41]}
+{"kind":"shape","id":"sh/u9kr2x8j","slide":11,"bbox":[116,353,9,9]}
+{"kind":"textbox","id":"sh/vatsb2p4","slide":11,"text":"开始 / 结束时间","textPreview":"开始 / 结束时间","textChars":9,"textLines":1,"bbox":[139,345,347,41]}
+{"kind":"shape","id":"sh/wv2947qp","slide":11,"bbox":[116,398,9,9]}
+{"kind":"textbox","id":"sh/hwbadc7a","slide":11,"text":"请假事由","textPreview":"请假事由","textChars":4,"textLines":1,"bbox":[139,390,347,41]}
+{"kind":"shape","id":"sh/ixkr6x8v","slide":11,"bbox":[116,443,9,9]}
+{"kind":"textbox","id":"sh/jytsf2p0","slide":11,"text":"审批人自动匹配","textPreview":"审批人自动匹配","textChars":7,"textLines":1,"bbox":[139,435,347,41]}
+{"kind":"shape","id":"sh/4zm987ql","slide":11,"bbox":[748,219,450,280]}
+{"kind":"textbox","id":"sh/50vahc76","slide":11,"text":"公司 B","textPreview":"公司 B","textChars":4,"textLines":1,"bbox":[778,245,150,32]}
+{"kind":"shape","id":"sh/614rah8r","slide":11,"bbox":[782,308,9,9]}
+{"kind":"textbox","id":"sh/r2dsjmpc","slide":11,"text":"假期余额规则","textPreview":"假期余额规则","textChars":6,"textLines":1,"bbox":[805,300,347,41]}
+{"kind":"shape","id":"sh/36x8rm5k","slide":11,"bbox":[782,353,9,9]}
+{"kind":"textbox","id":"sh/254ryh4z","slide":11,"text":"日期时间 + 时长","textPreview":"日期时间 + 时长","textChars":9,"textLines":1,"bbox":[805,345,347,41]}
+{"kind":"shape","id":"sh/p8fqtwna","slide":11,"bbox":[782,398,9,9]}
+{"kind":"textbox","id":"sh/o7690rm5","slide":11,"text":"交接人员","textPreview":"交接人员","textChars":4,"textLines":1,"bbox":[805,390,347,41]}
+{"kind":"shape","id":"sh/f2d8n258","slide":11,"bbox":[782,443,9,9]}
+{"kind":"textbox","id":"sh/e14ruh4n","slide":11,"text":"发起人选择审批人","textPreview":"发起人选择审批人","textChars":8,"textLines":1,"bbox":[805,435,347,41]}
+{"kind":"shape","id":"sh/14vqpcne","slide":11,"bbox":[570,329,140,44]}
+{"kind":"textbox","id":"sh/g3m9w7mt","slide":11,"text":"不能写死","textPreview":"不能写死","textChars":4,"textLines":1,"bbox":[574,382,132,28]}
+{"kind":"shape","id":"sh/ryt8j25c","slide":11,"bbox":[82,550,342,90]}
+{"kind":"textbox","id":"sh/6xkrqx4r","slide":11,"text":"ERP","textPreview":"ERP","textChars":3,"textLines":1,"bbox":[101,568,112,28]}
+{"kind":"textbox","id":"sh/w3i5032p","slide":11,"text":"定义模板、字段和审批流程","textPreview":"定义模板、字段和审批流程","textChars":12,"textLines":1,"bbox":[207,567,195,50]}
+{"kind":"shape","id":"sh/h4r6t83a","slide":11,"bbox":[457,550,342,90]}
+{"kind":"textbox","id":"sh/uh0nytkj","slide":11,"text":"AI","textPreview":"AI","textChars":2,"textLines":1,"bbox":[476,568,112,28]}
+{"kind":"textbox","id":"sh/vi9oryl4","slide":11,"text":"理解用户表达并提取信息","textPreview":"理解用户表达并提取信息","textChars":11,"textLines":1,"bbox":[582,567,195,50]}
+{"kind":"shape","id":"sh/4725432l","slide":11,"bbox":[832,550,342,90]}
+{"kind":"textbox","id":"sh/58b6x836","slide":11,"text":"聊天助手","textPreview":"聊天助手","textChars":4,"textLines":1,"bbox":[851,568,112,28]}
+{"kind":"textbox","id":"sh/i50n2dkf","slide":11,"text":"动态追问、校验、预览","textPreview":"动态追问、校验、预览","textChars":10,"textLines":1,"bbox":[957,567,195,50]}
+{"kind":"notes","id":"nt/7psg8q","slide":11,"text":"【只记一句】同一个请假动作，在不同公司可能对应不同表单。\n\n【可直接照读】审批最难的地方是组件多、字段不一样，而且每家公司还能配置不同规则。解决方法不是为每家公司增加一组 if-else，而是让 ERP 定义模板和字段，AI负责理解表达，聊天助手根据配置动态追问、校验和预览。这样新增组件主要是增加配置和适配，而不是重写主流程。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/services/crm_service.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}
+{"kind":"slide","id":"sl/2vkqiv","slide":12,"title":"标准日报助手：固定流程优先保证稳定","textShapes":24}
+{"kind":"shape","id":"sh/zeh4ru1k","slide":12,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/gve1snql","slide":12,"text":"标准日报助手：固定流程优先保证稳定","textPreview":"标准日报助手：固定流程优先保证稳定","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/1wn21sr6","slide":12,"text":"DAILY REPORT AGENT","textPreview":"DAILY REPORT AGENT","textChars":18,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/2xw3ux8r","slide":12,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/3y5k329c","slide":12,"bbox":[74,158,425,410]}
+{"kind":"textbox","id":"sh/ozelw7qx","slide":12,"text":"典型对话","textPreview":"典型对话","textChars":4,"textLines":1,"bbox":[106,188,230,34]}
+{"kind":"shape","id":"sh/pkn25sr2","slide":12,"bbox":[108,246,344,90]}
+{"kind":"textbox","id":"sh/i1sjit87","slide":12,"text":"帮我写今天日报：完成客户拜访和报价整理","textPreview":"帮我写今天日报：完成客户拜访和报价整理","textChars":19,"textLines":1,"bbox":[130,261,300,66]}
+{"kind":"shape","id":"sh/j21kry9s","slide":12,"bbox":[154,364,308,60]}
+{"kind":"textbox","id":"sh/zmx0nqxk","slide":12,"text":"已加载今天的日报配置和草稿。","textPreview":"已加载今天的日报配置和草稿。","textChars":14,"textLines":1,"bbox":[176,379,264,36]}
+{"kind":"shape","id":"sh/ylojulgz","slide":12,"bbox":[154,450,308,60]}
+{"kind":"textbox","id":"sh/lozip0fa","slide":12,"text":"预览已生成，请确认提交。","textPreview":"预览已生成，请确认提交。","textChars":12,"textLines":1,"bbox":[176,465,264,36]}
+{"kind":"textbox","id":"sh/0nq1wvyp","slide":12,"text":"稳定执行链路","textPreview":"稳定执行链路","textChars":6,"textLines":1,"bbox":[576,158,350,34]}
+{"kind":"shape","id":"sh/bix0jqx8","slide":12,"bbox":[584,213,42,42]}
+{"kind":"textbox","id":"sh/qhojqlgn","slide":12,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[584,219,42,28]}
+{"kind":"textbox","id":"sh/dkfilgfe","slide":12,"text":"加载上下文","textPreview":"加载上下文","textChars":5,"textLines":1,"bbox":[642,211,210,27]}
+{"kind":"textbox","id":"sh/cj61svyt","slide":12,"text":"字段、配置、草稿、同步数据","textPreview":"字段、配置、草稿、同步数据","textChars":13,"textLines":1,"bbox":[843,213,350,38]}
+{"kind":"shape","id":"sh/3ed0f6xc","slide":12,"bbox":[584,291,42,42]}
+{"kind":"textbox","id":"sh/2t4zm1gr","slide":12,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[584,297,42,28]}
+{"kind":"textbox","id":"sh/6p4jy10j","slide":12,"text":"补充内容","textPreview":"补充内容","textChars":4,"textLines":1,"bbox":[642,289,210,27]}
+{"kind":"textbox","id":"sh/rqdkr614","slide":12,"text":"日期与工作内容","textPreview":"日期与工作内容","textChars":7,"textLines":1,"bbox":[843,291,350,38]}
+{"kind":"shape","id":"sh/srm10bip","slide":12,"bbox":[584,369,42,42]}
+{"kind":"textbox","id":"sh/tsv2tgza","slide":12,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[584,375,42,28]}
+{"kind":"textbox","id":"sh/ed4j2l0f","slide":12,"text":"保存草稿","textPreview":"保存草稿","textChars":4,"textLines":1,"bbox":[642,367,210,27]}
+{"kind":"textbox","id":"sh/fedkvqh0","slide":12,"text":"保留 ERP 原始业务字段","textPreview":"保留 ERP 原始业务字段","textChars":13,"textLines":1,"bbox":[843,369,350,38]}
+{"kind":"shape","id":"sh/gfm14bil","slide":12,"bbox":[584,447,42,42]}
+{"kind":"textbox","id":"sh/1gf2xgz6","slide":12,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[584,453,42,28]}
+{"kind":"textbox","id":"sh/2hoj6l0r","slide":12,"text":"生成预览","textPreview":"生成预览","textChars":4,"textLines":1,"bbox":[642,445,210,27]}
+{"kind":"textbox","id":"sh/3ixkzqhc","slide":12,"text":"展示接收人、抄送人和自定义字段","textPreview":"展示接收人、抄送人和自定义字段","textChars":15,"textLines":1,"bbox":[843,447,350,38]}
+{"kind":"shape","id":"sh/dczmpkje","slide":12,"bbox":[584,525,42,42]}
+{"kind":"textbox","id":"sh/cbq5wf2t","slide":12,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[584,531,42,28]}
+{"kind":"textbox","id":"sh/bah4na18","slide":12,"text":"确认提交","textPreview":"确认提交","textChars":4,"textLines":1,"bbox":[642,523,210,27]}
+{"kind":"textbox","id":"sh/q98nupkn","slide":12,"text":"明确确认后才写入 ERP","textPreview":"明确确认后才写入 ERP","textChars":12,"textLines":1,"bbox":[843,525,350,38]}
+{"kind":"shape","id":"sh/lgjmt4jq","slide":12,"bbox":[74,601,1124,56]}
+{"kind":"textbox","id":"sh/0fa50z25","slide":12,"text":"适合步骤明确、提交风险较高、需要持续恢复的业务流程","textPreview":"适合步骤明确、提交风险较高、需要持续恢复的业务流程","textChars":25,"textLines":1,"bbox":[107,616,1058,28]}
+{"kind":"notes","id":"nt/2vkqiv","slide":12,"text":"【只记一句】标准日报优先用固定流程，先保证稳定和可恢复。\n\n【可直接照读】用户说“帮我写今天日报”，系统加载当天配置、已有草稿和同步数据，收集工作内容，保存草稿，生成预览，确认后提交。这个场景步骤比较明确，所以把流程显式化，便于控制风险，也便于出现中断后继续。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/xxiw4r","slide":13,"title":"自主日报助手：让 Agent 决定下一步做什么","textShapes":17}
+{"kind":"shape","id":"sh/54fu987a","slide":13,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/rm1svedo","slide":13,"text":"自主日报助手：让 Agent 决定下一步做什么","textPreview":"自主日报助手：让 Agent 决定下一步做什么","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/6lsb29cj","slide":13,"text":"DAILY REPORT CREATE AGENT","textPreview":"DAILY REPORT CREATE AGENT","textChars":25,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/1cja1ov6","slide":13,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/gbat8jul","slide":13,"bbox":[72,166,452,383]}
+{"kind":"textbox","id":"sh/fa1szed0","slide":13,"text":"输入不再要求固定格式","textPreview":"输入不再要求固定格式","textChars":10,"textLines":1,"bbox":[108,198,380,35]}
+{"kind":"shape","id":"sh/epsb69cf","slide":13,"bbox":[112,267,360,66]}
+{"kind":"textbox","id":"sh/xgzapkvm","slide":13,"text":"把今天的客户跟进整理成日报","textPreview":"把今天的客户跟进整理成日报","textChars":13,"textLines":1,"bbox":[134,282,316,42]}
+{"kind":"textbox","id":"sh/wfqtwze1","slide":13,"text":"Agent 自主判断","textPreview":"Agent 自主判断","textChars":10,"textLines":1,"bbox":[112,376,190,30]}
+{"kind":"shape","id":"sh/258ny1gv","slide":13,"bbox":[116,420,9,9]}
+{"kind":"textbox","id":"sh/361o76hg","slide":13,"text":"先确认日期","textPreview":"先确认日期","textChars":5,"textLines":1,"bbox":[139,412,327,33]}
+{"kind":"shape","id":"sh/47a50by1","slide":13,"bbox":[116,457,9,9]}
+{"kind":"textbox","id":"sh/p8j69gzm","slide":13,"text":"需要加载哪些 ERP 数据","textPreview":"需要加载哪些 ERP 数据","textChars":13,"textLines":1,"bbox":[139,449,327,33]}
+{"kind":"shape","id":"sh/q9s721g7","slide":13,"bbox":[116,494,9,9]}
+{"kind":"textbox","id":"sh/ra1ob6hs","slide":13,"text":"是否继续追问内容","textPreview":"是否继续追问内容","textChars":8,"textLines":1,"bbox":[139,486,327,33]}
+{"kind":"shape","id":"sh/cbap4byx","slide":13,"bbox":[116,531,9,9]}
+{"kind":"textbox","id":"sh/dcj6dgzi","slide":13,"text":"何时生成预览","textPreview":"何时生成预览","textChars":6,"textLines":1,"bbox":[139,523,327,33]}
+{"kind":"shape","id":"sh/edc76lg3","slide":13,"bbox":[559,321,74,42]}
+{"kind":"shape","id":"sh/zelofqho","slide":13,"bbox":[654,166,548,383]}
+{"kind":"textbox","id":"sh/b2lonqdw","slide":13,"text":"能力提升","textPreview":"能力提升","textChars":4,"textLines":1,"bbox":[692,198,180,33]}
+{"kind":"shape","id":"sh/a1cnulwb","slide":13,"bbox":[698,265,9,9]}
+{"kind":"textbox","id":"sh/x4n6p0vm","slide":13,"text":"适应更自然、更开放的用户表达","textPreview":"适应更自然、更开放的用户表达","textChars":14,"textLines":1,"bbox":[721,257,419,57]}
+{"kind":"shape","id":"sh/w3u5wveh","slide":13,"bbox":[698,326,9,9]}
+{"kind":"textbox","id":"sh/nel4j6dk","slide":13,"text":"减少固定流程中的人工分支设计","textPreview":"减少固定流程中的人工分支设计","textChars":14,"textLines":1,"bbox":[721,318,419,57]}
+{"kind":"shape","id":"sh/mdcnqlwz","slide":13,"bbox":[698,387,9,9]}
+{"kind":"textbox","id":"sh/903mlgvq","slide":13,"text":"可按上下文自主调用日报工具","textPreview":"可按上下文自主调用日报工具","textChars":13,"textLines":1,"bbox":[721,379,419,57]}
+{"kind":"textbox","id":"sh/ofu5sbe5","slide":13,"text":"仍需保留的边界","textPreview":"仍需保留的边界","textChars":7,"textLines":1,"bbox":[692,430,210,30]}
+{"kind":"textbox","id":"sh/za14f6do","slide":13,"text":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textPreview":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textChars":27,"textLines":1,"bbox":[697,476,442,42]}
+{"kind":"shape","id":"sh/e9snm1w3","slide":13,"bbox":[79,600,1116,57]}
+{"kind":"textbox","id":"sh/436t03qp","slide":13,"text":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textPreview":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textChars":30,"textLines":1,"bbox":[110,615,1054,29]}
+{"kind":"notes","id":"nt/xxiw4r","slide":13,"text":"【只记一句】自主日报让 Agent 决定下一步，但写入边界仍然固定。\n\n【可直接照读】当用户只说“把今天客户跟进整理成日报”时，输入并不完整，Agent需要判断是否先确认日期、加载哪些 ERP 数据、是否继续追问以及何时生成预览。它提升了自然表达的适应性，但不能编造内容、跳过预览或自动提交。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/2142sf","slide":14,"title":"Agentic Workflow：把自主规划与流程闸门组合起来","textShapes":21}
+{"kind":"shape","id":"sh/y54rm1g3","slide":14,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/bitwvy9g","slide":14,"text":"Agentic Workflow：把自主规划与流程闸门组合起来","textPreview":"Agentic Workflow：把自主规划与流程闸门组合起来","textChars":31,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/axkfmt8v","slide":14,"text":"AGENTIC WORKFLOW DEMO","textPreview":"AGENTIC WORKFLOW DEMO","textChars":21,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/9wbetora","slide":14,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ov2xkjqp","slide":14,"text":"Agent 负责开放性工作","textPreview":"Agent 负责开放性工作","textChars":13,"textLines":1,"bbox":[92,158,430,35]}
+{"kind":"textbox","id":"sh/nu9wre94","slide":14,"text":"Workflow 负责确定性边界","textPreview":"Workflow 负责确定性边界","textChars":16,"textLines":1,"bbox":[760,158,430,35]}
+{"kind":"shape","id":"sh/mt0fi98j","slide":14,"bbox":[92,226,438,82]}
+{"kind":"textbox","id":"sh/1srep4ry","slide":14,"text":"理解目标","textPreview":"理解目标","textChars":4,"textLines":1,"bbox":[118,239,126,28]}
+{"kind":"textbox","id":"sh/0ridgzqt","slide":14,"text":"识别用户要写什么日报","textPreview":"识别用户要写什么日报","textChars":10,"textLines":1,"bbox":[245,240,250,42]}
+{"kind":"shape","id":"sh/ytgn2hov","slide":14,"bbox":[92,337,438,82]}
+{"kind":"textbox","id":"sh/zupobm5g","slide":14,"text":"制定计划","textPreview":"制定计划","textChars":4,"textLines":1,"bbox":[118,350,126,28]}
+{"kind":"textbox","id":"sh/kvyp4761","slide":14,"text":"明确需要哪些上下文","textPreview":"明确需要哪些上下文","textChars":9,"textLines":1,"bbox":[245,351,250,42]}
+{"kind":"shape","id":"sh/lw76dcnm","slide":14,"bbox":[92,448,438,82]}
+{"kind":"textbox","id":"sh/a5wnyxoz","slide":14,"text":"整理内容","textPreview":"整理内容","textChars":4,"textLines":1,"bbox":[118,461,126,28]}
+{"kind":"textbox","id":"sh/b65o725k","slide":14,"text":"结合用户输入生成正文","textPreview":"结合用户输入生成正文","textChars":10,"textLines":1,"bbox":[245,462,250,42]}
+{"kind":"shape","id":"sh/cry50765","slide":14,"bbox":[573,337,110,45]}
+{"kind":"textbox","id":"sh/xs769cna","slide":14,"text":"建议下一步","textPreview":"建议下一步","textChars":5,"textLines":1,"bbox":[567,390,120,27]}
+{"kind":"shape","id":"sh/21wnuxon","slide":14,"bbox":[752,216,438,68]}
+{"kind":"textbox","id":"sh/n25o3258","slide":14,"text":"保存草稿","textPreview":"保存草稿","textChars":4,"textLines":1,"bbox":[777,226,126,27]}
+{"kind":"textbox","id":"sh/r61kbyl0","slide":14,"text":"由流程执行写入","textPreview":"由流程执行写入","textChars":7,"textLines":1,"bbox":[910,228,250,35]}
+{"kind":"shape","id":"sh/65s32t4f","slide":14,"bbox":[752,307,438,68]}
+{"kind":"textbox","id":"sh/t83mdo36","slide":14,"text":"生成预览","textPreview":"生成预览","textChars":4,"textLines":1,"bbox":[777,317,126,27]}
+{"kind":"textbox","id":"sh/s7ul43ml","slide":14,"text":"展示完整业务信息","textPreview":"展示完整业务信息","textChars":8,"textLines":1,"bbox":[910,319,250,35]}
+{"kind":"shape","id":"sh/fal4fylc","slide":14,"bbox":[752,398,438,68]}
+{"kind":"textbox","id":"sh/e9c36t4r","slide":14,"text":"人工确认","textPreview":"人工确认","textChars":4,"textLines":1,"bbox":[777,408,126,27]}
+{"kind":"textbox","id":"sh/1c3mh832","slide":14,"text":"暂停等待用户动作","textPreview":"暂停等待用户动作","textChars":8,"textLines":1,"bbox":[910,410,250,35]}
+{"kind":"shape","id":"sh/gbul83mx","slide":14,"bbox":[752,489,438,68]}
+{"kind":"textbox","id":"sh/vehk3els","slide":14,"text":"提交闸门","textPreview":"提交闸门","textChars":4,"textLines":1,"bbox":[777,499,126,27]}
+{"kind":"textbox","id":"sh/ud83u94n","slide":14,"text":"确认后才允许执行","textPreview":"确认后才允许执行","textChars":8,"textLines":1,"bbox":[910,501,250,35]}
+{"kind":"shape","id":"sh/07m9obyt","slide":14,"bbox":[94,611,1095,48]}
+{"kind":"textbox","id":"sh/l8vahgfe","slide":14,"text":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textPreview":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textChars":36,"textLines":1,"bbox":[126,623,1031,25]}
+{"kind":"notes","id":"nt/2142sf","slide":14,"text":"【只记一句】开放性工作交给 Agent，确定性写入交给 Workflow。\n\n【可直接照读】Agent可以理解目标、制定计划和组织正文；Workflow负责保存草稿、生成预览、等待确认和执行提交。这个 Agentic Workflow demo 体现的是一种折中：让模型有灵活性，但把高风险动作放在明确的流程闸门之后。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agentic_workflow_demo.py\n[/Sources]"}
+{"kind":"slide","id":"sl/abi563","slide":15,"title":"四种方案不是替代关系，而是按任务选择","textShapes":30}
+{"kind":"shape","id":"sh/50n6dwv6","slide":15,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/ru5cvutg","slide":15,"text":"四种方案不是替代关系，而是按任务选择","textPreview":"四种方案不是替代关系，而是按任务选择","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/qtcvmpcv","slide":15,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ps3utkba","slide":15,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/4rutkzup","slide":15,"bbox":[55,167,195,62]}
+{"kind":"textbox","id":"sh/3qlcrut4","slide":15,"text":"方案","textPreview":"方案","textChars":2,"textLines":1,"bbox":[65,184,175,28]}
+{"kind":"shape","id":"sh/2pcbipcz","slide":15,"bbox":[250,167,285,62]}
+{"kind":"textbox","id":"sh/ho3upkbe","slide":15,"text":"适合场景","textPreview":"适合场景","textChars":4,"textLines":1,"bbox":[260,184,265,28]}
+{"kind":"shape","id":"sh/gnutgfut","slide":15,"bbox":[535,167,180,62]}
+{"kind":"textbox","id":"sh/65g76pov","slide":15,"text":"可控性","textPreview":"可控性","textChars":3,"textLines":1,"bbox":[545,184,160,28]}
+{"kind":"shape","id":"sh/76p8zupg","slide":15,"bbox":[715,167,180,62]}
+{"kind":"textbox","id":"sh/s7y98f61","slide":15,"text":"灵活性","textPreview":"灵活性","textChars":3,"textLines":1,"bbox":[725,184,160,28]}
+{"kind":"shape","id":"sh/t87q1k7m","slide":15,"bbox":[895,167,260,62]}
+{"kind":"textbox","id":"sh/i1w7258z","slide":15,"text":"当前定位","textPreview":"当前定位","textChars":4,"textLines":1,"bbox":[905,184,240,28]}
+{"kind":"shape","id":"sh/j258vapk","slide":15,"bbox":[55,229,195,91]}
+{"kind":"textbox","id":"sh/k3ep4f65","slide":15,"text":"审批助手","textPreview":"审批助手","textChars":4,"textLines":1,"bbox":[67,253,171,46]}
+{"kind":"shape","id":"sh/547qxk7q","slide":15,"bbox":[250,229,285,91]}
+{"kind":"textbox","id":"sh/adw7y583","slide":15,"text":"动态审批、真实提交","textPreview":"动态审批、真实提交","textChars":9,"textLines":1,"bbox":[262,253,261,46]}
+{"kind":"shape","id":"sh/ve58rap8","slide":15,"bbox":[535,229,180,91]}
+{"kind":"textbox","id":"sh/zi14z650","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,253,156,46]}
+{"kind":"shape","id":"sh/ehsn61ov","slide":15,"bbox":[715,229,180,91]}
+{"kind":"textbox","id":"sh/1kj61wn6","slide":15,"text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[727,253,156,46]}
+{"kind":"shape","id":"sh/0ja58b6l","slide":15,"bbox":[895,229,260,91]}
+{"kind":"textbox","id":"sh/n6lo365c","slide":15,"text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,253,236,46]}
+{"kind":"shape","id":"sh/mlcna14r","slide":15,"bbox":[55,320,195,91]}
+{"kind":"textbox","id":"sh/98365gni","slide":15,"text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[67,344,171,46]}
+{"kind":"shape","id":"sh/87u5cbmx","slide":15,"bbox":[250,320,285,91]}
+{"kind":"textbox","id":"sh/3qh4rm58","slide":15,"text":"步骤明确、风险较高","textPreview":"步骤明确、风险较高","textChars":9,"textLines":1,"bbox":[262,344,261,46]}
+{"kind":"shape","id":"sh/2p8nyhon","slide":15,"bbox":[535,320,180,91]}
+{"kind":"textbox","id":"sh/sv618nm5","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,344,156,46]}
+{"kind":"shape","id":"sh/twf2183q","slide":15,"bbox":[715,320,180,91]}
+{"kind":"textbox","id":"sh/6t4j6d4f","slide":15,"text":"中低","textPreview":"中低","textChars":2,"textLines":1,"bbox":[727,344,156,46]}
+{"kind":"shape","id":"sh/7udkzil0","slide":15,"bbox":[895,320,260,91]}
+{"kind":"textbox","id":"sh/krm143m9","slide":15,"text":"生产落地","textPreview":"生产落地","textChars":4,"textLines":1,"bbox":[907,344,236,46]}
+{"kind":"shape","id":"sh/5sv2x83u","slide":15,"bbox":[55,411,195,91]}
+{"kind":"textbox","id":"sh/ip4j2t43","slide":15,"text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[67,435,171,46]}
+{"kind":"shape","id":"sh/jqdkvylo","slide":15,"bbox":[250,411,285,91]}
+{"kind":"textbox","id":"sh/4nqlg72d","slide":15,"text":"输入开放、路径不固定","textPreview":"输入开放、路径不固定","textChars":10,"textLines":1,"bbox":[262,435,261,46]}
+{"kind":"shape","id":"sh/poz29s3y","slide":15,"bbox":[535,411,180,91]}
+{"kind":"textbox","id":"sh/1g7ql0fe","slide":15,"text":"中","textPreview":"中","textChars":1,"textLines":1,"bbox":[547,435,156,46]}
+{"kind":"shape","id":"sh/0vypcvyt","slide":15,"bbox":[715,411,180,91]}
+{"kind":"textbox","id":"sh/fup8jqx8","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,435,156,46]}
+{"kind":"shape","id":"sh/etg7algn","slide":15,"bbox":[895,411,260,91]}
+{"kind":"textbox","id":"sh/9krqpkfa","slide":15,"text":"能力探索","textPreview":"能力探索","textChars":4,"textLines":1,"bbox":[907,435,236,46]}
+{"kind":"shape","id":"sh/oji9gfyp","slide":15,"bbox":[55,502,195,91]}
+{"kind":"textbox","id":"sh/ni98nax4","slide":15,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[67,526,171,46]}
+{"kind":"shape","id":"sh/mhg7e5gj","slide":15,"bbox":[250,502,285,91]}
+{"kind":"textbox","id":"sh/xorqtkf6","slide":15,"text":"复杂任务、需要安全闸门","textPreview":"复杂任务、需要安全闸门","textChars":11,"textLines":1,"bbox":[262,526,261,46]}
+{"kind":"shape","id":"sh/wni9kfy1","slide":15,"bbox":[535,502,180,91]}
+{"kind":"textbox","id":"sh/utcnehwj","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[547,526,156,46]}
+{"kind":"shape","id":"sh/vulo7mdo","slide":15,"bbox":[715,502,180,91]}
+{"kind":"textbox","id":"sh/gvu5gre9","slide":15,"text":"高","textPreview":"高","textChars":1,"textLines":1,"bbox":[727,526,156,46]}
+{"kind":"shape","id":"sh/hw369wvu","slide":15,"bbox":[895,502,260,91]}
+{"kind":"textbox","id":"sh/ixcnihwf","slide":15,"text":"演进方向","textPreview":"演进方向","textChars":4,"textLines":1,"bbox":[907,526,236,46]}
+{"kind":"textbox","id":"sh/3ylobmd0","slide":15,"text":"选择原则","textPreview":"选择原则","textChars":4,"textLines":1,"bbox":[81,626,130,27]}
+{"kind":"textbox","id":"sh/4ze5krel","slide":15,"text":"越接近写入和审批，越需要显式流程；越偏理解、规划与生成，越适合 Agent","textPreview":"越接近写入和审批，越需要显式流程；越偏理解、规划与生成，越适合 Agent","textChars":37,"textLines":1,"bbox":[204,624,965,31]}
+{"kind":"notes","id":"nt/abi563","slide":15,"text":"【只记一句】四种方案是按风险和开放程度选择，不是互相替代。\n\n【可直接照读】审批和标准日报已经具备生产落地的特征，因为流程和提交边界清晰；自主日报更适合能力探索，灵活性高但需要更多约束；Agentic Workflow是演进方向，用自主规划处理开放任务，再用流程闸门保证安全。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/3wldpk","slide":16,"title":"预期效果：聊天请假、聊天发日报，并且过程可控","textShapes":23}
+{"kind":"shape","id":"sh/6l0bypwb","slide":16,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/sz61gny5","slide":16,"text":"预期效果：聊天请假、聊天发日报，并且过程可控","textPreview":"预期效果：聊天请假、聊天发日报，并且过程可控","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/t0f2psfq","slide":16,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/u1ojixgb","slide":16,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/fmhkrixw","slide":16,"bbox":[74,161,547,354]}
+{"kind":"textbox","id":"sh/gnq1kny1","slide":16,"text":"聊天请假","textPreview":"聊天请假","textChars":4,"textLines":1,"bbox":[106,190,220,35]}
+{"kind":"shape","id":"sh/hoz2tsfm","slide":16,"bbox":[107,252,330,58]}
+{"kind":"textbox","id":"sh/2p8jmxg7","slide":16,"text":"我明天下午请假 2 小时","textPreview":"我明天下午请假 2 小时","textChars":12,"textLines":1,"bbox":[129,267,286,34]}
+{"kind":"textbox","id":"sh/3qhkv2xs","slide":16,"text":"识别模板 → 补充类型和时间 → 校验 → 预览 → 确认提交","textPreview":"识别模板 → 补充类型和时间 → 校验 → 预览 → 确认提交","textChars":31,"textLines":1,"bbox":[107,341,462,65]}
+{"kind":"textbox","id":"sh/fyhovi9c","slide":16,"text":"结果：用户无需寻找请假入口，也不必理解所有表单字段。","textPreview":"结果：用户无需寻找请假入口，也不必理解所有表单字段。","textChars":26,"textLines":1,"bbox":[107,429,462,52]}
+{"kind":"shape","id":"sh/ex872dsr","slide":16,"bbox":[661,161,547,354]}
+{"kind":"textbox","id":"sh/10z6xsr2","slide":16,"text":"聊天发日报","textPreview":"聊天发日报","textChars":5,"textLines":1,"bbox":[693,190,220,35]}
+{"kind":"shape","id":"sh/gzqp4nax","slide":16,"bbox":[694,252,393,58]}
+{"kind":"textbox","id":"sh/ruxori90","slide":16,"text":"整理今天客户跟进情况，生成日报","textPreview":"整理今天客户跟进情况，生成日报","textChars":15,"textLines":1,"bbox":[716,267,349,34]}
+{"kind":"textbox","id":"sh/6tonydsf","slide":16,"text":"加载 ERP 上下文 → 整理内容 → 保存草稿 → 预览 → 确认提交","textPreview":"加载 ERP 上下文 → 整理内容 → 保存草稿 → 预览 → 确认提交","textChars":36,"textLines":1,"bbox":[694,341,462,65]}
+{"kind":"textbox","id":"sh/twz6t8r6","slide":16,"text":"结果：减少重复整理，同时保留接收人、自定义字段等业务信息。","textPreview":"结果：减少重复整理，同时保留接收人、自定义字段等业务信息。","textChars":29,"textLines":1,"bbox":[694,429,462,52]}
+{"kind":"shape","id":"sh/svq50nal","slide":16,"bbox":[74,560,259,91]}
+{"kind":"textbox","id":"sh/bq1o329k","slide":16,"text":"2 个","textPreview":"2 个","textChars":3,"textLines":1,"bbox":[86,570,78,34]}
+{"kind":"textbox","id":"sh/qps7axsz","slide":16,"text":"核心业务场景","textPreview":"核心业务场景","textChars":6,"textLines":1,"bbox":[173,576,143,26]}
+{"kind":"textbox","id":"sh/mlcr21c7","slide":16,"text":"审批 + 日报","textPreview":"审批 + 日报","textChars":7,"textLines":1,"bbox":[86,613,235,22]}
+{"kind":"shape","id":"sh/nm5sv6ts","slide":16,"bbox":[358,560,259,91]}
+{"kind":"textbox","id":"sh/8ne94bux","slide":16,"text":"4 种","textPreview":"4 种","textChars":3,"textLines":1,"bbox":[370,570,78,34]}
+{"kind":"textbox","id":"sh/9onaxgbi","slide":16,"text":"工作流方案","textPreview":"工作流方案","textChars":5,"textLines":1,"bbox":[457,576,143,26]}
+{"kind":"textbox","id":"sh/apwr6lc3","slide":16,"text":"流程与 Agent 对比","textPreview":"流程与 Agent 对比","textChars":12,"textLines":1,"bbox":[370,613,235,22]}
+{"kind":"shape","id":"sh/vq5szqto","slide":16,"bbox":[642,560,259,91]}
+{"kind":"textbox","id":"sh/wre98vu9","slide":16,"text":"2 类","textPreview":"2 类","textChars":3,"textLines":1,"bbox":[654,570,78,34]}
+{"kind":"textbox","id":"sh/xsna1gbu","slide":16,"text":"写入确认闸门","textPreview":"写入确认闸门","textChars":6,"textLines":1,"bbox":[741,576,143,26]}
+{"kind":"textbox","id":"sh/qtsruhcz","slide":16,"text":"审批提交 + 日报提交","textPreview":"审批提交 + 日报提交","textChars":11,"textLines":1,"bbox":[654,613,235,22]}
+{"kind":"shape","id":"sh/bul8nmtk","slide":16,"bbox":[926,560,259,91]}
+{"kind":"textbox","id":"sh/t8rutkv2","slide":16,"text":"8 项","textPreview":"8 项","textChars":3,"textLines":1,"bbox":[938,570,78,34]}
+{"kind":"textbox","id":"sh/snid0feh","slide":16,"text":"后续量化指标","textPreview":"后续量化指标","textChars":6,"textLines":1,"bbox":[1025,576,143,26]}
+{"kind":"textbox","id":"sh/7m9crudw","slide":16,"text":"准确率、轮次、成功率、耗时","textPreview":"准确率、轮次、成功率、耗时","textChars":13,"textLines":1,"bbox":[938,613,235,22]}
+{"kind":"notes","id":"nt/3wldpk","slide":16,"text":"【只记一句】现场演示证明“能用”，预期效果页说明“如何衡量”。\n\n【可直接照读】刚才已经看到两条真实业务路径。当前已实现的是聊天请假、动态字段收集、审批预览和确认提交，以及聊天写日报、草稿、预览和 interrupt/resume 恢复。下一步用模板识别准确率、平均对话轮次、必填字段完成率、预览到提交成功率、恢复成功率和 ERP Tool P95 延迟衡量规模化效果。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}
+{"kind":"slide","id":"sl/m7h1j9","slide":17,"title":"现场演示：用两条对话证明业务闭环","textShapes":17}
+{"kind":"shape","id":"sh/relob6hk","slide":17,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/jexovul0","slide":17,"text":"现场演示：用两条对话证明业务闭环","textPreview":"现场演示：用两条对话证明业务闭环","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/idonmp4f","slide":17,"text":"LIVE DEMO · 2–3 MIN","textPreview":"LIVE DEMO · 2–3 MIN","textChars":19,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/t4z6143i","slide":17,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/s36psz2x","slide":17,"bbox":[72,154,538,403]}
+{"kind":"textbox","id":"sh/7ixozulc","slide":17,"text":"演示一：聊天请假","textPreview":"演示一：聊天请假","textChars":8,"textLines":1,"bbox":[106,184,310,35]}
+{"kind":"textbox","id":"sh/6ho7q9kr","slide":17,"text":"现场输入","textPreview":"现场输入","textChars":4,"textLines":1,"bbox":[106,247,135,27]}
+{"kind":"shape","id":"sh/h8z65o3e","slide":17,"bbox":[106,281,230,56]}
+{"kind":"textbox","id":"sh/g7qpwj2t","slide":17,"text":"我要请假","textPreview":"我要请假","textChars":4,"textLines":1,"bbox":[128,296,186,32]}
+{"kind":"textbox","id":"sh/6p0rmp0b","slide":17,"text":"继续补充：请假类型、开始时间、结束时间","textPreview":"继续补充：请假类型、开始时间、结束时间","textChars":19,"textLines":1,"bbox":[106,356,430,28]}
+{"kind":"textbox","id":"sh/7q98fu1w","slide":17,"text":"展示结果","textPreview":"展示结果","textChars":4,"textLines":1,"bbox":[106,411,135,27]}
+{"kind":"textbox","id":"sh/sr29ozih","slide":17,"text":"动态追问 → 字段校验 → 审批预览 → 确认提交","textPreview":"动态追问 → 字段校验 → 审批预览 → 确认提交","textChars":25,"textLines":1,"bbox":[106,449,440,47]}
+{"kind":"textbox","id":"sh/tsbqh4j2","slide":17,"text":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textPreview":"关键观察：不打开 ERP 表单，也能遵守原审批规则","textChars":25,"textLines":1,"bbox":[106,514,440,27]}
+{"kind":"shape","id":"sh/utkrq90n","slide":17,"bbox":[670,154,538,403]}
+{"kind":"textbox","id":"sh/futsje18","slide":17,"text":"演示二：聊天发日报","textPreview":"演示二：聊天发日报","textChars":9,"textLines":1,"bbox":[704,184,335,35]}
+{"kind":"textbox","id":"sh/gv29cjit","slide":17,"text":"现场输入","textPreview":"现场输入","textChars":4,"textLines":1,"bbox":[704,247,135,27]}
+{"kind":"shape","id":"sh/hwbal4jy","slide":17,"bbox":[704,281,438,64]}
+{"kind":"textbox","id":"sh/axgre50j","slide":17,"text":"写今天日报：完成审批助手开发和接口联调","textPreview":"写今天日报：完成审批助手开发和接口联调","textChars":19,"textLines":1,"bbox":[726,296,394,40]}
+{"kind":"textbox","id":"sh/vyp87a1o","slide":17,"text":"展示结果","textPreview":"展示结果","textChars":4,"textLines":1,"bbox":[704,379,135,27]}
+{"kind":"textbox","id":"sh/z25of6hg","slide":17,"text":"加载上下文 → 生成草稿 → 预览 → 确认提交","textPreview":"加载上下文 → 生成草稿 → 预览 → 确认提交","textChars":24,"textLines":1,"bbox":[704,417,440,47]}
+{"kind":"textbox","id":"sh/e1wn61gb","slide":17,"text":"关键观察：日报内容可以自然表达，业务字段仍然保留","textPreview":"关键观察：日报内容可以自然表达，业务字段仍然保留","textChars":24,"textLines":1,"bbox":[704,482,440,27]}
+{"kind":"shape","id":"sh/14n6hgzm","slide":17,"bbox":[81,596,1119,57]}
+{"kind":"textbox","id":"sh/03e58by1","slide":17,"text":"演示原则：先展示输入与结果，再解释背后的 Agent、Workflow 和 ERP Tool","textPreview":"演示原则：先展示输入与结果，再解释背后的 Agent、Workflow 和 ERP Tool","textChars":46,"textLines":1,"bbox":[108,612,1065,28]}
+{"kind":"notes","id":"nt/m7h1j9","slide":17,"text":"【只记一句】现场用两条对话证明：AI 不只是回答，而是真的走完 ERP 业务闭环。\n\n【演示前准备】提前启动 ai_approval_assistant，优先打开现有聊天页面；没有聊天前端时打开 http://127.0.0.1:8010/docs。测试或 mock 环境可以确认提交，生产环境只演示到预览。每条演示使用新的 session_id，避免继承上一次状态。\n\n【可直接照读】下面我不讲代码，直接看实际效果。第一条输入“我要请假”，系统会按真实配置追问请假类型和时间，字段完整后生成审批预览，明确确认后才提交。第二条输入“写今天日报：完成审批助手开发和接口联调”，系统加载当天上下文、生成草稿和预览，再等待确认。大家重点看三个点：自然语言入口、动态补充信息、提交前人工确认。\n\n【异常备用】如果接口或网络临时异常，立刻停止刷新，直接用后面的 LangGraph Studio 截图说明同一条路径，并明确说明“现场环境异常，不影响已经完成的流程验证”。\n\n【时间建议】约 2 分 30 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/演示.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/api/chat.py\n- FastAPI Swagger demo entry: http://127.0.0.1:8010/docs\n- Deep Agents demo entry: http://127.0.0.1:8020/docs\n- Backup plan: if live service is unavailable, use the prepared LangGraph Studio screenshots and explain the same input → preview → confirmation path.\n[/Sources]"}
+{"kind":"slide","id":"sl/nvjbtr","slide":18,"title":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textShapes":21}
+{"kind":"shape","id":"sh/98fqpgri","slide":18,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/7mpwv2lw","slide":18,"text":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textPreview":"遇到的问题：动态配置与流程状态叠加后迅速变复杂","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/6lgf2xkb","slide":18,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/5k7ets3q","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/kjex0n25","slide":18,"bbox":[78,165,349,143]}
+{"kind":"textbox","id":"sh/ji5wrilk","slide":18,"text":"40","textPreview":"40","textChars":2,"textLines":1,"bbox":[103,181,89,57]}
+{"kind":"textbox","id":"sh/ihwfydkf","slide":18,"text":"注册节点","textPreview":"注册节点","textChars":4,"textLines":1,"bbox":[203,190,195,31]}
+{"kind":"textbox","id":"sh/pgry5cju","slide":18,"text":"顶层 9 + 审批 14 + 标准日报 10 + Agentic 7","textPreview":"顶层 9 + 审批 14 + 标准日报 10 + Agentic 7","textChars":34,"textLines":1,"bbox":[103,247,299,41]}
+{"kind":"shape","id":"sh/ofixcr2p","slide":18,"bbox":[458,165,349,143]}
+{"kind":"textbox","id":"sh/6983e903","slide":18,"text":"9","textPreview":"9","textChars":1,"textLines":1,"bbox":[483,181,89,57]}
+{"kind":"textbox","id":"sh/7a1kneho","slide":18,"text":"审批复核路由","textPreview":"审批复核路由","textChars":6,"textLines":1,"bbox":[583,190,195,31]}
+{"kind":"textbox","id":"sh/sbalgji9","slide":18,"text":"decision_review 需要处理 9 类分支","textPreview":"decision_review 需要处理 9 类分支","textChars":26,"textLines":1,"bbox":[483,247,299,41]}
+{"kind":"shape","id":"sh/tcj2pozu","slide":18,"bbox":[838,165,349,143]}
+{"kind":"textbox","id":"sh/y583a90r","slide":18,"text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[863,181,89,57]}
+{"kind":"textbox","id":"sh/j6hkjuhc","slide":18,"text":"日报恢复路线","textPreview":"日报恢复路线","textChars":6,"textLines":1,"bbox":[963,190,195,31]}
+{"kind":"textbox","id":"sh/k7qlczix","slide":18,"text":"interrupt_daily_report resume 后有 7 类去向","textPreview":"interrupt_daily_report resume 后有 7 类去向","textChars":38,"textLines":1,"bbox":[863,247,299,41]}
+{"kind":"shape","id":"sh/l8z2l4zi","slide":18,"bbox":[78,341,543,112]}
+{"kind":"textbox","id":"sh/21c3mt0b","slide":18,"text":"审批组件太多","textPreview":"审批组件太多","textChars":6,"textLines":1,"bbox":[103,358,190,30]}
+{"kind":"textbox","id":"sh/32l4vyhw","slide":18,"text":"字段、选项和审批规则都可能按公司动态配置。","textPreview":"字段、选项和审批规则都可能按公司动态配置。","textChars":21,"textLines":1,"bbox":[296,358,296,64]}
+{"kind":"shape","id":"sh/fat876tw","slide":18,"bbox":[659,341,543,112]}
+{"kind":"textbox","id":"sh/e9kry1cb","slide":18,"text":"if-else 持续增长","textPreview":"if-else 持续增长","textChars":12,"textLines":1,"bbox":[684,358,190,30]}
+{"kind":"textbox","id":"sh/1wbqtwb2","slide":18,"text":"新建、继续、修改、取消、确认与字段缺失都要分流。","textPreview":"新建、继续、修改、取消、确认与字段缺失都要分流。","textChars":24,"textLines":1,"bbox":[877,358,296,64]}
+{"kind":"shape","id":"sh/0b290ruh","slide":18,"bbox":[78,481,543,112]}
+{"kind":"textbox","id":"sh/nyd8v6t8","slide":18,"text":"状态相互影响","textPreview":"状态相互影响","textChars":6,"textLines":1,"bbox":[103,498,190,30]}
+{"kind":"textbox","id":"sh/2x4r21cn","slide":18,"text":"多轮对话、人工中断、恢复和重复提交需要协同。","textPreview":"多轮对话、人工中断、恢复和重复提交需要协同。","textChars":22,"textLines":1,"bbox":[296,498,296,64]}
+{"kind":"shape","id":"sh/p0vqxgby","slide":18,"bbox":[659,481,543,112]}
+{"kind":"textbox","id":"sh/ozm94bud","slide":18,"text":"故障定位困难","textPreview":"故障定位困难","textChars":6,"textLines":1,"bbox":[684,498,190,30]}
+{"kind":"textbox","id":"sh/b2dszqt4","slide":18,"text":"需要区分模型、路由、状态恢复与 ERP 接口问题。","textPreview":"需要区分模型、路由、状态恢复与 ERP 接口问题。","textChars":25,"textLines":1,"bbox":[877,498,296,64]}
+{"kind":"shape","id":"sh/a14r6lcj","slide":18,"bbox":[80,630,1120,44]}
+{"kind":"textbox","id":"sh/876pwvqx","slide":18,"text":"根本原因：动态配置 × 多轮对话 × 状态流转 × ERP 写入风险同时叠加","textPreview":"根本原因：动态配置 × 多轮对话 × 状态流转 × ERP 写入风险同时叠加","textChars":38,"textLines":1,"bbox":[104,641,1072,24]}
+{"kind":"notes","id":"nt/nvjbtr","slide":18,"text":"【只记一句】复杂度来自配置、状态和安全边界叠加。\n\n【可直接照读】审批组件太多，每个组件字段不同；LangGraph中 if-else 持续增加；多轮对话、人工中断和恢复让节点状态相互影响；出现问题时还要区分模型、路由、状态和 ERP 接口。当前四类工作流一共注册了约 40 个节点：顶层 9 个、审批子图 14 个、标准日报 10 个、Agentic Workflow 7 个。这个数字能直观说明，聊天入口很简单，业务执行并不简单。\n\n【时间建议】约 75 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/fl2dbn","slide":19,"title":"问题排查：需要从“看结果”升级为“看完整链路”","textShapes":18}
+{"kind":"shape","id":"sh/on6pwby1","slide":19,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/t4fa9ovu","slide":19,"text":"问题排查：需要从“看结果”升级为“看完整链路”","textPreview":"问题排查：需要从“看结果”升级为“看完整链路”","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/s369gje9","slide":19,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/jexs3eds","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/id4ra9w7","slide":19,"text":"一次请求可能同时经过四类环节","textPreview":"一次请求可能同时经过四类环节","textChars":14,"textLines":1,"bbox":[81,158,510,34]}
+{"kind":"shape","id":"sh/5gfa54vy","slide":19,"bbox":[293,291,65,34]}
+{"kind":"shape","id":"sh/4f69cjed","slide":19,"bbox":[588,291,65,34]}
+{"kind":"shape","id":"sh/3ahsfydw","slide":19,"bbox":[883,291,65,34]}
+{"kind":"shape","id":"sh/298bmtwr","slide":19,"bbox":[70,225,230,175]}
+{"kind":"textbox","id":"sh/ovmls7u1","slide":19,"text":"模型理解","textPreview":"模型理解","textChars":4,"textLines":1,"bbox":[90,250,190,30]}
+{"kind":"textbox","id":"sh/9wvmlcb6","slide":19,"text":"意图是否识别正确？\n字段是否提取完整？","textPreview":"意图是否识别正确？ | 字段是否提取完整？","textChars":19,"textLines":2,"bbox":[90,307,190,62]}
+{"kind":"shape","id":"sh/mt43qhcv","slide":19,"bbox":[365,225,230,175]}
+{"kind":"textbox","id":"sh/nud4jmtg","slide":19,"text":"流程路由","textPreview":"流程路由","textChars":4,"textLines":1,"bbox":[385,250,190,30]}
+{"kind":"textbox","id":"sh/0rmlo7up","slide":19,"text":"进入了哪个节点？\n为什么选择这个分支？","textPreview":"进入了哪个节点？ | 为什么选择这个分支？","textChars":19,"textLines":2,"bbox":[385,307,190,62]}
+{"kind":"shape","id":"sh/1svmhcba","slide":19,"bbox":[660,225,230,175]}
+{"kind":"textbox","id":"sh/epk3mxcj","slide":19,"text":"状态变化","textPreview":"状态变化","textChars":4,"textLines":1,"bbox":[680,250,190,30]}
+{"kind":"textbox","id":"sh/zqdkf2t4","slide":19,"text":"当前等待什么？\n中断恢复是否正确？","textPreview":"当前等待什么？ | 中断恢复是否正确？","textChars":17,"textLines":2,"bbox":[680,307,190,62]}
+{"kind":"shape","id":"sh/c32lknut","slide":19,"bbox":[955,225,230,175]}
+{"kind":"textbox","id":"sh/dob2dsbe","slide":19,"text":"ERP 工具","textPreview":"ERP 工具","textChars":6,"textLines":1,"bbox":[975,250,190,30]}
+{"kind":"textbox","id":"sh/tk3ihon2","slide":19,"text":"调用了哪个接口？\n入参与返回是否正确？","textPreview":"调用了哪个接口？ | 入参与返回是否正确？","textChars":19,"textLines":2,"bbox":[975,307,190,62]}
+{"kind":"shape","id":"sh/sju1ojmh","slide":19,"bbox":[78,448,1124,180]}
+{"kind":"textbox","id":"sh/ril0fe5w","slide":19,"text":"LangSmith / Trace 需要重点观察","textPreview":"LangSmith / Trace 需要重点观察","textChars":24,"textLines":1,"bbox":[111,472,420,32]}
+{"kind":"shape","id":"sh/6hcjm94b","slide":19,"bbox":[112,526,9,9]}
+{"kind":"textbox","id":"sh/5w3idonq","slide":19,"text":"节点执行顺序与路由原因","textPreview":"节点执行顺序与路由原因","textChars":11,"textLines":1,"bbox":[135,518,1007,23]}
+{"kind":"shape","id":"sh/4vu1kjml","slide":19,"bbox":[112,553,9,9]}
+{"kind":"textbox","id":"sh/jul0be50","slide":19,"text":"模型输入输出与字段抽取结果","textPreview":"模型输入输出与字段抽取结果","textChars":13,"textLines":1,"bbox":[135,545,1007,23]}
+{"kind":"shape","id":"sh/itsji94f","slide":19,"bbox":[112,580,9,9]}
+{"kind":"textbox","id":"sh/psn2p83a","slide":19,"text":"Tool 调用参数、返回和耗时","textPreview":"Tool 调用参数、返回和耗时","textChars":15,"textLines":1,"bbox":[135,572,1007,23]}
+{"kind":"shape","id":"sh/ore1w3mp","slide":19,"bbox":[112,607,9,9]}
+{"kind":"textbox","id":"sh/mlo7u1gv","slide":19,"text":"中断前后的状态差异与失败位置","textPreview":"中断前后的状态差异与失败位置","textChars":14,"textLines":1,"bbox":[135,599,1007,23]}
+{"kind":"textbox","id":"sh/nmx836hg","slide":19,"text":"建议截图：审批完整 Trace + 日报 interrupt/resume + Agentic Workflow 计划与闸门","textPreview":"建议截图：审批完整 Trace + 日报 interrupt/resume + Agentic Workflow 计划与闸门","textChars":62,"textLines":1,"bbox":[89,650,1102,25]}
+{"kind":"notes","id":"nt/fl2dbn","slide":19,"text":"【只记一句】排查问题要看完整 Trace，而不是只看最终回答。\n\n【可直接照读】一次请求可能同时经过模型理解、流程路由、状态变化和 ERP 工具四类环节。LangSmith需要重点观察节点顺序、分支原因、模型字段抽取、Tool参数与耗时，以及 interrupt前后的状态差异。这样才能快速判断问题发生在哪一层，而不是凭感觉修改代码。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}
+{"kind":"slide","id":"sl/8yruqc","slide":20,"title":"优化方向：稳定流程标准化，开放判断 Agent 化","textShapes":20}
+{"kind":"shape","id":"sh/obmlkfud","slide":20,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/v2d47ipg","slide":20,"text":"优化方向：稳定流程标准化，开放判断 Agent 化","textPreview":"优化方向：稳定流程标准化，开放判断 Agent 化","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/a14nedov","slide":20,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/5sfmdsni","slide":20,"text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/4r65kn6x","slide":20,"bbox":[77,161,526,342]}
+{"kind":"textbox","id":"sh/j6d4bipc","slide":20,"text":"适合保留在流程中的内容","textPreview":"适合保留在流程中的内容","textChars":11,"textLines":1,"bbox":[111,191,430,36]}
+{"kind":"shape","id":"sh/i54nidor","slide":20,"bbox":[116,265,9,9]}
+{"kind":"textbox","id":"sh/lwbm187y","slide":20,"text":"字段是否完整","textPreview":"字段是否完整","textChars":6,"textLines":1,"bbox":[139,257,407,44]}
+{"kind":"shape","id":"sh/0v2l836t","slide":20,"bbox":[116,313,9,9]}
+{"kind":"textbox","id":"sh/i5szqd4r","slide":20,"text":"业务校验是否通过","textPreview":"业务校验是否通过","textChars":8,"textLines":1,"bbox":[139,305,407,44]}
+{"kind":"shape","id":"sh/j61gzilc","slide":20,"bbox":[116,361,9,9]}
+{"kind":"textbox","id":"sh/k7ahsnmh","slide":20,"text":"是否已经生成预览","textPreview":"是否已经生成预览","textChars":8,"textLines":1,"bbox":[139,353,407,44]}
+{"kind":"shape","id":"sh/58jy1s32","slide":20,"bbox":[116,409,9,9]}
+{"kind":"textbox","id":"sh/69szux4n","slide":20,"text":"用户是否明确确认","textPreview":"用户是否明确确认","textChars":8,"textLines":1,"bbox":[139,401,407,44]}
+{"kind":"shape","id":"sh/7a1g32l8","slide":20,"bbox":[116,457,9,9]}
+{"kind":"textbox","id":"sh/sbahwnmt","slide":20,"text":"写入是否幂等、可审计","textPreview":"写入是否幂等、可审计","textChars":10,"textLines":1,"bbox":[139,449,407,44]}
+{"kind":"shape","id":"sh/tw3y5s3e","slide":20,"bbox":[677,161,526,342]}
+{"kind":"textbox","id":"sh/uxczyxkz","slide":20,"text":"适合交给 Agent 的内容","textPreview":"适合交给 Agent 的内容","textChars":14,"textLines":1,"bbox":[711,191,430,36]}
+{"kind":"shape","id":"sh/fyl072l4","slide":20,"bbox":[716,265,9,9]}
+{"kind":"textbox","id":"sh/r2lgf21c","slide":20,"text":"理解用户真实目标","textPreview":"理解用户真实目标","textChars":8,"textLines":1,"bbox":[739,257,407,44]}
+{"kind":"shape","id":"sh/q1cfmx0r","slide":20,"bbox":[716,313,9,9]}
+{"kind":"textbox","id":"sh/d4nyhcji","slide":20,"text":"从自然语言提取信息","textPreview":"从自然语言提取信息","textChars":9,"textLines":1,"bbox":[739,305,407,44]}
+{"kind":"shape","id":"sh/c3exo7ix","slide":20,"bbox":[716,361,9,9]}
+{"kind":"textbox","id":"sh/3ylgb21g","slide":20,"text":"决定需要查询哪些上下文","textPreview":"决定需要查询哪些上下文","textChars":11,"textLines":1,"bbox":[739,353,407,44]}
+{"kind":"shape","id":"sh/2xcfix0v","slide":20,"bbox":[716,409,9,9]}
+{"kind":"textbox","id":"sh/p03ydsjm","slide":20,"text":"组织日报和业务摘要","textPreview":"组织日报和业务摘要","textChars":9,"textLines":1,"bbox":[739,401,407,44]}
+{"kind":"shape","id":"sh/4zuxk7i1","slide":20,"bbox":[716,457,9,9]}
+{"kind":"textbox","id":"sh/fa1g7i14","slide":20,"text":"面对开放任务制定下一步","textPreview":"面对开放任务制定下一步","textChars":11,"textLines":1,"bbox":[739,449,407,44]}
+{"kind":"textbox","id":"sh/u9sfed0j","slide":20,"text":"配套改进","textPreview":"配套改进","textChars":4,"textLines":1,"bbox":[82,548,160,30]}
+{"kind":"shape","id":"sh/k36lszu5","slide":20,"bbox":[82,594,260,65]}
+{"kind":"textbox","id":"sh/l4fm14vq","slide":20,"text":"规则配置化","textPreview":"规则配置化","textChars":5,"textLines":1,"bbox":[92,613,240,28]}
+{"kind":"shape","id":"sh/y1o3qpcf","slide":20,"bbox":[367,594,260,65]}
+{"kind":"textbox","id":"sh/j2x4zud0","slide":20,"text":"节点单一职责","textPreview":"节点单一职责","textChars":6,"textLines":1,"bbox":[377,613,240,28]}
+{"kind":"shape","id":"sh/87q5wzuh","slide":20,"bbox":[652,594,260,65]}
+{"kind":"textbox","id":"sh/tszm54v2","slide":20,"text":"统一 ERP 工具","textPreview":"统一 ERP 工具","textChars":9,"textLines":1,"bbox":[662,613,240,28]}
+{"kind":"shape","id":"sh/65o3upcb","slide":20,"bbox":[937,594,260,65]}
+{"kind":"textbox","id":"sh/76h43udw","slide":20,"text":"LangSmith 全链路观测","textPreview":"LangSmith 全链路观测","textChars":15,"textLines":1,"bbox":[947,613,240,28]}
+{"kind":"notes","id":"nt/8yruqc","slide":20,"text":"【只记一句】优化原则是把稳定规则流程化，把开放判断 Agent 化。\n\n【可直接照读】字段完整性、业务校验、预览确认、幂等和审计必须留在 Workflow 中；理解目标、提取信息、选择上下文和组织内容可以交给 Agent。配套动作包括规则配置化、节点单一职责、统一 ERP Tool 和全链路观测。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n[/Sources]"}
+{"kind":"slide","id":"sl/oftoby","slide":21,"title":"八句话总结：AI 负责理解，ERP 负责可信执行","textShapes":20}
+{"kind":"shape","id":"sh/u58jup0b","slide":21,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/itsr61sj","slide":21,"text":"八句话总结：AI 负责理解，ERP 负责可信执行","textPreview":"八句话总结：AI 负责理解，ERP 负责可信执行","textChars":24,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/3u1sz6t4","slide":21,"text":"CORE TAKEAWAYS","textPreview":"CORE TAKEAWAYS","textChars":14,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/sjutcbal","slide":21,"text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/dk3a5gb6","slide":21,"bbox":[72,151,554,94]}
+{"kind":"shape","id":"sh/qxcra1sv","slide":21,"bbox":[92,173,50,50]}
+{"kind":"textbox","id":"sh/rils36tg","slide":21,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[92,185,50,25]}
+{"kind":"textbox","id":"sh/8nq907ah","slide":21,"text":"AI不是替代ERP，而是给ERP增加自然语言入口。","textPreview":"AI不是替代ERP，而是给ERP增加自然语言入口。","textChars":25,"textLines":1,"bbox":[163,171,431,58]}
+{"kind":"shape","id":"sh/tozatcb2","slide":21,"bbox":[72,262,554,94]}
+{"kind":"shape","id":"sh/pgnets7a","slide":21,"bbox":[92,284,50,50]}
+{"kind":"textbox","id":"sh/ofexk7qp","slide":21,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[92,296,50,25]}
+{"kind":"textbox","id":"sh/3e5wr2p4","slide":21,"text":"首批选择审批和日报，因为高频、典型、容易验证闭环。","textPreview":"首批选择审批和日报，因为高频、典型、容易验证闭环。","textChars":25,"textLines":1,"bbox":[163,282,431,58]}
+{"kind":"shape","id":"sh/2dwfix8j","slide":21,"bbox":[72,373,554,94]}
+{"kind":"shape","id":"sh/d47exc76","slide":21,"bbox":[92,395,50,50]}
+{"kind":"textbox","id":"sh/c3yxo7q1","slide":21,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[92,407,50,25]}
+{"kind":"textbox","id":"sh/b25wv2pg","slide":21,"text":"用户只说业务目标，AI负责理解和补充信息。","textPreview":"用户只说业务目标，AI负责理解和补充信息。","textChars":21,"textLines":1,"bbox":[163,393,431,58]}
+{"kind":"shape","id":"sh/qhwfmx8v","slide":21,"bbox":[72,484,554,94]}
+{"kind":"shape","id":"sh/l87e1w7i","slide":21,"bbox":[92,506,50,50]}
+{"kind":"textbox","id":"sh/07yxsrqx","slide":21,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[92,518,50,25]}
+{"kind":"textbox","id":"sh/kb6hove9","slide":21,"text":"ERP继续负责权限、规则、字段和最终写入。","textPreview":"ERP继续负责权限、规则、字段和最终写入。","textChars":21,"textLines":1,"bbox":[163,504,431,58]}
+{"kind":"shape","id":"sh/5cfyx0fe","slide":21,"bbox":[654,151,554,94]}
+{"kind":"shape","id":"sh/i9ozmlg3","slide":21,"bbox":[674,173,50,50]}
+{"kind":"textbox","id":"sh/jaxgvqxo","slide":21,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[674,185,50,25]}
+{"kind":"textbox","id":"sh/sfqhsve5","slide":21,"text":"LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。","textPreview":"LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。","textChars":48,"textLines":1,"bbox":[745,171,431,58]}
+{"kind":"shape","id":"sh/tgzy10fq","slide":21,"bbox":[654,262,554,94]}
+{"kind":"shape","id":"sh/6dozq5wz","slide":21,"bbox":[674,284,50,50]}
+{"kind":"textbox","id":"sh/7ehgzaxk","slide":21,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[674,296,50,25]}
+{"kind":"textbox","id":"sh/ojmhgby1","slide":21,"text":"最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。","textPreview":"最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。","textChars":34,"textLines":1,"bbox":[745,282,431,58]}
+{"kind":"shape","id":"sh/9kvypgfm","slide":21,"bbox":[654,373,554,94]}
+{"kind":"shape","id":"sh/rylkveh4","slide":21,"bbox":[674,395,50,50]}
+{"kind":"textbox","id":"sh/qdcj29gj","slide":21,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[674,407,50,25]}
+{"kind":"textbox","id":"sh/d032xozu","slide":21,"text":"当前最大问题是动态字段、流程分支和状态复杂度。","textPreview":"当前最大问题是动态字段、流程分支和状态复杂度。","textChars":23,"textLines":1,"bbox":[745,393,431,58]}
+{"kind":"shape","id":"sh/czu14jyp","slide":21,"bbox":[654,484,554,94]}
+{"kind":"shape","id":"sh/3a1kruhs","slide":21,"bbox":[674,506,50,50]}
+{"kind":"textbox","id":"sh/29sjy9g7","slide":21,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[674,518,50,25]}
+{"kind":"textbox","id":"sh/pcj2t4zy","slide":21,"text":"下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。","textPreview":"下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。","textChars":33,"textLines":1,"bbox":[745,504,431,58]}
+{"kind":"shape","id":"sh/4ba10zyd","slide":21,"bbox":[74,619,1132,56]}
+{"kind":"textbox","id":"sh/f61knuhw","slide":21,"text":"一条主线：AI 降低用户操作门槛，ERP 保证业务执行可信","textPreview":"一条主线：AI 降低用户操作门槛，ERP 保证业务执行可信","textChars":29,"textLines":1,"bbox":[102,634,1076,28]}
+{"kind":"notes","id":"nt/oftoby","slide":21,"text":"【只记一句】AI 负责理解和交互，ERP 负责规则和可信执行。\n\n【可直接照读】最后用八句话总结这次实践。AI 不是替代 ERP，而是增加自然语言入口；审批和日报是第一批高频、典型、容易验证闭环的场景。用户负责表达目标，AI 负责理解和补充信息，ERP 继续负责权限、规则、字段和最终写入。技术上，LangChain 提供基础组件，LangGraph 负责主流程，Deep Agents 探索自主规划；最终选择 LangGraph，是因为 ERP 更需要可控、可恢复和可审计。当前最大的挑战是动态字段、流程分支和状态复杂度，下一步要沉淀统一 Schema、统一 Tool 和统一观测体系。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}
+{"kind":"slide","id":"sl/omhp50","slide":22,"title":"下一步：从两个场景沉淀 ERP 智能化底座","textShapes":19}
+{"kind":"shape","id":"sh/5sb694ri","slide":22,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/2h0v694r","slide":22,"text":"下一步：从两个场景沉淀 ERP 智能化底座","textPreview":"下一步：从两个场景沉淀 ERP 智能化底座","textChars":21,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ni9cfelc","slide":22,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/c72dc3m9","slide":22,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/x8bul83e","slide":22,"bbox":[423,328,58,38]}
+{"kind":"shape","id":"sh/alkvat43","slide":22,"bbox":[813,328,58,38]}
+{"kind":"shape","id":"sh/b6tcjylo","slide":22,"bbox":[73,187,350,342]}
+{"kind":"textbox","id":"sh/sbyt0zmp","slide":22,"text":"近期","textPreview":"近期","textChars":2,"textLines":1,"bbox":[103,216,90,30]}
+{"kind":"textbox","id":"sh/dc7u943a","slide":22,"text":"完善审批与日报闭环","textPreview":"完善审批与日报闭环","textChars":9,"textLines":1,"bbox":[103,264,290,70]}
+{"kind":"shape","id":"sh/5kvat8vy","slide":22,"bbox":[107,373,9,9]}
+{"kind":"textbox","id":"sh/kjmtk3ed","slide":22,"text":"动态字段适配","textPreview":"动态字段适配","textChars":6,"textLines":1,"bbox":[130,365,263,45]}
+{"kind":"shape","id":"sh/jidsryds","slide":22,"bbox":[107,422,9,9]}
+{"kind":"textbox","id":"sh/ih4bitw7","slide":22,"text":"确认与错误恢复","textPreview":"确认与错误恢复","textChars":7,"textLines":1,"bbox":[130,414,263,45]}
+{"kind":"shape","id":"sh/tofaxsvu","slide":22,"bbox":[107,471,9,9]}
+{"kind":"textbox","id":"sh/sn6tone9","slide":22,"text":"链路观测","textPreview":"链路观测","textChars":4,"textLines":1,"bbox":[130,463,263,45]}
+{"kind":"shape","id":"sh/7mdsvido","slide":22,"bbox":[463,187,350,342]}
+{"kind":"textbox","id":"sh/6l4bmdw3","slide":22,"text":"中期","textPreview":"中期","textChars":2,"textLines":1,"bbox":[493,216,90,30]}
+{"kind":"textbox","id":"sh/hcfu1svq","slide":22,"text":"沉淀通用能力","textPreview":"沉淀通用能力","textChars":6,"textLines":1,"bbox":[493,264,290,70]}
+{"kind":"shape","id":"sh/gb6tsnel","slide":22,"bbox":[497,373,9,9]}
+{"kind":"textbox","id":"sh/0vedormh","slide":22,"text":"统一业务 Schema","textPreview":"统一业务 Schema","textChars":11,"textLines":1,"bbox":[520,365,263,45]}
+{"kind":"shape","id":"sh/1wnuxw32","slide":22,"bbox":[497,422,9,9]}
+{"kind":"textbox","id":"sh/etwvm14r","slide":22,"text":"统一 ERP Tool","textPreview":"统一 ERP Tool","textChars":11,"textLines":1,"bbox":[520,414,263,45]}
+{"kind":"shape","id":"sh/fu5cv6lw","slide":22,"bbox":[497,471,9,9]}
+{"kind":"textbox","id":"sh/ojydsb2t","slide":22,"text":"公司级配置适配","textPreview":"公司级配置适配","textChars":7,"textLines":1,"bbox":[520,463,263,45]}
+{"kind":"shape","id":"sh/9k7e1g3e","slide":22,"bbox":[853,187,350,342]}
+{"kind":"textbox","id":"sh/mhwvq1kn","slide":22,"text":"长期","textPreview":"长期","textChars":2,"textLines":1,"bbox":[883,216,90,30]}
+{"kind":"textbox","id":"sh/ni5wz6l8","slide":22,"text":"扩展更多 ERP 场景","textPreview":"扩展更多 ERP 场景","textChars":11,"textLines":1,"bbox":[883,264,290,70]}
+{"kind":"shape","id":"sh/4nudg7m9","slide":22,"bbox":[887,373,9,9]}
+{"kind":"textbox","id":"sh/5o3upc3u","slide":22,"text":"订单与库存","textPreview":"订单与库存","textChars":5,"textLines":1,"bbox":[910,365,263,45]}
+{"kind":"shape","id":"sh/7utobe9o","slide":22,"bbox":[887,422,9,9]}
+{"kind":"textbox","id":"sh/6tk7i983","slide":22,"text":"客户跟进","textPreview":"客户跟进","textChars":4,"textLines":1,"bbox":[910,414,263,45]}
+{"kind":"shape","id":"sh/twv6doru","slide":22,"bbox":[887,471,9,9]}
+{"kind":"textbox","id":"sh/svmpkjq9","slide":22,"text":"经营分析与任务执行","textPreview":"经营分析与任务执行","textChars":9,"textLines":1,"bbox":[910,463,263,45]}
+{"kind":"shape","id":"sh/jqto7u9s","slide":22,"bbox":[74,577,1132,83]}
+{"kind":"textbox","id":"sh/ipk7e9s7","slide":22,"text":"以 LangGraph 作为主框架：让 AI 理解任务，让 ERP 流程稳定、可控、可追踪","textPreview":"以 LangGraph 作为主框架：让 AI 理解任务，让 ERP 流程稳定、可控、可追踪","textChars":45,"textLines":1,"bbox":[103,598,1074,42]}
+{"kind":"notes","id":"nt/omhp50","slide":22,"text":"【只记一句】下一步是把两个试点沉淀成可复用底座。\n\n【可直接照读】近期完善审批与日报的动态字段、错误恢复和链路观测；中期沉淀统一业务 Schema、ERP Tool和公司级配置适配；长期扩展订单、库存、客户跟进和经营分析。最终目标是让 AI 理解任务，让 ERP 流程稳定、可控、可追踪。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}
+{"kind":"slide","id":"sl/vll13u","slide":23,"title":"附录：聊天助手顶层路由图","textShapes":24}
+{"kind":"shape","id":"sh/6143u9wj","slide":23,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/ytwvixof","slide":23,"text":"附录：聊天助手顶层路由图","textPreview":"附录：聊天助手顶层路由图","textChars":12,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ju5cr250","slide":23,"text":"LANGGRAPH STUDIO","textPreview":"LANGGRAPH STUDIO","textChars":16,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/wredgn6p","slide":23,"text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/xsnupsnu","slide":23,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/bqlcni54","slide":23,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/gnydsr6t","slide":23,"text":"节点职责（与代码对应）","textPreview":"节点职责（与代码对应）","textChars":11,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/ho7e1wne","slide":23,"bbox":[1008,180,1.5,462]}
+{"kind":"textbox","id":"sh/9k3qtwjm","slide":23,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,216,40.2]}
+{"kind":"textbox","id":"sh/8ju90ri1","slide":23,"text":"进入主图 / 本轮处理结束","textPreview":"进入主图 / 本轮处理结束","textChars":13,"textLines":1,"bbox":[1020,185,198,40.2]}
+{"kind":"shape","id":"sh/nil8rm1g","slide":23,"bbox":[782,227.2,436,1]}
+{"kind":"textbox","id":"sh/mhsry10v","slide":23,"text":"memory_agent","textPreview":"memory_agent","textChars":12,"textLines":1,"bbox":[782,232.2,216,40.2]}
+{"kind":"textbox","id":"sh/lgjqpwja","slide":23,"text":"记录输入，补充短期记忆","textPreview":"记录输入，补充短期记忆","textChars":11,"textLines":1,"bbox":[1020,232.2,198,40.2]}
+{"kind":"shape","id":"sh/0fa9wrip","slide":23,"bbox":[782,274.4,436,1]}
+{"kind":"textbox","id":"sh/zu18nm1k","slide":23,"text":"intent_router","textPreview":"intent_router","textChars":13,"textLines":1,"bbox":[782,279.4,216,40.2]}
+{"kind":"textbox","id":"sh/yts7uh0z","slide":23,"text":"按意图与会话状态分配业务 Agent","textPreview":"按意图与会话状态分配业务 Agent","textChars":18,"textLines":1,"bbox":[1020,279.4,198,40.2]}
+{"kind":"shape","id":"sh/5cna1gzu","slide":23,"bbox":[782,321.6,436,1]}
+{"kind":"textbox","id":"sh/4be98bi9","slide":23,"text":"user_profile_agent","textPreview":"user_profile_agent","textChars":18,"textLines":1,"bbox":[782,326.6,216,40.2]}
+{"kind":"textbox","id":"sh/o761kjuh","slide":23,"text":"加载当前用户和直属上级","textPreview":"加载当前用户和直属上级","textChars":11,"textLines":1,"bbox":[1020,326.6,198,40.2]}
+{"kind":"shape","id":"sh/p8f2tob2","slide":23,"bbox":[782,368.8,436,1]}
+{"kind":"textbox","id":"sh/254ji9cb","slide":23,"text":"user_info_agent","textPreview":"user_info_agent","textChars":15,"textLines":1,"bbox":[782,373.8,216,40.2]}
+{"kind":"textbox","id":"sh/36dkretw","slide":23,"text":"回答用户、上级和部门问题","textPreview":"回答用户、上级和部门问题","textChars":12,"textLines":1,"bbox":[1020,373.8,198,40.2]}
+{"kind":"shape","id":"sh/g3m1gjul","slide":23,"bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/14v2p4b6","slide":23,"text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[782,421,216,40.2]}
+{"kind":"textbox","id":"sh/e14je9cf","slide":23,"text":"进入审批发起子流程","textPreview":"进入审批发起子流程","textChars":9,"textLines":1,"bbox":[1020,421,198,40.2]}
+{"kind":"shape","id":"sh/f2dknet0","slide":23,"bbox":[782,463.2,436,1]}
+{"kind":"textbox","id":"sh/szm1czu9","slide":23,"text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[782,468.2,216,40.2]}
+{"kind":"textbox","id":"sh/t0v2l4bu","slide":23,"text":"进入标准日报子流程","textPreview":"进入标准日报子流程","textChars":9,"textLines":1,"bbox":[1020,468.2,198,40.2]}
+{"kind":"shape","id":"sh/vatkvuxw","slide":23,"bbox":[782,510.4,436,1]}
+{"kind":"textbox","id":"sh/u9k3mpwb","slide":23,"text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[782,515.4,216,40.2]}
+{"kind":"textbox","id":"sh/hwb2x4fm","slide":23,"text":"自主调用日报工具完成任务","textPreview":"自主调用日报工具完成任务","textChars":12,"textLines":1,"bbox":[1020,515.4,198,40.2]}
+{"kind":"shape","id":"sh/wb2lozeh","slide":23,"bbox":[782,557.6,436,1]}
+{"kind":"textbox","id":"sh/jytkzexs","slide":23,"text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[782,562.6,216,40.2]}
+{"kind":"textbox","id":"sh/ixk3q9w7","slide":23,"text":"演示 Agent 规划与流程闸门","textPreview":"演示 Agent 规划与流程闸门","textChars":16,"textLines":1,"bbox":[1020,562.6,198,40.2]}
+{"kind":"shape","id":"sh/50v214fy","slide":23,"bbox":[782,604.8,436,1]}
+{"kind":"textbox","id":"sh/4z2lszed","slide":23,"text":"general_chat","textPreview":"general_chat","textChars":12,"textLines":1,"bbox":[782,609.8,216,40.2]}
+{"kind":"textbox","id":"sh/r2d43ex4","slide":23,"text":"处理闲聊并保留业务上下文","textPreview":"处理闲聊并保留业务上下文","textChars":12,"textLines":1,"bbox":[1020,609.8,198,40.2]}
+{"kind":"image","id":"im/dkry10ri","slide":23,"name":"","bbox":[58,238.37,672,321.26]}
+{"kind":"notes","id":"nt/vll13u","slide":23,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-a168231d-4563-4e49-8319-92fa1617d4ed.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/wa3cpi","slide":24,"title":"审批子图：入口、上下文与路由决策","textShapes":20}
+{"kind":"shape","id":"sh/wf2xo3m5","slide":24,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/mhkfu1gb","slide":24,"text":"审批子图：入口、上下文与路由决策","textPreview":"审批子图：入口、上下文与路由决策","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/nitg36hw","slide":24,"text":"APPROVAL CREATION AGENT · 1/2","textPreview":"APPROVAL CREATION AGENT · 1/2","textChars":29,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/wn2h0byt","slide":24,"text":"24","textPreview":"24","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/x8by9gzy","slide":24,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/bmtg76h8","slide":24,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/crixory9","slide":24,"text":"节点职责：入口与路由","textPreview":"节点职责：入口与路由","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/dcryxwzu","slide":24,"bbox":[997,180,1.5,462]}
+{"kind":"textbox","id":"sh/9gvadcvq","slide":24,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,205,52]}
+{"kind":"textbox","id":"sh/8fm9krul","slide":24,"text":"进入审批子图 / 本轮处理结束","textPreview":"进入审批子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[1009,185,209,52]}
+{"kind":"shape","id":"sh/7edsbmd0","slide":24,"bbox":[782,239,436,1]}
+{"kind":"textbox","id":"sh/md4rihcf","slide":24,"text":"approval_creation_entry","textPreview":"approval_creation_entry","textChars":23,"textLines":1,"bbox":[782,244,205,52]}
+{"kind":"textbox","id":"sh/hkfahwv2","slide":24,"text":"标记进入审批发起流程","textPreview":"标记进入审批发起流程","textChars":10,"textLines":1,"bbox":[1009,244,209,52]}
+{"kind":"shape","id":"sh/wj69oruh","slide":24,"bbox":[782,298,436,1]}
+{"kind":"textbox","id":"sh/vidsfmdw","slide":24,"text":"load_context","textPreview":"load_context","textChars":12,"textLines":1,"bbox":[782,303,205,52]}
+{"kind":"textbox","id":"sh/uh4rmhcb","slide":24,"text":"加载用户上下文和可用审批模板","textPreview":"加载用户上下文和可用审批模板","textChars":14,"textLines":1,"bbox":[1009,303,209,52]}
+{"kind":"shape","id":"sh/58falwvy","slide":24,"bbox":[782,357,436,1]}
+{"kind":"textbox","id":"sh/4769sbud","slide":24,"text":"classify","textPreview":"classify","textChars":8,"textLines":1,"bbox":[782,362,205,52]}
+{"kind":"textbox","id":"sh/4retof2p","slide":24,"text":"识别模板、会话状态和用户动作","textPreview":"识别模板、会话状态和用户动作","textChars":14,"textLines":1,"bbox":[1009,362,209,52]}
+{"kind":"shape","id":"sh/psnuhk3a","slide":24,"bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/2pwbm5kj","slide":24,"text":"decision_review","textPreview":"decision_review","textChars":15,"textLines":1,"bbox":[782,421,205,52]}
+{"kind":"textbox","id":"sh/3q5cfal4","slide":24,"text":"复核路由与提交条件，限制循环","textPreview":"复核路由与提交条件，限制循环","textChars":14,"textLines":1,"bbox":[1009,421,209,52]}
+{"kind":"shape","id":"sh/cfydsf21","slide":24,"bbox":[782,475,436,1]}
+{"kind":"textbox","id":"sh/dg7ulkj6","slide":24,"text":"clarify","textPreview":"clarify","textChars":7,"textLines":1,"bbox":[782,480,205,52]}
+{"kind":"textbox","id":"sh/qtwbqpkv","slide":24,"text":"返回缺失、冲突或模板选择提示","textPreview":"返回缺失、冲突或模板选择提示","textChars":14,"textLines":1,"bbox":[1009,480,209,52]}
+{"kind":"shape","id":"sh/repcjalg","slide":24,"bbox":[782,534,436,1]}
+{"kind":"textbox","id":"sh/sjutgv2h","slide":24,"text":"general_chat","textPreview":"general_chat","textChars":12,"textLines":1,"bbox":[782,539,205,52]}
+{"kind":"textbox","id":"sh/tk3u9032","slide":24,"text":"处理非审批问题并保留审批上下文","textPreview":"处理非审批问题并保留审批上下文","textChars":15,"textLines":1,"bbox":[1009,539,209,52]}
+{"kind":"shape","id":"sh/betwfylk","slide":24,"bbox":[782,593,436,1]}
+{"kind":"textbox","id":"sh/adkfmt4z","slide":24,"text":"resume","textPreview":"resume","textChars":6,"textLines":1,"bbox":[782,598,205,52]}
+{"kind":"textbox","id":"sh/xgbeh83q","slide":24,"text":"提示当前等待项，帮助继续审批","textPreview":"提示当前等待项，帮助继续审批","textChars":14,"textLines":1,"bbox":[1009,598,209,52]}
+{"kind":"image","id":"im/072583i1","slide":24,"name":"","bbox":[58,221.73,672,354.55]}
+{"kind":"notes","id":"nt/wa3cpi","slide":24,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-39e93d19-0368-48e9-9041-d15d064c8b2e.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/j7o1y2","slide":25,"title":"审批子图：字段、审批人与安全提交","textShapes":18}
+{"kind":"shape","id":"sh/qd8b6hg7","slide":25,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1o3q9cfa","slide":25,"text":"审批子图：字段、审批人与安全提交","textPreview":"审批子图：字段、审批人与安全提交","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0nup07ep","slide":25,"text":"APPROVAL CREATION AGENT · 2/2","textPreview":"APPROVAL CREATION AGENT · 2/2","textChars":29,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/nql8bmd0","slide":25,"text":"25","textPreview":"25","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/mpc72hwv","slide":25,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/oru94rel","slide":25,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/bu58fmdc","slide":25,"text":"节点职责：业务执行","textPreview":"节点职责：业务执行","textChars":9,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/atwr6hwr","slide":25,"bbox":[997,180,1.5,462]}
+{"kind":"textbox","id":"sh/cny58fuh","slide":25,"text":"collect","textPreview":"collect","textChars":7,"textLines":1,"bbox":[782,185,205,60.43]}
+{"kind":"textbox","id":"sh/do761kb2","slide":25,"text":"收集动态字段，缺失时继续追问","textPreview":"收集动态字段，缺失时继续追问","textChars":14,"textLines":1,"bbox":[1009,185,209,60.43]}
+{"kind":"shape","id":"sh/qlwn65cb","slide":25,"bbox":[782,247.43,436,1]}
+{"kind":"textbox","id":"sh/bmpozatw","slide":25,"text":"validate","textPreview":"validate","textChars":8,"textLines":1,"bbox":[782,252.43,205,60.43]}
+{"kind":"textbox","id":"sh/0rypcfut","slide":25,"text":"按 ERP 或模板规则校验字段","textPreview":"按 ERP 或模板规则校验字段","textChars":15,"textLines":1,"bbox":[1009,252.43,209,60.43]}
+{"kind":"shape","id":"sh/ls765kby","slide":25,"bbox":[782,314.86,436,1]}
+{"kind":"textbox","id":"sh/ypg7apcn","slide":25,"text":"assignee","textPreview":"assignee","textChars":8,"textLines":1,"bbox":[782,319.86,205,60.43]}
+{"kind":"textbox","id":"sh/zqpo3at8","slide":25,"text":"获取审批节点，必要时选择审批人","textPreview":"获取审批节点，必要时选择审批人","textChars":15,"textLines":1,"bbox":[1009,319.86,209,60.43]}
+{"kind":"shape","id":"sh/8vipgzup","slide":25,"bbox":[782,382.29,436,1]}
+{"kind":"textbox","id":"sh/9gr694ba","slide":25,"text":"preview","textPreview":"preview","textChars":7,"textLines":1,"bbox":[782,387.29,205,60.43]}
+{"kind":"textbox","id":"sh/hcn6t43e","slide":25,"text":"生成完整预览，等待明确确认","textPreview":"生成完整预览，等待明确确认","textChars":13,"textLines":1,"bbox":[1009,387.29,209,60.43]}
+{"kind":"shape","id":"sh/wbe50zmt","slide":25,"bbox":[782,449.71,436,1]}
+{"kind":"textbox","id":"sh/va5orul8","slide":25,"text":"submit","textPreview":"submit","textChars":6,"textLines":1,"bbox":[782,454.71,205,60.43]}
+{"kind":"textbox","id":"sh/u9wnyp4n","slide":25,"text":"确认守卫通过后正式提交 ERP","textPreview":"确认守卫通过后正式提交 ERP","textChars":15,"textLines":1,"bbox":[1009,454.71,209,60.43]}
+{"kind":"shape","id":"sh/5076x43a","slide":25,"bbox":[782,517.14,436,1]}
+{"kind":"textbox","id":"sh/4fep4zm5","slide":25,"text":"already_submitted","textPreview":"already_submitted","textChars":17,"textLines":1,"bbox":[782,522.14,205,60.43]}
+{"kind":"textbox","id":"sh/je5ovulk","slide":25,"text":"返回原提交结果，防止重复提交","textPreview":"返回原提交结果，防止重复提交","textChars":14,"textLines":1,"bbox":[1009,522.14,209,60.43]}
+{"kind":"shape","id":"sh/idwn2p4z","slide":25,"bbox":[782,584.57,436,1]}
+{"kind":"textbox","id":"sh/l436lk36","slide":25,"text":"cancel","textPreview":"cancel","textChars":6,"textLines":1,"bbox":[782,589.57,205,60.43]}
+{"kind":"textbox","id":"sh/kju5sfml","slide":25,"text":"取消申请并重置审批状态","textPreview":"取消申请并重置审批状态","textChars":11,"textLines":1,"bbox":[1009,589.57,209,60.43]}
+{"kind":"image","id":"im/g3ipgrmd","slide":25,"name":"","bbox":[58,221.73,672,354.55]}
+{"kind":"notes","id":"nt/j7o1y2","slide":25,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-39e93d19-0368-48e9-9041-d15d064c8b2e.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/kbjkb4","slide":26,"title":"标准日报子图：准备上下文与收集信息","textShapes":16}
+{"kind":"shape","id":"sh/qp4napo7","slide":26,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xgjmls3m","slide":26,"text":"标准日报子图：准备上下文与收集信息","textPreview":"标准日报子图：准备上下文与收集信息","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/wfalcn2h","slide":26,"text":"DAILY REPORT AGENT · 1/2","textPreview":"DAILY REPORT AGENT · 1/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/j2l4n2ls","slide":26,"text":"26","textPreview":"26","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/ihc3exk7","slide":26,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/k3ulg72d","slide":26,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/z6hkbylo","slide":26,"text":"节点职责：准备与编辑","textPreview":"节点职责：准备与编辑","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/yl832t43","slide":26,"bbox":[1012,180,1.5,462]}
+{"kind":"textbox","id":"sh/kvyhs7yh","slide":26,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,220,71.67]}
+{"kind":"textbox","id":"sh/lw7y1cz2","slide":26,"text":"进入日报子图 / 本轮处理结束","textPreview":"进入日报子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[1024,185,194,71.67]}
+{"kind":"shape","id":"sh/y9gzqxgb","slide":26,"bbox":[782,258.67,436,1]}
+{"kind":"textbox","id":"sh/jupgz2hw","slide":26,"text":"daily_report_entry","textPreview":"daily_report_entry","textChars":18,"textLines":1,"bbox":[782,263.67,220,71.67]}
+{"kind":"textbox","id":"sh/8zihwryt","slide":26,"text":"初始化标准日报模式和会话状态","textPreview":"初始化标准日报模式和会话状态","textChars":14,"textLines":1,"bbox":[1024,263.67,194,71.67]}
+{"kind":"shape","id":"sh/t0ry5czy","slide":26,"bbox":[782,337.33,436,1]}
+{"kind":"textbox","id":"sh/6xgzuhgn","slide":26,"text":"daily_report_action","textPreview":"daily_report_action","textChars":19,"textLines":1,"bbox":[782,342.33,220,71.67]}
+{"kind":"textbox","id":"sh/7ypg3mh8","slide":26,"text":"判断加载、补内容、改日期或提交","textPreview":"判断加载、补内容、改日期或提交","textChars":15,"textLines":1,"bbox":[1024,342.33,194,71.67]}
+{"kind":"shape","id":"sh/o3exkny9","slide":26,"bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/p4nytszu","slide":26,"text":"load_daily_report_context","textPreview":"load_daily_report_context","textChars":25,"textLines":1,"bbox":[782,421,220,71.67]}
+{"kind":"textbox","id":"sh/5ov61knm","slide":26,"text":"加载字段、配置、草稿和同步数据","textPreview":"加载字段、配置、草稿和同步数据","textChars":15,"textLines":1,"bbox":[1024,421,194,71.67]}
+{"kind":"shape","id":"sh/4nm58f61","slide":26,"bbox":[782,494.67,436,1]}
+{"kind":"textbox","id":"sh/3mdoza5g","slide":26,"text":"collect_daily_report_content","textPreview":"collect_daily_report_content","textChars":28,"textLines":1,"bbox":[782,499.67,220,71.67]}
+{"kind":"textbox","id":"sh/il4n65ov","slide":26,"text":"收集或修改日报工作内容","textPreview":"收集或修改日报工作内容","textChars":11,"textLines":1,"bbox":[1024,499.67,194,71.67]}
+{"kind":"shape","id":"sh/dcf654ni","slide":26,"bbox":[782,573.33,436,1]}
+{"kind":"textbox","id":"sh/sr65cz6x","slide":26,"text":"collect_daily_report_date","textPreview":"collect_daily_report_date","textChars":25,"textLines":1,"bbox":[782,578.33,220,71.67]}
+{"kind":"textbox","id":"sh/rqxo3u5c","slide":26,"text":"收集日期并重载当天上下文","textPreview":"收集日期并重载当天上下文","textChars":12,"textLines":1,"bbox":[1024,578.33,194,71.67]}
+{"kind":"image","id":"im/apkji1cv","slide":26,"name":"","bbox":[58,194.63,672,408.74]}
+{"kind":"notes","id":"nt/kbjkb4","slide":26,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/asfv6y","slide":27,"title":"标准日报子图：草稿、预览与提交恢复","textShapes":14}
+{"kind":"shape","id":"sh/s7qx87ed","slide":27,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/650nu98z","slide":27,"text":"标准日报子图：草稿、预览与提交恢复","textPreview":"标准日报子图：草稿、预览与提交恢复","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/76to3epk","slide":27,"text":"DAILY REPORT AGENT · 2/2","textPreview":"DAILY REPORT AGENT · 2/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/gv2p03q1","slide":27,"text":"27","textPreview":"27","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/hwb69o7m","slide":27,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/futo7ypg","slide":27,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/wzi5ozqx","slide":27,"text":"节点职责：写入与恢复","textPreview":"节点职责：写入与恢复","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/x0r6x47i","slide":27,"bbox":[1020,180,1.5,462]}
+{"kind":"textbox","id":"sh/pwn2t036","slide":27,"text":"save_daily_report_draft","textPreview":"save_daily_report_draft","textChars":23,"textLines":1,"bbox":[782,185,228,87.4]}
+{"kind":"textbox","id":"sh/4vulkv2l","slide":27,"text":"将完整 payload 保存为 ERP 草稿","textPreview":"将完整 payload 保存为 ERP 草稿","textChars":22,"textLines":1,"bbox":[1032,185,186,87.4]}
+{"kind":"shape","id":"sh/3ulkrql0","slide":27,"bbox":[782,274.4,436,1]}
+{"kind":"textbox","id":"sh/2tc3i5kf","slide":27,"text":"preview_daily_report","textPreview":"preview_daily_report","textChars":20,"textLines":1,"bbox":[782,279.4,228,87.4]}
+{"kind":"textbox","id":"sh/dknmhk32","slide":27,"text":"生成预览以及确认、修改、取消动作","textPreview":"生成预览以及确认、修改、取消动作","textChars":16,"textLines":1,"bbox":[1032,279.4,186,87.4]}
+{"kind":"shape","id":"sh/cjelof2h","slide":27,"bbox":[782,368.8,436,1]}
+{"kind":"textbox","id":"sh/ri5kfalc","slide":27,"text":"submit_daily_report","textPreview":"submit_daily_report","textChars":19,"textLines":1,"bbox":[782,373.8,228,87.4]}
+{"kind":"textbox","id":"sh/qhw3m5kr","slide":27,"text":"明确确认后提交；失败时保留编辑态","textPreview":"明确确认后提交；失败时保留编辑态","textChars":16,"textLines":1,"bbox":[1032,373.8,186,87.4]}
+{"kind":"shape","id":"sh/1o7mlkje","slide":27,"bbox":[782,463.2,436,1]}
+{"kind":"textbox","id":"sh/0nelsf2t","slide":27,"text":"cancel_daily_report","textPreview":"cancel_daily_report","textChars":19,"textLines":1,"bbox":[782,468.2,228,87.4]}
+{"kind":"textbox","id":"sh/k36x4ne1","slide":27,"text":"取消提交并回到日报内容编辑","textPreview":"取消提交并回到日报内容编辑","textChars":13,"textLines":1,"bbox":[1032,468.2,186,87.4]}
+{"kind":"shape","id":"sh/54fedsvm","slide":27,"bbox":[782,557.6,436,1]}
+{"kind":"textbox","id":"sh/i1ov2dwb","slide":27,"text":"interrupt_daily_report","textPreview":"interrupt_daily_report","textChars":22,"textLines":1,"bbox":[782,562.6,228,87.4]}
+{"kind":"textbox","id":"sh/j2xwbidg","slide":27,"text":"暂停等待输入，resume 后继续路由","textPreview":"暂停等待输入，resume 后继续路由","textChars":19,"textLines":1,"bbox":[1032,562.6,186,87.4]}
+{"kind":"image","id":"im/qt83y5wf","slide":27,"name":"","bbox":[58,194.63,672,408.74]}
+{"kind":"notes","id":"nt/asfv6y","slide":27,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}
+{"kind":"slide","id":"sl/02tw42","slide":28,"title":"附录：Agentic Workflow 子图","textShapes":20}
+{"kind":"shape","id":"sh/kn2poj61","slide":28,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/qxofador","slide":28,"text":"附录：Agentic Workflow 子图","textPreview":"附录：Agentic Workflow 子图","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ryxwjipc","slide":28,"text":"AGENTIC WORKFLOW DEMO","textPreview":"AGENTIC WORKFLOW DEMO","textChars":21,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/036xg76t","slide":28,"text":"28","textPreview":"28","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/l4fypc7e","slide":28,"bbox":[54,146,540,506]}
+{"kind":"shape","id":"sh/z2xwn2p8","slide":28,"bbox":[618,142,616,518]}
+{"kind":"textbox","id":"sh/g7mx436p","slide":28,"text":"节点职责（与代码对应）","textPreview":"节点职责（与代码对应）","textChars":11,"textLines":1,"bbox":[634,154,584,28]}
+{"kind":"shape","id":"sh/h8ved87u","slide":28,"bbox":[849,184,1.5,458]}
+{"kind":"textbox","id":"sh/xofidcfm","slide":28,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[634,189,205,51.5]}
+{"kind":"textbox","id":"sh/wnm147y1","slide":28,"text":"进入演示子图 / 本轮处理结束","textPreview":"进入演示子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[861,189,357,51.5]}
+{"kind":"shape","id":"sh/bmd0b2xg","slide":28,"bbox":[634,242.5,584,1]}
+{"kind":"textbox","id":"sh/al4j2xgv","slide":28,"text":"demo_agent_plan","textPreview":"demo_agent_plan","textChars":15,"textLines":1,"bbox":[634,247.5,205,51.5]}
+{"kind":"textbox","id":"sh/lsf2hcfy","slide":28,"text":"理解目标、抽取日期与内容，提出下一步建议","textPreview":"理解目标、抽取日期与内容，提出下一步建议","textChars":20,"textLines":1,"bbox":[861,247.5,357,51.5]}
+{"kind":"shape","id":"sh/kr6187yd","slide":28,"bbox":[634,301,584,1]}
+{"kind":"textbox","id":"sh/jqxkf2xs","slide":28,"text":"demo_confirm_date","textPreview":"demo_confirm_date","textChars":17,"textLines":1,"bbox":[634,306,205,51.5]}
+{"kind":"textbox","id":"sh/ypoj6hg7","slide":28,"text":"将相对日期转成 ERP 可用的明确日期","textPreview":"将相对日期转成 ERP 可用的明确日期","textChars":19,"textLines":1,"bbox":[861,306,357,51.5]}
+{"kind":"shape","id":"sh/tgz2lwfu","slide":28,"bbox":[634,359.5,584,1]}
+{"kind":"textbox","id":"sh/8fq1cry9","slide":28,"text":"demo_load_context","textPreview":"demo_load_context","textChars":17,"textLines":1,"bbox":[634,364.5,205,51.5]}
+{"kind":"textbox","id":"sh/szyl8vml","slide":28,"text":"加载 ERP 默认 payload、草稿和同步数据","textPreview":"加载 ERP 默认 payload、草稿和同步数据","textChars":25,"textLines":1,"bbox":[861,364.5,357,51.5]}
+{"kind":"shape","id":"sh/d07mh0n6","slide":28,"bbox":[634,418,584,1]}
+{"kind":"textbox","id":"sh/qxw36l4f","slide":28,"text":"demo_agent_compose","textPreview":"demo_agent_compose","textChars":18,"textLines":1,"bbox":[634,423,205,51.5]}
+{"kind":"textbox","id":"sh/ry54fq50","slide":28,"text":"根据计划与上下文生成正文，只修改内容字段","textPreview":"根据计划与上下文生成正文，只修改内容字段","textChars":20,"textLines":1,"bbox":[861,423,357,51.5]}
+{"kind":"shape","id":"sh/0nylcfmh","slide":28,"bbox":[634,476.5,584,1]}
+{"kind":"textbox","id":"sh/1o7mlkn2","slide":28,"text":"demo_save_draft","textPreview":"demo_save_draft","textChars":15,"textLines":1,"bbox":[634,481.5,205,51.5]}
+{"kind":"textbox","id":"sh/e1g3a54b","slide":28,"text":"由 Workflow 执行草稿写入，不让 Agent 直写","textPreview":"由 Workflow 执行草稿写入，不让 Agent 直写","textChars":29,"textLines":1,"bbox":[861,481.5,357,51.5]}
+{"kind":"shape","id":"sh/fmp4ja5w","slide":28,"bbox":[634,535,584,1]}
+{"kind":"textbox","id":"sh/wrel0b6d","slide":28,"text":"demo_preview_gate","textPreview":"demo_preview_gate","textChars":17,"textLines":1,"bbox":[634,540,205,51.5]}
+{"kind":"textbox","id":"sh/hsn29gny","slide":28,"text":"生成预览并暂停，等待用户确认或修改","textPreview":"生成预览并暂停，等待用户确认或修改","textChars":17,"textLines":1,"bbox":[861,540,357,51.5]}
+{"kind":"shape","id":"sh/zmtofepg","slide":28,"bbox":[634,593.5,584,1]}
+{"kind":"textbox","id":"sh/ylk7m9ov","slide":28,"text":"demo_submit_gate","textPreview":"demo_submit_gate","textChars":16,"textLines":1,"bbox":[634,598.5,205,51.5]}
+{"kind":"textbox","id":"sh/lob6ho7m","slide":28,"text":"校验预览状态与明确确认后才允许提交","textPreview":"校验预览状态与明确确认后才允许提交","textChars":17,"textLines":1,"bbox":[861,598.5,357,51.5]}
+{"kind":"image","id":"im/kri9432t","slide":28,"name":"","bbox":[83.18,160,481.63,478]}
+{"kind":"notes","id":"nt/02tw42","slide":28,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-b08edd2a-092c-42e0-b5a8-e9c7d58a5c65.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agentic_workflow_demo.py\n[/Sources]"}
+{"kind":"slide","id":"sl/8j3bna","slide":29,"title":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textShapes":17}
+{"kind":"shape","id":"sh/nmlwvmxo","slide":29,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/761c7upo","slide":29,"text":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textPreview":"企业级 RAG：连接 ERP 知识、权限与业务上下文","textChars":26,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/m58vepo3","slide":29,"text":"ENTERPRISE RAG · ARCHITECTURE 1/3","textPreview":"ENTERPRISE RAG · ARCHITECTURE 1/3","textChars":33,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/hwjud47q","slide":29,"text":"29","textPreview":"29","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/wbadkz65","slide":29,"bbox":[73,151,1134,102]}
+{"kind":"shape","id":"sh/va1cbupk","slide":29,"bbox":[96,180,42,42]}
+{"kind":"textbox","id":"sh/u9svipoz","slide":29,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[96,186,42,28]}
+{"kind":"textbox","id":"sh/dgzu1k76","slide":29,"text":"知识源治理","textPreview":"知识源治理","textChars":5,"textLines":1,"bbox":[158,170,205,33]}
+{"kind":"textbox","id":"sh/cfqt8f61","slide":29,"text":"制度 · SOP · 操作手册 · FAQ · ERP 字段说明与审批规则","textPreview":"制度 · SOP · 操作手册 · FAQ · ERP 字段说明与审批规则","textChars":37,"textLines":1,"bbox":[377,167,790,32]}
+{"kind":"textbox","id":"sh/qhsfeh0b","slide":29,"text":"版本、更新时间、责任人、原文位置必须可追溯","textPreview":"版本、更新时间、责任人、原文位置必须可追溯","textChars":21,"textLines":1,"bbox":[377,207,790,26]}
+{"kind":"shape","id":"sh/ri1gnmhw","slide":29,"bbox":[612,255,55,20]}
+{"kind":"shape","id":"sh/cjaxgrih","slide":29,"bbox":[73,275,1134,102]}
+{"kind":"shape","id":"sh/dkjypwzm","slide":29,"bbox":[96,304,42,42]}
+{"kind":"textbox","id":"sh/elsfi107","slide":29,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[96,310,42,28]}
+{"kind":"textbox","id":"sh/zmlgrmhs","slide":29,"text":"检索与安全底座","textPreview":"检索与安全底座","textChars":7,"textLines":1,"bbox":[158,294,205,33]}
+{"kind":"textbox","id":"sh/0nuxkrid","slide":29,"text":"Milvus Dense + BM25 混合检索 · RRF / Weighted 融合 · Reranker 精排","textPreview":"Milvus Dense + BM25 混合检索 · RRF / Weighted 融合 · Reranker 精排","textChars":58,"textLines":1,"bbox":[377,291,790,32]}
+{"kind":"textbox","id":"sh/183ytwzy","slide":29,"text":"tenant / company / department / ACL 在检索服务层强制过滤","textPreview":"tenant / company / department / ACL 在检索服务层强制过滤","textChars":46,"textLines":1,"bbox":[377,331,790,26]}
+{"kind":"shape","id":"sh/m9cfm1gj","slide":29,"bbox":[612,379,55,20]}
+{"kind":"shape","id":"sh/nalgv6h4","slide":29,"bbox":[73,399,1134,102]}
+{"kind":"shape","id":"sh/je5w36xw","slide":29,"bbox":[96,428,42,42]}
+{"kind":"textbox","id":"sh/ydwfa1wr","slide":29,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[96,434,42,28]}
+{"kind":"textbox","id":"sh/lgne5gf2","slide":29,"text":"ERP 业务协同","textPreview":"ERP 业务协同","textChars":8,"textLines":1,"bbox":[158,418,205,33]}
+{"kind":"textbox","id":"sh/kfexcbeh","slide":29,"text":"RAG 回答规则 · ERP Tool 查询实时数据 · LangGraph 控制下一步动作","textPreview":"RAG 回答规则 · ERP Tool 查询实时数据 · LangGraph 控制下一步动作","textChars":46,"textLines":1,"bbox":[377,415,790,32]}
+{"kind":"textbox","id":"sh/balwz6x0","slide":29,"text":"预览、人工确认、正式提交和审计仍由业务流程负责","textPreview":"预览、人工确认、正式提交和审计仍由业务流程负责","textChars":23,"textLines":1,"bbox":[377,455,790,26]}
+{"kind":"shape","id":"sh/apcf61wf","slide":29,"bbox":[74,548,1132,112]}
+{"kind":"textbox","id":"sh/xc3e1wf6","slide":29,"text":"企业级 RAG 的核心不是“模型知道更多”","textPreview":"企业级 RAG 的核心不是“模型知道更多”","textChars":21,"textLines":1,"bbox":[105,568,1070,31]}
+{"kind":"textbox","id":"sh/wbux8bel","slide":29,"text":"而是知识有治理、检索有权限、回答有证据、执行有边界","textPreview":"而是知识有治理、检索有权限、回答有证据、执行有边界","textChars":25,"textLines":1,"bbox":[105,607,1070,29]}
+{"kind":"notes","id":"nt/8j3bna","slide":29,"text":"【只记一句】企业级 RAG 的重点不是向量库，而是知识治理、权限、来源和业务边界。\n\n【可直接照读】企业级 RAG 不是把几份文档放进向量库，再做一个知识库聊天。它首先要治理知识源，包括制度、SOP、操作手册、ERP 字段说明和审批规则，并记录版本、更新时间、责任人和原文位置。其次，检索时必须在服务端强制加入租户、公司、部门和 ACL 权限，再通过混合检索与重排找到证据。最后还要明确边界：RAG 回答规则和知识，ERP Tool 查询实时数据，LangGraph 控制预览、确认、提交和审计。\n\n【ERP 示例】员工问“差旅报销需要哪些材料”，走 RAG；问“我的报销单现在到谁审批”，走 ERP Tool；说“帮我发起报销”，进入 LangGraph 业务流程。\n\n【时间建议】约 75 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs/docs/rag_demo_sources/approval_rag_guide.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}
+{"kind":"slide","id":"sl/b1xqfz","slide":30,"title":"Milvus：承载企业级混合检索与多租户隔离","textShapes":34}
+{"kind":"shape","id":"sh/mp0321kr","slide":30,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/7qpkfu94","slide":30,"text":"Milvus：承载企业级混合检索与多租户隔离","textPreview":"Milvus：承载企业级混合检索与多租户隔离","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/6pgjmp8j","slide":30,"text":"ENTERPRISE RAG · MILVUS 2/3","textPreview":"ENTERPRISE RAG · MILVUS 2/3","textChars":27,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/lo72d4ry","slide":30,"text":"30","textPreview":"30","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/kny1kzat","slide":30,"bbox":[72,151,434,395]}
+{"kind":"textbox","id":"sh/jmpkbu98","slide":30,"text":"Collection 数据结构","textPreview":"Collection 数据结构","textChars":15,"textLines":1,"bbox":[101,176,370,34]}
+{"kind":"textbox","id":"sh/ylwjipsn","slide":30,"text":"text","textPreview":"text","textChars":4,"textLines":1,"bbox":[103,226,176,27]}
+{"kind":"textbox","id":"sh/pkr2pori","slide":30,"text":"Chunk 原文，支持引用与 BM25","textPreview":"Chunk 原文，支持引用与 BM25","textChars":19,"textLines":1,"bbox":[274,226,198,37]}
+{"kind":"shape","id":"sh/4jilwjqx","slide":30,"bbox":[102,265,365,1]}
+{"kind":"textbox","id":"sh/qdc3uhwr","slide":30,"text":"dense","textPreview":"dense","textChars":5,"textLines":1,"bbox":[103,274,176,27]}
+{"kind":"textbox","id":"sh/belknmxc","slide":30,"text":"语义向量：同义表达与自然语言","textPreview":"语义向量：同义表达与自然语言","textChars":14,"textLines":1,"bbox":[274,274,198,37]}
+{"kind":"shape","id":"sh/cfulwrex","slide":30,"bbox":[102,313,365,1]}
+{"kind":"textbox","id":"sh/dg32pcfi","slide":30,"text":"sparse","textPreview":"sparse","textChars":6,"textLines":1,"bbox":[103,322,176,27]}
+{"kind":"textbox","id":"sh/29s3qxwv","slide":30,"text":"BM25：制度号、单据号、产品编码","textPreview":"BM25：制度号、单据号、产品编码","textChars":17,"textLines":1,"bbox":[274,322,198,37]}
+{"kind":"shape","id":"sh/3a1kj2x0","slide":30,"bbox":[102,361,365,1]}
+{"kind":"textbox","id":"sh/obuls7el","slide":30,"text":"来源 / 页码 / 标题","textPreview":"来源 / 页码 / 标题","textChars":12,"textLines":1,"bbox":[103,370,176,27]}
+{"kind":"textbox","id":"sh/pc32lcf6","slide":30,"text":"原文来源、页码与标题路径","textPreview":"原文来源、页码与标题路径","textChars":12,"textLines":1,"bbox":[274,370,198,37]}
+{"kind":"shape","id":"sh/m5w321wz","slide":30,"bbox":[102,409,365,1]}
+{"kind":"textbox","id":"sh/7654v6dk","slide":30,"text":"租户 / 公司 / 部门","textPreview":"租户 / 公司 / 部门","textChars":12,"textLines":1,"bbox":[103,418,176,27]}
+{"kind":"textbox","id":"sh/jqx0nydw","slide":30,"text":"多租户和组织权限隔离","textPreview":"多租户和组织权限隔离","textChars":10,"textLines":1,"bbox":[274,418,198,37]}
+{"kind":"shape","id":"sh/ipozutcb","slide":30,"bbox":[102,457,365,1]}
+{"kind":"textbox","id":"sh/5szip8v2","slide":30,"text":"ACL / 版本 / 更新时间","textPreview":"ACL / 版本 / 更新时间","textChars":15,"textLines":1,"bbox":[103,466,176,27]}
+{"kind":"textbox","id":"sh/4rqhw3uh","slide":30,"text":"权限、版本与增量更新","textPreview":"权限、版本与增量更新","textChars":10,"textLines":1,"bbox":[274,466,198,37]}
+{"kind":"textbox","id":"sh/ruh0ryds","slide":30,"text":"在线查询链路","textPreview":"在线查询链路","textChars":6,"textLines":1,"bbox":[555,151,250,34]}
+{"kind":"shape","id":"sh/6t8zytcn","slide":30,"bbox":[833,246,44,17]}
+{"kind":"shape","id":"sh/tgzit8vy","slide":30,"bbox":[548,199,660,48]}
+{"kind":"textbox","id":"sh/sfqh03ud","slide":30,"text":"用户问题","textPreview":"用户问题","textChars":4,"textLines":1,"bbox":[572,210,190,26]}
+{"kind":"textbox","id":"sh/fih0vid4","slide":30,"text":"意图、关键词与当前身份","textPreview":"意图、关键词与当前身份","textChars":11,"textLines":1,"bbox":[778,210,403,27]}
+{"kind":"shape","id":"sh/eh8j2dcj","slide":30,"bbox":[833,303,44,17]}
+{"kind":"shape","id":"sh/cnahcnax","slide":30,"bbox":[548,256,660,48]}
+{"kind":"textbox","id":"sh/dojylsr2","slide":30,"text":"强制权限过滤","textPreview":"强制权限过滤","textChars":6,"textLines":1,"bbox":[572,267,190,26]}
+{"kind":"textbox","id":"sh/qlszadsr","slide":30,"text":"tenant + company + department + ACL","textPreview":"tenant + company + department + ACL","textChars":35,"textLines":1,"bbox":[778,267,403,27]}
+{"kind":"shape","id":"sh/bm1gji9c","slide":30,"bbox":[833,360,44,17]}
+{"kind":"shape","id":"sh/ojah83al","slide":30,"bbox":[548,313,660,48]}
+{"kind":"textbox","id":"sh/pkjyh8r6","slide":30,"text":"Dense + BM25","textPreview":"Dense + BM25","textChars":12,"textLines":1,"bbox":[572,324,190,26]}
+{"kind":"textbox","id":"sh/2h8z6dsf","slide":30,"text":"语义召回与精确召回并行","textPreview":"语义召回与精确召回并行","textChars":11,"textLines":1,"bbox":[778,324,403,27]}
+{"kind":"shape","id":"sh/3ihgfy90","slide":30,"bbox":[833,417,44,17]}
+{"kind":"shape","id":"sh/gvqh43ap","slide":30,"bbox":[548,370,660,48]}
+{"kind":"textbox","id":"sh/1wzyd8ra","slide":30,"text":"RRF / Weighted","textPreview":"RRF / Weighted","textChars":14,"textLines":1,"bbox":[572,381,190,26]}
+{"kind":"textbox","id":"sh/5ovmp03q","slide":30,"text":"融合不同检索结果的排名","textPreview":"融合不同检索结果的排名","textChars":11,"textLines":1,"bbox":[778,381,403,27]}
+{"kind":"shape","id":"sh/knm5wvm5","slide":30,"bbox":[833,474,44,17]}
+{"kind":"shape","id":"sh/jmd4nqlk","slide":30,"bbox":[548,427,660,48]}
+{"kind":"textbox","id":"sh/ilknu54z","slide":30,"text":"Reranker","textPreview":"Reranker","textChars":8,"textLines":1,"bbox":[572,438,190,26]}
+{"kind":"textbox","id":"sh/tcv6tk3m","slide":30,"text":"精排 Top-K，过滤高相似噪声","textPreview":"精排 Top-K，过滤高相似噪声","textChars":16,"textLines":1,"bbox":[778,438,403,27]}
+{"kind":"shape","id":"sh/srm50fm1","slide":30,"bbox":[548,484,660,48]}
+{"kind":"textbox","id":"sh/7qdoralg","slide":30,"text":"来源证据","textPreview":"来源证据","textChars":4,"textLines":1,"bbox":[572,495,190,26]}
+{"kind":"textbox","id":"sh/6p4ny54b","slide":30,"text":"返回文档、章节、版本与原文","textPreview":"返回文档、章节、版本与原文","textChars":13,"textLines":1,"bbox":[778,495,403,27]}
+{"kind":"shape","id":"sh/9gbmhg3i","slide":30,"bbox":[73,565,1134,91]}
+{"kind":"textbox","id":"sh/8v25obmx","slide":30,"text":"部署选择","textPreview":"部署选择","textChars":4,"textLines":1,"bbox":[99,584,120,29]}
+{"kind":"textbox","id":"sh/e1gjyhkv","slide":30,"text":"Lite：学习 / Demo","textPreview":"Lite：学习 / Demo","textChars":14,"textLines":1,"bbox":[235,584,210,29]}
+{"kind":"textbox","id":"sh/zmpkrm1g","slide":30,"text":"Standalone：单机试点","textPreview":"Standalone：单机试点","textChars":15,"textLines":1,"bbox":[463,584,245,29]}
+{"kind":"textbox","id":"sh/0nil0r2l","slide":30,"text":"Distributed / Cloud：规模化、高可用、并发与弹性","textPreview":"Distributed / Cloud：规模化、高可用、并发与弹性","textChars":33,"textLines":1,"bbox":[724,584,444,29]}
+{"kind":"textbox","id":"sh/lor2twj6","slide":30,"text":"ERP 同时存在语义问题与精确编号：Dense + BM25 比单路向量检索更合适","textPreview":"ERP 同时存在语义问题与精确编号：Dense + BM25 比单路向量检索更合适","textChars":41,"textLines":1,"bbox":[99,620,1067,24]}
+{"kind":"notes","id":"nt/b1xqfz","slide":30,"text":"【只记一句】Milvus 同时承载语义、关键词和权限过滤，是 ERP 知识检索的基础底座。\n\n【可直接照读】Milvus 中不只保存向量，还要保存原文、Dense 向量、BM25 稀疏向量，以及来源、页码、标题、公司、部门、权限、版本和更新时间。查询时，先由检索服务强制注入当前用户的权限范围，再同时执行 Dense 语义召回和 BM25 精确召回，通过 RRF 或加权方式融合，最后由 Reranker 精排并返回带来源的证据。ERP 里既有“请假怎么申请”这种语义问题，也有制度号、审批编号、产品编码等精确词，因此 Dense 加 BM25 比单路向量检索更适合。\n\n【部署口径】Milvus Lite 适合本地学习和 Demo；Standalone 适合单机试点；企业生产再根据数据规模、并发、高可用和弹性选择 Distributed 或云服务。\n\n【时间建议】约 85 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_milvus_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs2/milvus_hnsw_ivf_annoy_cold_start_update_multitenancy.md\n- Milvus Hybrid Search documentation: https://milvus.io/docs/multi-vector-search.md\n- Milvus Multi-tenancy documentation: https://milvus.io/docs/multi_tenancy.md\n[/Sources]"}
+{"kind":"slide","id":"sl/20pld7","slide":31,"title":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textShapes":27}
+{"kind":"shape","id":"sh/d8v29kf2","slide":31,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/8rqd8zuh","slide":31,"text":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textPreview":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textChars":31,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/tszu14b2","slide":31,"text":"ENTERPRISE RAG · SELECTION 3/3","textPreview":"ENTERPRISE RAG · SELECTION 3/3","textChars":30,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/y1ob2pcf","slide":31,"text":"31","textPreview":"31","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/j2xcvud0","slide":31,"bbox":[72,154,352,364]}
+{"kind":"textbox","id":"sh/k36d4zul","slide":31,"text":"Milvus 混合 RAG","textPreview":"Milvus 混合 RAG","textChars":13,"textLines":1,"bbox":[95,181,306,38]}
+{"kind":"textbox","id":"sh/l4fuxkvq","slide":31,"text":"ERP 第一阶段首选","textPreview":"ERP 第一阶段首选","textChars":10,"textLines":1,"bbox":[95,226,306,28]}
+{"kind":"shape","id":"sh/ax4by5c3","slide":31,"bbox":[103,290,9,9]}
+{"kind":"textbox","id":"sh/bydcrado","slide":31,"text":"适合：制度、FAQ、字段说明、操作手册","textPreview":"适合：制度、FAQ、字段说明、操作手册","textChars":19,"textLines":1,"bbox":[126,282,267,51]}
+{"kind":"shape","id":"sh/7uxobitg","slide":31,"bbox":[103,345,9,9]}
+{"kind":"textbox","id":"sh/6ton2dsv","slide":31,"text":"优势：稳定、成本可控、增量更新简单","textPreview":"优势：稳定、成本可控、增量更新简单","textChars":17,"textLines":1,"bbox":[126,337,267,51]}
+{"kind":"shape","id":"sh/tgf6dsbm","slide":31,"bbox":[103,400,9,9]}
+{"kind":"textbox","id":"sh/sf654na1","slide":31,"text":"局限：不显式建模跨文档复杂关系","textPreview":"局限：不显式建模跨文档复杂关系","textChars":15,"textLines":1,"bbox":[126,392,267,51]}
+{"kind":"shape","id":"sh/fixofitc","slide":31,"bbox":[103,455,9,9]}
+{"kind":"textbox","id":"sh/uhon6xs7","slide":31,"text":"重点：权限、混合检索、来源与评测","textPreview":"重点：权限、混合检索、来源与评测","textChars":16,"textLines":1,"bbox":[126,447,267,51]}
+{"kind":"shape","id":"sh/hkf6hsbi","slide":31,"bbox":[450,154,352,364]}
+{"kind":"textbox","id":"sh/gj658nax","slide":31,"text":"Microsoft GraphRAG","textPreview":"Microsoft GraphRAG","textChars":18,"textLines":1,"bbox":[473,181,306,38]}
+{"kind":"textbox","id":"sh/vmd43yt8","slide":31,"text":"复杂关系专项验证","textPreview":"复杂关系专项验证","textChars":8,"textLines":1,"bbox":[473,226,306,28]}
+{"kind":"shape","id":"sh/alknatsn","slide":31,"bbox":[481,290,9,9]}
+{"kind":"textbox","id":"sh/ehsri1cb","slide":31,"text":"适合：跨文档多跳、全局主题与风险","textPreview":"适合：跨文档多跳、全局主题与风险","textChars":16,"textLines":1,"bbox":[504,282,267,51]}
+{"kind":"shape","id":"sh/zi18b6dw","slide":31,"bbox":[481,345,9,9]}
+{"kind":"textbox","id":"sh/0ja9kbuh","slide":31,"text":"优势：实体关系、社区发现、全局检索","textPreview":"优势：实体关系、社区发现、全局检索","textChars":17,"textLines":1,"bbox":[504,337,267,51]}
+{"kind":"shape","id":"sh/143qdgv2","slide":31,"bbox":[481,400,9,9]}
+{"kind":"textbox","id":"sh/qds7ehcf","slide":31,"text":"代价：索引成本高，实体消歧与更新复杂","textPreview":"代价：索引成本高，实体消歧与更新复杂","textChars":18,"textLines":1,"bbox":[504,392,267,51]}
+{"kind":"shape","id":"sh/re187mdk","slide":31,"bbox":[481,455,9,9]}
+{"kind":"textbox","id":"sh/cfa9gru5","slide":31,"text":"风险：权限需传播到实体、关系和社区报告","textPreview":"风险：权限需传播到实体、关系和社区报告","textChars":19,"textLines":1,"bbox":[504,447,267,51]}
+{"kind":"shape","id":"sh/dgjq9wvq","slide":31,"bbox":[828,154,352,364]}
+{"kind":"textbox","id":"sh/2987ahc3","slide":31,"text":"LightRAG","textPreview":"LightRAG","textChars":8,"textLines":1,"bbox":[851,181,306,38]}
+{"kind":"textbox","id":"sh/3ah83mdo","slide":31,"text":"第二阶段轻量试验","textPreview":"第二阶段轻量试验","textChars":8,"textLines":1,"bbox":[851,226,306,28]}
+{"kind":"shape","id":"sh/5gr25oji","slide":31,"bbox":[859,290,9,9]}
+{"kind":"textbox","id":"sh/4fylwjix","slide":31,"text":"适合：图关系能力与持续增量知识","textPreview":"适合：图关系能力与持续增量知识","textChars":15,"textLines":1,"bbox":[882,282,267,51]}
+{"kind":"shape","id":"sh/jepk3e1c","slide":31,"bbox":[859,345,9,9]}
+{"kind":"textbox","id":"sh/idg3u90r","slide":31,"text":"优势：图召回与向量召回融合","textPreview":"优势：图召回与向量召回融合","textChars":13,"textLines":1,"bbox":[882,337,267,51]}
+{"kind":"shape","id":"sh/hc7214j6","slide":31,"bbox":[859,400,9,9]}
+{"kind":"textbox","id":"sh/wby1szi1","slide":31,"text":"代价：仍需实体抽取、消歧和图存储","textPreview":"代价：仍需实体抽取、消歧和图存储","textChars":16,"textLines":1,"bbox":[882,392,267,51]}
+{"kind":"shape","id":"sh/vapkzu1g","slide":31,"bbox":[859,455,9,9]}
+{"kind":"textbox","id":"sh/upgjqp0v","slide":31,"text":"原则：Light 不代表没有索引成本","textPreview":"原则：Light 不代表没有索引成本","textChars":18,"textLines":1,"bbox":[882,447,267,51]}
+{"kind":"shape","id":"sh/9on2x4ja","slide":31,"bbox":[426,581,24,20]}
+{"kind":"shape","id":"sh/8ne1ozip","slide":31,"bbox":[72,548,352,104]}
+{"kind":"textbox","id":"sh/of618zep","slide":31,"text":"阶段 1","textPreview":"阶段 1","textChars":4,"textLines":1,"bbox":[91,565,85,27]}
+{"kind":"textbox","id":"sh/9gf2h4fu","slide":31,"text":"Milvus 混合 RAG + 权限 + 固定评测集","textPreview":"Milvus 混合 RAG + 权限 + 固定评测集","textChars":26,"textLines":1,"bbox":[91,599,314,39]}
+{"kind":"shape","id":"sh/md4j6pwj","slide":31,"bbox":[804,581,24,20]}
+{"kind":"shape","id":"sh/nedkfux4","slide":31,"bbox":[450,548,352,104]}
+{"kind":"textbox","id":"sh/w361cjel","slide":31,"text":"阶段 2","textPreview":"阶段 2","textChars":4,"textLines":1,"bbox":[469,565,85,27]}
+{"kind":"textbox","id":"sh/x4f2lof6","slide":31,"text":"选择多跳 / 全局问题验证图 RAG 价值","textPreview":"选择多跳 / 全局问题验证图 RAG 价值","textChars":21,"textLines":1,"bbox":[469,599,314,39]}
+{"kind":"shape","id":"sh/ahoja9wf","slide":31,"bbox":[828,548,352,104]}
+{"kind":"textbox","id":"sh/b2xkjex0","slide":31,"text":"阶段 3","textPreview":"阶段 3","textChars":4,"textLines":1,"bbox":[847,565,85,27]}
+{"kind":"textbox","id":"sh/c7m10feh","slide":31,"text":"同数据同模型比较质量、成本、P95 与增量更新","textPreview":"同数据同模型比较质量、成本、P95 与增量更新","textChars":23,"textLines":1,"bbox":[847,599,314,39]}
+{"kind":"notes","id":"nt/20pld7","slide":31,"text":"【只记一句】先用 Milvus 建立稳定 RAG 基线，再用真实评测证明 GraphRAG 或 LightRAG 是否值得增加复杂度。\n\n【可直接照读】传统的 Milvus 混合 RAG 最适合制度、FAQ、字段说明和操作手册，成本可控、增量更新简单，应该作为 ERP 第一阶段基线。Microsoft GraphRAG 会抽取实体和关系、进行社区发现，并支持 Local Search 和 Global Search，适合跨文档多跳关系、全局主题和风险总结，但离线索引成本、实体消歧、增量更新和权限传播都更复杂。LightRAG 同样融合图关系和向量检索，更强调增量使用体验，适合第二阶段快速验证，但“Light”不代表没有实体抽取和索引成本。\n\n【验证方法】必须使用同一批文档、同一模型和同一评测集，对比准确率、证据覆盖率、索引成本、P95 延迟和增量更新时间；如果图检索没有显著增益，就不应该为了技术完整而引入更多中间件。\n\n【时间建议】约 95 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_graphrag_lightrag_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- Microsoft GraphRAG documentation: https://microsoft.github.io/graphrag/\n- LightRAG repository: https://github.com/HKUDS/LightRAG\n[/Sources]"}
+{"kind":"slide","id":"sl/s77ohg","slide":32,"title":"一次请求，如何从聊天走到 ERP","textShapes":28}
+{"kind":"shape","id":"sh/tk7mp8ny","slide":32,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/210re9sf","slide":32,"text":"一次请求，如何从聊天走到 ERP","textPreview":"一次请求，如何从聊天走到 ERP","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/n29snet0","slide":32,"text":"ENTERPRISE RAG · AGENT WORKFLOW 4/4","textPreview":"ENTERPRISE RAG · AGENT WORKFLOW 4/4","textChars":35,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/c7i9k3ah","slide":32,"text":"35","textPreview":"35","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/x8batob2","slide":32,"bbox":[224,263,21,22]}
+{"kind":"shape","id":"sh/a50ritsb","slide":32,"bbox":[55,179,170,160]}
+{"kind":"shape","id":"sh/b69srytw","slide":32,"bbox":[118,197,42,42]}
+{"kind":"textbox","id":"sh/kb29o3ad","slide":32,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[118,203,42,28]}
+{"kind":"textbox","id":"sh/lwbax8by","slide":32,"text":"用户提问","textPreview":"用户提问","textChars":4,"textLines":1,"bbox":[67,250,146,28]}
+{"kind":"textbox","id":"sh/1kvupcve","slide":32,"text":"自然语言\n表达业务目标","textPreview":"自然语言 | 表达业务目标","textChars":11,"textLines":2,"bbox":[67,283,146,43]}
+{"kind":"shape","id":"sh/gjmdgret","slide":32,"bbox":[419,263,21,22]}
+{"kind":"shape","id":"sh/fidcnmx8","slide":32,"bbox":[250,179,170,160]}
+{"kind":"shape","id":"sh/eh4behwn","slide":32,"bbox":[313,197,42,42]}
+{"kind":"textbox","id":"sh/p8futwva","slide":32,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[313,203,42,28]}
+{"kind":"textbox","id":"sh/o76dkrep","slide":32,"text":"LLM 理解","textPreview":"LLM 理解","textChars":6,"textLines":1,"bbox":[262,250,146,28]}
+{"kind":"textbox","id":"sh/36xcrmdk","slide":32,"text":"识别意图\n抽取业务字段","textPreview":"识别意图 | 抽取业务字段","textChars":11,"textLines":2,"bbox":[262,283,146,43]}
+{"kind":"shape","id":"sh/2l4vihwz","slide":32,"bbox":[614,263,21,22]}
+{"kind":"shape","id":"sh/5cbuhsf6","slide":32,"bbox":[445,179,170,160]}
+{"kind":"shape","id":"sh/4b2t8nel","slide":32,"bbox":[508,197,42,42]}
+{"kind":"textbox","id":"sh/wv6do7mh","slide":32,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[508,203,42,28]}
+{"kind":"textbox","id":"sh/xwfuxcn2","slide":32,"text":"路由选择","textPreview":"路由选择","textChars":4,"textLines":1,"bbox":[457,250,146,28]}
+{"kind":"textbox","id":"sh/atovmx4b","slide":32,"text":"制度问答\n实时查询 · 业务动作","textPreview":"制度问答 | 实时查询 · 业务动作","textChars":16,"textLines":2,"bbox":[457,283,146,43]}
+{"kind":"shape","id":"sh/vuxcv25w","slide":32,"bbox":[809,263,21,22]}
+{"kind":"shape","id":"sh/kz6ds7md","slide":32,"bbox":[640,179,170,160]}
+{"kind":"shape","id":"sh/50zu1cny","slide":32,"bbox":[703,197,42,42]}
+{"kind":"textbox","id":"sh/ixovqx4n","slide":32,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[703,203,42,28]}
+{"kind":"textbox","id":"sh/jyxcz258","slide":32,"text":"能力调用","textPreview":"能力调用","textChars":4,"textLines":1,"bbox":[652,250,146,28]}
+{"kind":"textbox","id":"sh/snqdwrmp","slide":32,"text":"RAG 检索\n或 ERP Tool","textPreview":"RAG 检索 | 或 ERP Tool","textChars":17,"textLines":2,"bbox":[652,283,146,43]}
+{"kind":"shape","id":"sh/tozu5wna","slide":32,"bbox":[1004,263,21,22]}
+{"kind":"shape","id":"sh/3i1gvqpc","slide":32,"bbox":[835,179,170,160]}
+{"kind":"shape","id":"sh/2hsf2lor","slide":32,"bbox":[898,197,42,42]}
+{"kind":"textbox","id":"sh/pk3yxg7i","slide":32,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[898,203,42,28]}
+{"kind":"textbox","id":"sh/4jux4v6x","slide":32,"text":"LangGraph 控制","textPreview":"LangGraph 控制","textChars":12,"textLines":1,"bbox":[847,250,146,28]}
+{"kind":"textbox","id":"sh/fu1wr6pg","slide":32,"text":"追问 · 校验\n预览 · 确认","textPreview":"追问 · 校验 | 预览 · 确认","textChars":15,"textLines":2,"bbox":[847,283,146,43]}
+{"kind":"shape","id":"sh/utsfy1ov","slide":32,"bbox":[1030,179,170,160]}
+{"kind":"shape","id":"sh/hgjytg76","slide":32,"bbox":[1093,197,42,42]}
+{"kind":"textbox","id":"sh/gfax0b6l","slide":32,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1093,203,42,28]}
+{"kind":"textbox","id":"sh/zq5g3a5k","slide":32,"text":"返回结果","textPreview":"返回结果","textChars":4,"textLines":1,"bbox":[1042,250,146,28]}
+{"kind":"textbox","id":"sh/ypcfu5oz","slide":32,"text":"证据回答\n或写入 ERP","textPreview":"证据回答 | 或写入 ERP","textChars":12,"textLines":2,"bbox":[1042,283,146,43]}
+{"kind":"textbox","id":"sh/mxcjypk3","slide":32,"text":"三个关键边界","textPreview":"三个关键边界","textChars":6,"textLines":1,"bbox":[75,389,300,31]}
+{"kind":"shape","id":"sh/7yl0rulo","slide":32,"bbox":[72,435,352,148]}
+{"kind":"textbox","id":"sh/8zu10z29","slide":32,"text":"LLM Agent","textPreview":"LLM Agent","textChars":9,"textLines":1,"bbox":[93,456,310,28]}
+{"kind":"textbox","id":"sh/9032t43u","slide":32,"text":"负责理解与规划，不直接修改 ERP","textPreview":"负责理解与规划，不直接修改 ERP","textChars":17,"textLines":1,"bbox":[93,496,310,62]}
+{"kind":"shape","id":"sh/ytsjupk7","slide":32,"bbox":[450,435,352,148]}
+{"kind":"textbox","id":"sh/zu10nuls","slide":32,"text":"RAG + Milvus","textPreview":"RAG + Milvus","textChars":12,"textLines":1,"bbox":[471,456,310,28]}
+{"kind":"textbox","id":"sh/kva1wz2d","slide":32,"text":"只在权限范围内检索制度和文档","textPreview":"只在权限范围内检索制度和文档","textChars":14,"textLines":1,"bbox":[471,496,310,62]}
+{"kind":"shape","id":"sh/lwjip43i","slide":32,"bbox":[828,435,352,148]}
+{"kind":"textbox","id":"sh/ipwj69kb","slide":32,"text":"ERP Tool + LangGraph","textPreview":"ERP Tool + LangGraph","textChars":20,"textLines":1,"bbox":[849,456,310,28]}
+{"kind":"textbox","id":"sh/jq5kzelw","slide":32,"text":"ERP 提供实时事实，LangGraph 控制业务写入","textPreview":"ERP 提供实时事实，LangGraph 控制业务写入","textChars":27,"textLines":1,"bbox":[849,496,310,62]}
+{"kind":"notes","id":"nt/s77ohg","slide":32,"text":"【只记一句】用户只说业务目标，Agent 负责理解和选路，RAG 或 ERP Tool 负责执行，LangGraph 负责追问、确认和写入控制。\n\n【可直接照读】用户从前端输入自然语言后，LLM 先识别这是制度问答、实时查询还是业务动作；制度问题进入 RAG，实时数据和动态模板通过 ERP Tool 获取；如果要执行审批，LangGraph 会继续补充字段、校验、生成预览，并在用户确认后才写入 ERP。整个过程可以返回执行计划、工具调用、检索证据和 ERP 结果，方便现场演示和问题排查。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/services/milvus_service.py\n- D:/PythonProject/LearnOne/ai_erp_rag_assistant/app/services/erp_client.py\n[/Sources]"}
+{"kind":"slide","id":"sl/f7l4fg","slide":33,"title":"谢谢","textShapes":6}
+{"kind":"shape","id":"sh/il07ydgr","slide":33,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1gvq1sfq","slide":33,"text":"谢谢","textPreview":"谢谢","textChars":2,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0fm987e5","slide":33,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/rqt8vixo","slide":33,"text":"36","textPreview":"36","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/qpk72dg3","slide":33,"bbox":[72,176,1136,332]}
+{"kind":"textbox","id":"sh/dsbqxsfe","slide":33,"text":"AI 让 ERP 更易用","textPreview":"AI 让 ERP 更易用","textChars":12,"textLines":1,"bbox":[120,247,1040,70]}
+{"kind":"textbox","id":"sh/sr2p4nyt","slide":33,"text":"ERP 让 AI 更可靠","textPreview":"ERP 让 AI 更可靠","textChars":12,"textLines":1,"bbox":[120,333,1040,64]}
+{"kind":"textbox","id":"sh/3m98rixc","slide":33,"text":"欢迎交流","textPreview":"欢迎交流","textChars":4,"textLines":1,"bbox":[120,584,1040,36]}
+{"kind":"notes","id":"nt/f7l4fg","slide":33,"text":"【只记一句】RAG 与 ERP 的结合，最终目标是让用户少记菜单和字段，但不降低业务控制力。\n\n【可直接照读】后续可以从审批和日报继续扩展到采购、订单、库存和客户跟进。每增加一个场景，都沿用同一套分层：知识进入 RAG，实时事实通过 ERP Tool，业务写入由 LangGraph 控制。这样既能持续积累 AI 能力，也能避免把所有逻辑都堆在 Prompt 或 if-else 中。谢谢大家。\n\n【时间建议】约 30 秒\n\n[Sources]\n- Closing slide; no external claims.\n[/Sources]"}

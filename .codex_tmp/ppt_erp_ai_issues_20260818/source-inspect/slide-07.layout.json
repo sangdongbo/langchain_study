@@ -1,0 +1,1056 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/gnmp4jqx",
+    "id": "gnmp4jqx",
+    "slide": 7,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#F6F1E8",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light",
+        "eastAsianTypeface": "Calibri Light",
+        "complexScriptTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri",
+        "eastAsianTypeface": "Calibri",
+        "complexScriptTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/eh4jil4r",
+      "id": "19",
+      "name": "矩形 18",
+      "bbox": [
+        0,
+        0,
+        1280,
+        116
+      ],
+      "geometry": "rect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cb2tkvap",
+      "id": "2",
+      "name": "矩形 1",
+      "bbox": [
+        72,
+        29,
+        1030,
+        60
+      ],
+      "geometry": "rect",
+      "text": "三层关系：基础组件、运行时与 Agent 套件",
+      "textPreview": "三层关系：基础组件、运行时与 Agent 套件",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "三层关系：基础组件、运行时与 Agent 套件"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "三层关系：基础组件、运行时与 Agent 套件",
+          "resolvedTextStyle": {
+            "fontSize": 38,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "三层关系：基础组件、运行时与 Agent 套件",
+              "fontSize": 38,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcbud0ra",
+      "id": "3",
+      "name": "矩形 2",
+      "bbox": [
+        1000,
+        48,
+        205,
+        26
+      ],
+      "geometry": "rect",
+      "text": "ERP × AI PRACTICE",
+      "textPreview": "ERP × AI PRACTICE",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ERP × AI PRACTICE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ERP × AI PRACTICE",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#E8D9DD",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ERP × AI PRACTICE",
+              "fontSize": 13,
+              "color": "#E8D9DD",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ydkbm5sv",
+      "id": "4",
+      "name": "矩形 3",
+      "bbox": [
+        1170,
+        674,
+        42,
+        20
+      ],
+      "geometry": "rect",
+      "text": "07",
+      "textPreview": "07",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "07"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "07",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#A66C6B",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "07",
+              "fontSize": 12,
+              "color": "#A66C6B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zedcfa9g",
+      "id": "5",
+      "name": "矩形 4",
+      "bbox": [
+        82,
+        157,
+        900,
+        34
+      ],
+      "geometry": "rect",
+      "text": "不是三套互相替代的框架，而是不同层级的能力组合",
+      "textPreview": "不是三套互相替代的框架，而是不同层级的能力组合",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "不是三套互相替代的框架，而是不同层级的能力组合"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "不是三套互相替代的框架，而是不同层级的能力组合",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "color": "#282523",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "不是三套互相替代的框架，而是不同层级的能力组合",
+              "fontSize": 25,
+              "color": "#282523",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzmdova1",
+      "id": "6",
+      "name": "圆角矩形 5",
+      "bbox": [
+        216.67,
+        195,
+        841.13,
+        132.33
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#74364A",
+      "lineColor": "#74364A",
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0vuh0rm",
+      "id": "7",
+      "name": "矩形 6",
+      "bbox": [
+        255,
+        246,
+        770,
+        34
+      ],
+      "geometry": "rect",
+      "text": "Deep Agents  ·  应用层 / Agent Harness",
+      "textPreview": "Deep Agents  ·  应用层 / Agent Harness",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Deep Agents  ·  应用层 / Agent Harness"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Deep Agents  ·  应用层 / Agent Harness",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Deep Agents  ·  应用层 / Agent Harness",
+              "fontSize": 25,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/eh0ba1sr",
+      "id": "8",
+      "name": "矩形 7",
+      "bbox": [
+        285,
+        283,
+        710,
+        24
+      ],
+      "geometry": "rect",
+      "text": "LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管",
+      "textPreview": "LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高"
+          },
+          {
+            "index": 2,
+            "text": "，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#F2E5E8",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LangGraph ",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 2,
+              "text": "之上做高度业务封装，内置一堆中间件。",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 3,
+              "text": "提供任务规划、子智能体、文件与长任务等高",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 4,
+              "text": "，",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 5,
+              "text": "流转逻辑是黑盒 ",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 6,
+              "text": "ReAct ",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 7,
+              "text": "循环",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 8,
+              "text": "级能力",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 9,
+              "text": "，",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 10,
+              "text": "state",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 11,
+              "text": "被框架",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            },
+            {
+              "index": 12,
+              "text": "接管",
+              "fontSize": 16,
+              "color": "#F2E5E8"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fi9c369c",
+      "id": "9",
+      "name": "下箭头 8",
+      "bbox": [
+        616,
+        329.8,
+        48,
+        38
+      ],
+      "geometry": "downArrow",
+      "fillColor": "#A66C6B",
+      "lineColor": "#A66C6B",
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/baxkjqlk",
+      "id": "10",
+      "name": "矩形 9",
+      "bbox": [
+        590,
+        363,
+        100,
+        24
+      ],
+      "geometry": "rect",
+      "text": "构建在",
+      "textPreview": "构建在",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "构建在"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "构建在",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#A66C6B",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "构建在",
+              "fontSize": 16,
+              "color": "#A66C6B"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a9ojq5kz",
+      "id": "11",
+      "name": "圆角矩形 10",
+      "bbox": [
+        220,
+        389,
+        840,
+        88
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#A66C6B",
+      "lineColor": "#A66C6B",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xcz2l03q",
+      "id": "12",
+      "name": "矩形 11",
+      "bbox": [
+        255,
+        416,
+        770,
+        34
+      ],
+      "geometry": "rect",
+      "text": "LangGraph  ·  运行时 / Agent Runtime",
+      "textPreview": "LangGraph  ·  运行时 / Agent Runtime",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LangGraph  ·  运行时 / Agent Runtime"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LangGraph  ·  运行时 / Agent Runtime",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LangGraph  ·  运行时 / Agent Runtime",
+              "fontSize": 25,
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cbq1sv25",
+      "id": "13",
+      "name": "矩形 12",
+      "bbox": [
+        285,
+        453,
+        710,
+        24
+      ],
+      "geometry": "rect",
+      "text": "状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、事件流」",
+      "textPreview": "状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、事件流」",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、"
+          },
+          {
+            "index": 2,
+            "text": "事件流」"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、事件流」",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#F8EDEE",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "状态图编排框架，额外封装了「",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 2,
+              "text": "state",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 3,
+              "text": "、",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 4,
+              "text": "循环、分支、状态持久化、中断、回溯",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 5,
+              "text": "、",
+              "fontSize": 16,
+              "color": "#F8EDEE",
+              "alignment": "center"
+            },
+            {
+              "index": 6,
+              "text": "多 ",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 7,
+              "text": "Agent、",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            },
+            {
+              "index": 8,
+              "text": "事件流」",
+              "fontSize": 16,
+              "color": "#F8EDEE"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n6x0fqlo",
+      "id": "14",
+      "name": "下箭头 13",
+      "bbox": [
+        616,
+        486,
+        48,
+        38
+      ],
+      "geometry": "downArrow",
+      "fillColor": "#A66C6B",
+      "lineColor": "#A66C6B",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25ojml43",
+      "id": "15",
+      "name": "矩形 14",
+      "bbox": [
+        590,
+        522,
+        100,
+        24
+      ],
+      "geometry": "rect",
+      "text": "构建在",
+      "textPreview": "构建在",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "构建在"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "构建在",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#A66C6B",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "构建在",
+              "fontSize": 16,
+              "color": "#A66C6B"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p8fih03e",
+      "id": "16",
+      "name": "圆角矩形 15",
+      "bbox": [
+        220,
+        559,
+        840,
+        88
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#E9DCC9",
+      "lineColor": "#E9DCC9",
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o761ov2t",
+      "id": "17",
+      "name": "矩形 16",
+      "bbox": [
+        255,
+        586,
+        770,
+        34
+      ],
+      "geometry": "rect",
+      "text": "LangChain  ·  基础层 / Agent Framework",
+      "textPreview": "LangChain  ·  基础层 / Agent Framework",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LangChain  ·  基础层 / Agent Framework"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LangChain  ·  基础层 / Agent Framework",
+          "resolvedTextStyle": {
+            "fontSize": 25,
+            "color": "#5D293B",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "LangChain  ·  基础层 / Agent Framework",
+              "fontSize": 25,
+              "color": "#5D293B",
+              "bold": true
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/f2d0b6lc",
+      "id": "18",
+      "name": "矩形 17",
+      "bbox": [
+        285,
+        623,
+        710,
+        24
+      ],
+      "geometry": "rect",
+      "text": "组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用",
+      "textPreview": "组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#6E635E",
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "组件库，",
+              "fontSize": 16,
+              "color": "#6E635E"
+            },
+            {
+              "index": 2,
+              "text": "（Prompt、LLM、Chain、Tool、Document、Retriever），",
+              "fontSize": 16,
+              "color": "#6E635E"
+            },
+            {
+              "index": 3,
+              "text": "只负责单步 / 串行调用",
+              "fontSize": 16,
+              "color": "#6E635E"
+            }
+          ],
+          "bulletCharacter": "",
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

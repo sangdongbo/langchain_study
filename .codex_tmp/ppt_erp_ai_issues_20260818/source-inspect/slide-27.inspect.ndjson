@@ -1,0 +1,8 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/4vyxknqp","slide":27,"title":"标准日报子图：草稿、预览与提交恢复","textShapes":3}
+{"kind":"shape","id":"sh/elkj65sb","slide":27,"name":"矩形 23","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/kn694nmx","slide":27,"name":"矩形 1","text":"标准日报子图：草稿、预览与提交恢复","textPreview":"标准日报子图：草稿、预览与提交恢复","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/lofadsni","slide":27,"name":"矩形 2","text":"DAILY REPORT AGENT · 2/2","textPreview":"DAILY REPORT AGENT · 2/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/mpor6x43","slide":27,"name":"矩形 3","text":"27","textPreview":"27","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"notes","id":"nt/4vyxknqp","slide":27,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}

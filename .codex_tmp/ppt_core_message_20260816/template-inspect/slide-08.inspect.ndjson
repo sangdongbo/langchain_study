@@ -1,0 +1,58 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":8,"title":"核心对比：ERP 场景更看重可控执行与状态管理","textShapes":28}
+{"kind":"shape","id":"sh/lkvepgje","slide":8,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/18byd4zy","slide":8,"text":"核心对比：ERP 场景更看重可控执行与状态管理","textPreview":"核心对比：ERP 场景更看重可控执行与状态管理","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/g72x4zyd","slide":8,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ri9g7uhw","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/6h0fypgb","slide":8,"bbox":[55,166,210,60]}
+{"kind":"textbox","id":"sh/tkby9kzm","slide":8,"text":"维度","textPreview":"维度","textChars":2,"textLines":1,"bbox":[65,182,190,28]}
+{"kind":"shape","id":"sh/sjix0zy1","slide":8,"bbox":[265,166,270,60]}
+{"kind":"textbox","id":"sh/je9g3ahk","slide":8,"text":"LangChain","textPreview":"LangChain","textChars":9,"textLines":1,"bbox":[275,182,250,28]}
+{"kind":"shape","id":"sh/id0fu50z","slide":8,"bbox":[535,166,270,60]}
+{"kind":"textbox","id":"sh/o7ydoret","slide":8,"text":"LangGraph","textPreview":"LangGraph","textChars":9,"textLines":1,"bbox":[545,182,250,28]}
+{"kind":"shape","id":"sh/98rehwve","slide":8,"bbox":[805,166,270,60]}
+{"kind":"textbox","id":"sh/m5gvmhwn","slide":8,"text":"Deep Agents","textPreview":"Deep Agents","textChars":11,"textLines":1,"bbox":[815,182,250,28]}
+{"kind":"shape","id":"sh/n6pwfmd8","slide":8,"bbox":[55,226,210,78]}
+{"kind":"textbox","id":"sh/0jydkreh","slide":8,"text":"定位","textPreview":"定位","textChars":2,"textLines":1,"bbox":[67,246,186,40]}
+{"kind":"shape","id":"sh/1k7edwv2","slide":8,"bbox":[265,226,270,78]}
+{"kind":"textbox","id":"sh/ehgvihwr","slide":8,"text":"基础开发框架","textPreview":"基础开发框架","textChars":6,"textLines":1,"bbox":[277,246,246,40]}
+{"kind":"shape","id":"sh/zipwbmdc","slide":8,"bbox":[535,226,270,78]}
+{"kind":"textbox","id":"sh/kfixwbe1","slide":8,"text":"状态图运行时","textPreview":"状态图运行时","textChars":6,"textLines":1,"bbox":[547,246,246,40]}
+{"kind":"shape","id":"sh/lgbepgvm","slide":8,"bbox":[805,226,270,78]}
+{"kind":"textbox","id":"sh/tw7e9gnq","slide":8,"text":"高级 Agent 套件","textPreview":"高级 Agent 套件","textChars":11,"textLines":1,"bbox":[817,246,246,40]}
+{"kind":"shape","id":"sh/svydgb65","slide":8,"bbox":[55,304,210,78]}
+{"kind":"textbox","id":"sh/7u5w765k","slide":8,"text":"控制流","textPreview":"控制流","textChars":3,"textLines":1,"bbox":[67,324,186,40]}
+{"kind":"shape","id":"sh/6twve1oz","slide":8,"bbox":[265,304,270,78]}
+{"kind":"textbox","id":"sh/5sne5wne","slide":8,"text":"链式调用为主","textPreview":"链式调用为主","textChars":6,"textLines":1,"bbox":[277,324,246,40]}
+{"kind":"shape","id":"sh/kredcr6t","slide":8,"bbox":[535,304,270,78]}
+{"kind":"textbox","id":"sh/jq5w365o","slide":8,"text":"显式状态图","textPreview":"显式状态图","textChars":5,"textLines":1,"bbox":[547,324,246,40]}
+{"kind":"shape","id":"sh/i5wva1o3","slide":8,"bbox":[805,304,270,78]}
+{"kind":"textbox","id":"sh/x4ne1wni","slide":8,"text":"自主规划 + 工具","textPreview":"自主规划 + 工具","textChars":9,"textLines":1,"bbox":[817,324,246,40]}
+{"kind":"shape","id":"sh/w3ed8r6x","slide":8,"bbox":[55,382,210,78]}
+{"kind":"textbox","id":"sh/m9sb2x4v","slide":8,"text":"持久化","textPreview":"持久化","textChars":3,"textLines":1,"bbox":[67,402,186,40]}
+{"kind":"shape","id":"sh/na1sb2lg","slide":8,"bbox":[265,382,270,78]}
+{"kind":"textbox","id":"sh/8bat47ml","slide":8,"text":"需自行组合","textPreview":"需自行组合","textChars":5,"textLines":1,"bbox":[277,402,246,40]}
+{"kind":"shape","id":"sh/9w3uds36","slide":8,"bbox":[535,382,270,78]}
+{"kind":"textbox","id":"sh/y5sbed4j","slide":8,"text":"原生支持检查点","textPreview":"原生支持检查点","textChars":7,"textLines":1,"bbox":[547,402,246,40]}
+{"kind":"shape","id":"sh/z61s7il4","slide":8,"bbox":[805,382,270,78]}
+{"kind":"textbox","id":"sh/07atgnmp","slide":8,"text":"构建在 LangGraph 上","textPreview":"构建在 LangGraph 上","textChars":15,"textLines":1,"bbox":[817,402,246,40]}
+{"kind":"shape","id":"sh/l8ja9s3a","slide":8,"bbox":[55,460,210,78]}
+{"kind":"textbox","id":"sh/q18bad4n","slide":8,"text":"人工干预","textPreview":"人工干预","textChars":4,"textLines":1,"bbox":[67,480,186,40]}
+{"kind":"shape","id":"sh/b2hs3il8","slide":8,"bbox":[265,460,270,78]}
+{"kind":"textbox","id":"sh/3u18fepo","slide":8,"text":"需自行实现","textPreview":"需自行实现","textChars":5,"textLines":1,"bbox":[277,480,246,40]}
+{"kind":"shape","id":"sh/2ts769o3","slide":8,"bbox":[535,460,270,78]}
+{"kind":"textbox","id":"sh/pwjqho7u","slide":8,"text":"interrupt / resume","textPreview":"interrupt / resume","textChars":18,"textLines":1,"bbox":[547,480,246,40]}
+{"kind":"shape","id":"sh/4vap8j69","slide":8,"bbox":[805,460,270,78]}
+{"kind":"textbox","id":"sh/fq1obeps","slide":8,"text":"支持危险工具中断","textPreview":"支持危险工具中断","textChars":8,"textLines":1,"bbox":[817,480,246,40]}
+{"kind":"shape","id":"sh/up872987","slide":8,"bbox":[55,538,210,78]}
+{"kind":"textbox","id":"sh/hsjqd47y","slide":8,"text":"适合任务","textPreview":"适合任务","textChars":4,"textLines":1,"bbox":[67,558,186,40]}
+{"kind":"shape","id":"sh/grap4zqd","slide":8,"bbox":[265,538,270,78]}
+{"kind":"textbox","id":"sh/72ho7upg","slide":8,"text":"简单问答、原型","textPreview":"简单问答、原型","textChars":7,"textLines":1,"bbox":[277,558,246,40]}
+{"kind":"shape","id":"sh/6187yp8b","slide":8,"bbox":[535,538,270,78]}
+{"kind":"textbox","id":"sh/cvmdsb2h","slide":8,"text":"审批、业务流程","textPreview":"审批、业务流程","textChars":7,"textLines":1,"bbox":[547,558,246,40]}
+{"kind":"shape","id":"sh/xwvelwj2","slide":8,"bbox":[805,538,270,78]}
+{"kind":"textbox","id":"sh/at4vq1kr","slide":8,"text":"长任务、复杂研究","textPreview":"长任务、复杂研究","textChars":8,"textLines":1,"bbox":[817,558,246,40]}
+{"kind":"shape","id":"sh/budwj61c","slide":8,"bbox":[82,632,1116,42]}
+{"kind":"textbox","id":"sh/kjmdwbit","slide":8,"text":"对 ERP 审批和日报而言，状态可追踪、流程可暂停、写操作可拦截，比“代码更少”更重要","textPreview":"对 ERP 审批和日报而言，状态可追踪、流程可暂停、写操作可拦截，比“代码更少”更重要","textChars":43,"textLines":1,"bbox":[109,642,1062,22]}
+{"kind":"notes","id":"nt/fu1gfa1s","slide":8,"text":"【只记一句】ERP 场景更看重可控执行，而不是代码看起来更少。\n\n【可直接照读】LangChain适合简单调用，LangGraph适合有状态和人工确认的流程，Deep Agents适合开放长任务。审批和日报需要暂停、恢复和安全写入，因此 LangGraph 更贴合主流程。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_deep_agents_assistant/app/agents/approval_agent.py\n- C:/Users/EDY/Pictures/5.jpg\n- C:/Users/EDY/Pictures/7.jpg\n[/Sources]"}

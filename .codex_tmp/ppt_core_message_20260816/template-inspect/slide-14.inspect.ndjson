@@ -1,0 +1,35 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6lsnupw7","slide":14,"title":"Agentic Workflow：把自主规划与流程闸门组合起来","textShapes":21}
+{"kind":"shape","id":"sh/cvylkn2d","slide":14,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc7eds76","slide":14,"text":"Agentic Workflow：把自主规划与流程闸门组合起来","textPreview":"Agentic Workflow：把自主规划与流程闸门组合起来","textChars":31,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/wbydknq1","slide":14,"text":"AGENTIC WORKFLOW DEMO","textPreview":"AGENTIC WORKFLOW DEMO","textChars":21,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/jepwf2pc","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/idgvmx8r","slide":14,"text":"Agent 负责开放性工作","textPreview":"Agent 负责开放性工作","textChars":13,"textLines":1,"bbox":[92,158,430,35]}
+{"kind":"textbox","id":"sh/5grehs7i","slide":14,"text":"Workflow 负责确定性边界","textPreview":"Workflow 负责确定性边界","textChars":16,"textLines":1,"bbox":[760,158,430,35]}
+{"kind":"shape","id":"sh/kfidonqx","slide":14,"bbox":[92,226,438,82]}
+{"kind":"textbox","id":"sh/zi5c3y98","slide":14,"text":"理解目标","textPreview":"理解目标","textChars":4,"textLines":1,"bbox":[118,239,126,28]}
+{"kind":"textbox","id":"sh/ehwvat8n","slide":14,"text":"识别用户要写什么日报","textPreview":"识别用户要写什么日报","textChars":10,"textLines":1,"bbox":[245,240,250,42]}
+{"kind":"shape","id":"sh/c3e1gjyd","slide":14,"bbox":[92,337,438,82]}
+{"kind":"textbox","id":"sh/x4ni9ofy","slide":14,"text":"制定计划","textPreview":"制定计划","textChars":4,"textLines":1,"bbox":[118,350,126,28]}
+{"kind":"textbox","id":"sh/a1wze9g7","slide":14,"text":"明确需要哪些上下文","textPreview":"明确需要哪些上下文","textChars":9,"textLines":1,"bbox":[245,351,250,42]}
+{"kind":"shape","id":"sh/b2507exs","slide":14,"bbox":[92,448,438,82]}
+{"kind":"textbox","id":"sh/kre1k3y9","slide":14,"text":"整理内容","textPreview":"整理内容","textChars":4,"textLines":1,"bbox":[118,461,126,28]}
+{"kind":"textbox","id":"sh/ls7idofu","slide":14,"text":"结合用户输入生成正文","textPreview":"结合用户输入生成正文","textChars":10,"textLines":1,"bbox":[245,462,250,42]}
+{"kind":"shape","id":"sh/y5wjitgj","slide":14,"bbox":[573,337,110,45]}
+{"kind":"textbox","id":"sh/z650byxo","slide":14,"text":"建议下一步","textPreview":"建议下一步","textChars":5,"textLines":1,"bbox":[567,390,120,27]}
+{"kind":"shape","id":"sh/0buh8zy5","slide":14,"bbox":[752,216,438,68]}
+{"kind":"textbox","id":"sh/1w3i14fq","slide":14,"text":"保存草稿","textPreview":"保存草稿","textChars":4,"textLines":1,"bbox":[777,226,126,27]}
+{"kind":"textbox","id":"sh/hsvy50re","slide":14,"text":"由流程执行写入","textPreview":"由流程执行写入","textChars":7,"textLines":1,"bbox":[910,228,250,35]}
+{"kind":"shape","id":"sh/grmxwvqt","slide":14,"bbox":[752,307,438,68]}
+{"kind":"textbox","id":"sh/fqdg3q98","slide":14,"text":"生成预览","textPreview":"生成预览","textChars":4,"textLines":1,"bbox":[777,317,126,27]}
+{"kind":"textbox","id":"sh/up4fal83","slide":14,"text":"展示完整业务信息","textPreview":"展示完整业务信息","textChars":8,"textLines":1,"bbox":[910,319,250,35]}
+{"kind":"shape","id":"sh/pwvy90rq","slide":14,"bbox":[752,398,438,68]}
+{"kind":"textbox","id":"sh/4vmh0vq5","slide":14,"text":"人工确认","textPreview":"人工确认","textChars":4,"textLines":1,"bbox":[777,408,126,27]}
+{"kind":"textbox","id":"sh/3udg7q9k","slide":14,"text":"暂停等待用户动作","textPreview":"暂停等待用户动作","textChars":8,"textLines":1,"bbox":[910,410,250,35]}
+{"kind":"shape","id":"sh/2t4fyl8z","slide":14,"bbox":[752,489,438,68]}
+{"kind":"textbox","id":"sh/d0fydk7m","slide":14,"text":"提交闸门","textPreview":"提交闸门","textChars":4,"textLines":1,"bbox":[777,499,126,27]}
+{"kind":"textbox","id":"sh/cz6h4fq1","slide":14,"text":"确认后才允许执行","textPreview":"确认后才允许执行","textChars":8,"textLines":1,"bbox":[910,501,250,35]}
+{"kind":"shape","id":"sh/atg3idk7","slide":14,"bbox":[94,611,1095,48]}
+{"kind":"textbox","id":"sh/bup4rils","slide":14,"text":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textPreview":"核心思路：让 Agent 提供灵活性，让 Workflow 保证业务安全","textChars":36,"textLines":1,"bbox":[126,623,1031,25]}
+{"kind":"notes","id":"nt/6lsnupw7","slide":14,"text":"【只记一句】开放性工作交给 Agent，确定性写入交给 Workflow。\n\n【可直接照读】Agent可以理解目标、制定计划和组织正文；Workflow负责保存草稿、生成预览、等待确认和执行提交。这个 Agentic Workflow demo 体现的是一种折中：让模型有灵活性，但把高风险动作放在明确的流程闸门之后。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agentic_workflow_demo.py\n[/Sources]"}

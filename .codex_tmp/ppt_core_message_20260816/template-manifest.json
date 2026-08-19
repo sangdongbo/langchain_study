@@ -1,0 +1,25 @@
+{
+  "source": "D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版-整体优化版.pptx",
+  "slideCount": 33,
+  "masters": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "placeholders": []
+    }
+  ],
+  "layouts": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "Master",
+      "parentLayoutId": "",
+      "placeholders": []
+    },
+    {
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "placeholders": []
+    }
+  ]
+}

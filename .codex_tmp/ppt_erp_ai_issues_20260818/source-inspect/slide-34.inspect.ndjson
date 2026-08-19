@@ -1,0 +1,12 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/ofu103u5","slide":34,"title":"谢谢","textShapes":6}
+{"kind":"shape","id":"sh/y18ne9c3","slide":34,"name":"矩形 8","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/pwzm1kbm","slide":34,"name":"矩形 1","text":"谢谢","textPreview":"谢谢","textChars":2,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ovq58fu1","slide":34,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/byh43utc","slide":34,"name":"矩形 3","text":"34","textPreview":"34","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/qx8napc7","slide":34,"name":"圆角矩形 4","bbox":[72,176,1136,332]}
+{"kind":"textbox","id":"sh/d0zm54bi","slide":34,"name":"矩形 5","text":"AI没有替代ERP","textPreview":"AI没有替代ERP","textChars":9,"textLines":1,"bbox":[120,247,1040,70]}
+{"kind":"textbox","id":"sh/czq5czux","slide":34,"name":"矩形 6","text":"而是为ERP增加自然语言业务入口","textPreview":"而是为ERP增加自然语言业务入口","textChars":16,"textLines":1,"bbox":[120,333,1040,64]}
+{"kind":"textbox","id":"sh/z2147eto","slide":34,"name":"矩形 7","text":"欢迎交流","textPreview":"欢迎交流","textChars":4,"textLines":1,"bbox":[120,584,1040,36]}
+{"kind":"notes","id":"nt/ofu103u5","slide":34,"text":"【只记一句】AI没有替代ERP，而是为ERP增加自然语言业务入口。\n\n【可直接照读】最后再重复一次今天最重要的结论：AI没有替代ERP，而是为ERP增加自然语言业务入口。用户从找功能、填表单，转向说目标、确认结果；AI负责理解和交互，ERP继续负责规则和可信执行。后续无论扩展到采购、订单、库存还是知识问答，都应该坚持这一职责边界。谢谢大家，欢迎交流。\n\n【时间建议】约 30 秒\n\n[Sources]\n- Closing slide; no external claims.\n[/Sources]"}

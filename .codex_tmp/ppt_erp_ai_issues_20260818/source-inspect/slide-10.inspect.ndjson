@@ -1,0 +1,40 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"审批最难的不是聊天，而是适配动态配置","textShapes":21}
+{"kind":"shape","id":"sh/103qxcbq","slide":10,"name":"矩形 36","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"name":"矩形 1","text":"审批最难的不是聊天，而是适配动态配置","textPreview":"审批最难的不是聊天，而是适配动态配置","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/zelojyl8","slide":10,"name":"矩形 3","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ydcnatkn","slide":10,"name":"矩形 4","text":"同一个“请假”，不同公司可能完全不同","textPreview":"同一个“请假”，不同公司可能完全不同","textChars":18,"textLines":1,"bbox":[82,158,700,37]}
+{"kind":"shape","id":"sh/l036l83y","slide":10,"name":"圆角矩形 5","bbox":[82,219,450,280]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"name":"矩形 6","text":"公司 A","textPreview":"公司 A","textChars":4,"textLines":1,"bbox":[112,245,150,32]}
+{"kind":"shape","id":"sh/725onyl4","slide":10,"name":"椭圆 7","bbox":[116,308,9,9]}
+{"kind":"textbox","id":"sh/m1cnetkj","slide":10,"name":"矩形 8","text":"请假类型","textPreview":"请假类型","textChars":4,"textLines":1,"bbox":[139,300,347,41]}
+{"kind":"shape","id":"sh/s7yt4b21","slide":10,"name":"椭圆 9","bbox":[116,353,9,9]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"name":"矩形 10","text":"开始 / 结束时间","textPreview":"开始 / 结束时间","textChars":9,"textLines":1,"bbox":[139,345,347,41]}
+{"kind":"shape","id":"sh/q5gb21kb","slide":10,"name":"椭圆 11","bbox":[116,398,9,9]}
+{"kind":"textbox","id":"sh/r6pcv6lw","slide":10,"name":"矩形 12","text":"请假事由","textPreview":"请假事由","textChars":4,"textLines":1,"bbox":[139,390,347,41]}
+{"kind":"shape","id":"sh/0bit8b2d","slide":10,"name":"椭圆 13","bbox":[116,443,9,9]}
+{"kind":"textbox","id":"sh/1cru1g3y","slide":10,"name":"矩形 14","text":"审批人自动匹配","textPreview":"审批人自动匹配","textChars":7,"textLines":1,"bbox":[139,435,347,41]}
+{"kind":"shape","id":"sh/e9gb61k7","slide":10,"name":"圆角矩形 15","bbox":[748,219,450,280]}
+{"kind":"textbox","id":"sh/fapcz6ls","slide":10,"name":"矩形 16","text":"公司 B","textPreview":"公司 B","textChars":4,"textLines":1,"bbox":[778,245,150,32]}
+{"kind":"shape","id":"sh/ozitcv29","slide":10,"name":"椭圆 17","bbox":[782,308,9,9]}
+{"kind":"textbox","id":"sh/p0ru503u","slide":10,"name":"矩形 18","text":"假期余额规则","textPreview":"假期余额规则","textChars":6,"textLines":1,"bbox":[805,300,347,41]}
+{"kind":"shape","id":"sh/xwnupgvy","slide":10,"name":"椭圆 19","bbox":[782,353,9,9]}
+{"kind":"textbox","id":"sh/wvetgbud","slide":10,"name":"矩形 20","text":"日期时间 + 时长","textPreview":"日期时间 + 时长","textChars":9,"textLines":1,"bbox":[805,345,347,41]}
+{"kind":"shape","id":"sh/bu5cnqd8","slide":10,"name":"椭圆 21","bbox":[782,398,9,9]}
+{"kind":"textbox","id":"sh/atwbelcn","slide":10,"name":"矩形 22","text":"交接人员","textPreview":"交接人员","textChars":4,"textLines":1,"bbox":[805,390,347,41]}
+{"kind":"shape","id":"sh/lk7ut0va","slide":10,"name":"椭圆 23","bbox":[782,443,9,9]}
+{"kind":"textbox","id":"sh/kjytkvup","slide":10,"name":"矩形 24","text":"发起人选择审批人","textPreview":"发起人选择审批人","textChars":8,"textLines":1,"bbox":[805,435,347,41]}
+{"kind":"shape","id":"sh/jypcrqd4","slide":10,"name":"右箭头 25","bbox":[570,329,140,44]}
+{"kind":"textbox","id":"sh/yxgbilcj","slide":10,"name":"矩形 26","text":"不能写死","textPreview":"不能写死","textChars":4,"textLines":1,"bbox":[574,382,132,28]}
+{"kind":"shape","id":"sh/1o3ahwvq","slide":10,"name":"圆角矩形 27","bbox":[82,550,342,90]}
+{"kind":"textbox","id":"sh/0nut8rul","slide":10,"name":"矩形 28","text":"ERP","textPreview":"ERP","textChars":3,"textLines":1,"bbox":[101,568,112,28]}
+{"kind":"textbox","id":"sh/q9srixs3","slide":10,"name":"矩形 29","text":"定义模板、字段和审批流程","textPreview":"定义模板、字段和审批流程","textChars":12,"textLines":1,"bbox":[207,567,195,50]}
+{"kind":"shape","id":"sh/ru18r2to","slide":10,"name":"圆角矩形 30","bbox":[457,550,342,90]}
+{"kind":"textbox","id":"sh/cva9k7a9","slide":10,"name":"矩形 31","text":"AI","textPreview":"AI","textChars":2,"textLines":1,"bbox":[476,568,112,28]}
+{"kind":"textbox","id":"sh/dwjqtcbu","slide":10,"name":"矩形 32","text":"理解用户表达并提取信息","textPreview":"理解用户表达并提取信息","textChars":11,"textLines":1,"bbox":[582,567,195,50]}
+{"kind":"shape","id":"sh/exsrmhsf","slide":10,"name":"圆角矩形 33","bbox":[832,550,342,90]}
+{"kind":"textbox","id":"sh/zyl8vmt0","slide":10,"name":"矩形 34","text":"聊天助手","textPreview":"聊天助手","textChars":4,"textLines":1,"bbox":[851,568,112,28]}
+{"kind":"textbox","id":"sh/0zu9ora5","slide":10,"name":"矩形 35","text":"动态追问、校验、预览","textPreview":"动态追问、校验、预览","textChars":10,"textLines":1,"bbox":[957,567,195,50]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":10,"text":"【只记一句】同一个请假动作，在不同公司可能对应不同表单。\n\n【可直接照读】审批最难的地方是组件多、字段不一样，而且每家公司还能配置不同规则。解决方法不是为每家公司增加一组 if-else，而是让 ERP 定义模板和字段，AI负责理解表达，聊天助手根据配置动态追问、校验和预览。这样新增组件主要是增加配置和适配，而不是重写主流程。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/services/crm_service.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}

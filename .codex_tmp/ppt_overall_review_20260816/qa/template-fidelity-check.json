@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-08-16T01:48:47.480Z",
+  "workspace": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816",
+  "finalPptx": "D:\\PythonProject\\LearnOne\\ERP与AI融合实践-智能审批与日报-RAG扩展版-整体优化版.pptx",
+  "starterPptx": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816\\template-starter.pptx",
+  "mapPath": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816\\template-frame-map.json",
+  "starterLayoutDir": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816\\template-starter-layout",
+  "finalLayoutDir": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816\\final-layout",
+  "editDir": "D:\\PythonProject\\LearnOne\\.codex_tmp\\ppt_overall_review_20260816",
+  "issueCount": 0,
+  "issues": []
+}

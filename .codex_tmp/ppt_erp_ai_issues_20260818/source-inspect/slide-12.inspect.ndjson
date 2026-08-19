@@ -1,0 +1,34 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/8f2psfyx","slide":12,"title":"自主日报助手：让 Agent 决定下一步做什么","textShapes":17}
+{"kind":"shape","id":"sh/bm5sryt8","slide":12,"name":"矩形 30","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1gbm9s3a","slide":12,"name":"矩形 1","text":"自主日报助手：让 Agent 决定下一步做什么","textPreview":"自主日报助手：让 Agent 决定下一步做什么","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0f2lgnmp","slide":12,"name":"矩形 2","text":"DAILY REPORT CREATE AGENT","textPreview":"DAILY REPORT CREATE AGENT","textChars":25,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ra943il8","slide":12,"name":"矩形 3","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/q903ad4n","slide":12,"name":"圆角矩形 4","bbox":[72,166,452,383]}
+{"kind":"textbox","id":"sh/dcbm583y","slide":12,"name":"矩形 5","text":"输入不再要求固定格式","textPreview":"输入不再要求固定格式","textChars":10,"textLines":1,"bbox":[108,198,380,35]}
+{"kind":"shape","id":"sh/sb2lcnmd","slide":12,"name":"圆角矩形 6","bbox":[112,267,360,66]}
+{"kind":"textbox","id":"sh/b6d4f2lc","slide":12,"name":"矩形 7","text":"把今天的客户跟进整理成日报","textPreview":"把今天的客户跟进整理成日报","textChars":13,"textLines":1,"bbox":[134,282,316,42]}
+{"kind":"textbox","id":"sh/a543mx4r","slide":12,"name":"矩形 8","text":"Agent 自主判断","textPreview":"Agent 自主判断","textChars":10,"textLines":1,"bbox":[112,376,190,30]}
+{"kind":"shape","id":"sh/wvupgz6t","slide":12,"name":"椭圆 9","bbox":[116,420,9,9]}
+{"kind":"textbox","id":"sh/xw3q94ne","slide":12,"name":"矩形 10","text":"先确认日期","textPreview":"先确认日期","textChars":5,"textLines":1,"bbox":[139,412,327,33]}
+{"kind":"shape","id":"sh/atc7epon","slide":12,"name":"椭圆 11","bbox":[116,457,9,9]}
+{"kind":"textbox","id":"sh/bulo7u58","slide":12,"name":"矩形 12","text":"需要加载哪些 ERP 数据","textPreview":"需要加载哪些 ERP 数据","textChars":13,"textLines":1,"bbox":[139,449,327,33]}
+{"kind":"shape","id":"sh/orapcf6h","slide":12,"name":"椭圆 13","bbox":[116,494,9,9]}
+{"kind":"textbox","id":"sh/9sj65kn2","slide":12,"name":"矩形 14","text":"是否继续追问内容","textPreview":"是否继续追问内容","textChars":8,"textLines":1,"bbox":[139,486,327,33]}
+{"kind":"shape","id":"sh/mps7a5or","slide":12,"name":"椭圆 15","bbox":[116,531,9,9]}
+{"kind":"textbox","id":"sh/nq1o3a5w","slide":12,"name":"矩形 16","text":"何时生成预览","textPreview":"何时生成预览","textChars":6,"textLines":1,"bbox":[139,523,327,33]}
+{"kind":"shape","id":"sh/0nap8f6l","slide":12,"name":"右箭头 17","bbox":[559,321,74,42]}
+{"kind":"shape","id":"sh/1oj61kn6","slide":12,"name":"圆角矩形 18","bbox":[654,166,548,383]}
+{"kind":"textbox","id":"sh/hkbm5wzu","slide":12,"name":"矩形 19","text":"能力提升","textPreview":"能力提升","textChars":4,"textLines":1,"bbox":[692,198,180,33]}
+{"kind":"shape","id":"sh/gj25cry9","slide":12,"name":"椭圆 20","bbox":[698,265,9,9]}
+{"kind":"textbox","id":"sh/fit436ho","slide":12,"name":"矩形 21","text":"适应更自然、更开放的用户表达","textPreview":"适应更自然、更开放的用户表达","textChars":14,"textLines":1,"bbox":[721,257,419,57]}
+{"kind":"shape","id":"sh/uh0na1g3","slide":12,"name":"椭圆 22","bbox":[698,326,9,9]}
+{"kind":"textbox","id":"sh/tgrm1wzy","slide":12,"name":"矩形 23","text":"减少固定流程中的人工分支设计","textPreview":"减少固定流程中的人工分支设计","textChars":14,"textLines":1,"bbox":[721,318,419,57]}
+{"kind":"shape","id":"sh/sfi58ryd","slide":12,"name":"椭圆 24","bbox":[698,387,9,9]}
+{"kind":"textbox","id":"sh/7u94zmhs","slide":12,"name":"矩形 25","text":"可按上下文自主调用日报工具","textPreview":"可按上下文自主调用日报工具","textChars":13,"textLines":1,"bbox":[721,379,419,57]}
+{"kind":"textbox","id":"sh/6t0n6hg7","slide":12,"name":"矩形 26","text":"仍需保留的边界","textPreview":"仍需保留的边界","textChars":7,"textLines":1,"bbox":[692,430,210,30]}
+{"kind":"textbox","id":"sh/dcv6dgz2","slide":12,"name":"矩形 27","text":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textPreview":"不允许编造内容 · 不允许跳过预览 · 不允许自动提交","textChars":27,"textLines":1,"bbox":[697,476,442,42]}
+{"kind":"shape","id":"sh/cbm5kbyh","slide":12,"name":"圆角矩形 28","bbox":[79,600,1116,57]}
+{"kind":"textbox","id":"sh/alwbitsn","slide":12,"name":"矩形 29","text":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textPreview":"适合作为能力探索：灵活性更高，但执行顺序与异常恢复更依赖约束","textChars":30,"textLines":1,"bbox":[110,615,1054,29]}
+{"kind":"notes","id":"nt/8f2psfyx","slide":12,"text":"【只记一句】自主日报让 Agent 决定下一步，但写入边界仍然固定。\n\n【可直接照读】当用户只说“把今天客户跟进整理成日报”时，输入并不完整，Agent需要判断是否先确认日期、加载哪些 ERP 数据、是否继续追问以及何时生成预览。它提升了自然表达的适应性，但不能编造内容、跳过预览或自动提交。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}

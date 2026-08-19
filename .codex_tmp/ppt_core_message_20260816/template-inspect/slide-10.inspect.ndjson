@@ -1,0 +1,36 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"聊天发起审批：用户只描述需求，助手完成流程引导","textShapes":22}
+{"kind":"shape","id":"sh/dwjqtcbu","slide":10,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"text":"聊天发起审批：用户只描述需求，助手完成流程引导","textPreview":"聊天发起审批：用户只描述需求，助手完成流程引导","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"text":"APPROVAL CREATION AGENT","textPreview":"APPROVAL CREATION AGENT","textChars":23,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/zelojyl8","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ydcnatkn","slide":10,"text":"用户体验","textPreview":"用户体验","textChars":4,"textLines":1,"bbox":[78,156,300,35]}
+{"kind":"shape","id":"sh/l036l83y","slide":10,"bbox":[86,216,380,64]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"text":"我明天下午请假 2 小时","textPreview":"我明天下午请假 2 小时","textChars":12,"textLines":1,"bbox":[108,231,336,40]}
+{"kind":"shape","id":"sh/725onyl4","slide":10,"bbox":[174,304,304,58]}
+{"kind":"textbox","id":"sh/m1cnetkj","slide":10,"text":"请选择请假类型。","textPreview":"请选择请假类型。","textChars":8,"textLines":1,"bbox":[196,319,260,34]}
+{"kind":"shape","id":"sh/s7yt4b21","slide":10,"bbox":[86,388,186,56]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"text":"调休","textPreview":"调休","textChars":2,"textLines":1,"bbox":[108,403,142,32]}
+{"kind":"shape","id":"sh/q5gb21kb","slide":10,"bbox":[165,468,350,66]}
+{"kind":"textbox","id":"sh/r6pcv6lw","slide":10,"text":"审批预览已生成，确认后提交。","textPreview":"审批预览已生成，确认后提交。","textChars":14,"textLines":1,"bbox":[187,483,306,42]}
+{"kind":"textbox","id":"sh/0bit8b2d","slide":10,"text":"助手完成的四件事","textPreview":"助手完成的四件事","textChars":8,"textLines":1,"bbox":[618,156,400,35]}
+{"kind":"shape","id":"sh/1cru1g3y","slide":10,"bbox":[620,220,42,42]}
+{"kind":"textbox","id":"sh/e9gb61k7","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[620,226,42,28]}
+{"kind":"textbox","id":"sh/fapcz6ls","slide":10,"text":"识别审批模板","textPreview":"识别审批模板","textChars":6,"textLines":1,"bbox":[678,219,452,30]}
+{"kind":"textbox","id":"sh/ozitcv29","slide":10,"text":"结合用户身份和当前公司配置","textPreview":"结合用户身份和当前公司配置","textChars":13,"textLines":1,"bbox":[678,251,452,48]}
+{"kind":"shape","id":"sh/p0ru503u","slide":10,"bbox":[620,310,42,42]}
+{"kind":"textbox","id":"sh/xwnupgvy","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[620,316,42,28]}
+{"kind":"textbox","id":"sh/wvetgbud","slide":10,"text":"动态补充信息","textPreview":"动态补充信息","textChars":6,"textLines":1,"bbox":[678,309,452,30]}
+{"kind":"textbox","id":"sh/bu5cnqd8","slide":10,"text":"按实际表单追问日期、时长、原因等字段","textPreview":"按实际表单追问日期、时长、原因等字段","textChars":18,"textLines":1,"bbox":[678,341,452,48]}
+{"kind":"shape","id":"sh/atwbelcn","slide":10,"bbox":[620,400,42,42]}
+{"kind":"textbox","id":"sh/lk7ut0va","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[620,406,42,28]}
+{"kind":"textbox","id":"sh/kjytkvup","slide":10,"text":"应用 ERP 流程","textPreview":"应用 ERP 流程","textChars":9,"textLines":1,"bbox":[678,399,452,30]}
+{"kind":"textbox","id":"sh/jypcrqd4","slide":10,"text":"校验字段，并获取真实审批节点与办理人","textPreview":"校验字段，并获取真实审批节点与办理人","textChars":18,"textLines":1,"bbox":[678,431,452,48]}
+{"kind":"shape","id":"sh/yxgbilcj","slide":10,"bbox":[620,490,42,42]}
+{"kind":"textbox","id":"sh/1o3ahwvq","slide":10,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[620,496,42,28]}
+{"kind":"textbox","id":"sh/0nut8rul","slide":10,"text":"预览后提交","textPreview":"预览后提交","textChars":5,"textLines":1,"bbox":[678,489,452,30]}
+{"kind":"textbox","id":"sh/q9srixs3","slide":10,"text":"用户明确确认，才执行最终写入","textPreview":"用户明确确认，才执行最终写入","textChars":14,"textLines":1,"bbox":[678,521,452,48]}
+{"kind":"shape","id":"sh/ru18r2to","slide":10,"bbox":[80,601,1115,56]}
+{"kind":"textbox","id":"sh/cva9k7a9","slide":10,"text":"核心价值：用户不必先理解 ERP 表单，系统仍然遵守原有审批规则","textPreview":"核心价值：用户不必先理解 ERP 表单，系统仍然遵守原有审批规则","textChars":32,"textLines":1,"bbox":[111,616,1053,29]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":10,"text":"【只记一句】聊天发起审批的关键是动态适配，而不是把请假话术写死。\n\n【可直接照读】用户说“我明天下午请假两小时”，助手先识别审批模板，再根据公司配置追问缺失字段，校验后生成预览，只有用户明确确认才写入 ERP。用户看到的是一句话入口，系统内部仍然遵守原来的字段、审批人和权限规则。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}

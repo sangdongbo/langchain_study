@@ -1,0 +1,40 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6l0j294r","slide":32,"title":"RAG × ERP：三层协作，让自然语言进入业务流程","textShapes":20}
+{"kind":"shape","id":"sh/qpk7a1cb","slide":32,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/kr61sfy1","slide":32,"text":"RAG × ERP：三层协作，让自然语言进入业务流程","textPreview":"RAG × ERP：三层协作，让自然语言进入业务流程","textChars":26,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/lszilkfm","slide":32,"text":"ENTERPRISE RAG · ERP COLLABORATION 1/4","textPreview":"ENTERPRISE RAG · ERP COLLABORATION 1/4","textChars":38,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/6t8jupg7","slide":32,"text":"32","textPreview":"32","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/7uh0nuxs","slide":32,"bbox":[426,316,38,28]}
+{"kind":"shape","id":"sh/8vq1wzyd","slide":32,"bbox":[72,165,344,330]}
+{"kind":"textbox","id":"sh/twzipkfy","slide":32,"text":"RAG 知识层","textPreview":"RAG 知识层","textChars":7,"textLines":1,"bbox":[94,194,300,35]}
+{"kind":"textbox","id":"sh/mx4zilg3","slide":32,"text":"回答：规则是什么？","textPreview":"回答：规则是什么？","textChars":9,"textLines":1,"bbox":[94,240,300,28]}
+{"kind":"shape","id":"sh/nyd0bqxo","slide":32,"bbox":[104,310,9,9]}
+{"kind":"textbox","id":"sh/ry94z29w","slide":32,"text":"制度、SOP、FAQ","textPreview":"制度、SOP、FAQ","textChars":10,"textLines":1,"bbox":[127,302,257,55]}
+{"kind":"shape","id":"sh/qx0nqx8b","slide":32,"bbox":[104,369,9,9]}
+{"kind":"textbox","id":"sh/d0bm1c7m","slide":32,"text":"字段与审批规则","textPreview":"字段与审批规则","textChars":7,"textLines":1,"bbox":[127,361,257,55]}
+{"kind":"shape","id":"sh/szi5s7qh","slide":32,"bbox":[104,428,9,9]}
+{"kind":"textbox","id":"sh/3a94vi9k","slide":32,"text":"返回来源、版本与原文","textPreview":"返回来源、版本与原文","textChars":10,"textLines":1,"bbox":[127,420,257,55]}
+{"kind":"shape","id":"sh/i903mx8z","slide":32,"bbox":[830,316,38,28]}
+{"kind":"shape","id":"sh/5crmxsrq","slide":32,"bbox":[476,165,344,330]}
+{"kind":"textbox","id":"sh/4bilonq5","slide":32,"text":"ERP Tool 实时层","textPreview":"ERP Tool 实时层","textChars":12,"textLines":1,"bbox":[498,194,300,35]}
+{"kind":"textbox","id":"sh/v6p4ri9o","slide":32,"text":"回答：现在是什么？","textPreview":"回答：现在是什么？","textChars":9,"textLines":1,"bbox":[498,240,300,28]}
+{"kind":"shape","id":"sh/u5g3yd83","slide":32,"bbox":[508,310,9,9]}
+{"kind":"textbox","id":"sh/y1gnadsv","slide":32,"text":"当前用户与权限","textPreview":"当前用户与权限","textChars":7,"textLines":1,"bbox":[531,302,257,55]}
+{"kind":"shape","id":"sh/j2p43itg","slide":32,"bbox":[508,369,9,9]}
+{"kind":"textbox","id":"sh/k3y5cna1","slide":32,"text":"审批模板与实时状态","textPreview":"审批模板与实时状态","textChars":9,"textLines":1,"bbox":[531,361,257,55]}
+{"kind":"shape","id":"sh/l4765sbm","slide":32,"bbox":[508,428,9,9]}
+{"kind":"textbox","id":"sh/65gneds7","slide":32,"text":"订单、库存、客户数据","textPreview":"订单、库存、客户数据","textChars":10,"textLines":1,"bbox":[531,420,257,55]}
+{"kind":"shape","id":"sh/76po7its","slide":32,"bbox":[880,165,344,330]}
+{"kind":"textbox","id":"sh/87y5gnax","slide":32,"text":"LangGraph 执行层","textPreview":"LangGraph 执行层","textChars":13,"textLines":1,"bbox":[902,194,300,35]}
+{"kind":"textbox","id":"sh/t8769sbi","slide":32,"text":"决定：下一步做什么？","textPreview":"决定：下一步做什么？","textChars":10,"textLines":1,"bbox":[902,240,300,28]}
+{"kind":"shape","id":"sh/u90nixs3","slide":32,"bbox":[912,310,9,9]}
+{"kind":"textbox","id":"sh/va9ob2to","slide":32,"text":"判断调用 RAG 还是 Tool","textPreview":"判断调用 RAG 还是 Tool","textChars":16,"textLines":1,"bbox":[935,302,257,55]}
+{"kind":"shape","id":"sh/54bq1wvq","slide":32,"bbox":[912,369,9,9]}
+{"kind":"textbox","id":"sh/432p8ru5","slide":32,"text":"追问、校验、预览","textPreview":"追问、校验、预览","textChars":8,"textLines":1,"bbox":[935,361,257,55]}
+{"kind":"shape","id":"sh/32t8zmd0","slide":32,"bbox":[912,428,9,9]}
+{"kind":"textbox","id":"sh/i1k76hcf","slide":32,"text":"确认、提交与审计","textPreview":"确认、提交与审计","textChars":8,"textLines":1,"bbox":[935,420,257,55]}
+{"kind":"shape","id":"sh/dsvq5wv2","slide":32,"bbox":[72,542,1136,116]}
+{"kind":"textbox","id":"sh/sr29cbuh","slide":32,"text":"三个边界，避免“所有能力都塞进一个 Prompt”","textPreview":"三个边界，避免“所有能力都塞进一个 Prompt”","textChars":25,"textLines":1,"bbox":[103,561,1074,30]}
+{"kind":"textbox","id":"sh/rqt836dw","slide":32,"text":"RAG 管知识 · ERP Tool 管实时事实 · LangGraph 管流程、状态和写入","textPreview":"RAG 管知识 · ERP Tool 管实时事实 · LangGraph 管流程、状态和写入","textChars":46,"textLines":1,"bbox":[103,605,1074,29]}
+{"kind":"notes","id":"nt/6l0j294r","slide":32,"text":"【只记一句】RAG 管知识，ERP Tool 管实时数据，LangGraph 把两者编排成安全的业务动作。\n\n【可直接照读】RAG 负责制度、SOP、字段说明和流程规则；ERP Tool 负责当前用户、审批模板、订单、库存和实时状态；LangGraph 负责识别意图、补充字段、调用正确能力，并控制预览、人工确认、提交和审计。用户看到的是自然语言入口，ERP 仍然保留原有权限、规则和写入边界。\n\n【时间建议】约 65 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs/docs/rag_demo_sources/approval_rag_guide.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}

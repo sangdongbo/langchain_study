@@ -1,0 +1,35 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"最终选型：ERP 主流程采用 LangGraph","textShapes":24}
+{"kind":"shape","id":"sh/cva9k7a9","slide":10,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"text":"最终选型：ERP 主流程采用 LangGraph","textPreview":"最终选型：ERP 主流程采用 LangGraph","textChars":24,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/zelojyl8","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ydcnatkn","slide":10,"text":"为什么选择 LangGraph 作为主框架？","textPreview":"为什么选择 LangGraph 作为主框架？","textChars":22,"textLines":1,"bbox":[82,159,610,35]}
+{"kind":"shape","id":"sh/l036l83y","slide":10,"bbox":[90,222,42,42]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,228,42,28]}
+{"kind":"textbox","id":"sh/725onyl4","slide":10,"text":"流程清晰","textPreview":"流程清晰","textChars":4,"textLines":1,"bbox":[150,226,145,27]}
+{"kind":"textbox","id":"sh/m1cnetkj","slide":10,"text":"审批、日报都需要明确的业务阶段","textPreview":"审批、日报都需要明确的业务阶段","textChars":15,"textLines":1,"bbox":[300,226,352,34]}
+{"kind":"shape","id":"sh/s7yt4b21","slide":10,"bbox":[90,297,42,42]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[90,303,42,28]}
+{"kind":"textbox","id":"sh/q5gb21kb","slide":10,"text":"状态可控","textPreview":"状态可控","textChars":4,"textLines":1,"bbox":[150,301,145,27]}
+{"kind":"textbox","id":"sh/r6pcv6lw","slide":10,"text":"支持多轮对话、暂停、恢复和人工确认","textPreview":"支持多轮对话、暂停、恢复和人工确认","textChars":17,"textLines":1,"bbox":[300,301,352,34]}
+{"kind":"shape","id":"sh/0bit8b2d","slide":10,"bbox":[90,372,42,42]}
+{"kind":"textbox","id":"sh/1cru1g3y","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[90,378,42,28]}
+{"kind":"textbox","id":"sh/e9gb61k7","slide":10,"text":"便于排查","textPreview":"便于排查","textChars":4,"textLines":1,"bbox":[150,376,145,27]}
+{"kind":"textbox","id":"sh/fapcz6ls","slide":10,"text":"可以观察节点路径、状态变化和失败位置","textPreview":"可以观察节点路径、状态变化和失败位置","textChars":18,"textLines":1,"bbox":[300,376,352,34]}
+{"kind":"shape","id":"sh/ozitcv29","slide":10,"bbox":[90,447,42,42]}
+{"kind":"textbox","id":"sh/p0ru503u","slide":10,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[90,453,42,28]}
+{"kind":"textbox","id":"sh/xwnupgvy","slide":10,"text":"适配 ERP","textPreview":"适配 ERP","textChars":6,"textLines":1,"bbox":[150,451,145,27]}
+{"kind":"textbox","id":"sh/wvetgbud","slide":10,"text":"更容易承载动态字段、校验和提交闸门","textPreview":"更容易承载动态字段、校验和提交闸门","textChars":17,"textLines":1,"bbox":[300,451,352,34]}
+{"kind":"shape","id":"sh/bu5cnqd8","slide":10,"bbox":[753,195,433,349]}
+{"kind":"textbox","id":"sh/atwbelcn","slide":10,"text":"最终分工","textPreview":"最终分工","textChars":4,"textLines":1,"bbox":[785,226,150,32]}
+{"kind":"textbox","id":"sh/lk7ut0va","slide":10,"text":"LangChain","textPreview":"LangChain","textChars":9,"textLines":1,"bbox":[786,290,145,27]}
+{"kind":"textbox","id":"sh/kjytkvup","slide":10,"text":"基础组件：模型、Prompt、Tool","textPreview":"基础组件：模型、Prompt、Tool","textChars":19,"textLines":1,"bbox":[942,290,215,28]}
+{"kind":"textbox","id":"sh/jypcrqd4","slide":10,"text":"LangGraph","textPreview":"LangGraph","textChars":9,"textLines":1,"bbox":[786,357,145,27]}
+{"kind":"textbox","id":"sh/yxgbilcj","slide":10,"text":"主框架：ERP 流程、状态、人工确认","textPreview":"主框架：ERP 流程、状态、人工确认","textChars":18,"textLines":1,"bbox":[942,357,215,44]}
+{"kind":"textbox","id":"sh/1o3ahwvq","slide":10,"text":"Deep Agents","textPreview":"Deep Agents","textChars":11,"textLines":1,"bbox":[786,432,145,27]}
+{"kind":"textbox","id":"sh/0nut8rul","slide":10,"text":"探索方向：自主规划、复杂任务","textPreview":"探索方向：自主规划、复杂任务","textChars":14,"textLines":1,"bbox":[942,432,215,35]}
+{"kind":"shape","id":"sh/q9srixs3","slide":10,"bbox":[81,603,1119,54]}
+{"kind":"textbox","id":"sh/ru18r2to","slide":10,"text":"结论：不是放弃 Agent，而是先用 LangGraph 把 ERP 业务底座做稳","textPreview":"结论：不是放弃 Agent，而是先用 LangGraph 把 ERP 业务底座做稳","textChars":41,"textLines":1,"bbox":[112,617,1055,29]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":10,"text":"【只记一句】最终分工是 LangChain 做基础，LangGraph做主流程，Deep Agents做探索。\n\n【可直接照读】选择 LangGraph 是因为流程清晰、状态可持久化、路径便于排查，并且能把 ERP 校验和提交做成明确闸门。\n\n【时间建议】约 40 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- C:/Users/EDY/Pictures/1.jpg\n- C:/Users/EDY/Pictures/13.jpg\n[/Sources]"}

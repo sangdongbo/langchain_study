@@ -1,0 +1,22 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/gnmp4jqx","slide":7,"title":"三层关系：基础组件、运行时与 Agent 套件","textShapes":12}
+{"kind":"shape","id":"sh/eh4jil4r","slide":7,"name":"矩形 18","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/cb2tkvap","slide":7,"name":"矩形 1","text":"三层关系：基础组件、运行时与 Agent 套件","textPreview":"三层关系：基础组件、运行时与 Agent 套件","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/dcbud0ra","slide":7,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ydkbm5sv","slide":7,"name":"矩形 3","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/zedcfa9g","slide":7,"name":"矩形 4","text":"不是三套互相替代的框架，而是不同层级的能力组合","textPreview":"不是三套互相替代的框架，而是不同层级的能力组合","textChars":23,"textLines":1,"bbox":[82,157,900,34]}
+{"kind":"shape","id":"sh/kzmdova1","slide":7,"name":"圆角矩形 5","bbox":[216.67,195,841.13,132.33]}
+{"kind":"textbox","id":"sh/l0vuh0rm","slide":7,"name":"矩形 6","text":"Deep Agents  ·  应用层 / Agent Harness","textPreview":"Deep Agents  ·  应用层 / Agent Harness","textChars":35,"textLines":1,"bbox":[255,246,770,34]}
+{"kind":"textbox","id":"sh/eh0ba1sr","slide":7,"name":"矩形 7","text":"LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管","textPreview":"LangGraph 之上做高度业务封装，内置一堆中间件。提供任务规划、子智能体、文件与长任务等高，流转逻辑是黑盒 ReAct 循环级能力，state被框架接管","textChars":79,"textLines":1,"bbox":[285,283,710,24]}
+{"kind":"shape","id":"sh/fi9c369c","slide":7,"name":"下箭头 8","bbox":[616,329.8,48,38]}
+{"kind":"textbox","id":"sh/baxkjqlk","slide":7,"name":"矩形 9","text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,363,100,24]}
+{"kind":"shape","id":"sh/a9ojq5kz","slide":7,"name":"圆角矩形 10","bbox":[220,389,840,88]}
+{"kind":"textbox","id":"sh/xcz2l03q","slide":7,"name":"矩形 11","text":"LangGraph  ·  运行时 / Agent Runtime","textPreview":"LangGraph  ·  运行时 / Agent Runtime","textChars":33,"textLines":1,"bbox":[255,416,770,34]}
+{"kind":"textbox","id":"sh/cbq1sv25","slide":7,"name":"矩形 12","text":"状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、事件流」","textPreview":"状态图编排框架，额外封装了「state、循环、分支、状态持久化、中断、回溯、多 Agent、事件流」","textChars":50,"textLines":1,"bbox":[285,453,710,24]}
+{"kind":"shape","id":"sh/n6x0fqlo","slide":7,"name":"下箭头 13","bbox":[616,486,48,38]}
+{"kind":"textbox","id":"sh/25ojml43","slide":7,"name":"矩形 14","text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,522,100,24]}
+{"kind":"shape","id":"sh/p8fih03e","slide":7,"name":"圆角矩形 15","bbox":[220,559,840,88]}
+{"kind":"textbox","id":"sh/o761ov2t","slide":7,"name":"矩形 16","text":"LangChain  ·  基础层 / Agent Framework","textPreview":"LangChain  ·  基础层 / Agent Framework","textChars":35,"textLines":1,"bbox":[255,586,770,34]}
+{"kind":"textbox","id":"sh/f2d0b6lc","slide":7,"name":"矩形 17","text":"组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用","textPreview":"组件库，（Prompt、LLM、Chain、Tool、Document、Retriever），只负责单步 / 串行调用","textChars":59,"textLines":1,"bbox":[285,623,710,24]}
+{"kind":"notes","id":"nt/gnmp4jqx","slide":7,"text":"【只记一句】三者是分层组合，最终主流程选 LangGraph。\n\n【可直接照读】LangChain提供模型和 Tool 等基础构件；LangGraph负责状态、分支和人工中断；Deep Agents提供更高层的自主规划。ERP 涉及真实写入，所以先保证流程可控。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/pyproject.toml\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- C:/Users/EDY/Pictures/16.jpg\n[/Sources]"}

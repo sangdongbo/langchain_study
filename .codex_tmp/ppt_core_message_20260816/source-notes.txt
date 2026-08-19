@@ -1,0 +1,6 @@
+No new external claims or assets are introduced in this edit.
+The revised wording summarizes the project architecture already cited in the source deck speaker notes:
+- D:/PythonProject/LearnOne/ai_approval_assistant/README.md
+- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md
+- User-provided visual references already cited by the source deck.
+

@@ -1,0 +1,53 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/nax4b2dk","slide":33,"title":"怎么搜索出想要的内容？一条企业级检索链路","textShapes":28}
+{"kind":"shape","id":"sh/s3ex0nm9","slide":33,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/lk3m50nq","slide":33,"text":"怎么搜索出想要的内容？一条企业级检索链路","textPreview":"怎么搜索出想要的内容？一条企业级检索链路","textChars":20,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0jalwfm5","slide":33,"text":"ENTERPRISE RAG · SEARCH PATH 2/4","textPreview":"ENTERPRISE RAG · SEARCH PATH 2/4","textChars":32,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/nml47a5w","slide":33,"text":"33","textPreview":"33","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/mlc3y54b","slide":33,"bbox":[224,263,21,22]}
+{"kind":"shape","id":"sh/9o3m9knm","slide":33,"bbox":[55,179,170,160]}
+{"kind":"shape","id":"sh/8nul0fmh","slide":33,"bbox":[118,197,42,42]}
+{"kind":"textbox","id":"sh/vql4bu5s","slide":33,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[118,203,42,28]}
+{"kind":"textbox","id":"sh/apc32p47","slide":33,"text":"用户问题","textPreview":"用户问题","textChars":4,"textLines":1,"bbox":[67,250,146,28]}
+{"kind":"textbox","id":"sh/grad8zah","slide":33,"text":"自然语言\n带上下文","textPreview":"自然语言 | 带上下文","textChars":9,"textLines":2,"bbox":[67,283,146,43]}
+{"kind":"shape","id":"sh/hsjuhkb2","slide":33,"bbox":[419,263,21,22]}
+{"kind":"shape","id":"sh/upsv6psb","slide":33,"bbox":[250,179,170,160]}
+{"kind":"shape","id":"sh/vq1cfutw","slide":33,"bbox":[313,197,42,42]}
+{"kind":"textbox","id":"sh/4vadczad","slide":33,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[313,203,42,28]}
+{"kind":"textbox","id":"sh/5w3ul4by","slide":33,"text":"问题拆解","textPreview":"问题拆解","textChars":4,"textLines":1,"bbox":[262,250,146,28]}
+{"kind":"textbox","id":"sh/itsvapsn","slide":33,"text":"业务类型 · 公司\n部门 · 时间 · 关键词","textPreview":"业务类型 · 公司 | 部门 · 时间 · 关键词","textChars":23,"textLines":2,"bbox":[262,283,146,43]}
+{"kind":"shape","id":"sh/3u1cjut8","slide":33,"bbox":[614,263,21,22]}
+{"kind":"shape","id":"sh/czudgjap","slide":33,"bbox":[445,179,170,160]}
+{"kind":"shape","id":"sh/dk3ep4ba","slide":33,"bbox":[508,197,42,42]}
+{"kind":"textbox","id":"sh/lgzu94je","slide":33,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[508,203,42,28]}
+{"kind":"textbox","id":"sh/0fqd0z2t","slide":33,"text":"权限过滤","textPreview":"权限过滤","textChars":4,"textLines":1,"bbox":[457,250,146,28]}
+{"kind":"textbox","id":"sh/zehc7u18","slide":33,"text":"tenant / company\ndepartment / ACL","textPreview":"tenant / company | department / ACL","textChars":33,"textLines":2,"bbox":[457,283,146,43]}
+{"kind":"shape","id":"sh/yd8vy9kn","slide":33,"bbox":[809,263,21,22]}
+{"kind":"shape","id":"sh/9kjudoja","slide":33,"bbox":[640,179,170,160]}
+{"kind":"shape","id":"sh/8jad4j2p","slide":33,"bbox":[703,197,42,42]}
+{"kind":"textbox","id":"sh/nihcbe1k","slide":33,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[703,203,42,28]}
+{"kind":"textbox","id":"sh/mh8v29kz","slide":33,"text":"混合召回","textPreview":"混合召回","textChars":4,"textLines":1,"bbox":[652,250,146,28]}
+{"kind":"textbox","id":"sh/pofu1k36","slide":33,"text":"Dense 语义\n+ BM25 精确词","textPreview":"Dense 语义 | + BM25 精确词","textChars":19,"textLines":2,"bbox":[652,283,146,43]}
+{"kind":"shape","id":"sh/4n6tsf2l","slide":33,"bbox":[1004,263,21,22]}
+{"kind":"shape","id":"sh/uhkjm1w7","slide":33,"bbox":[835,179,170,160]}
+{"kind":"shape","id":"sh/vit0f6ds","slide":33,"bbox":[898,197,42,42]}
+{"kind":"textbox","id":"sh/gj21ored","slide":33,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[898,203,42,28]}
+{"kind":"textbox","id":"sh/h4bihwvy","slide":33,"text":"融合与精排","textPreview":"融合与精排","textChars":5,"textLines":1,"bbox":[847,250,146,28]}
+{"kind":"textbox","id":"sh/i5kjq1w3","slide":33,"text":"RRF / Weighted\n+ Reranker","textPreview":"RRF / Weighted | + Reranker","textChars":25,"textLines":2,"bbox":[847,283,146,43]}
+{"kind":"shape","id":"sh/36d0j6do","slide":33,"bbox":[1030,179,170,160]}
+{"kind":"shape","id":"sh/47m1sbe9","slide":33,"bbox":[1093,197,42,42]}
+{"kind":"textbox","id":"sh/58v2lgvu","slide":33,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1093,203,42,28]}
+{"kind":"textbox","id":"sh/y90jehwz","slide":33,"text":"证据回答","textPreview":"证据回答","textChars":4,"textLines":1,"bbox":[1042,250,146,28]}
+{"kind":"textbox","id":"sh/ja9072xk","slide":33,"text":"来源 · 章节\n版本 · 原文","textPreview":"来源 · 章节 | 版本 · 原文","textChars":15,"textLines":2,"bbox":[1042,283,146,43]}
+{"kind":"textbox","id":"sh/z61gbyp8","slide":33,"text":"为什么要两路检索？","textPreview":"为什么要两路检索？","textChars":9,"textLines":1,"bbox":[75,389,300,31]}
+{"kind":"shape","id":"sh/y5sz2ton","slide":33,"bbox":[72,435,352,148]}
+{"kind":"textbox","id":"sh/l8jyd87e","slide":33,"text":"Dense 向量","textPreview":"Dense 向量","textChars":8,"textLines":1,"bbox":[93,456,310,28]}
+{"kind":"textbox","id":"sh/07ah436t","slide":33,"text":"擅长同义表达和语义问题，例如“出差回来怎么报销”","textPreview":"擅长同义表达和语义问题，例如“出差回来怎么报销”","textChars":24,"textLines":1,"bbox":[93,496,310,62]}
+{"kind":"shape","id":"sh/na1gfipk","slide":33,"bbox":[450,435,352,148]}
+{"kind":"textbox","id":"sh/m9sz6doz","slide":33,"text":"BM25 关键词","textPreview":"BM25 关键词","textChars":8,"textLines":1,"bbox":[471,456,310,28]}
+{"kind":"textbox","id":"sh/9c3yh87q","slide":33,"text":"擅长制度号、订单号、产品编码和字段名等精确匹配","textPreview":"擅长制度号、订单号、产品编码和字段名等精确匹配","textChars":23,"textLines":1,"bbox":[471,496,310,62]}
+{"kind":"shape","id":"sh/8buh8n65","slide":33,"bbox":[828,435,352,148]}
+{"kind":"textbox","id":"sh/vylgjipg","slide":33,"text":"找不到怎么办","textPreview":"找不到怎么办","textChars":6,"textLines":1,"bbox":[849,456,310,28]}
+{"kind":"textbox","id":"sh/axczadov","slide":33,"text":"返回“当前权限范围内没有找到”，向用户追问范围，不编造答案","textPreview":"返回“当前权限范围内没有找到”，向用户追问范围，不编造答案","textChars":29,"textLines":1,"bbox":[849,496,310,62]}
+{"kind":"notes","id":"nt/nax4b2dk","slide":33,"text":"【只记一句】想搜索得准，关键不是只换一个模型，而是把问题拆解、权限过滤、混合检索和重排序连起来。\n\n【可直接照读】用户问题先被拆成业务类型、公司、部门、时间范围和关键词；检索服务再强制加入 tenant、company、department 和 ACL 条件。Dense 负责理解“怎么申请”这类语义，BM25 负责制度号、审批编号、产品编码等精确词，RRF 或 Weighted 融合结果，Reranker 再从候选片段里挑出最相关的证据。检索不到时要明确说明资料不足，而不是让模型编造答案。\n\n【时间建议】约 75 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs2/RAG优化.md\n- D:/PythonProject/LearnOne/docs2/milvus_hnsw_ivf_annoy_cold_start_update_multitenancy.md\n[/Sources]"}

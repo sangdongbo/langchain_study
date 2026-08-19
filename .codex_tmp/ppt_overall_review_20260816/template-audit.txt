@@ -1,0 +1,27 @@
+Source structure:
+- 36 slides, one PowerPoint master, one Title Slide layout.
+- No inherited placeholders were reported by Artifact Tool for the master or layout.
+- Visual system: burgundy header, cream canvas, rounded cards, muted orange/green/red accents, bottom-right page marker.
+
+Reusable slide patterns:
+- Opening: slide 1.
+- Four-question agenda: slide 2.
+- Two-column scenario: slides 3, 4, 11, 17.
+- Evidence/data: slides 5 and 6.
+- Process and comparison: slides 7-10, 15-16, 18-22.
+- LangGraph Studio appendix: slides 23-28.
+- Enterprise RAG appendix: slides 29-35.
+- Closing: slide 36.
+
+Narrative review:
+- The original core talk is approximately 17.4 minutes before the live demonstration.
+- The original seven-slide RAG ending adds approximately nine minutes and repeats role boundaries, retrieval paths, use cases, and workflow logic.
+- Source slide 4 exposes presenter-production language in visible copy and appears too early in the story.
+- Source slide 19 exposes the production note “建议截图” in audience-facing copy.
+
+Insertion/reorder contract:
+- Move source slide 4 after source slide 17 and rewrite it as a business-loop validation slide.
+- Preserve source slides 1-3 and 5-31 in their existing relative order.
+- Omit source slides 32-34 because their core ideas are already covered by source slides 29-31 and 35.
+- Preserve source slide 35 as the penultimate ERP/RAG workflow slide, then source slide 36 as the closing slide.
+- Renumber page markers after the reorder and omissions.

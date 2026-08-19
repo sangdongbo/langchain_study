@@ -15,9 +15,15 @@ def _path_from_env(value: str | None, fallback: str) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
+def _bool_from_env(value: str | None, default: bool = False) -> bool:
+    if value is None:
+        return default
+    return str(value).strip().lower() in {"1", "true", "yes", "on", "是"}
+
+
 class Settings(BaseModel):
     host: str = "127.0.0.1"
-    port: int = 8020
+    port: int = 8021
     milvus_uri: str = "http://127.0.0.1:19530"
     milvus_token: str = ""
     milvus_collection: str = "erp_knowledge_chunks"
@@ -26,12 +32,21 @@ class Settings(BaseModel):
     rag_processed_dir: Path = PROJECT_ROOT / "data" / "knowledge" / "processed"
     rag_chunk_size: int = Field(default=800, ge=100, le=4000)
     rag_chunk_overlap: int = Field(default=120, ge=0, le=1000)
+    rag_min_score: float = Field(default=0.35, ge=-1, le=1)
+    rag_company_id: str = "lanjing"
+    rag_department: str = "公共制度"
+    rag_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:employee_handbook"])
     erp_mode: str = "remote"
+    erp_read_mode: str = "remote"
+    erp_write_mode: str = "disabled"
+    erp_skip_userinfo_validation: bool = False
     erp_base_url: str = "http://127.0.0.1:8002"
     erp_approval_list_path: str = "/api/approval/list"
     erp_form_fields_path: str = "/api/field/formFields"
     erp_get_nodes_path: str = "/api/approval/getNodes"
     erp_add_approval_path: str = "/api/approval/add"
+    erp_holiday_rule_path: str = "/api/attendance/getHolidayRuleByUser"
+    erp_calculate_holiday_duration_path: str = "/api/attendance/calculateHolidayDuration"
     erp_userinfo_path: str = "/api/User/userinfo"
     erp_approval_status_path: str = "/api/approval/myList"
     erp_uid: str = ""
@@ -83,7 +98,7 @@ class Settings(BaseModel):
         )
         return cls(
             host=values.get("AI_ERP_RAG_HOST") or "127.0.0.1",
-            port=int(values.get("AI_ERP_RAG_PORT") or 8020),
+            port=int(values.get("AI_ERP_RAG_PORT") or 8021),
             milvus_uri=values.get("MILVUS_URI") or "http://127.0.0.1:19530",
             milvus_token=values.get("MILVUS_TOKEN") or "",
             milvus_collection=values.get("MILVUS_COLLECTION") or "erp_knowledge_chunks",
@@ -92,12 +107,27 @@ class Settings(BaseModel):
             rag_processed_dir=_path_from_env(values.get("RAG_PROCESSED_DIR"), "data/knowledge/processed"),
             rag_chunk_size=int(values.get("RAG_CHUNK_SIZE") or 800),
             rag_chunk_overlap=int(values.get("RAG_CHUNK_OVERLAP") or 120),
+            rag_min_score=float(values.get("RAG_MIN_SCORE") or 0.35),
+            rag_company_id=values.get("RAG_COMPANY_ID") or values.get("ERP_DEMO_COMPANY_ID") or "lanjing",
+            rag_department=values.get("RAG_DEPARTMENT") or "公共制度",
+            rag_permission_tags=[
+                item.strip()
+                for item in (values.get("RAG_PERMISSION_TAGS") or "knowledge:employee_handbook").split(",")
+                if item.strip()
+            ],
             erp_mode=values.get("ERP_MODE") or "remote",
+            erp_read_mode=values.get("ERP_READ_MODE") or values.get("ERP_MODE") or "remote",
+            erp_write_mode=values.get("ERP_WRITE_MODE") or (
+                "mock" if (values.get("ERP_READ_MODE") or values.get("ERP_MODE") or "remote").lower() == "mock" else "disabled"
+            ),
+            erp_skip_userinfo_validation=_bool_from_env(values.get("ERP_SKIP_USERINFO_VALIDATION")),
             erp_base_url=values.get("ERP_BASE_URL") or "http://127.0.0.1:8002",
             erp_approval_list_path=values.get("ERP_APPROVAL_LIST_PATH") or "/api/approval/list",
             erp_form_fields_path=values.get("ERP_FORM_FIELDS_PATH") or "/api/field/formFields",
             erp_get_nodes_path=values.get("ERP_GET_NODES_PATH") or "/api/approval/getNodes",
             erp_add_approval_path=values.get("ERP_ADD_APPROVAL_PATH") or "/api/approval/add",
+            erp_holiday_rule_path=values.get("ERP_HOLIDAY_RULE_PATH") or "/api/attendance/getHolidayRuleByUser",
+            erp_calculate_holiday_duration_path=values.get("ERP_CALCULATE_HOLIDAY_DURATION_PATH") or "/api/attendance/calculateHolidayDuration",
             erp_userinfo_path=values.get("ERP_USERINFO_PATH") or "/api/User/userinfo",
             erp_approval_status_path=values.get("ERP_APPROVAL_STATUS_PATH") or "/api/approval/myList",
             erp_uid=values.get("ERP_UID") or "",

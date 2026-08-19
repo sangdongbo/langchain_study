@@ -1,0 +1,29 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"本次分享围绕四个核心问题展开","textShapes":20}
+{"kind":"shape","id":"sh/fadgzu58","slide":2,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/9072xkry","slide":2,"text":"本次分享围绕四个核心问题展开","textPreview":"本次分享围绕四个核心问题展开","textChars":14,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":2,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/b29kza94","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/a10jqpsj","slide":2,"bbox":[76,174,544,194]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[106,199,70,39]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":2,"text":"应用场景","textPreview":"应用场景","textChars":4,"textLines":1,"bbox":[189,200,300,36]}
+{"kind":"textbox","id":"sh/r65knqtk","slide":2,"text":"AI 与 ERP 如何结合？","textPreview":"AI 与 ERP 如何结合？","textChars":14,"textLines":1,"bbox":[107,259,480,30]}
+{"kind":"textbox","id":"sh/q5wjelsz","slide":2,"text":"聊天发起审批、聊天填写日报","textPreview":"聊天发起审批、聊天填写日报","textChars":13,"textLines":1,"bbox":[107,301,480,48]}
+{"kind":"shape","id":"sh/ove9o7yd","slide":2,"bbox":[660,174,544,194]}
+{"kind":"textbox","id":"sh/9wnqhczy","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[690,199,70,39]}
+{"kind":"textbox","id":"sh/mtwrmxg7","slide":2,"text":"实施路径","textPreview":"实施路径","textChars":4,"textLines":1,"bbox":[773,200,300,36]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"text":"如何把想法做成可用能力？","textPreview":"如何把想法做成可用能力？","textChars":12,"textLines":1,"bbox":[691,259,480,30]}
+{"kind":"textbox","id":"sh/wjy9sry9","slide":2,"text":"开发聊天助手，接入 ERP，并用 LangGraph 编排","textPreview":"开发聊天助手，接入 ERP，并用 LangGraph 编排","textChars":29,"textLines":1,"bbox":[691,301,480,48]}
+{"kind":"shape","id":"sh/xk7qlczu","slide":2,"bbox":[76,407,544,194]}
+{"kind":"textbox","id":"sh/ahwrqhgj","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[106,432,70,39]}
+{"kind":"textbox","id":"sh/bip8jmho","slide":2,"text":"预期效果","textPreview":"预期效果","textChars":4,"textLines":1,"bbox":[189,433,300,36]}
+{"kind":"textbox","id":"sh/cnupgny5","slide":2,"text":"最终希望实现什么？","textPreview":"最终希望实现什么？","textChars":9,"textLines":1,"bbox":[107,492,480,30]}
+{"kind":"textbox","id":"sh/do3q9szq","slide":2,"text":"聊天请假、聊天发日报，形成可确认的业务闭环","textPreview":"聊天请假、聊天发日报，形成可确认的业务闭环","textChars":21,"textLines":1,"bbox":[107,534,480,48]}
+{"kind":"shape","id":"sh/t8byxkn2","slide":2,"bbox":[660,407,544,194]}
+{"kind":"textbox","id":"sh/s72xofmh","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[690,432,70,39]}
+{"kind":"textbox","id":"sh/76twva5c","slide":2,"text":"遇到的问题","textPreview":"遇到的问题","textChars":5,"textLines":1,"bbox":[773,433,300,36]}
+{"kind":"textbox","id":"sh/65kfmpor","slide":2,"text":"实际开发为什么变复杂？","textPreview":"实际开发为什么变复杂？","textChars":11,"textLines":1,"bbox":[691,492,480,30]}
+{"kind":"textbox","id":"sh/hcvy14ne","slide":2,"text":"动态组件、if-else 增长、节点复杂、排查困难","textPreview":"动态组件、if-else 增长、节点复杂、排查困难","textChars":25,"textLines":1,"bbox":[691,534,480,48]}
+{"kind":"textbox","id":"sh/gbmxszmt","slide":2,"text":"核心目标：让用户直接表达业务目标，让 AI 在 ERP 的数据、规则和权限边界内协助执行","textPreview":"核心目标：让用户直接表达业务目标，让 AI 在 ERP 的数据、规则和权限边界内协助执行","textChars":44,"textLines":1,"bbox":[82,637,1110,30]}
+{"kind":"notes","id":"nt/hwbqtkby","slide":2,"text":"【只记一句】今天只回答四个问题：场景、路径、效果、问题。\n\n【可直接照读】整场分享围绕四个问题展开。第一，AI 为什么要进入 ERP；第二，如何通过聊天助手落地；第三，目前已经实现了哪些可用能力；第四，为什么看起来只是请假和日报，最后却出现了很多节点和分支。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}

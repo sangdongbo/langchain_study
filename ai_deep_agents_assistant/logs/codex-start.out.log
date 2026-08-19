@@ -1,0 +1,10 @@
+Starting AI Deep Agents Approval Assistant on http://127.0.0.1:8020
+Using Python: D:\PythonProject\LearnOne\.venv\Scripts\python.exe
+INFO:     127.0.0.1:54824 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54844 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60946 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65091 - "OPTIONS /api/ai-approval/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65091 - "POST /api/ai-approval/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65505 - "POST /api/ai-approval/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60972 - "POST /api/ai-approval/chat HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:62228 - "GET /health HTTP/1.1" 200 OK

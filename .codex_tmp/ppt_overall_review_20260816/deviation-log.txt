@@ -1,0 +1,6 @@
+1. Output slide 17 duplicates source slide 4 but replaces visible “live demo” production wording with audience-facing business-loop validation wording. Reason: the user will demonstrate live, but the PPT should not contain internal presentation instructions.
+2. Output slide 16 keeps source slide 17 visuals but updates speaker notes because the validation slide now follows it instead of preceding it.
+3. Output slide 19 replaces the visible “建议截图” production note with an audience-facing diagnostic objective.
+4. Source slides 32, 33, and 34 are omitted. Reason: their role boundary, retrieval path, and three-question routing content substantially overlaps source slides 29, 30, and 35.
+5. Output slide 32 keeps source slide 35 visuals but removes the obsolete “4/4” header sequence after the RAG reduction.
+6. Page markers are renumbered to match the 33-slide output.

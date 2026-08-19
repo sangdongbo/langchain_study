@@ -1,0 +1,38 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textShapes":24}
+{"kind":"shape","id":"sh/ji5kf2ho","slide":5,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/dgbulwnm","slide":5,"text":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textPreview":"行业现状：AI 使用率很高，规模化价值仍有明显断层","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"text":"GLOBAL AI ADOPTION · 2025","textPreview":"GLOBAL AI ADOPTION · 2025","textChars":25,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/yhkbe1o7","slide":5,"text":"88%","textPreview":"88%","textChars":3,"textLines":1,"bbox":[78,156,210,76]}
+{"kind":"textbox","id":"sh/l4bupwny","slide":5,"text":"至少一个业务职能常态化使用 AI","textPreview":"至少一个业务职能常态化使用 AI","textChars":16,"textLines":1,"bbox":[82,229,338,51]}
+{"kind":"textbox","id":"sh/032tgr6d","slide":5,"text":"2024 年为 78%，一年提升 10 个百分点","textPreview":"2024 年为 78%，一年提升 10 个百分点","textChars":24,"textLines":1,"bbox":[82,284,390,29]}
+{"kind":"shape","id":"sh/n6dcr65o","slide":5,"bbox":[82,337,510,52]}
+{"kind":"shape","id":"sh/m5kbi1oj","slide":5,"bbox":[82,337,449,52]}
+{"kind":"textbox","id":"sh/w32dkbuh","slide":5,"text":"88% 已使用","textPreview":"88% 已使用","textChars":7,"textLines":1,"bbox":[98,349,170,27]}
+{"kind":"textbox","id":"sh/x4vedgvm","slide":5,"text":"但规模化仍是少数","textPreview":"但规模化仍是少数","textChars":8,"textLines":1,"bbox":[82,435,420,36]}
+{"kind":"shape","id":"sh/ahkvi1cb","slide":5,"bbox":[82,489,510,47]}
+{"kind":"shape","id":"sh/v2twb6dw","slide":5,"bbox":[82,489,170,47]}
+{"kind":"textbox","id":"sh/k7mxovud","slide":5,"text":"约 1/3 已规模化","textPreview":"约 1/3 已规模化","textChars":10,"textLines":1,"bbox":[98,499,205,27]}
+{"kind":"textbox","id":"sh/58vehgvy","slide":5,"text":"近 2/3 尚未开始企业级扩展","textPreview":"近 2/3 尚未开始企业级扩展","textChars":15,"textLines":1,"bbox":[307,500,270,26]}
+{"kind":"shape","id":"sh/i54fmlc7","slide":5,"bbox":[650,167,255,190]}
+{"kind":"textbox","id":"sh/j6dwfqds","slide":5,"text":"62%","textPreview":"62%","textChars":3,"textLines":1,"bbox":[672,189,211,61]}
+{"kind":"textbox","id":"sh/sb6xsvu9","slide":5,"text":"试验或使用 AI Agent","textPreview":"试验或使用 AI Agent","textChars":14,"textLines":1,"bbox":[672,258,211,43]}
+{"kind":"textbox","id":"sh/tcfel0vu","slide":5,"text":"23% 已扩展 · 39% 试验中","textPreview":"23% 已扩展 · 39% 试验中","textChars":17,"textLines":1,"bbox":[670,310,215,30]}
+{"kind":"shape","id":"sh/hgrmpwj2","slide":5,"bbox":[927,167,255,190]}
+{"kind":"textbox","id":"sh/gfi5grih","slide":5,"text":"39%","textPreview":"39%","textChars":3,"textLines":1,"bbox":[949,189,211,61]}
+{"kind":"textbox","id":"sh/fe94nm1w","slide":5,"text":"报告企业级 EBIT 影响","textPreview":"报告企业级 EBIT 影响","textChars":13,"textLines":1,"bbox":[949,258,211,43]}
+{"kind":"textbox","id":"sh/ud0ne10b","slide":5,"text":"价值影响仍未成为多数","textPreview":"价值影响仍未成为多数","textChars":10,"textLines":1,"bbox":[947,310,215,30]}
+{"kind":"shape","id":"sh/pkr6tgjy","slide":5,"bbox":[650,391,255,190]}
+{"kind":"textbox","id":"sh/4ji5kbid","slide":5,"text":"51%","textPreview":"51%","textChars":3,"textLines":1,"bbox":[672,413,211,61]}
+{"kind":"textbox","id":"sh/3i94r61s","slide":5,"text":"遇到至少一种负面后果","textPreview":"遇到至少一种负面后果","textChars":10,"textLines":1,"bbox":[672,482,211,43]}
+{"kind":"textbox","id":"sh/2h0ni107","slide":5,"text":"近三分之一提到 AI 不准确","textPreview":"近三分之一提到 AI 不准确","textChars":14,"textLines":1,"bbox":[670,534,215,30]}
+{"kind":"shape","id":"sh/5o7mhcju","slide":5,"bbox":[927,391,255,190]}
+{"kind":"textbox","id":"sh/kny587i9","slide":5,"text":"6%","textPreview":"6%","textChars":2,"textLines":1,"bbox":[949,413,211,61]}
+{"kind":"textbox","id":"sh/atcjidg7","slide":5,"text":"被归为 AI 高绩效组织","textPreview":"被归为 AI 高绩效组织","textChars":12,"textLines":1,"bbox":[949,482,211,43]}
+{"kind":"textbox","id":"sh/vu5kbihc","slide":5,"text":"更重视流程重构与规模化","textPreview":"更重视流程重构与规模化","textChars":11,"textLines":1,"bbox":[947,534,215,30]}
+{"kind":"shape","id":"sh/wve1knyx","slide":5,"bbox":[80,608,1120,51]}
+{"kind":"textbox","id":"sh/xwn2dszi","slide":5,"text":"结论：真正的竞争点不是“接入模型”，而是把 AI 嵌入业务流程并形成可控执行","textPreview":"结论：真正的竞争点不是“接入模型”，而是把 AI 嵌入业务流程并形成可控执行","textChars":38,"textLines":1,"bbox":[106,621,1068,27]}
+{"kind":"textbox","id":"sh/ihw3mxg3","slide":5,"text":"数据来源：McKinsey《The state of AI in 2025》（2025，n=1,993，覆盖 105 个国家）","textPreview":"数据来源：McKinsey《The state of AI in 2025》（2025，n=1,993，覆盖 105 个国家）","textChars":63,"textLines":1,"bbox":[82,665,1090,16]}
+{"kind":"notes","id":"nt/i107q5of","slide":5,"text":"【只记一句】AI 接入已经普及，但规模化产生价值仍然困难。\n\n【可直接照读】麦肯锡 2025 年调研显示，88% 的组织已经常态化使用 AI，但接近三分之二还没有开始企业级规模化。62% 正在试验或使用 AI Agent，只有 39% 报告了企业级 EBIT 影响。核心差距不在模型，而在能否嵌入真实流程。\n\n【时间建议】约 45 秒\n\n[Sources]\n- McKinsey, The state of AI in 2025: Agents, innovation, and transformation (survey of 1,993 participants across 105 nations): https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai\n[/Sources]"}

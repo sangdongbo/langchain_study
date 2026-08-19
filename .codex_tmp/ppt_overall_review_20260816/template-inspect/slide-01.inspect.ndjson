@@ -1,0 +1,22 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"ERP 与 AI 融合实践","textShapes":12}
+{"kind":"shape","id":"sh/dgzetcfa","slide":1,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/547294r6","slide":1,"bbox":[0,0,1280,218]}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"text":"ERP 与 AI 融合实践","textPreview":"ERP 与 AI 融合实践","textChars":13,"textLines":1,"bbox":[78,56,900,78]}
+{"kind":"textbox","id":"sh/7qp4be9c","slide":1,"text":"从聊天发起审批，到聊天填写日报","textPreview":"从聊天发起审批，到聊天填写日报","textChars":15,"textLines":1,"bbox":[82,137,820,46]}
+{"kind":"textbox","id":"sh/65g3298r","slide":1,"text":"让用户直接表达业务目标，让 AI 在 ERP 规则内协助完成操作","textPreview":"让用户直接表达业务目标，让 AI 在 ERP 规则内协助完成操作","textChars":32,"textLines":1,"bbox":[82,284,820,88]}
+{"kind":"shape","id":"sh/ts7md4r2","slide":1,"bbox":[82,445,252,116]}
+{"kind":"textbox","id":"sh/sryl4zqx","slide":1,"text":"智能审批","textPreview":"智能审批","textChars":4,"textLines":1,"bbox":[100,469,216,32]}
+{"kind":"textbox","id":"sh/fu94fe98","slide":1,"text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[97,516,222,27]}
+{"kind":"shape","id":"sh/utg3698n","slide":1,"bbox":[368,445,252,116]}
+{"kind":"textbox","id":"sh/wn6dc7eh","slide":1,"text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[386,469,216,32]}
+{"kind":"textbox","id":"sh/hofulsf2","slide":1,"text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[383,516,222,27]}
+{"kind":"shape","id":"sh/ul4vaxgb","slide":1,"bbox":[654,445,252,116]}
+{"kind":"textbox","id":"sh/vmdcj2xw","slide":1,"text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[672,469,216,32]}
+{"kind":"textbox","id":"sh/4r6dg7et","slide":1,"text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[669,516,222,27]}
+{"kind":"shape","id":"sh/5sfepcfe","slide":1,"bbox":[940,445,252,116]}
+{"kind":"textbox","id":"sh/ipovexwn","slide":1,"text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[958,469,216,32]}
+{"kind":"textbox","id":"sh/3qxwn2x8","slide":1,"text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[955,516,222,27]}
+{"kind":"textbox","id":"sh/sfqdkrep","slide":1,"text":"AI APPROVAL ASSISTANT · 场景实践分享","textPreview":"AI APPROVAL ASSISTANT · 场景实践分享","textChars":30,"textLines":1,"bbox":[82,646,520,22]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":"【只记一句】ERP 和 AI 的结合，目标不是做一个会聊天的机器人，而是让用户用自然语言完成真实业务动作。\n\n【可直接照读】今天分享的是 ERP 与 AI 的结合实践，重点放在两个具体动作：聊天发起审批、聊天填写日报。我们验证了 approval_creation_agent、daily_report_agent、daily_report_create_agent 和 daily_report_agentic_workflow_demo 四类实现，最后把 LangGraph 作为 ERP 主流程框架。\n\n【时间建议】约 45 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- Visual style references supplied by the user: C:/Users/EDY/Pictures/1.jpg–16.jpg\n[/Sources]"}

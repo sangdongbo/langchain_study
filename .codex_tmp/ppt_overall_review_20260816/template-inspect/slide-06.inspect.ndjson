@@ -1,0 +1,45 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textShapes":26}
+{"kind":"shape","id":"sh/of2tcvy9","slide":6,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"text":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textPreview":"价值现状：企业持续投入，但 AI 回报尚未普遍兑现","textChars":25,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"text":"PWC GLOBAL CEO SURVEY · 2026","textPreview":"PWC GLOBAL CEO SURVEY · 2026","textChars":28,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/87ipkzal","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/98rqt4r6","slide":6,"text":"4,454 位 CEO · 95 个国家和地区","textPreview":"4,454 位 CEO · 95 个国家和地区","textChars":23,"textLines":1,"bbox":[81,151,640,35]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"text":"调研时间：2025 年 9 月 30 日—11 月 10 日","textPreview":"调研时间：2025 年 9 月 30 日—11 月 10 日","textChars":30,"textLines":1,"bbox":[81,191,520,27]}
+{"kind":"shape","id":"sh/7m98ru9g","slide":6,"bbox":[78,242,258,145]}
+{"kind":"textbox","id":"sh/oryp8fah","slide":6,"text":"30%","textPreview":"30%","textChars":3,"textLines":1,"bbox":[96,260,222,61]}
+{"kind":"textbox","id":"sh/pc76hkr2","slide":6,"text":"AI 带来收入增长","textPreview":"AI 带来收入增长","textChars":9,"textLines":1,"bbox":[96,329,222,35]}
+{"kind":"shape","id":"sh/h4bupgn6","slide":6,"bbox":[365,242,258,145]}
+{"kind":"textbox","id":"sh/w32twb6l","slide":6,"text":"26%","textPreview":"26%","textChars":3,"textLines":1,"bbox":[383,260,222,61]}
+{"kind":"textbox","id":"sh/v2tcn650","slide":6,"text":"AI 带来成本下降","textPreview":"AI 带来成本下降","textChars":9,"textLines":1,"bbox":[383,329,222,35]}
+{"kind":"shape","id":"sh/u1kbu1ov","slide":6,"bbox":[652,242,258,145]}
+{"kind":"textbox","id":"sh/5svutgni","slide":6,"text":"56%","textPreview":"56%","textChars":3,"textLines":1,"bbox":[670,260,222,61]}
+{"kind":"textbox","id":"sh/47mt0b6x","slide":6,"text":"既未增收也未降本","textPreview":"既未增收也未降本","textChars":8,"textLines":1,"bbox":[670,329,222,35]}
+{"kind":"shape","id":"sh/j6dcr65c","slide":6,"bbox":[939,242,258,145]}
+{"kind":"textbox","id":"sh/i54bylor","slide":6,"text":"12%","textPreview":"12%","textChars":3,"textLines":1,"bbox":[957,260,222,61]}
+{"kind":"textbox","id":"sh/twfux0ne","slide":6,"text":"同时实现增收与降本","textPreview":"同时实现增收与降本","textChars":9,"textLines":1,"bbox":[957,329,222,35]}
+{"kind":"textbox","id":"sh/svmt4v6t","slide":6,"text":"AI 在业务领域“大范围应用”的比例仍然不高","textPreview":"AI 在业务领域“大范围应用”的比例仍然不高","textChars":22,"textLines":1,"bbox":[82,427,780,35]}
+{"kind":"textbox","id":"sh/cbe5g3ih","slide":6,"text":"获客 / 需求生成","textPreview":"获客 / 需求生成","textChars":9,"textLines":1,"bbox":[82,470,190,24]}
+{"kind":"shape","id":"sh/dcnm98zm","slide":6,"bbox":[280,473,700,18]}
+{"kind":"shape","id":"sh/qpwnet0b","slide":6,"bbox":[280,473,616,18]}
+{"kind":"textbox","id":"sh/bq547yhw","slide":6,"text":"22%","textPreview":"22%","textChars":3,"textLines":1,"bbox":[998,469,70,26]}
+{"kind":"textbox","id":"sh/0fy5k3id","slide":6,"text":"支持服务","textPreview":"支持服务","textChars":4,"textLines":1,"bbox":[82,498,190,24]}
+{"kind":"shape","id":"sh/lg76d8zy","slide":6,"bbox":[280,501,700,18]}
+{"kind":"shape","id":"sh/ydgnit07","slide":6,"bbox":[280,501,560,18]}
+{"kind":"textbox","id":"sh/zep4byhs","slide":6,"text":"20%","textPreview":"20%","textChars":3,"textLines":1,"bbox":[998,497,70,26]}
+{"kind":"textbox","id":"sh/gju58ji9","slide":6,"text":"产品、服务与体验","textPreview":"产品、服务与体验","textChars":8,"textLines":1,"bbox":[82,526,190,24]}
+{"kind":"shape","id":"sh/1k3mhozu","slide":6,"bbox":[280,529,700,18]}
+{"kind":"shape","id":"sh/jet8nm1c","slide":6,"bbox":[280,529,532,18]}
+{"kind":"textbox","id":"sh/idk7ehkr","slide":6,"text":"19%","textPreview":"19%","textChars":3,"textLines":1,"bbox":[998,525,70,26]}
+{"kind":"textbox","id":"sh/50bqpcj2","slide":6,"text":"战略决策","textPreview":"战略决策","textChars":4,"textLines":1,"bbox":[82,554,190,24]}
+{"kind":"shape","id":"sh/4f2pgr2h","slide":6,"bbox":[280,557,700,18]}
+{"kind":"shape","id":"sh/va98j210","slide":6,"bbox":[280,557,420,18]}
+{"kind":"textbox","id":"sh/u907axkf","slide":6,"text":"15%","textPreview":"15%","textChars":3,"textLines":1,"bbox":[998,553,70,26]}
+{"kind":"textbox","id":"sh/hcrqlcj6","slide":6,"text":"需求履约","textPreview":"需求履约","textChars":4,"textLines":1,"bbox":[82,582,190,24]}
+{"kind":"shape","id":"sh/wbipc72l","slide":6,"bbox":[280,585,700,18]}
+{"kind":"shape","id":"sh/7698f214","slide":6,"bbox":[280,585,364,18]}
+{"kind":"textbox","id":"sh/m5076xkj","slide":6,"text":"13%","textPreview":"13%","textChars":3,"textLines":1,"bbox":[998,581,70,26]}
+{"kind":"textbox","id":"sh/2dkbalg3","slide":6,"text":"孤立功能难以产生可衡量价值：需要业务流程、数据基础、风险机制和组织采用共同推进","textPreview":"孤立功能难以产生可衡量价值：需要业务流程、数据基础、风险机制和组织采用共同推进","textChars":39,"textLines":1,"bbox":[82,624,1110,25]}
+{"kind":"textbox","id":"sh/netcjqxo","slide":6,"text":"数据来源：PwC《29th Global CEO Survey: Leading through uncertainty in the age of AI》（2026，n=4,454，覆盖 95 个国家和地区）","textPreview":"数据来源：PwC《29th Global CEO Survey: Leading through uncertainty in the age of AI》（2026，n=4,454，覆盖 95 个国家和地区）","textChars":105,"textLines":1,"bbox":[82,660,1100,16]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":6,"text":"【只记一句】企业在持续投入 AI，但大多数还没有同时获得增收和降本。\n\n【可直接照读】PwC 2026 全球 CEO 调研显示，30% 表示 AI 带来收入增长，26% 表示成本下降，但 56% 既未增收也未降本，只有 12% 同时实现两种收益。这说明孤立功能不等于业务价值，需要流程、数据与责任边界共同落地。\n\n【时间建议】约 45 秒\n\n[Sources]\n- PwC, 29th Global CEO Survey: Leading through uncertainty in the age of AI (4,454 CEOs across 95 countries and territories): https://www.pwc.com/gx/en/issues/c-suite-insights/ceo-survey.html\n[/Sources]"}

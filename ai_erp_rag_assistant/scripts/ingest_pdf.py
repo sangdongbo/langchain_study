@@ -23,6 +23,9 @@ for import_root in (REPOSITORY_ROOT, PROJECT_ROOT):
 from ai_erp_rag_assistant.app.config import get_settings
 
 
+HEADING_PATTERN = re.compile(r"第[一二三四五六七八九十百零〇0-9]+[章节条]\s*[^。；]{0,50}")
+
+
 def split_text(text: str, size: int, overlap: int) -> list[str]:
     normalized = re.sub(r"\s+", " ", text).strip()
     if not normalized:
@@ -31,6 +34,15 @@ def split_text(text: str, size: int, overlap: int) -> list[str]:
     start = 0
     while start < len(normalized):
         end = min(start + size, len(normalized))
+        if end < len(normalized):
+            window = normalized[start:end]
+            minimum_break = max(int(size * 0.6), 1)
+            punctuation_break = max(window.rfind(mark) for mark in ("。", "！", "？", "；")) + 1
+            heading_breaks = [match.start() for match in HEADING_PATTERN.finditer(window)]
+            heading_break = heading_breaks[-1] if heading_breaks else -1
+            preferred_break = max(punctuation_break, heading_break)
+            if preferred_break >= minimum_break:
+                end = start + preferred_break
         chunks.append(normalized[start:end])
         if end == len(normalized):
             break
@@ -38,12 +50,39 @@ def split_text(text: str, size: int, overlap: int) -> list[str]:
     return chunks
 
 
+def infer_title(text: str, fallback: str) -> str:
+    match = HEADING_PATTERN.search(text)
+    if match:
+        return match.group(0).strip()
+    return fallback
+
+
+def document_metadata(pdf_path: Path, text: str, settings) -> dict[str, object]:
+    version_match = re.search(r"(20\d{2})\s*年?\s*(?:修订版|版)", f"{pdf_path.stem} {text}")
+    effective_match = re.search(
+        r"生效日期\s*[:：]?\s*(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日",
+        text,
+    )
+    effective_date = ""
+    if effective_match:
+        year, month, day = (int(item) for item in effective_match.groups())
+        effective_date = f"{year:04d}-{month:02d}-{day:02d}"
+    return {
+        "company_id": settings.rag_company_id,
+        "department": settings.rag_department,
+        "version": version_match.group(1) if version_match else "",
+        "effective_date": effective_date,
+        "permission_tags": list(settings.rag_permission_tags),
+    }
+
+
 def extract_pdf(pdf_path: Path, settings) -> tuple[list[dict[str, object]], list[int]]:
     reader = PdfReader(str(pdf_path))
+    page_texts = [page.extract_text() or "" for page in reader.pages]
+    metadata = document_metadata(pdf_path, " ".join(page_texts[:2]), settings)
     rows: list[dict[str, object]] = []
     empty_pages: list[int] = []
-    for page_number, page in enumerate(reader.pages, start=1):
-        page_text = page.extract_text() or ""
+    for page_number, page_text in enumerate(page_texts, start=1):
         if not page_text.strip():
             empty_pages.append(page_number)
             continue
@@ -57,13 +96,13 @@ def extract_pdf(pdf_path: Path, settings) -> tuple[list[dict[str, object]], list
                     "text": chunk,
                     "source": pdf_path.name,
                     "page": page_number,
-                    "title": None,
-                    "company_id": "lanjing",
-                    "department": "公共制度",
-                    "version": "2026",
-                    "effective_date": "2026-04-11",
+                    "title": infer_title(chunk, pdf_path.stem),
+                    "company_id": metadata["company_id"],
+                    "department": metadata["department"],
+                    "version": metadata["version"],
+                    "effective_date": metadata["effective_date"],
                     "is_active": True,
-                    "permission_tags": ["knowledge:employee_handbook"],
+                    "permission_tags": metadata["permission_tags"],
                 }
             )
     return rows, empty_pages

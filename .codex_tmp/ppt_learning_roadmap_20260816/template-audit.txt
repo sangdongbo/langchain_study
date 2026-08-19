@@ -1,0 +1,6 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版-主线强化版.pptx
+Slide count: 33
+Edit scope: rewrite inherited text and speaker notes on slide 22 only.
+Visual contract: preserve the source three-column near/mid/long roadmap, typography, colors, spacing, master, layout, page markers, and all other slides.
+Narrative job: make the future roadmap explicitly show the AI engineering, LangGraph, and enterprise RAG capabilities that still need deeper study and validation.
+

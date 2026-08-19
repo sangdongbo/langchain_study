@@ -1,0 +1,33 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/7qto7e10","slide":24,"title":"审批子图：字段、审批人与安全提交","textShapes":18}
+{"kind":"shape","id":"sh/mlg3al4f","slide":24,"name":"矩形 29","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1sfqxsv6","slide":24,"name":"矩形 1","text":"审批子图：字段、审批人与安全提交","textPreview":"审批子图：字段、审批人与安全提交","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0r6p4nul","slide":24,"name":"矩形 2","text":"APPROVAL CREATION AGENT · 2/2","textPreview":"APPROVAL CREATION AGENT · 2/2","textChars":29,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/nux8zidc","slide":24,"name":"矩形 3","text":"25","textPreview":"25","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/2to76dcr","slide":24,"name":"圆角矩形 4","bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/ov6p8nux","slide":24,"name":"圆角矩形 6","bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/3ydonyd8","slide":24,"name":"矩形 7","text":"节点职责：业务执行","textPreview":"节点职责：业务执行","textChars":9,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/ix47utcn","slide":24,"name":"矩形 8","bbox":[997,180,1.5,462]}
+{"kind":"textbox","id":"sh/8veh8ril","slide":24,"name":"矩形 9","text":"collect","textPreview":"collect","textChars":7,"textLines":1,"bbox":[782,185,205,60.43]}
+{"kind":"textbox","id":"sh/9wni1wjq","slide":24,"name":"矩形 10","text":"收集动态字段，缺失时继续追问","textPreview":"收集动态字段，缺失时继续追问","textChars":14,"textLines":1,"bbox":[1009,185,209,60.43]}
+{"kind":"shape","id":"sh/mtwz6h0f","slide":24,"name":"矩形 11","bbox":[782,247.43,436,1]}
+{"kind":"textbox","id":"sh/nu50zm10","slide":24,"name":"矩形 12","text":"validate","textPreview":"validate","textChars":8,"textLines":1,"bbox":[782,252.43,205,60.43]}
+{"kind":"textbox","id":"sh/wzyhcrih","slide":24,"name":"矩形 13","text":"按 ERP 或模板规则校验字段","textPreview":"按 ERP 或模板规则校验字段","textChars":15,"textLines":1,"bbox":[1009,252.43,209,60.43]}
+{"kind":"shape","id":"sh/x07i5wj2","slide":24,"name":"矩形 14","bbox":[782,314.86,436,1]}
+{"kind":"textbox","id":"sh/axgza10b","slide":24,"name":"矩形 15","text":"assignee","textPreview":"assignee","textChars":8,"textLines":1,"bbox":[782,319.86,205,60.43]}
+{"kind":"textbox","id":"sh/vyp03m1w","slide":24,"name":"矩形 16","text":"获取审批节点，必要时选择审批人","textPreview":"获取审批节点，必要时选择审批人","textChars":15,"textLines":1,"bbox":[1009,319.86,209,60.43]}
+{"kind":"shape","id":"sh/c3uh07id","slide":24,"name":"矩形 17","bbox":[782,382.29,436,1]}
+{"kind":"textbox","id":"sh/d43itcjy","slide":24,"name":"矩形 18","text":"preview","textPreview":"preview","textChars":7,"textLines":1,"bbox":[782,387.29,205,60.43]}
+{"kind":"textbox","id":"sh/t8v6h47a","slide":24,"name":"矩形 19","text":"生成完整预览，等待明确确认","textPreview":"生成完整预览，等待明确确认","textChars":13,"textLines":1,"bbox":[1009,387.29,209,60.43]}
+{"kind":"shape","id":"sh/s72p8z6p","slide":24,"name":"矩形 20","bbox":[782,449.71,436,1]}
+{"kind":"textbox","id":"sh/rmtofup4","slide":24,"name":"矩形 21","text":"submit","textPreview":"submit","textChars":6,"textLines":1,"bbox":[782,454.71,205,60.43]}
+{"kind":"textbox","id":"sh/6lk76poz","slide":24,"name":"矩形 22","text":"确认守卫通过后正式提交 ERP","textPreview":"确认守卫通过后正式提交 ERP","textChars":15,"textLines":1,"bbox":[1009,454.71,209,60.43]}
+{"kind":"shape","id":"sh/1cv6l47m","slide":24,"name":"矩形 23","bbox":[782,517.14,436,1]}
+{"kind":"textbox","id":"sh/gbmpcz61","slide":24,"name":"矩形 24","text":"already_submitted","textPreview":"already_submitted","textChars":17,"textLines":1,"bbox":[782,522.14,205,60.43]}
+{"kind":"textbox","id":"sh/fadojepg","slide":24,"name":"矩形 25","text":"返回原提交结果，防止重复提交","textPreview":"返回原提交结果，防止重复提交","textChars":14,"textLines":1,"bbox":[1009,522.14,209,60.43]}
+{"kind":"shape","id":"sh/e947a9ov","slide":24,"name":"矩形 26","bbox":[782,584.57,436,1]}
+{"kind":"textbox","id":"sh/pgf6po7i","slide":24,"name":"矩形 27","text":"cancel","textPreview":"cancel","textChars":6,"textLines":1,"bbox":[782,589.57,205,60.43]}
+{"kind":"textbox","id":"sh/of6pgj6x","slide":24,"name":"矩形 28","text":"取消申请并重置审批状态","textPreview":"取消申请并重置审批状态","textChars":11,"textLines":1,"bbox":[1009,589.57,209,60.43]}
+{"kind":"image","id":"im/obqp47q1","slide":24,"name":"图片 36","bbox":[58,221.73,672,354.55]}
+{"kind":"notes","id":"nt/7qto7e10","slide":24,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-39e93d19-0368-48e9-9041-d15d064c8b2e.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/approval_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n[/Sources]"}

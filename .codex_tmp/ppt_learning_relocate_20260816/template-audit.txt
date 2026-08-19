@@ -1,0 +1,6 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版-学习探索版.pptx
+Source slide count: 33
+Output slide count: 34
+Edit scope: restore source slide 22 to the original delivery roadmap; duplicate the existing learning roadmap and move it after the RAG section; move the closing slide to page 34.
+Visual contract: use source slide 22 as the exact visual template for both roadmap pages; preserve all masters, layouts, fonts, colors, shapes, and other slides.
+

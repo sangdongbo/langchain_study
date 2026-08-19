@@ -1,0 +1,42 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/5onypobq","slide":22,"title":"附录：聊天助手顶层路由图","textShapes":24}
+{"kind":"shape","id":"sh/ml0jap4f","slide":22,"name":"矩形 38","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/6987itcr","slide":22,"name":"矩形 1","text":"附录：聊天助手顶层路由图","textPreview":"附录：聊天助手顶层路由图","textChars":12,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/7a18rydc","slide":22,"name":"矩形 2","text":"LANGGRAPH STUDIO","textPreview":"LANGGRAPH STUDIO","textChars":16,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/k7qpgjul","slide":22,"name":"矩形 3","text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/58zqpov6","slide":22,"name":"圆角矩形 4","bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/jmh8nyd0","slide":22,"name":"圆角矩形 6","bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/43u9snu5","slide":22,"name":"矩形 7","text":"节点职责（与代码对应）","textPreview":"节点职责（与代码对应）","textChars":11,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/p43q1sva","slide":22,"name":"矩形 8","bbox":[1008,180,1.5,462]}
+{"kind":"textbox","id":"sh/p4z6tcri","slide":22,"name":"矩形 9","text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,216,40.2]}
+{"kind":"textbox","id":"sh/436507qx","slide":22,"name":"矩形 10","text":"进入主图 / 本轮处理结束","textPreview":"进入主图 / 本轮处理结束","textChars":13,"textLines":1,"bbox":[1020,185,198,40.2]}
+{"kind":"shape","id":"sh/3ixor29c","slide":22,"name":"矩形 11","bbox":[782,227.2,436,1]}
+{"kind":"textbox","id":"sh/2honyx8r","slide":22,"name":"矩形 12","text":"memory_agent","textPreview":"memory_agent","textChars":12,"textLines":1,"bbox":[782,232.2,216,40.2]}
+{"kind":"textbox","id":"sh/hgf6pcr6","slide":22,"name":"矩形 13","text":"记录输入，补充短期记忆","textPreview":"记录输入，补充短期记忆","textChars":11,"textLines":1,"bbox":[1020,232.2,198,40.2]}
+{"kind":"shape","id":"sh/gf65w7ql","slide":22,"name":"矩形 14","bbox":[782,274.4,436,1]}
+{"kind":"textbox","id":"sh/fexon290","slide":22,"name":"矩形 15","text":"intent_router","textPreview":"intent_router","textChars":13,"textLines":1,"bbox":[782,279.4,216,40.2]}
+{"kind":"textbox","id":"sh/udonux8v","slide":22,"name":"矩形 16","text":"按意图与会话状态分配业务 Agent","textPreview":"按意图与会话状态分配业务 Agent","textChars":18,"textLines":1,"bbox":[1020,279.4,198,40.2]}
+{"kind":"shape","id":"sh/1cj61w7q","slide":22,"name":"矩形 17","bbox":[782,321.6,436,1]}
+{"kind":"textbox","id":"sh/0bap8rq5","slide":22,"name":"矩形 18","text":"user_profile_agent","textPreview":"user_profile_agent","textChars":18,"textLines":1,"bbox":[782,326.6,216,40.2]}
+{"kind":"textbox","id":"sh/krihkz2d","slide":22,"name":"矩形 19","text":"加载当前用户和直属上级","textPreview":"加载当前用户和直属上级","textChars":11,"textLines":1,"bbox":[1020,326.6,198,40.2]}
+{"kind":"shape","id":"sh/lsrit4jy","slide":22,"name":"矩形 20","bbox":[782,368.8,436,1]}
+{"kind":"textbox","id":"sh/yp0zipk7","slide":22,"name":"矩形 21","text":"user_info_agent","textPreview":"user_info_agent","textChars":15,"textLines":1,"bbox":[782,373.8,216,40.2]}
+{"kind":"textbox","id":"sh/jq90ru1s","slide":22,"name":"矩形 22","text":"回答用户、上级和部门问题","textPreview":"回答用户、上级和部门问题","textChars":12,"textLines":1,"bbox":[1020,373.8,198,40.2]}
+{"kind":"shape","id":"sh/wnihgf2h","slide":22,"name":"矩形 23","bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/xoripkj2","slide":22,"name":"矩形 24","text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[782,421,216,40.2]}
+{"kind":"textbox","id":"sh/al0zepkb","slide":22,"name":"矩形 25","text":"进入审批发起子流程","textPreview":"进入审批发起子流程","textChars":9,"textLines":1,"bbox":[1020,421,198,40.2]}
+{"kind":"shape","id":"sh/bm9gnu1w","slide":22,"name":"矩形 26","bbox":[782,463.2,436,1]}
+{"kind":"textbox","id":"sh/ozyhcf25","slide":22,"name":"矩形 27","text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[782,468.2,216,40.2]}
+{"kind":"textbox","id":"sh/907ylkjq","slide":22,"name":"矩形 28","text":"进入标准日报子流程","textPreview":"进入标准日报子流程","textChars":9,"textLines":1,"bbox":[1020,468.2,198,40.2]}
+{"kind":"shape","id":"sh/rup0va5s","slide":22,"name":"矩形 29","bbox":[782,510.4,436,1]}
+{"kind":"textbox","id":"sh/qtwz2547","slide":22,"name":"矩形 30","text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[782,515.4,216,40.2]}
+{"kind":"textbox","id":"sh/dw7ixkni","slide":22,"name":"矩形 31","text":"自主调用日报工具完成任务","textPreview":"自主调用日报工具完成任务","textChars":12,"textLines":1,"bbox":[1020,515.4,198,40.2]}
+{"kind":"shape","id":"sh/cvy14fmx","slide":22,"name":"矩形 32","bbox":[782,557.6,436,1]}
+{"kind":"textbox","id":"sh/zyp0za5o","slide":22,"name":"矩形 33","text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[782,562.6,216,40.2]}
+{"kind":"textbox","id":"sh/exgj6p43","slide":22,"name":"矩形 34","text":"演示 Agent 规划与流程闸门","textPreview":"演示 Agent 规划与流程闸门","textChars":16,"textLines":1,"bbox":[1020,562.6,198,40.2]}
+{"kind":"shape","id":"sh/1k7i1knu","slide":22,"name":"矩形 35","bbox":[782,604.8,436,1]}
+{"kind":"textbox","id":"sh/0jy18fm9","slide":22,"name":"矩形 36","text":"general_chat","textPreview":"general_chat","textChars":12,"textLines":1,"bbox":[782,609.8,216,40.2]}
+{"kind":"textbox","id":"sh/nm903u5k","slide":22,"name":"矩形 37","text":"处理闲聊并保留业务上下文","textPreview":"处理闲聊并保留业务上下文","textChars":12,"textLines":1,"bbox":[1020,609.8,198,40.2]}
+{"kind":"image","id":"im/hgr61gzm","slide":22,"name":"图片 45","bbox":[58,238.37,672,321.26]}
+{"kind":"notes","id":"nt/5onypobq","slide":22,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-a168231d-4563-4e49-8319-92fa1617d4ed.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_agent.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py\n[/Sources]"}

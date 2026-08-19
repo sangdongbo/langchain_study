@@ -23,22 +23,45 @@ def get_current_user(
     )
 
 
-def get_approval_template(
-    approval_type: str,
+def list_approval_templates(
+    query: str,
     company_id: str,
     *,
     user: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    return erp_client.list_approval_templates(query, company_id=company_id, user=user or {})
+
+
+def get_approval_template(
+    template_id: str,
+    company_id: str,
+    *,
+    title: str = "",
+    user: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return erp_client.get_approval_template(approval_type, company_id=company_id, user=user or {})
+    return erp_client.get_approval_template(template_id, company_id=company_id, title=title, user=user or {})
 
 
 def get_leave_template(company_id: str, *, user: dict[str, Any] | None = None) -> dict[str, Any]:
     """Backward-compatible shortcut used by older demo callers."""
-    return get_approval_template("请假", company_id, user=user)
+    candidates = list_approval_templates("请假", company_id, user=user)
+    if not candidates:
+        raise RuntimeError("ERP 未找到请假审批模板")
+    first = candidates[0]
+    return get_approval_template(str(first["template_id"]), company_id, title=str(first.get("title") or ""), user=user)
 
 
 def query_approval_status(user_id: str, *, user: dict[str, Any] | None = None) -> dict[str, Any]:
     return erp_client.query_approval_status(user_id, user=user or {})
+
+
+def get_approval_nodes(
+    template_id: str,
+    fields: dict[str, Any],
+    *,
+    user: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    return erp_client.get_approval_nodes(template_id, fields, user=user or {})
 
 
 def submit_approval(preview: dict[str, Any], *, user: dict[str, Any] | None = None) -> dict[str, Any]:

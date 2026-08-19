@@ -1,0 +1,27 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/l0bepsfm","slide":26,"title":"标准日报子图：草稿、预览与提交恢复","textShapes":14}
+{"kind":"shape","id":"sh/sru1szel","slide":26,"name":"矩形 23","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/uhk36lk7","slide":26,"name":"矩形 1","text":"标准日报子图：草稿、预览与提交恢复","textPreview":"标准日报子图：草稿、预览与提交恢复","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/vitkzqlc","slide":26,"name":"矩形 2","text":"DAILY REPORT AGENT · 2/2","textPreview":"DAILY REPORT AGENT · 2/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/8fil4b21","slide":26,"name":"矩形 3","text":"27","textPreview":"27","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/tgr2xg3m","slide":26,"name":"圆角矩形 4","bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/7e9kv6lg","slide":26,"name":"圆角矩形 6","bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/kbil0r2p","slide":26,"name":"矩形 7","text":"节点职责：写入与恢复","textPreview":"节点职责：写入与恢复","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/lcr2tw3a","slide":26,"name":"矩形 8","bbox":[1020,180,1.5,462]}
+{"kind":"textbox","id":"sh/lsja143i","slide":26,"name":"矩形 9","text":"save_daily_report_draft","textPreview":"save_daily_report_draft","textChars":23,"textLines":1,"bbox":[782,185,228,87.4]}
+{"kind":"textbox","id":"sh/krat8z2x","slide":26,"name":"矩形 10","text":"将完整 payload 保存为 ERP 草稿","textPreview":"将完整 payload 保存为 ERP 草稿","textChars":22,"textLines":1,"bbox":[1032,185,186,87.4]}
+{"kind":"shape","id":"sh/z61szulc","slide":26,"name":"矩形 11","bbox":[782,274.4,436,1]}
+{"kind":"textbox","id":"sh/y5sr69kr","slide":26,"name":"矩形 12","text":"preview_daily_report","textPreview":"preview_daily_report","textChars":20,"textLines":1,"bbox":[782,279.4,228,87.4]}
+{"kind":"textbox","id":"sh/x4jax436","slide":26,"name":"矩形 13","text":"生成预览以及确认、修改、取消动作","textPreview":"生成预览以及确认、修改、取消动作","textChars":16,"textLines":1,"bbox":[1032,279.4,186,87.4]}
+{"kind":"shape","id":"sh/c3a94z21","slide":26,"name":"矩形 14","bbox":[782,368.8,436,1]}
+{"kind":"textbox","id":"sh/b21svulg","slide":26,"name":"矩形 15","text":"submit_daily_report","textPreview":"submit_daily_report","textChars":19,"textLines":1,"bbox":[782,373.8,228,87.4]}
+{"kind":"textbox","id":"sh/a18r2pkv","slide":26,"name":"矩形 16","text":"明确确认后提交；失败时保留编辑态","textPreview":"明确确认后提交；失败时保留编辑态","textChars":16,"textLines":1,"bbox":[1032,373.8,186,87.4]}
+{"kind":"shape","id":"sh/p0zatk3a","slide":26,"name":"矩形 17","bbox":[782,463.2,436,1]}
+{"kind":"textbox","id":"sh/ozq90f2p","slide":26,"name":"矩形 18","text":"cancel_daily_report","textPreview":"cancel_daily_report","textChars":19,"textLines":1,"bbox":[782,468.2,228,87.4]}
+{"kind":"textbox","id":"sh/0ve1wjex","slide":26,"name":"矩形 19","text":"取消提交并回到日报内容编辑","textPreview":"取消提交并回到日报内容编辑","textChars":13,"textLines":1,"bbox":[1032,468.2,186,87.4]}
+{"kind":"shape","id":"sh/1wn25ofi","slide":26,"name":"矩形 20","bbox":[782,557.6,436,1]}
+{"kind":"textbox","id":"sh/etwju9wr","slide":26,"name":"矩形 21","text":"interrupt_daily_report","textPreview":"interrupt_daily_report","textChars":22,"textLines":1,"bbox":[782,562.6,228,87.4]}
+{"kind":"textbox","id":"sh/fu5k3exc","slide":26,"name":"矩形 22","text":"暂停等待输入，resume 后继续路由","textPreview":"暂停等待输入，resume 后继续路由","textChars":19,"textLines":1,"bbox":[1032,562.6,186,87.4]}
+{"kind":"image","id":"im/utkbix8f","slide":26,"name":"图片 30","bbox":[58,194.63,672,408.74]}
+{"kind":"notes","id":"nt/l0bepsfm","slide":26,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}

@@ -1,0 +1,36 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/gny5sjyp","slide":16,"title":"预期效果：聊天请假、聊天发日报，并且过程可控","textShapes":23}
+{"kind":"shape","id":"sh/69k32xsn","slide":16,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/8z2h8bq1","slide":16,"text":"预期效果：聊天请假、聊天发日报，并且过程可控","textPreview":"预期效果：聊天请假、聊天发日报，并且过程可控","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/9kby1g7m","slide":16,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ytkf2h8j","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/zutgvm94","slide":16,"bbox":[74,161,547,354]}
+{"kind":"textbox","id":"sh/kv2h4rqp","slide":16,"text":"聊天请假","textPreview":"聊天请假","textChars":4,"textLines":1,"bbox":[106,190,220,35]}
+{"kind":"shape","id":"sh/lwbyxwra","slide":16,"bbox":[107,252,330,58]}
+{"kind":"textbox","id":"sh/ip4zel83","slide":16,"text":"我明天下午请假 2 小时","textPreview":"我明天下午请假 2 小时","textChars":12,"textLines":1,"bbox":[129,267,286,34]}
+{"kind":"textbox","id":"sh/3qdg7qpo","slide":16,"text":"识别模板 → 补充类型和时间 → 校验 → 预览 → 确认提交","textPreview":"识别模板 → 补充类型和时间 → 校验 → 预览 → 确认提交","textChars":31,"textLines":1,"bbox":[107,341,462,65]}
+{"kind":"textbox","id":"sh/fm1gzq5o","slide":16,"text":"结果：用户无需寻找请假入口，也不必理解所有表单字段。","textPreview":"结果：用户无需寻找请假入口，也不必理解所有表单字段。","textChars":26,"textLines":1,"bbox":[107,429,462,52]}
+{"kind":"shape","id":"sh/e1sf65o3","slide":16,"bbox":[661,161,547,354]}
+{"kind":"textbox","id":"sh/1ojy10ne","slide":16,"text":"聊天发日报","textPreview":"聊天发日报","textChars":5,"textLines":1,"bbox":[693,190,220,35]}
+{"kind":"shape","id":"sh/gnax8v6t","slide":16,"bbox":[694,252,393,58]}
+{"kind":"textbox","id":"sh/nqlg3a5k","slide":16,"text":"整理今天客户跟进情况，生成日报","textPreview":"整理今天客户跟进情况，生成日报","textChars":15,"textLines":1,"bbox":[716,267,349,34]}
+{"kind":"textbox","id":"sh/2pcfa5oz","slide":16,"text":"加载 ERP 上下文 → 整理内容 → 保存草稿 → 预览 → 确认提交","textPreview":"加载 ERP 上下文 → 整理内容 → 保存草稿 → 预览 → 确认提交","textChars":36,"textLines":1,"bbox":[694,341,462,65]}
+{"kind":"textbox","id":"sh/ps3y5knq","slide":16,"text":"结果：减少重复整理，同时保留接收人、自定义字段等业务信息。","textPreview":"结果：减少重复整理，同时保留接收人、自定义字段等业务信息。","textChars":29,"textLines":1,"bbox":[694,429,462,52]}
+{"kind":"shape","id":"sh/oruhcf65","slide":16,"bbox":[74,560,259,91]}
+{"kind":"textbox","id":"sh/bulg7u5g","slide":16,"text":"2 个","textPreview":"2 个","textChars":3,"textLines":1,"bbox":[86,570,78,34]}
+{"kind":"textbox","id":"sh/atczepob","slide":16,"text":"核心业务场景","textPreview":"核心业务场景","textChars":6,"textLines":1,"bbox":[173,576,143,26]}
+{"kind":"textbox","id":"sh/mpgj6t8j","slide":16,"text":"审批 + 日报","textPreview":"审批 + 日报","textChars":7,"textLines":1,"bbox":[86,613,235,22]}
+{"kind":"shape","id":"sh/7qp0zepo","slide":16,"bbox":[358,560,259,91]}
+{"kind":"textbox","id":"sh/8by18jq9","slide":16,"text":"4 种","textPreview":"4 种","textChars":3,"textLines":1,"bbox":[370,570,78,34]}
+{"kind":"textbox","id":"sh/9c7i1o7u","slide":16,"text":"工作流方案","textPreview":"工作流方案","textChars":5,"textLines":1,"bbox":[457,576,143,26]}
+{"kind":"textbox","id":"sh/ylwj2987","slide":16,"text":"流程与 Agent 对比","textPreview":"流程与 Agent 对比","textChars":12,"textLines":1,"bbox":[370,613,235,22]}
+{"kind":"shape","id":"sh/zm50veps","slide":16,"bbox":[642,560,259,91]}
+{"kind":"textbox","id":"sh/kne14jqd","slide":16,"text":"2 类","textPreview":"2 类","textChars":3,"textLines":1,"bbox":[654,570,78,34]}
+{"kind":"textbox","id":"sh/lo7ixo7y","slide":16,"text":"写入确认闸门","textPreview":"写入确认闸门","textChars":6,"textLines":1,"bbox":[741,576,143,26]}
+{"kind":"textbox","id":"sh/ih0jedob","slide":16,"text":"审批提交 + 日报提交","textPreview":"审批提交 + 日报提交","textChars":11,"textLines":1,"bbox":[654,613,235,22]}
+{"kind":"shape","id":"sh/ji9k7ypw","slide":16,"bbox":[926,560,259,91]}
+{"kind":"textbox","id":"sh/tcbmdcre","slide":16,"text":"8 项","textPreview":"8 项","textChars":3,"textLines":1,"bbox":[938,570,78,34]}
+{"kind":"textbox","id":"sh/sb2l47at","slide":16,"text":"后续量化指标","textPreview":"后续量化指标","textChars":6,"textLines":1,"bbox":[1025,576,143,26]}
+{"kind":"textbox","id":"sh/rat4b298","slide":16,"text":"准确率、轮次、成功率、耗时","textPreview":"准确率、轮次、成功率、耗时","textChars":13,"textLines":1,"bbox":[938,613,235,22]}
+{"kind":"notes","id":"nt/gny5sjyp","slide":16,"text":"【只记一句】预期效果不是让 AI 多回答一句，而是让两个业务动作形成可确认、可恢复、可衡量的闭环。\n\n【可直接照读】当前已实现聊天请假、动态字段收集、审批预览和确认提交，以及聊天写日报、草稿、预览和 interrupt/resume 恢复。下一页用两个场景验证这条业务闭环。后续可以用模板识别准确率、平均对话轮次、必填字段完成率、预览到提交成功率、恢复成功率和 ERP Tool P95 延迟衡量规模化效果。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}

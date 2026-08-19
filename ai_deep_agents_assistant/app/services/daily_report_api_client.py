@@ -17,10 +17,16 @@ DEFAULT_SYNC_TYPES = [
     "work_ticket",
     "customer_manage",
 ]
+ERP_SUCCESS_CODE = "200"
+ERP_AUTH_FAILURE_CODES = {"401", "403"}
 
 
 class DailyReportApiError(RuntimeError):
     """携带接口上下文的 ERP 日报请求异常。"""
+
+
+class DailyReportAuthError(DailyReportApiError):
+    """ERP 明确拒绝 UID 或 Authorization。"""
 
 
 class DailyReportApiClient:
@@ -123,8 +129,15 @@ class DailyReportApiClient:
         except httpx.TimeoutException as exc:
             raise DailyReportApiError(f"日报接口请求超时：{method} {path}") from exc
         except httpx.HTTPStatusError as exc:
+            status_code = exc.response.status_code
+            detail = _response_message(exc.response)
+            if status_code in {401, 403}:
+                raise DailyReportAuthError(
+                    _erp_auth_error_message(method, path, detail)
+                ) from exc
+            suffix = f"，{detail}" if detail else ""
             raise DailyReportApiError(
-                f"日报接口请求失败：{method} {path}，HTTP {exc.response.status_code}"
+                f"日报接口请求失败：{method} {path}，HTTP {status_code}{suffix}"
             ) from exc
         except (httpx.HTTPError, ValueError) as exc:
             raise DailyReportApiError(
@@ -132,4 +145,43 @@ class DailyReportApiClient:
             ) from exc
         if not isinstance(payload, dict):
             raise DailyReportApiError(f"日报接口返回格式错误：{method} {path}")
+        _raise_for_erp_business_error(payload, method, path)
         return payload
+
+
+def _raise_for_erp_business_error(
+    payload: dict[str, Any],
+    method: str,
+    path: str,
+) -> None:
+    """同时检查 ERP 的 HTTP 200 + 业务 code 响应约定。"""
+    raw_code = payload.get("code")
+    if raw_code is None:
+        return
+    code = str(raw_code).strip()
+    if code == ERP_SUCCESS_CODE:
+        return
+    detail = _payload_message(payload)
+    if code in ERP_AUTH_FAILURE_CODES:
+        raise DailyReportAuthError(_erp_auth_error_message(method, path, detail))
+    suffix = f"，{detail}" if detail else ""
+    raise DailyReportApiError(
+        f"日报接口业务失败：{method} {path}，code={code}{suffix}"
+    )
+
+
+def _erp_auth_error_message(method: str, path: str, detail: str = "") -> str:
+    suffix = f"，ERP返回：{detail}" if detail else ""
+    return f"ERP登录状态无效：{method} {path}{suffix}。请重新登录ERP后重试。"
+
+
+def _response_message(response: httpx.Response) -> str:
+    try:
+        payload = response.json()
+    except ValueError:
+        return ""
+    return _payload_message(payload) if isinstance(payload, dict) else ""
+
+
+def _payload_message(payload: dict[str, Any]) -> str:
+    return str(payload.get("message") or payload.get("msg") or "").strip()

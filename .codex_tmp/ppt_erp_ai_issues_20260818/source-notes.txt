@@ -1,0 +1,10 @@
+Slide 17 content sources:
+- User-provided reference screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-aa65bb8f-8161-400a-b762-b18ec105a92c.png
+- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md
+- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md
+
+Slide 27 content sources:
+- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_create_agent.py
+- D:/PythonProject/LearnOne/ai_approval_assistant/app/tools/daily_report_tools.py
+- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py
+

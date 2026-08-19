@@ -1,0 +1,7 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/14bup87q","slide":17,"title":"解决的方案","textShapes":2}
+{"kind":"shape","id":"sh/oza547ed","slide":17,"name":"矩形 31","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1c7e50ni","slide":17,"name":"矩形 1","text":"解决的方案","textPreview":"解决的方案","textChars":5,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/gbedwfmx","slide":17,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"notes","id":"nt/14bup87q","slide":17,"text":"【只记一句】排查问题要看完整 Trace，而不是只看最终回答。\n\n【可直接照读】一次请求可能同时经过模型理解、流程路由、状态变化和 ERP 工具四类环节。LangSmith需要重点观察节点顺序、分支原因、模型字段抽取、Tool参数与耗时，以及 interrupt前后的状态差异。这样才能快速判断问题发生在哪一层，而不是凭感觉修改代码。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

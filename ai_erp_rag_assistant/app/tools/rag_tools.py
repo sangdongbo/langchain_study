@@ -10,7 +10,14 @@ def search_knowledge(
     *,
     company_id: str,
     department: str,
+    permission_tags: list[str],
     top_k: int = 5,
 ) -> list[dict[str, Any]]:
-    """实际执行 Embedding -> Milvus dense search -> tenant/permission filter。"""
-    return milvus_service.search(query, company_id=company_id, department=department, top_k=top_k)
+    """实际执行 Embedding -> Milvus dense search -> tenant/department filter。"""
+    return milvus_service.search(
+        query,
+        company_id=company_id,
+        department=department,
+        permission_tags=permission_tags,
+        top_k=top_k,
+    )

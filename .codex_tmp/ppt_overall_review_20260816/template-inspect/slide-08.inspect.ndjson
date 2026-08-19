@@ -1,0 +1,22 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":8,"title":"三层关系：基础组件、运行时与 Agent 套件","textShapes":12}
+{"kind":"shape","id":"sh/lgbepgvm","slide":8,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/18byd4zy","slide":8,"text":"三层关系：基础组件、运行时与 Agent 套件","textPreview":"三层关系：基础组件、运行时与 Agent 套件","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/g72x4zyd","slide":8,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ri9g7uhw","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/6h0fypgb","slide":8,"text":"不是三套互相替代的框架，而是不同层级的能力组合","textPreview":"不是三套互相替代的框架，而是不同层级的能力组合","textChars":23,"textLines":1,"bbox":[82,157,900,34]}
+{"kind":"shape","id":"sh/tkby9kzm","slide":8,"bbox":[220,219,840,88]}
+{"kind":"textbox","id":"sh/sjix0zy1","slide":8,"text":"Deep Agents  ·  应用层 / Agent Harness","textPreview":"Deep Agents  ·  应用层 / Agent Harness","textChars":35,"textLines":1,"bbox":[255,246,770,34]}
+{"kind":"textbox","id":"sh/je9g3ahk","slide":8,"text":"提供任务规划、子智能体、文件与长任务等高级能力","textPreview":"提供任务规划、子智能体、文件与长任务等高级能力","textChars":23,"textLines":1,"bbox":[285,283,710,24]}
+{"kind":"shape","id":"sh/id0fu50z","slide":8,"bbox":[616,316,48,38]}
+{"kind":"textbox","id":"sh/o7ydoret","slide":8,"text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,352,100,24]}
+{"kind":"shape","id":"sh/98rehwve","slide":8,"bbox":[220,389,840,88]}
+{"kind":"textbox","id":"sh/m5gvmhwn","slide":8,"text":"LangGraph  ·  运行时 / Agent Runtime","textPreview":"LangGraph  ·  运行时 / Agent Runtime","textChars":33,"textLines":1,"bbox":[255,416,770,34]}
+{"kind":"textbox","id":"sh/n6pwfmd8","slide":8,"text":"负责状态管理、持久化执行、循环分支与人工中断","textPreview":"负责状态管理、持久化执行、循环分支与人工中断","textChars":22,"textLines":1,"bbox":[285,453,710,24]}
+{"kind":"shape","id":"sh/0jydkreh","slide":8,"bbox":[616,486,48,38]}
+{"kind":"textbox","id":"sh/1k7edwv2","slide":8,"text":"构建在","textPreview":"构建在","textChars":3,"textLines":1,"bbox":[590,522,100,24]}
+{"kind":"shape","id":"sh/ehgvihwr","slide":8,"bbox":[220,559,840,88]}
+{"kind":"textbox","id":"sh/zipwbmdc","slide":8,"text":"LangChain  ·  基础层 / Agent Framework","textPreview":"LangChain  ·  基础层 / Agent Framework","textChars":35,"textLines":1,"bbox":[255,586,770,34]}
+{"kind":"textbox","id":"sh/kfixwbe1","slide":8,"text":"提供模型适配、Prompt、Tool、消息与链式调用等基础构件","textPreview":"提供模型适配、Prompt、Tool、消息与链式调用等基础构件","textChars":31,"textLines":1,"bbox":[285,623,710,24]}
+{"kind":"notes","id":"nt/fu1gfa1s","slide":8,"text":"【只记一句】三者是分层组合，最终主流程选 LangGraph。\n\n【可直接照读】LangChain提供模型和 Tool 等基础构件；LangGraph负责状态、分支和人工中断；Deep Agents提供更高层的自主规划。ERP 涉及真实写入，所以先保证流程可控。\n\n【时间建议】约 35 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/pyproject.toml\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- C:/Users/EDY/Pictures/16.jpg\n[/Sources]"}

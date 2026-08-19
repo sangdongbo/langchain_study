@@ -1,0 +1,22 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"ERP 与 AI 融合实践","textShapes":11}
+{"kind":"shape","id":"sh/dgzetcfa","slide":1,"name":"矩形 18","bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/547294r6","slide":1,"name":"矩形 1","bbox":[0,0,1280,218]}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"name":"矩形 2","text":"ERP 与 AI 融合实践","textPreview":"ERP 与 AI 融合实践","textChars":13,"textLines":1,"bbox":[73.07,80.33,900,78]}
+{"kind":"shape","id":"sh/7qp4be9c","slide":1,"name":"矩形 3","bbox":[82,141,820,46]}
+{"kind":"textbox","id":"sh/65g3298r","slide":1,"name":"矩形 4","text":"AI没有替代ERP，而是为ERP增加自然语言业务入口","textPreview":"AI没有替代ERP，而是为ERP增加自然语言业务入口","textChars":26,"textLines":1,"bbox":[82,284,820,88]}
+{"kind":"shape","id":"sh/ts7md4r2","slide":1,"name":"圆角矩形 5","bbox":[82,445,252,116]}
+{"kind":"textbox","id":"sh/sryl4zqx","slide":1,"name":"矩形 6","text":"智能审批","textPreview":"智能审批","textChars":4,"textLines":1,"bbox":[100,469,216,32]}
+{"kind":"textbox","id":"sh/fu94fe98","slide":1,"name":"矩形 7","text":"approval_creation_agent","textPreview":"approval_creation_agent","textChars":23,"textLines":1,"bbox":[97,516,222,27]}
+{"kind":"shape","id":"sh/utg3698n","slide":1,"name":"圆角矩形 8","bbox":[368,445,252,116]}
+{"kind":"textbox","id":"sh/wn6dc7eh","slide":1,"name":"矩形 9","text":"标准日报","textPreview":"标准日报","textChars":4,"textLines":1,"bbox":[386,469,216,32]}
+{"kind":"textbox","id":"sh/hofulsf2","slide":1,"name":"矩形 10","text":"daily_report_agent","textPreview":"daily_report_agent","textChars":18,"textLines":1,"bbox":[383,516,222,27]}
+{"kind":"shape","id":"sh/ul4vaxgb","slide":1,"name":"圆角矩形 11","bbox":[654,445,252,116]}
+{"kind":"textbox","id":"sh/vmdcj2xw","slide":1,"name":"矩形 12","text":"自主日报","textPreview":"自主日报","textChars":4,"textLines":1,"bbox":[672,469,216,32]}
+{"kind":"textbox","id":"sh/4r6dg7et","slide":1,"name":"矩形 13","text":"daily_report_create_agent","textPreview":"daily_report_create_agent","textChars":25,"textLines":1,"bbox":[669,516,222,27]}
+{"kind":"shape","id":"sh/5sfepcfe","slide":1,"name":"圆角矩形 14","bbox":[940,445,252,116]}
+{"kind":"textbox","id":"sh/ipovexwn","slide":1,"name":"矩形 15","text":"Agentic Workflow","textPreview":"Agentic Workflow","textChars":16,"textLines":1,"bbox":[958,469,216,32]}
+{"kind":"textbox","id":"sh/3qxwn2x8","slide":1,"name":"矩形 16","text":"daily_report_agentic_workflow_demo","textPreview":"daily_report_agentic_workflow_demo","textChars":34,"textLines":1,"bbox":[955,516,222,27]}
+{"kind":"textbox","id":"sh/sfqdkrep","slide":1,"name":"矩形 17","text":"AI APPROVAL ASSISTANT · 场景实践分享","textPreview":"AI APPROVAL ASSISTANT · 场景实践分享","textChars":30,"textLines":1,"bbox":[82,646,520,22]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":"【只记一句】AI没有替代ERP，而是为ERP增加自然语言业务入口。\n\n【可直接照读】今天整场分享只围绕一句话：AI没有替代ERP，而是为ERP增加自然语言业务入口。传统ERP要求用户先找到菜单、理解字段、填写表单；引入AI以后，用户只需要表达业务目标，AI负责理解、追问和整理，ERP仍然负责权限、规则、字段和最终写入。接下来我用聊天发起审批和聊天填写日报两个场景说明这条路径。\n\n【时间建议】约 50 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n- Visual style references supplied by the user: C:/Users/EDY/Pictures/1.jpg–16.jpg\n[/Sources]"}

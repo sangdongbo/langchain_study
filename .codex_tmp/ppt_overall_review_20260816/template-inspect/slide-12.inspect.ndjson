@@ -1,0 +1,40 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/8f2psfyx","slide":12,"title":"审批最难的不是聊天，而是适配动态配置","textShapes":21}
+{"kind":"shape","id":"sh/9k3apob2","slide":12,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/1gbm9s3a","slide":12,"text":"审批最难的不是聊天，而是适配动态配置","textPreview":"审批最难的不是聊天，而是适配动态配置","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/0f2lgnmp","slide":12,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/ra943il8","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/q903ad4n","slide":12,"text":"同一个“请假”，不同公司可能完全不同","textPreview":"同一个“请假”，不同公司可能完全不同","textChars":18,"textLines":1,"bbox":[82,158,700,37]}
+{"kind":"shape","id":"sh/dcbm583y","slide":12,"bbox":[82,219,450,280]}
+{"kind":"textbox","id":"sh/sb2lcnmd","slide":12,"text":"公司 A","textPreview":"公司 A","textChars":4,"textLines":1,"bbox":[112,245,150,32]}
+{"kind":"shape","id":"sh/b6d4f2lc","slide":12,"bbox":[116,308,9,9]}
+{"kind":"textbox","id":"sh/a543mx4r","slide":12,"text":"请假类型","textPreview":"请假类型","textChars":4,"textLines":1,"bbox":[139,300,347,41]}
+{"kind":"shape","id":"sh/wvupgz6t","slide":12,"bbox":[116,353,9,9]}
+{"kind":"textbox","id":"sh/xw3q94ne","slide":12,"text":"开始 / 结束时间","textPreview":"开始 / 结束时间","textChars":9,"textLines":1,"bbox":[139,345,347,41]}
+{"kind":"shape","id":"sh/atc7epon","slide":12,"bbox":[116,398,9,9]}
+{"kind":"textbox","id":"sh/bulo7u58","slide":12,"text":"请假事由","textPreview":"请假事由","textChars":4,"textLines":1,"bbox":[139,390,347,41]}
+{"kind":"shape","id":"sh/orapcf6h","slide":12,"bbox":[116,443,9,9]}
+{"kind":"textbox","id":"sh/9sj65kn2","slide":12,"text":"审批人自动匹配","textPreview":"审批人自动匹配","textChars":7,"textLines":1,"bbox":[139,435,347,41]}
+{"kind":"shape","id":"sh/mps7a5or","slide":12,"bbox":[748,219,450,280]}
+{"kind":"textbox","id":"sh/nq1o3a5w","slide":12,"text":"公司 B","textPreview":"公司 B","textChars":4,"textLines":1,"bbox":[778,245,150,32]}
+{"kind":"shape","id":"sh/0nap8f6l","slide":12,"bbox":[782,308,9,9]}
+{"kind":"textbox","id":"sh/1oj61kn6","slide":12,"text":"假期余额规则","textPreview":"假期余额规则","textChars":6,"textLines":1,"bbox":[805,300,347,41]}
+{"kind":"shape","id":"sh/hkbm5wzu","slide":12,"bbox":[782,353,9,9]}
+{"kind":"textbox","id":"sh/gj25cry9","slide":12,"text":"日期时间 + 时长","textPreview":"日期时间 + 时长","textChars":9,"textLines":1,"bbox":[805,345,347,41]}
+{"kind":"shape","id":"sh/fit436ho","slide":12,"bbox":[782,398,9,9]}
+{"kind":"textbox","id":"sh/uh0na1g3","slide":12,"text":"交接人员","textPreview":"交接人员","textChars":4,"textLines":1,"bbox":[805,390,347,41]}
+{"kind":"shape","id":"sh/tgrm1wzy","slide":12,"bbox":[782,443,9,9]}
+{"kind":"textbox","id":"sh/sfi58ryd","slide":12,"text":"发起人选择审批人","textPreview":"发起人选择审批人","textChars":8,"textLines":1,"bbox":[805,435,347,41]}
+{"kind":"shape","id":"sh/7u94zmhs","slide":12,"bbox":[570,329,140,44]}
+{"kind":"textbox","id":"sh/6t0n6hg7","slide":12,"text":"不能写死","textPreview":"不能写死","textChars":4,"textLines":1,"bbox":[574,382,132,28]}
+{"kind":"shape","id":"sh/dcv6dgz2","slide":12,"bbox":[82,550,342,90]}
+{"kind":"textbox","id":"sh/cbm5kbyh","slide":12,"text":"ERP","textPreview":"ERP","textChars":3,"textLines":1,"bbox":[101,568,112,28]}
+{"kind":"textbox","id":"sh/alwbitsn","slide":12,"text":"定义模板、字段和审批流程","textPreview":"定义模板、字段和审批流程","textChars":12,"textLines":1,"bbox":[207,567,195,50]}
+{"kind":"shape","id":"sh/bm5sryt8","slide":12,"bbox":[457,550,342,90]}
+{"kind":"textbox","id":"sh/wnetkjat","slide":12,"text":"AI","textPreview":"AI","textChars":2,"textLines":1,"bbox":[476,568,112,28]}
+{"kind":"textbox","id":"sh/xonutobe","slide":12,"text":"理解用户表达并提取信息","textPreview":"理解用户表达并提取信息","textChars":11,"textLines":1,"bbox":[582,567,195,50]}
+{"kind":"shape","id":"sh/mhcbe9sr","slide":12,"bbox":[832,550,342,90]}
+{"kind":"textbox","id":"sh/nilsnetc","slide":12,"text":"聊天助手","textPreview":"聊天助手","textChars":4,"textLines":1,"bbox":[851,568,112,28]}
+{"kind":"textbox","id":"sh/ojutgjah","slide":12,"text":"动态追问、校验、预览","textPreview":"动态追问、校验、预览","textChars":10,"textLines":1,"bbox":[957,567,195,50]}
+{"kind":"notes","id":"nt/8f2psfyx","slide":12,"text":"【只记一句】同一个请假动作，在不同公司可能对应不同表单。\n\n【可直接照读】审批最难的地方是组件多、字段不一样，而且每家公司还能配置不同规则。解决方法不是为每家公司增加一组 if-else，而是让 ERP 定义模板和字段，AI负责理解表达，聊天助手根据配置动态追问、校验和预览。这样新增组件主要是增加配置和适配，而不是重写主流程。\n\n【时间建议】约 55 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/services/crm_service.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n[/Sources]"}

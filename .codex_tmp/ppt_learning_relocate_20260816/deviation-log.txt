@@ -1,0 +1,5 @@
+Slide 22: restore the original “next step” roadmap and original speaker notes.
+Slide 33: duplicate source slide 22 unchanged as the “future learning and exploration” roadmap, updating only its page marker from 22 to 33.
+Slide 34: preserve the original closing slide and update its page marker from 33 to 34.
+No new visual primitives or external assets are added.
+

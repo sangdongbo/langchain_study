@@ -1,0 +1,5 @@
+Slide 1: rewrite the existing subtitle statement and speaker notes so the central thesis is explicit at the opening.
+Slide 21: rewrite the title, first takeaway, bottom synthesis line, and speaker notes to make the natural-language-entry thesis the primary conclusion.
+Slide 33: preserve the closing layout but replace the two central slogans and speaker notes with the final thesis; keep the existing “谢谢” and “欢迎交流”.
+No other visual or narrative changes are intentional.
+

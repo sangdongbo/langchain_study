@@ -1,0 +1,3 @@
+Slide 22: replace the original scene-expansion roadmap with a learning-and-exploration roadmap. The existing three-column layout is preserved; only inherited text boxes and speaker notes are rewritten.
+No new slides, shapes, images, charts, or externally sourced claims are introduced.
+

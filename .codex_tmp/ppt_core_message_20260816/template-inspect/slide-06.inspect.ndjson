@@ -1,0 +1,29 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"实施路径：从业务试点到可复用聊天助手","textShapes":19}
+{"kind":"shape","id":"sh/ydgnit07","slide":6,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"text":"实施路径：从业务试点到可复用聊天助手","textPreview":"实施路径：从业务试点到可复用聊天助手","textChars":18,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/87ipkzal","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/98rqt4r6","slide":6,"bbox":[72,172,346,183]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[97,194,62,35]}
+{"kind":"textbox","id":"sh/7m98ru9g","slide":6,"text":"选择试点场景","textPreview":"选择试点场景","textChars":6,"textLines":1,"bbox":[163,194,225,34]}
+{"kind":"textbox","id":"sh/oryp8fah","slide":6,"text":"先做审批与日报，验证查询、补充信息和写入闭环","textPreview":"先做审批与日报，验证查询、补充信息和写入闭环","textChars":22,"textLines":1,"bbox":[100,254,290,69]}
+{"kind":"shape","id":"sh/pc76hkr2","slide":6,"bbox":[467,172,346,183]}
+{"kind":"textbox","id":"sh/h4bupgn6","slide":6,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[492,194,62,35]}
+{"kind":"textbox","id":"sh/w32twb6l","slide":6,"text":"接入 ERP 上下文","textPreview":"接入 ERP 上下文","textChars":10,"textLines":1,"bbox":[558,194,225,34]}
+{"kind":"textbox","id":"sh/v2tcn650","slide":6,"text":"打通用户权限、审批模板、动态字段、日报配置与草稿","textPreview":"打通用户权限、审批模板、动态字段、日报配置与草稿","textChars":24,"textLines":1,"bbox":[495,254,290,69]}
+{"kind":"shape","id":"sh/u1kbu1ov","slide":6,"bbox":[862,172,346,183]}
+{"kind":"textbox","id":"sh/5svutgni","slide":6,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[887,194,62,35]}
+{"kind":"textbox","id":"sh/47mt0b6x","slide":6,"text":"封装业务能力","textPreview":"封装业务能力","textChars":6,"textLines":1,"bbox":[953,194,225,34]}
+{"kind":"textbox","id":"sh/j6dcr65c","slide":6,"text":"将查询、校验、保存、预览和提交封装为统一 Tool","textPreview":"将查询、校验、保存、预览和提交封装为统一 Tool","textChars":25,"textLines":1,"bbox":[890,254,290,69]}
+{"kind":"shape","id":"sh/i54bylor","slide":6,"bbox":[271,424,346,183]}
+{"kind":"textbox","id":"sh/twfux0ne","slide":6,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[296,446,62,35]}
+{"kind":"textbox","id":"sh/svmt4v6t","slide":6,"text":"使用 LangGraph 编排","textPreview":"使用 LangGraph 编排","textChars":15,"textLines":1,"bbox":[362,446,225,34]}
+{"kind":"textbox","id":"sh/cbe5g3ih","slide":6,"text":"管理多轮状态、流程节点、人工确认、暂停与恢复","textPreview":"管理多轮状态、流程节点、人工确认、暂停与恢复","textChars":22,"textLines":1,"bbox":[299,506,290,69]}
+{"kind":"shape","id":"sh/dcnm98zm","slide":6,"bbox":[666,424,346,183]}
+{"kind":"textbox","id":"sh/qpwnet0b","slide":6,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[691,446,62,35]}
+{"kind":"textbox","id":"sh/bq547yhw","slide":6,"text":"观测与迭代","textPreview":"观测与迭代","textChars":5,"textLines":1,"bbox":[757,446,225,34]}
+{"kind":"textbox","id":"sh/0fy5k3id","slide":6,"text":"通过 LangSmith 定位模型、路由、状态与 ERP 接口问题","textPreview":"通过 LangSmith 定位模型、路由、状态与 ERP 接口问题","textChars":33,"textLines":1,"bbox":[694,506,290,69]}
+{"kind":"textbox","id":"sh/lg76d8zy","slide":6,"text":"实施原则：AI 负责理解与组织，LangGraph 负责状态与流程，ERP 负责真实规则与最终执行","textPreview":"实施原则：AI 负责理解与组织，LangGraph 负责状态与流程，ERP 负责真实规则与最终执行","textChars":49,"textLines":1,"bbox":[86,642,1108,28]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":6,"text":"【只记一句】实施路径是先选场景，再接数据，再封装工具，最后用 LangGraph 编排和观测。\n\n【可直接照读】我们没有从“大而全的企业助手”开始，而是先选择审批和日报两个高频动作。接着接入用户权限、审批模板、动态字段和日报配置，再把查询、校验、保存、预览、提交封装成统一 Tool。LangGraph 管理状态和流程，LangSmith帮助定位问题，形成从试点到复用的路径。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}

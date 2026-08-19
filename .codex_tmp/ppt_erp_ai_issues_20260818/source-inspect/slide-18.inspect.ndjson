@@ -1,0 +1,35 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/y5wne50z","slide":18,"title":"问题排查：需要从“看结果”升级为“看完整链路”","textShapes":18}
+{"kind":"shape","id":"sh/7yh8nytw","slide":18,"name":"矩形 31","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/wrelszu9","slide":18,"name":"矩形 1","text":"问题排查：需要从“看结果”升级为“看完整链路”","textPreview":"问题排查：需要从“看结果”升级为“看完整链路”","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/hsn2l4bu","slide":18,"name":"矩形 2","text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/itw3upcf","slide":18,"name":"矩形 3","text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/je5knut0","slide":18,"name":"矩形 4","text":"一次请求可能同时经过四类环节","textPreview":"一次请求可能同时经过四类环节","textChars":14,"textLines":1,"bbox":[81,158,510,34]}
+{"kind":"shape","id":"sh/4felwzu5","slide":18,"name":"右箭头 5","bbox":[293,291,65,34]}
+{"kind":"shape","id":"sh/5gnmp4bq","slide":18,"name":"右箭头 6","bbox":[588,291,65,34]}
+{"kind":"shape","id":"sh/6hw3y9sb","slide":18,"name":"右箭头 7","bbox":[883,291,65,34]}
+{"kind":"shape","id":"sh/rip4retw","slide":18,"name":"圆角矩形 8","bbox":[70,225,230,175]}
+{"kind":"textbox","id":"sh/fapkr6pw","slide":18,"name":"矩形 9","text":"模型理解","textPreview":"模型理解","textChars":4,"textLines":1,"bbox":[90,250,190,30]}
+{"kind":"textbox","id":"sh/upg3i18r","slide":18,"name":"矩形 10","text":"意图是否识别正确？\n字段是否提取完整？","textPreview":"意图是否识别正确？ | 字段是否提取完整？","textChars":19,"textLines":2,"bbox":[90,307,190,62]}
+{"kind":"shape","id":"sh/1cr2tg72","slide":18,"name":"圆角矩形 11","bbox":[365,225,230,175]}
+{"kind":"textbox","id":"sh/gbylkbqh","slide":18,"name":"矩形 12","text":"流程路由","textPreview":"流程路由","textChars":4,"textLines":1,"bbox":[385,250,190,30]}
+{"kind":"textbox","id":"sh/7mpknmp0","slide":18,"name":"矩形 13","text":"进入了哪个节点？\n为什么选择这个分支？","textPreview":"进入了哪个节点？ | 为什么选择这个分支？","textChars":19,"textLines":2,"bbox":[385,307,190,62]}
+{"kind":"shape","id":"sh/6lg3e18f","slide":18,"name":"圆角矩形 14","bbox":[660,225,230,175]}
+{"kind":"textbox","id":"sh/to72pw76","slide":18,"name":"矩形 15","text":"状态变化","textPreview":"状态变化","textChars":4,"textLines":1,"bbox":[680,250,190,30]}
+{"kind":"textbox","id":"sh/snylgrql","slide":18,"name":"矩形 16","text":"当前等待什么？\n中断恢复是否正确？","textPreview":"当前等待什么？ | 中断恢复是否正确？","textChars":17,"textLines":2,"bbox":[680,307,190,62]}
+{"kind":"shape","id":"sh/bi94zqp4","slide":18,"name":"圆角矩形 17","bbox":[955,225,230,175]}
+{"kind":"textbox","id":"sh/qh03ql8j","slide":18,"name":"矩形 18","text":"ERP 工具","textPreview":"ERP 工具","textChars":6,"textLines":1,"bbox":[975,250,190,30]}
+{"kind":"textbox","id":"sh/md4nipsr","slide":18,"name":"矩形 19","text":"调用了哪个接口？\n入参与返回是否正确？","textPreview":"调用了哪个接口？ | 入参与返回是否正确？","textChars":19,"textLines":2,"bbox":[975,307,190,62]}
+{"kind":"shape","id":"sh/nedoru9c","slide":18,"name":"圆角矩形 20","bbox":[78,448,1123.6,213.53]}
+{"kind":"textbox","id":"sh/8zm5kzax","slide":18,"name":"矩形 21","text":"LangSmith / Trace 需要重点观察","textPreview":"LangSmith / Trace 需要重点观察","textChars":24,"textLines":1,"bbox":[111,472,420,32]}
+{"kind":"shape","id":"sh/90v6t4ri","slide":18,"name":"椭圆 22","bbox":[112,526,9,9]}
+{"kind":"textbox","id":"sh/a14nm9s3","slide":18,"name":"矩形 23","text":"节点执行顺序与路由原因","textPreview":"节点执行顺序与路由原因","textChars":11,"textLines":1,"bbox":[135,518,1007,23]}
+{"kind":"shape","id":"sh/v2xovu9o","slide":18,"name":"椭圆 24","bbox":[112,553,9,9]}
+{"kind":"textbox","id":"sh/w36poza9","slide":18,"name":"矩形 25","text":"模型输入输出与字段抽取结果","textPreview":"模型输入输出与字段抽取结果","textChars":13,"textLines":1,"bbox":[135,545,1007,23]}
+{"kind":"shape","id":"sh/x4f6x4re","slide":18,"name":"椭圆 26","bbox":[112,580,9,9]}
+{"kind":"textbox","id":"sh/q5kna5sz","slide":18,"name":"矩形 27","text":"Tool 调用参数、返回和耗时","textPreview":"Tool 调用参数、返回和耗时","textChars":15,"textLines":1,"bbox":[135,572,1007,23]}
+{"kind":"shape","id":"sh/b6toja94","slide":18,"name":"椭圆 28","bbox":[112,607,9,9]}
+{"kind":"textbox","id":"sh/t0zqp8bm","slide":18,"name":"矩形 29","text":"中断前后的状态差异与失败位置","textPreview":"中断前后的状态差异与失败位置","textChars":14,"textLines":1,"bbox":[135,599,1007,23]}
+{"kind":"textbox","id":"sh/szq9g3uh","slide":18,"name":"矩形 30","text":"排查目标：快速定位问题发生在模型、路由、状态还是 ERP 接口","textPreview":"排查目标：快速定位问题发生在模型、路由、状态还是 ERP 接口","textChars":31,"textLines":1,"bbox":[89,676.07,1102,25]}
+{"kind":"notes","id":"nt/y5wne50z","slide":18,"text":"【只记一句】排查问题要看完整 Trace，而不是只看最终回答。\n\n【可直接照读】一次请求可能同时经过模型理解、流程路由、状态变化和 ERP 工具四类环节。LangSmith需要重点观察节点顺序、分支原因、模型字段抽取、Tool参数与耗时，以及 interrupt前后的状态差异。这样才能快速判断问题发生在哪一层，而不是凭感觉修改代码。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

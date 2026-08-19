@@ -1,0 +1,35 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/nid43ytk","slide":19,"title":"问题排查：需要从“看结果”升级为“看完整链路”","textShapes":18}
+{"kind":"shape","id":"sh/cfuxw3yt","slide":19,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/9gb6xgbi","slide":19,"text":"问题排查：需要从“看结果”升级为“看完整链路”","textPreview":"问题排查：需要从“看结果”升级为“看完整链路”","textChars":23,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/8v2pobax","slide":19,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/vitozqt8","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"textbox","id":"sh/ahk7qls3","slide":19,"text":"一次请求可能同时经过四类环节","textPreview":"一次请求可能同时经过四类环节","textChars":14,"textLines":1,"bbox":[81,158,510,34]}
+{"kind":"shape","id":"sh/xkbq10be","slide":19,"bbox":[293,291,65,34]}
+{"kind":"shape","id":"sh/wj2psvat","slide":19,"bbox":[588,291,65,34]}
+{"kind":"shape","id":"sh/jmd83atk","slide":19,"bbox":[883,291,65,34]}
+{"kind":"shape","id":"sh/il47u5sz","slide":19,"bbox":[70,225,230,175]}
+{"kind":"textbox","id":"sh/cri1gnql","slide":19,"text":"模型理解","textPreview":"模型理解","textChars":4,"textLines":1,"bbox":[90,250,190,30]}
+{"kind":"textbox","id":"sh/dsri9sr6","slide":19,"text":"意图是否识别正确？\n字段是否提取完整？","textPreview":"意图是否识别正确？ | 字段是否提取完整？","textChars":19,"textLines":2,"bbox":[90,307,190,62]}
+{"kind":"shape","id":"sh/qpgjex8f","slide":19,"bbox":[365,225,230,175]}
+{"kind":"textbox","id":"sh/rqp07290","slide":19,"text":"流程路由","textPreview":"流程路由","textChars":4,"textLines":1,"bbox":[385,250,190,30]}
+{"kind":"textbox","id":"sh/0vi1k7qx","slide":19,"text":"进入了哪个节点？\n为什么选择这个分支？","textPreview":"进入了哪个节点？ | 为什么选择这个分支？","textChars":19,"textLines":2,"bbox":[385,307,190,62]}
+{"kind":"shape","id":"sh/1gridcr2","slide":19,"bbox":[660,225,230,175]}
+{"kind":"textbox","id":"sh/et0jix8r","slide":19,"text":"状态变化","textPreview":"状态变化","textChars":4,"textLines":1,"bbox":[680,250,190,30]}
+{"kind":"textbox","id":"sh/zu90b29c","slide":19,"text":"当前等待什么？\n中断恢复是否正确？","textPreview":"当前等待什么？ | 中断恢复是否正确？","textChars":17,"textLines":2,"bbox":[680,307,190,62]}
+{"kind":"shape","id":"sh/oj21o7qt","slide":19,"bbox":[955,225,230,175]}
+{"kind":"textbox","id":"sh/9kb2hcre","slide":19,"text":"ERP 工具","textPreview":"ERP 工具","textChars":6,"textLines":1,"bbox":[975,250,190,30]}
+{"kind":"textbox","id":"sh/x07i1cji","slide":19,"text":"调用了哪个接口？\n入参与返回是否正确？","textPreview":"调用了哪个接口？ | 入参与返回是否正确？","textChars":19,"textLines":2,"bbox":[975,307,190,62]}
+{"kind":"shape","id":"sh/wfy1s7ix","slide":19,"bbox":[78,448,1124,180]}
+{"kind":"textbox","id":"sh/vep0z21c","slide":19,"text":"LangSmith / Trace 需要重点观察","textPreview":"LangSmith / Trace 需要重点观察","textChars":24,"textLines":1,"bbox":[111,472,420,32]}
+{"kind":"shape","id":"sh/adgjqx0r","slide":19,"bbox":[112,526,9,9]}
+{"kind":"textbox","id":"sh/54ri5wje","slide":19,"text":"节点执行顺序与路由原因","textPreview":"节点执行顺序与路由原因","textChars":11,"textLines":1,"bbox":[135,518,1007,23]}
+{"kind":"shape","id":"sh/k3y1wri9","slide":19,"bbox":[112,553,9,9]}
+{"kind":"textbox","id":"sh/j2p03m1o","slide":19,"text":"模型输入输出与字段抽取结果","textPreview":"模型输入输出与字段抽取结果","textChars":13,"textLines":1,"bbox":[135,545,1007,23]}
+{"kind":"shape","id":"sh/i1gjuh03","slide":19,"bbox":[112,580,9,9]}
+{"kind":"textbox","id":"sh/l8nitsja","slide":19,"text":"Tool 调用参数、返回和耗时","textPreview":"Tool 调用参数、返回和耗时","textChars":15,"textLines":1,"bbox":[135,572,1007,23]}
+{"kind":"shape","id":"sh/07ehknip","slide":19,"bbox":[112,607,9,9]}
+{"kind":"textbox","id":"sh/qdsfutgn","slide":19,"text":"中断前后的状态差异与失败位置","textPreview":"中断前后的状态差异与失败位置","textChars":14,"textLines":1,"bbox":[135,599,1007,23]}
+{"kind":"textbox","id":"sh/belg3yh8","slide":19,"text":"排查目标：快速定位问题发生在模型、路由、状态还是 ERP 接口","textPreview":"排查目标：快速定位问题发生在模型、路由、状态还是 ERP 接口","textChars":31,"textLines":1,"bbox":[89,650,1102,25]}
+{"kind":"notes","id":"nt/nid43ytk","slide":19,"text":"【只记一句】排查问题要看完整 Trace，而不是只看最终回答。\n\n【可直接照读】一次请求可能同时经过模型理解、流程路由、状态变化和 ERP 工具四类环节。LangSmith需要重点观察节点顺序、分支原因、模型字段抽取、Tool参数与耗时，以及 interrupt前后的状态差异。这样才能快速判断问题发生在哪一层，而不是凭感觉修改代码。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/studio_debug.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/workflow.py\n[/Sources]"}

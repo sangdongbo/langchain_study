@@ -61,14 +61,23 @@ class MilvusService:
         self._client().upsert(collection_name=self.settings.milvus_collection, data=payload)
         return len(payload)
 
-    def search(self, query: str, *, company_id: str = "", department: str = "", top_k: int = 5) -> list[dict[str, Any]]:
+    def search(
+        self,
+        query: str,
+        *,
+        company_id: str,
+        department: str = "",
+        permission_tags: list[str] | None = None,
+        top_k: int = 5,
+    ) -> list[dict[str, Any]]:
         client = self._client()
         if not client.has_collection(self.settings.milvus_collection):
             raise RuntimeError(f"Milvus collection 不存在：{self.settings.milvus_collection}。请先执行 PDF 入库。")
+        company_id = company_id.strip()
+        if not company_id:
+            raise RuntimeError("缺少 company_id，已拒绝执行无租户边界的知识检索。")
         vector = embedding_service.embed_query(query)
-        filters = ["is_active == true"]
-        if company_id:
-            filters.append(f'company_id == "{_escape(company_id)}"')
+        filters = ["is_active == true", f'company_id == "{_escape(company_id)}"']
         if department:
             filters.append(f'(department == "公共制度" or department == "{_escape(department)}")')
         results = client.search(
@@ -76,15 +85,25 @@ class MilvusService:
             data=[vector],
             anns_field="dense",
             filter=" and ".join(filters),
-            limit=top_k,
+            limit=max(top_k * 3, top_k),
             output_fields=OUTPUT_FIELDS,
             search_params={"metric_type": "COSINE", "params": {}},
         )
         hits = results[0] if results else []
         evidence: list[dict[str, Any]] = []
+        seen_chunk_ids: set[str] = set()
         for hit in hits:
             entity = hit.get("entity", hit)
-            evidence.append({key: _plain(value) for key, value in {**entity, "score": hit.get("distance", hit.get("score"))}.items()})
+            score = float(hit.get("distance", hit.get("score", 0.0)) or 0.0)
+            if score < self.settings.rag_min_score:
+                continue
+            chunk_id = str(entity.get("chunk_id") or "")
+            if chunk_id in seen_chunk_ids:
+                continue
+            seen_chunk_ids.add(chunk_id)
+            evidence.append({key: _plain(value) for key, value in {**entity, "score": score}.items()})
+            if len(evidence) >= top_k:
+                break
         return evidence
 
 

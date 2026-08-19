@@ -1,0 +1,31 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/ofu103u5","slide":34,"title":"三个 ERP 问题，三种处理方式","textShapes":17}
+{"kind":"shape","id":"sh/9gnmh0zi","slide":34,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/pwzm1kbm","slide":34,"text":"三个 ERP 问题，三种处理方式","textPreview":"三个 ERP 问题，三种处理方式","textChars":16,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ovq58fu1","slide":34,"text":"ENTERPRISE RAG · USE CASES 3/4","textPreview":"ENTERPRISE RAG · USE CASES 3/4","textChars":30,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/byh43utc","slide":34,"text":"34","textPreview":"34","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/qx8napc7","slide":34,"bbox":[426,329,38,28]}
+{"kind":"shape","id":"sh/d0zm54bi","slide":34,"bbox":[72,165,344,346]}
+{"kind":"textbox","id":"sh/czq5czux","slide":34,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[97,191,65,34]}
+{"kind":"textbox","id":"sh/z2147eto","slide":34,"text":"病假需要什么材料？","textPreview":"病假需要什么材料？","textChars":9,"textLines":1,"bbox":[97,242,294,65]}
+{"kind":"shape","id":"sh/y18ne9c3","slide":34,"bbox":[112,331,264,46]}
+{"kind":"textbox","id":"sh/0vidkfu5","slide":34,"text":"RAG 知识检索","textPreview":"RAG 知识检索","textChars":8,"textLines":1,"bbox":[123,342,242,26]}
+{"kind":"textbox","id":"sh/1wredkbq","slide":34,"text":"检索当前有效制度\n返回条款、版本和来源","textPreview":"检索当前有效制度 | 返回条款、版本和来源","textChars":19,"textLines":2,"bbox":[100,405,288,64]}
+{"kind":"shape","id":"sh/e90vipcz","slide":34,"bbox":[830,329,38,28]}
+{"kind":"shape","id":"sh/za9wbutk","slide":34,"bbox":[476,165,344,346]}
+{"kind":"textbox","id":"sh/oz2dozu1","slide":34,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[501,191,65,34]}
+{"kind":"textbox","id":"sh/90beh4bm","slide":34,"text":"我的请假审批到谁了？","textPreview":"我的请假审批到谁了？","textChars":10,"textLines":1,"bbox":[501,242,294,65]}
+{"kind":"shape","id":"sh/mxkvmpcb","slide":34,"bbox":[516,331,264,46]}
+{"kind":"textbox","id":"sh/nytwfutg","slide":34,"text":"ERP Tool 实时查询","textPreview":"ERP Tool 实时查询","textChars":13,"textLines":1,"bbox":[527,342,242,26]}
+{"kind":"textbox","id":"sh/w32xszud","slide":34,"text":"读取当前审批状态\n返回节点、处理人和时间","textPreview":"读取当前审批状态 | 返回节点、处理人和时间","textChars":20,"textLines":2,"bbox":[504,405,288,64]}
+{"kind":"shape","id":"sh/x4vel4by","slide":34,"bbox":[880,165,344,346]}
+{"kind":"textbox","id":"sh/l87mpkzq","slide":34,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[905,191,65,34]}
+{"kind":"textbox","id":"sh/k7y5gfi5","slide":34,"text":"帮我明天下午请半天事假","textPreview":"帮我明天下午请半天事假","textChars":11,"textLines":1,"bbox":[905,242,294,65]}
+{"kind":"shape","id":"sh/j6p4nahk","slide":34,"bbox":[920,331,264,46]}
+{"kind":"textbox","id":"sh/y5wne50z","slide":34,"text":"RAG + Tool + LangGraph","textPreview":"RAG + Tool + LangGraph","textChars":22,"textLines":1,"bbox":[931,342,242,26]}
+{"kind":"textbox","id":"sh/tc7mtkzm","slide":34,"text":"追问缺失字段\n校验、预览、确认后提交","textPreview":"追问缺失字段 | 校验、预览、确认后提交","textChars":18,"textLines":2,"bbox":[908,405,288,64]}
+{"kind":"shape","id":"sh/8by5kfi1","slide":34,"bbox":[72,553,1136,104]}
+{"kind":"textbox","id":"sh/7ap4rahw","slide":34,"text":"用户少记菜单和字段，ERP 仍保留权限、规则与写入边界","textPreview":"用户少记菜单和字段，ERP 仍保留权限、规则与写入边界","textChars":27,"textLines":1,"bbox":[101,578,1078,31]}
+{"kind":"textbox","id":"sh/69gni50b","slide":34,"text":"AI 负责理解和交互，ERP 负责真实数据与可信执行","textPreview":"AI 负责理解和交互，ERP 负责真实数据与可信执行","textChars":26,"textLines":1,"bbox":[101,616,1078,27]}
+{"kind":"notes","id":"nt/ofu103u5","slide":34,"text":"【只记一句】同一句自然语言，可能对应知识问答、实时查询或完整业务执行。\n\n【可直接照读】“病假需要什么材料”走 RAG，返回制度条款和来源；“我的请假审批到谁了”走 ERP Tool，返回实时状态；“帮我明天下午请半天事假”则需要 RAG 加 ERP Tool 再进入 LangGraph，由系统追问缺失字段、校验权限和时间、生成预览，用户确认后才提交。这个分层让 AI 更方便，也让 ERP 继续可信。\n\n【时间建议】约 70 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/docs/rag_demo_sources/approval_rag_guide.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/approval_creation_agent.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agent.py\n[/Sources]"}

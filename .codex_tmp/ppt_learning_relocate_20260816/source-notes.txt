@@ -1,0 +1,9 @@
+The relocated learning roadmap preserves the sources already included in its speaker notes:
+- D:/PythonProject/LearnOne/ai_approval_assistant/README.md
+- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md
+- D:/PythonProject/LearnOne/docs/python_langchain_notes.md
+- D:/PythonProject/LearnOne/docs/python_rag_notes.md
+- D:/PythonProject/LearnOne/docs/python_milvus_notes.md
+- D:/PythonProject/LearnOne/docs/python_rag_graphrag_lightrag_notes.md
+No new external claim or asset is introduced.
+

@@ -1,0 +1,52 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/lcn6tkb6","slide":31,"title":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textShapes":27}
+{"kind":"shape","id":"sh/qhk7i1oj","slide":31,"name":"矩形 48","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/dgja98fe","slide":31,"name":"矩形 1","text":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textPreview":"企业选型：先建立 Milvus RAG 基线，再验证图检索增益","textChars":31,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cfa903yt","slide":31,"name":"矩形 2","text":"ENTERPRISE RAG · SELECTION 3/3","textPreview":"ENTERPRISE RAG · SELECTION 3/3","textChars":30,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/zilsbyx4","slide":31,"name":"矩形 3","text":"31","textPreview":"31","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/ehsr2dgz","slide":31,"name":"圆角矩形 4","bbox":[72,154,352,364]}
+{"kind":"textbox","id":"sh/1k3ad8fa","slide":31,"name":"矩形 5","text":"Milvus 混合 RAG","textPreview":"Milvus 混合 RAG","textChars":13,"textLines":1,"bbox":[95,181,306,38]}
+{"kind":"textbox","id":"sh/0jut43yp","slide":31,"name":"矩形 6","text":"ERP 第一阶段首选","textPreview":"ERP 第一阶段首选","textChars":10,"textLines":1,"bbox":[95,226,306,28]}
+{"kind":"shape","id":"sh/fmhszex0","slide":31,"name":"椭圆 7","bbox":[103,290,9,9]}
+{"kind":"textbox","id":"sh/ul8rq9gf","slide":31,"name":"矩形 8","text":"适合：制度、FAQ、字段说明、操作手册","textPreview":"适合：制度、FAQ、字段说明、操作手册","textChars":19,"textLines":1,"bbox":[126,282,267,51]}
+{"kind":"shape","id":"sh/4vm5g7al","slide":31,"name":"椭圆 9","bbox":[103,345,9,9]}
+{"kind":"textbox","id":"sh/5wvmpcr6","slide":31,"name":"矩形 10","text":"优势：稳定、成本可控、增量更新简单","textPreview":"优势：稳定、成本可控、增量更新简单","textChars":17,"textLines":1,"bbox":[126,337,267,51]}
+{"kind":"shape","id":"sh/it4nexsf","slide":31,"name":"椭圆 11","bbox":[103,400,9,9]}
+{"kind":"textbox","id":"sh/3ud4n290","slide":31,"name":"矩形 12","text":"局限：不显式建模跨文档复杂关系","textPreview":"局限：不显式建模跨文档复杂关系","textChars":15,"textLines":1,"bbox":[126,392,267,51]}
+{"kind":"shape","id":"sh/sz65k7ah","slide":31,"name":"椭圆 13","bbox":[103,455,9,9]}
+{"kind":"textbox","id":"sh/d0fmtcr2","slide":31,"name":"矩形 14","text":"重点：权限、混合检索、来源与评测","textPreview":"重点：权限、混合检索、来源与评测","textChars":16,"textLines":1,"bbox":[126,447,267,51]}
+{"kind":"shape","id":"sh/qx4nihsb","slide":31,"name":"圆角矩形 15","bbox":[450,154,352,364]}
+{"kind":"textbox","id":"sh/ryd4rm9w","slide":31,"name":"矩形 16","text":"Microsoft GraphRAG","textPreview":"Microsoft GraphRAG","textChars":18,"textLines":1,"bbox":[473,181,306,38]}
+{"kind":"textbox","id":"sh/832l8nad","slide":31,"name":"矩形 17","text":"复杂关系专项验证","textPreview":"复杂关系专项验证","textChars":8,"textLines":1,"bbox":[473,226,306,28]}
+{"kind":"shape","id":"sh/t4bmhsry","slide":31,"name":"椭圆 18","bbox":[481,290,9,9]}
+{"kind":"textbox","id":"sh/9032l43m","slide":31,"name":"矩形 19","text":"适合：跨文档多跳、全局主题与风险","textPreview":"适合：跨文档多跳、全局主题与风险","textChars":16,"textLines":1,"bbox":[504,282,267,51]}
+{"kind":"shape","id":"sh/8zu1cj21","slide":31,"name":"椭圆 20","bbox":[481,345,9,9]}
+{"kind":"textbox","id":"sh/nylkjelg","slide":31,"name":"矩形 21","text":"优势：实体关系、社区发现、全局检索","textPreview":"优势：实体关系、社区发现、全局检索","textChars":17,"textLines":1,"bbox":[504,337,267,51]}
+{"kind":"shape","id":"sh/mxcja9kv","slide":31,"name":"椭圆 22","bbox":[481,400,9,9]}
+{"kind":"textbox","id":"sh/xon2po3i","slide":31,"name":"矩形 23","text":"代价：索引成本高，实体消歧与更新复杂","textPreview":"代价：索引成本高，实体消歧与更新复杂","textChars":18,"textLines":1,"bbox":[504,392,267,51]}
+{"kind":"shape","id":"sh/wnulgj2d","slide":31,"name":"椭圆 24","bbox":[481,455,9,9]}
+{"kind":"textbox","id":"sh/vmlknels","slide":31,"name":"矩形 25","text":"风险：权限需传播到实体、关系和社区报告","textPreview":"风险：权限需传播到实体、关系和社区报告","textChars":19,"textLines":1,"bbox":[504,447,267,51]}
+{"kind":"shape","id":"sh/a1c3e9k7","slide":31,"name":"圆角矩形 26","bbox":[828,154,352,364]}
+{"kind":"textbox","id":"sh/5sn2to3u","slide":31,"name":"矩形 27","text":"LightRAG","textPreview":"LightRAG","textChars":8,"textLines":1,"bbox":[851,181,306,38]}
+{"kind":"textbox","id":"sh/krelk329","slide":31,"name":"矩形 28","text":"第二阶段轻量试验","textPreview":"第二阶段轻量试验","textChars":8,"textLines":1,"bbox":[851,226,306,28]}
+{"kind":"shape","id":"sh/ilory1wf","slide":31,"name":"椭圆 29","bbox":[859,290,9,9]}
+{"kind":"textbox","id":"sh/3mx8r6x0","slide":31,"name":"矩形 30","text":"适合：图关系能力与持续增量知识","textPreview":"适合：图关系能力与持续增量知识","textChars":15,"textLines":1,"bbox":[882,282,267,51]}
+{"kind":"shape","id":"sh/4n690bel","slide":31,"name":"椭圆 31","bbox":[859,345,9,9]}
+{"kind":"textbox","id":"sh/5ofqtgf6","slide":31,"name":"矩形 32","text":"优势：图召回与向量召回融合","textPreview":"优势：图召回与向量召回融合","textChars":13,"textLines":1,"bbox":[882,337,267,51]}
+{"kind":"shape","id":"sh/qpor21wr","slide":31,"name":"椭圆 33","bbox":[859,400,9,9]}
+{"kind":"textbox","id":"sh/rqx8v6xc","slide":31,"name":"矩形 34","text":"代价：仍需实体抽取、消歧和图存储","textPreview":"代价：仍需实体抽取、消歧和图存储","textChars":16,"textLines":1,"bbox":[882,392,267,51]}
+{"kind":"shape","id":"sh/sr694beh","slide":31,"name":"椭圆 35","bbox":[859,455,9,9]}
+{"kind":"textbox","id":"sh/dszqxgf2","slide":31,"name":"矩形 36","text":"原则：Light 不代表没有索引成本","textPreview":"原则：Light 不代表没有索引成本","textChars":18,"textLines":1,"bbox":[882,447,267,51]}
+{"kind":"shape","id":"sh/et8r6lwn","slide":31,"name":"右箭头 37","bbox":[426,581,24,20]}
+{"kind":"shape","id":"sh/fuh8zqx8","slide":31,"name":"圆角矩形 38","bbox":[72,548,352,104]}
+{"kind":"textbox","id":"sh/nad8jq5c","slide":31,"name":"矩形 39","text":"阶段 1","textPreview":"阶段 1","textChars":4,"textLines":1,"bbox":[91,565,85,27]}
+{"kind":"textbox","id":"sh/m947qlor","slide":31,"name":"矩形 40","text":"Milvus 混合 RAG + 权限 + 固定评测集","textPreview":"Milvus 混合 RAG + 权限 + 固定评测集","textChars":26,"textLines":1,"bbox":[91,599,314,39]}
+{"kind":"shape","id":"sh/9cvqlgni","slide":31,"name":"右箭头 41","bbox":[804,581,24,20]}
+{"kind":"shape","id":"sh/8bm9sb6x","slide":31,"name":"圆角矩形 42","bbox":[450,548,352,104]}
+{"kind":"textbox","id":"sh/vex8nq5o","slide":31,"name":"矩形 43","text":"阶段 2","textPreview":"阶段 2","textChars":4,"textLines":1,"bbox":[469,565,85,27]}
+{"kind":"textbox","id":"sh/ad4rulo3","slide":31,"name":"矩形 44","text":"选择多跳 / 全局问题验证图 RAG 价值","textPreview":"选择多跳 / 全局问题验证图 RAG 价值","textChars":21,"textLines":1,"bbox":[469,599,314,39]}
+{"kind":"shape","id":"sh/xgfqp0ne","slide":31,"name":"圆角矩形 45","bbox":[828,548,352,104]}
+{"kind":"textbox","id":"sh/wf69wv6t","slide":31,"name":"矩形 46","text":"阶段 3","textPreview":"阶段 3","textChars":4,"textLines":1,"bbox":[847,565,85,27]}
+{"kind":"textbox","id":"sh/rit8b6p4","slide":31,"name":"矩形 47","text":"同数据同模型比较质量、成本、P95 与增量更新","textPreview":"同数据同模型比较质量、成本、P95 与增量更新","textChars":23,"textLines":1,"bbox":[847,599,314,39]}
+{"kind":"notes","id":"nt/lcn6tkb6","slide":31,"text":"【只记一句】先用 Milvus 建立稳定 RAG 基线，再用真实评测证明 GraphRAG 或 LightRAG 是否值得增加复杂度。\n\n【可直接照读】传统的 Milvus 混合 RAG 最适合制度、FAQ、字段说明和操作手册，成本可控、增量更新简单，应该作为 ERP 第一阶段基线。Microsoft GraphRAG 会抽取实体和关系、进行社区发现，并支持 Local Search 和 Global Search，适合跨文档多跳关系、全局主题和风险总结，但离线索引成本、实体消歧、增量更新和权限传播都更复杂。LightRAG 同样融合图关系和向量检索，更强调增量使用体验，适合第二阶段快速验证，但“Light”不代表没有实体抽取和索引成本。\n\n【验证方法】必须使用同一批文档、同一模型和同一评测集，对比准确率、证据覆盖率、索引成本、P95 延迟和增量更新时间；如果图检索没有显著增益，就不应该为了技术完整而引入更多中间件。\n\n【时间建议】约 95 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_rag_graphrag_lightrag_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- Microsoft GraphRAG documentation: https://microsoft.github.io/graphrag/\n- LightRAG repository: https://github.com/HKUDS/LightRAG\n[/Sources]"}

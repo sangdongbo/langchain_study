@@ -1,0 +1,57 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/wnqh07ex","slide":30,"title":"Milvus：承载企业级混合检索与多租户隔离","textShapes":34}
+{"kind":"shape","id":"sh/sv2x0fux","slide":30,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/po72d8nm","slide":30,"text":"Milvus：承载企业级混合检索与多租户隔离","textPreview":"Milvus：承载企业级混合检索与多租户隔离","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/o3yl4361","slide":30,"text":"ENTERPRISE RAG · MILVUS 2/3","textPreview":"ENTERPRISE RAG · MILVUS 2/3","textChars":27,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/bqpkfy5s","slide":30,"text":"30","textPreview":"30","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/apg36do7","slide":30,"bbox":[72,151,434,395]}
+{"kind":"textbox","id":"sh/xsr2h8ni","slide":30,"text":"Collection 数据结构","textPreview":"Collection 数据结构","textChars":15,"textLines":1,"bbox":[101,176,370,34]}
+{"kind":"textbox","id":"sh/cril836d","slide":30,"text":"text","textPreview":"text","textChars":4,"textLines":1,"bbox":[103,226,176,27]}
+{"kind":"textbox","id":"sh/ru5k3ep8","slide":30,"text":"Chunk 原文，支持引用与 BM25","textPreview":"Chunk 原文，支持引用与 BM25","textChars":19,"textLines":1,"bbox":[274,226,198,37]}
+{"kind":"shape","id":"sh/6twju9o3","slide":30,"bbox":[102,265,365,1]}
+{"kind":"textbox","id":"sh/onqx8zix","slide":30,"text":"dense","textPreview":"dense","textChars":5,"textLines":1,"bbox":[103,274,176,27]}
+{"kind":"textbox","id":"sh/p8ze14zi","slide":30,"text":"语义向量：同义表达与自然语言","textPreview":"语义向量：同义表达与自然语言","textChars":14,"textLines":1,"bbox":[274,274,198,37]}
+{"kind":"shape","id":"sh/2l8f6p0r","slide":30,"bbox":[102,313,365,1]}
+{"kind":"textbox","id":"sh/3mhwzu1c","slide":30,"text":"sparse","textPreview":"sparse","textChars":6,"textLines":1,"bbox":[103,322,176,27]}
+{"kind":"textbox","id":"sh/cbaxczit","slide":30,"text":"BM25：制度号、单据号、产品编码","textPreview":"BM25：制度号、单据号、产品编码","textChars":17,"textLines":1,"bbox":[274,322,198,37]}
+{"kind":"shape","id":"sh/dcje54ze","slide":30,"bbox":[102,361,365,1]}
+{"kind":"textbox","id":"sh/q9sfap03","slide":30,"text":"来源 / 页码 / 标题","textPreview":"来源 / 页码 / 标题","textChars":12,"textLines":1,"bbox":[103,370,176,27]}
+{"kind":"textbox","id":"sh/ba1w3uh8","slide":30,"text":"原文来源、页码与标题路径","textPreview":"原文来源、页码与标题路径","textChars":12,"textLines":1,"bbox":[274,370,198,37]}
+{"kind":"shape","id":"sh/sf6d0fip","slide":30,"bbox":[102,409,365,1]}
+{"kind":"textbox","id":"sh/tgfetkja","slide":30,"text":"租户 / 公司 / 部门","textPreview":"租户 / 公司 / 部门","textChars":12,"textLines":1,"bbox":[103,418,176,27]}
+{"kind":"textbox","id":"sh/907mhc7m","slide":30,"text":"多租户和组织权限隔离","textPreview":"多租户和组织权限隔离","textChars":10,"textLines":1,"bbox":[274,418,198,37]}
+{"kind":"shape","id":"sh/8zel8761","slide":30,"bbox":[102,457,365,1]}
+{"kind":"textbox","id":"sh/7y5kf2pw","slide":30,"text":"ACL / 版本 / 更新时间","textPreview":"ACL / 版本 / 更新时间","textChars":15,"textLines":1,"bbox":[103,466,176,27]}
+{"kind":"textbox","id":"sh/mxw36xob","slide":30,"text":"权限、版本与增量更新","textPreview":"权限、版本与增量更新","textChars":10,"textLines":1,"bbox":[274,466,198,37]}
+{"kind":"textbox","id":"sh/h47mlc7y","slide":30,"text":"在线查询链路","textPreview":"在线查询链路","textChars":6,"textLines":1,"bbox":[555,151,250,34]}
+{"kind":"shape","id":"sh/w3ylc76d","slide":30,"bbox":[833,246,44,17]}
+{"kind":"shape","id":"sh/v2p4jmps","slide":30,"bbox":[548,199,660,48]}
+{"kind":"textbox","id":"sh/u1g3aho7","slide":30,"text":"用户问题","textPreview":"用户问题","textChars":4,"textLines":1,"bbox":[572,210,190,26]}
+{"kind":"textbox","id":"sh/5srmpw7u","slide":30,"text":"意图、关键词与当前身份","textPreview":"意图、关键词与当前身份","textChars":11,"textLines":1,"bbox":[778,210,403,27]}
+{"kind":"shape","id":"sh/4rylgr69","slide":30,"bbox":[833,303,44,17]}
+{"kind":"shape","id":"sh/2dsjat4r","slide":30,"bbox":[548,256,660,48]}
+{"kind":"textbox","id":"sh/3e10jy5c","slide":30,"text":"强制权限过滤","textPreview":"强制权限过滤","textChars":6,"textLines":1,"bbox":[572,267,190,26]}
+{"kind":"textbox","id":"sh/ofa1cjmx","slide":30,"text":"tenant + company + department + ACL","textPreview":"tenant + company + department + ACL","textChars":35,"textLines":1,"bbox":[778,267,403,27]}
+{"kind":"shape","id":"sh/pgjiloni","slide":30,"bbox":[833,360,44,17]}
+{"kind":"shape","id":"sh/a1cjet43","slide":30,"bbox":[548,313,660,48]}
+{"kind":"textbox","id":"sh/b2l0ny5o","slide":30,"text":"Dense + BM25","textPreview":"Dense + BM25","textChars":12,"textLines":1,"bbox":[572,324,190,26]}
+{"kind":"textbox","id":"sh/c3u1g3mt","slide":30,"text":"语义召回与精确召回并行","textPreview":"语义召回与精确召回并行","textChars":11,"textLines":1,"bbox":[778,324,403,27]}
+{"kind":"shape","id":"sh/x43ip8ne","slide":30,"bbox":[833,417,44,17]}
+{"kind":"shape","id":"sh/y5cjid4z","slide":30,"bbox":[548,370,660,48]}
+{"kind":"textbox","id":"sh/z6l0ri5k","slide":30,"text":"RRF / Weighted","textPreview":"RRF / Weighted","textChars":14,"textLines":1,"bbox":[572,381,190,26]}
+{"kind":"textbox","id":"sh/7mh0vyxo","slide":30,"text":"融合不同检索结果的排名","textPreview":"融合不同检索结果的排名","textChars":11,"textLines":1,"bbox":[778,381,403,27]}
+{"kind":"shape","id":"sh/6l8z2dw3","slide":30,"bbox":[833,474,44,17]}
+{"kind":"shape","id":"sh/tojix8fu","slide":30,"bbox":[548,427,660,48]}
+{"kind":"textbox","id":"sh/8na143e9","slide":30,"text":"Reranker","textPreview":"Reranker","textChars":8,"textLines":1,"bbox":[572,438,190,26]}
+{"kind":"textbox","id":"sh/vq10zix0","slide":30,"text":"精排 Top-K，过滤高相似噪声","textPreview":"精排 Top-K，过滤高相似噪声","textChars":16,"textLines":1,"bbox":[778,438,403,27]}
+{"kind":"shape","id":"sh/upsj6dwf","slide":30,"bbox":[548,484,660,48]}
+{"kind":"textbox","id":"sh/hsji1sfq","slide":30,"text":"来源证据","textPreview":"来源证据","textChars":4,"textLines":1,"bbox":[572,495,190,26]}
+{"kind":"textbox","id":"sh/gra18ne5","slide":30,"text":"返回文档、章节、版本与原文","textPreview":"返回文档、章节、版本与原文","textChars":13,"textLines":1,"bbox":[778,495,403,27]}
+{"kind":"shape","id":"sh/bux03exg","slide":30,"bbox":[73,565,1134,91]}
+{"kind":"textbox","id":"sh/atozutwv","slide":30,"text":"部署选择","textPreview":"部署选择","textChars":4,"textLines":1,"bbox":[99,584,120,29]}
+{"kind":"textbox","id":"sh/0zmx4fut","slide":30,"text":"Lite：学习 / Demo","textPreview":"Lite：学习 / Demo","textChars":14,"textLines":1,"bbox":[235,584,210,29]}
+{"kind":"textbox","id":"sh/10vyxkve","slide":30,"text":"Standalone：单机试点","textPreview":"Standalone：单机试点","textChars":15,"textLines":1,"bbox":[463,584,245,29]}
+{"kind":"textbox","id":"sh/ex4f2pcn","slide":30,"text":"Distributed / Cloud：规模化、高可用、并发与弹性","textPreview":"Distributed / Cloud：规模化、高可用、并发与弹性","textChars":33,"textLines":1,"bbox":[724,584,444,29]}
+{"kind":"textbox","id":"sh/fydwvad8","slide":30,"text":"ERP 同时存在语义问题与精确编号：Dense + BM25 比单路向量检索更合适","textPreview":"ERP 同时存在语义问题与精确编号：Dense + BM25 比单路向量检索更合适","textChars":41,"textLines":1,"bbox":[99,620,1067,24]}
+{"kind":"notes","id":"nt/wnqh07ex","slide":30,"text":"【只记一句】Milvus 同时承载语义、关键词和权限过滤，是 ERP 知识检索的基础底座。\n\n【可直接照读】Milvus 中不只保存向量，还要保存原文、Dense 向量、BM25 稀疏向量，以及来源、页码、标题、公司、部门、权限、版本和更新时间。查询时，先由检索服务强制注入当前用户的权限范围，再同时执行 Dense 语义召回和 BM25 精确召回，通过 RRF 或加权方式融合，最后由 Reranker 精排并返回带来源的证据。ERP 里既有“请假怎么申请”这种语义问题，也有制度号、审批编号、产品编码等精确词，因此 Dense 加 BM25 比单路向量检索更适合。\n\n【部署口径】Milvus Lite 适合本地学习和 Demo；Standalone 适合单机试点；企业生产再根据数据规模、并发、高可用和弹性选择 Distributed 或云服务。\n\n【时间建议】约 85 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/docs/python_milvus_notes.md\n- D:/PythonProject/LearnOne/docs/python_rag_notes.md\n- D:/PythonProject/LearnOne/docs2/milvus_hnsw_ivf_annoy_cold_start_update_multitenancy.md\n- Milvus Hybrid Search documentation: https://milvus.io/docs/multi-vector-search.md\n- Milvus Multi-tenancy documentation: https://milvus.io/docs/multi_tenancy.md\n[/Sources]"}

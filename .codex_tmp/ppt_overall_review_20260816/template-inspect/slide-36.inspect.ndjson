@@ -1,0 +1,12 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/m9s3ehgf","slide":36,"title":"谢谢","textShapes":6}
+{"kind":"shape","id":"sh/exwb69s7","slide":36,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/5s3atkbq","slide":36,"text":"谢谢","textPreview":"谢谢","textChars":2,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/4rut0fa5","slide":36,"text":"ERP × AI PRACTICE","textPreview":"ERP × AI PRACTICE","textChars":17,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/rulsvutw","slide":36,"text":"36","textPreview":"36","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/qtcb2psb","slide":36,"bbox":[72,176,1136,332]}
+{"kind":"textbox","id":"sh/dwnax4bm","slide":36,"text":"AI 让 ERP 更易用","textPreview":"AI 让 ERP 更易用","textChars":12,"textLines":1,"bbox":[120,247,1040,70]}
+{"kind":"textbox","id":"sh/svet4zah","slide":36,"text":"ERP 让 AI 更可靠","textPreview":"ERP 让 AI 更可靠","textChars":12,"textLines":1,"bbox":[120,333,1040,64]}
+{"kind":"textbox","id":"sh/fy5szuts","slide":36,"text":"欢迎交流","textPreview":"欢迎交流","textChars":4,"textLines":1,"bbox":[120,584,1040,36]}
+{"kind":"notes","id":"nt/m9s3ehgf","slide":36,"text":"【只记一句】RAG 与 ERP 的结合，最终目标是让用户少记菜单和字段，但不降低业务控制力。\n\n【可直接照读】后续可以从审批和日报继续扩展到采购、订单、库存和客户跟进。每增加一个场景，都沿用同一套分层：知识进入 RAG，实时事实通过 ERP Tool，业务写入由 LangGraph 控制。这样既能持续积累 AI 能力，也能避免把所有逻辑都堆在 Prompt 或 if-else 中。谢谢大家。\n\n【时间建议】约 30 秒\n\n[Sources]\n- Closing slide; no external claims.\n[/Sources]"}

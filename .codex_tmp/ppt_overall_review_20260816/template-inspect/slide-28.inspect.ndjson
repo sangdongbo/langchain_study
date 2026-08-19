@@ -1,0 +1,36 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/3mdove10","slide":28,"title":"附录：Agentic Workflow 子图","textShapes":20}
+{"kind":"shape","id":"sh/872h43al","slide":28,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/q9cz6xkv","slide":28,"text":"附录：Agentic Workflow 子图","textPreview":"附录：Agentic Workflow 子图","textChars":22,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/ralgf21g","slide":28,"text":"AGENTIC WORKFLOW DEMO","textPreview":"AGENTIC WORKFLOW DEMO","textChars":21,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/0zehcr2x","slide":28,"text":"28","textPreview":"28","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/10nylwji","slide":28,"bbox":[54,146,540,506]}
+{"kind":"shape","id":"sh/zy5gjm1c","slide":28,"bbox":[618,142,616,518]}
+{"kind":"textbox","id":"sh/o3ehgr29","slide":28,"text":"节点职责（与代码对应）","textPreview":"节点职责（与代码对应）","textChars":11,"textLines":1,"bbox":[634,154,584,28]}
+{"kind":"shape","id":"sh/947ipwje","slide":28,"bbox":[849,184,1.5,458]}
+{"kind":"textbox","id":"sh/lg3690fq","slide":28,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[634,189,205,51.5]}
+{"kind":"textbox","id":"sh/kfu5gfe5","slide":28,"text":"进入演示子图 / 本轮处理结束","textPreview":"进入演示子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[861,189,357,51.5]}
+{"kind":"shape","id":"sh/je1o7ax0","slide":28,"bbox":[634,242.5,584,1]}
+{"kind":"textbox","id":"sh/ytsne5wf","slide":28,"text":"demo_agent_plan","textPreview":"demo_agent_plan","textChars":15,"textLines":1,"bbox":[634,247.5,205,51.5]}
+{"kind":"textbox","id":"sh/tk36dkf2","slide":28,"text":"理解目标、抽取日期与内容，提出下一步建议","textPreview":"理解目标、抽取日期与内容，提出下一步建议","textChars":20,"textLines":1,"bbox":[861,247.5,357,51.5]}
+{"kind":"shape","id":"sh/8ju5kfeh","slide":28,"bbox":[634,301,584,1]}
+{"kind":"textbox","id":"sh/7ilobaxw","slide":28,"text":"demo_confirm_date","textPreview":"demo_confirm_date","textChars":17,"textLines":1,"bbox":[634,306,205,51.5]}
+{"kind":"textbox","id":"sh/6hcni5wb","slide":28,"text":"将相对日期转成 ERP 可用的明确日期","textPreview":"将相对日期转成 ERP 可用的明确日期","textChars":19,"textLines":1,"bbox":[861,306,357,51.5]}
+{"kind":"shape","id":"sh/9ojm1gfi","slide":28,"bbox":[634,359.5,584,1]}
+{"kind":"textbox","id":"sh/ona58ved","slide":28,"text":"demo_load_context","textPreview":"demo_load_context","textChars":17,"textLines":1,"bbox":[634,364.5,205,51.5]}
+{"kind":"textbox","id":"sh/0jex4fq5","slide":28,"text":"加载 ERP 默认 payload、草稿和同步数据","textPreview":"加载 ERP 默认 payload、草稿和同步数据","textChars":25,"textLines":1,"bbox":[861,364.5,357,51.5]}
+{"kind":"shape","id":"sh/1knedkrq","slide":28,"bbox":[634,418,584,1]}
+{"kind":"textbox","id":"sh/ehwf2p8z","slide":28,"text":"demo_agent_compose","textPreview":"demo_agent_compose","textChars":18,"textLines":1,"bbox":[634,423,205,51.5]}
+{"kind":"textbox","id":"sh/zi5wba9k","slide":28,"text":"根据计划与上下文生成正文，只修改内容字段","textPreview":"根据计划与上下文生成正文，只修改内容字段","textChars":20,"textLines":1,"bbox":[861,423,357,51.5]}
+{"kind":"shape","id":"sh/o7yx8zqh","slide":28,"bbox":[634,476.5,584,1]}
+{"kind":"textbox","id":"sh/987eh4rm","slide":28,"text":"demo_save_draft","textPreview":"demo_save_draft","textChars":15,"textLines":1,"bbox":[634,481.5,205,51.5]}
+{"kind":"textbox","id":"sh/m5wf6p8b","slide":28,"text":"由 Workflow 执行草稿写入，不让 Agent 直写","textPreview":"由 Workflow 执行草稿写入，不让 Agent 直写","textChars":29,"textLines":1,"bbox":[861,481.5,357,51.5]}
+{"kind":"shape","id":"sh/n6pwfu9w","slide":28,"bbox":[634,535,584,1]}
+{"kind":"textbox","id":"sh/wbyxczqd","slide":28,"text":"demo_preview_gate","textPreview":"demo_preview_gate","textChars":17,"textLines":1,"bbox":[634,540,205,51.5]}
+{"kind":"textbox","id":"sh/xc7yl4ry","slide":28,"text":"生成预览并暂停，等待用户确认或修改","textPreview":"生成预览并暂停，等待用户确认或修改","textChars":17,"textLines":1,"bbox":[861,540,357,51.5]}
+{"kind":"shape","id":"sh/76t0byt0","slide":28,"bbox":[634,593.5,584,1]}
+{"kind":"textbox","id":"sh/65kz2tsf","slide":28,"text":"demo_submit_gate","textPreview":"demo_submit_gate","textChars":16,"textLines":1,"bbox":[634,598.5,205,51.5]}
+{"kind":"textbox","id":"sh/t8bid8b6","slide":28,"text":"校验预览状态与明确确认后才允许提交","textPreview":"校验预览状态与明确确认后才允许提交","textChars":17,"textLines":1,"bbox":[861,598.5,357,51.5]}
+{"kind":"image","id":"im/sbalwbit","slide":28,"name":"","bbox":[83.18,160,481.63,478]}
+{"kind":"notes","id":"nt/3mdove10","slide":28,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-b08edd2a-092c-42e0-b5a8-e9c7d58a5c65.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_agentic_workflow_demo.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_agentic_workflow_demo.py\n[/Sources]"}

@@ -1,0 +1,30 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/l0bepsfm","slide":26,"title":"标准日报子图：准备上下文与收集信息","textShapes":16}
+{"kind":"shape","id":"sh/rql0zex0","slide":26,"bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/uhk36lk7","slide":26,"text":"标准日报子图：准备上下文与收集信息","textPreview":"标准日报子图：准备上下文与收集信息","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/vitkzqlc","slide":26,"text":"DAILY REPORT AGENT · 1/2","textPreview":"DAILY REPORT AGENT · 1/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/8fil4b21","slide":26,"text":"26","textPreview":"26","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/tgr2xg3m","slide":26,"bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/7e9kv6lg","slide":26,"bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/kbil0r2p","slide":26,"text":"节点职责：准备与编辑","textPreview":"节点职责：准备与编辑","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/lcr2tw3a","slide":26,"bbox":[1012,180,1.5,462]}
+{"kind":"textbox","id":"sh/lsja143i","slide":26,"text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,220,71.67]}
+{"kind":"textbox","id":"sh/krat8z2x","slide":26,"text":"进入日报子图 / 本轮处理结束","textPreview":"进入日报子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[1024,185,194,71.67]}
+{"kind":"shape","id":"sh/z61szulc","slide":26,"bbox":[782,258.67,436,1]}
+{"kind":"textbox","id":"sh/y5sr69kr","slide":26,"text":"daily_report_entry","textPreview":"daily_report_entry","textChars":18,"textLines":1,"bbox":[782,263.67,220,71.67]}
+{"kind":"textbox","id":"sh/x4jax436","slide":26,"text":"初始化标准日报模式和会话状态","textPreview":"初始化标准日报模式和会话状态","textChars":14,"textLines":1,"bbox":[1024,263.67,194,71.67]}
+{"kind":"shape","id":"sh/c3a94z21","slide":26,"bbox":[782,337.33,436,1]}
+{"kind":"textbox","id":"sh/b21svulg","slide":26,"text":"daily_report_action","textPreview":"daily_report_action","textChars":19,"textLines":1,"bbox":[782,342.33,220,71.67]}
+{"kind":"textbox","id":"sh/a18r2pkv","slide":26,"text":"判断加载、补内容、改日期或提交","textPreview":"判断加载、补内容、改日期或提交","textChars":15,"textLines":1,"bbox":[1024,342.33,194,71.67]}
+{"kind":"shape","id":"sh/p0zatk3a","slide":26,"bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/ozq90f2p","slide":26,"text":"load_daily_report_context","textPreview":"load_daily_report_context","textChars":25,"textLines":1,"bbox":[782,421,220,71.67]}
+{"kind":"textbox","id":"sh/0ve1wjex","slide":26,"text":"加载字段、配置、草稿和同步数据","textPreview":"加载字段、配置、草稿和同步数据","textChars":15,"textLines":1,"bbox":[1024,421,194,71.67]}
+{"kind":"shape","id":"sh/1wn25ofi","slide":26,"bbox":[782,494.67,436,1]}
+{"kind":"textbox","id":"sh/etwju9wr","slide":26,"text":"collect_daily_report_content","textPreview":"collect_daily_report_content","textChars":28,"textLines":1,"bbox":[782,499.67,220,71.67]}
+{"kind":"textbox","id":"sh/fu5k3exc","slide":26,"text":"收集或修改日报工作内容","textPreview":"收集或修改日报工作内容","textChars":11,"textLines":1,"bbox":[1024,499.67,194,71.67]}
+{"kind":"shape","id":"sh/sru1szel","slide":26,"bbox":[782,573.33,436,1]}
+{"kind":"textbox","id":"sh/ds3i14f6","slide":26,"text":"collect_daily_report_date","textPreview":"collect_daily_report_date","textChars":25,"textLines":1,"bbox":[782,578.33,220,71.67]}
+{"kind":"textbox","id":"sh/qpcjq9wv","slide":26,"text":"收集日期并重载当天上下文","textPreview":"收集日期并重载当天上下文","textChars":12,"textLines":1,"bbox":[1024,578.33,194,71.67]}
+{"kind":"image","id":"im/by9czi9w","slide":26,"name":"","bbox":[58,194.63,672,408.74]}
+{"kind":"notes","id":"nt/l0bepsfm","slide":26,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}

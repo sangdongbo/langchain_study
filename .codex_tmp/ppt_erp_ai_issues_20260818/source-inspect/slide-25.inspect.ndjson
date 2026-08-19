@@ -1,0 +1,30 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/69wfm9o7","slide":25,"title":"标准日报子图：准备上下文与收集信息","textShapes":16}
+{"kind":"shape","id":"sh/6lojihwn","slide":25,"name":"矩形 26","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/xg7axgf2","slide":25,"name":"矩形 1","text":"标准日报子图：准备上下文与收集信息","textPreview":"标准日报子图：准备上下文与收集信息","textChars":17,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/cfyt4beh","slide":25,"name":"矩形 2","text":"DAILY REPORT AGENT · 1/2","textPreview":"DAILY REPORT AGENT · 1/2","textChars":24,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/napsr6x0","slide":25,"name":"矩形 3","text":"26","textPreview":"26","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/29wby1wf","slide":25,"name":"圆角矩形 4","bbox":[44,146,700,506]}
+{"kind":"shape","id":"sh/obyt0bel","slide":25,"name":"圆角矩形 6","bbox":[766,138,468,522]}
+{"kind":"textbox","id":"sh/fm5snmx4","slide":25,"name":"矩形 7","text":"节点职责：准备与编辑","textPreview":"节点职责：准备与编辑","textChars":10,"textLines":1,"bbox":[782,150,436,28]}
+{"kind":"shape","id":"sh/elwbu1wj","slide":25,"name":"矩形 8","bbox":[1012,180,1.5,462]}
+{"kind":"textbox","id":"sh/wza9cbqp","slide":25,"name":"矩形 9","text":"START / END","textPreview":"START / END","textChars":11,"textLines":1,"bbox":[782,185,220,71.67]}
+{"kind":"textbox","id":"sh/h0jalgra","slide":25,"name":"矩形 10","text":"进入日报子图 / 本轮处理结束","textPreview":"进入日报子图 / 本轮处理结束","textChars":15,"textLines":1,"bbox":[1024,185,194,71.67]}
+{"kind":"shape","id":"sh/uxsra18j","slide":25,"name":"矩形 11","bbox":[782,258.67,436,1]}
+{"kind":"textbox","id":"sh/vy1sj694","slide":25,"name":"矩形 12","text":"daily_report_entry","textPreview":"daily_report_entry","textChars":18,"textLines":1,"bbox":[782,263.67,220,71.67]}
+{"kind":"textbox","id":"sh/8ba98bqt","slide":25,"name":"矩形 13","text":"初始化标准日报模式和会话状态","textPreview":"初始化标准日报模式和会话状态","textChars":14,"textLines":1,"bbox":[1024,263.67,194,71.67]}
+{"kind":"shape","id":"sh/9cjahgry","slide":25,"name":"矩形 14","bbox":[782,337.33,436,1]}
+{"kind":"textbox","id":"sh/m98r618n","slide":25,"name":"矩形 15","text":"daily_report_action","textPreview":"daily_report_action","textChars":19,"textLines":1,"bbox":[782,342.33,220,71.67]}
+{"kind":"textbox","id":"sh/7a1sf698","slide":25,"name":"矩形 16","text":"判断加载、补内容、改日期或提交","textPreview":"判断加载、补内容、改日期或提交","textChars":15,"textLines":1,"bbox":[1024,342.33,194,71.67]}
+{"kind":"shape","id":"sh/s7utkvqx","slide":25,"name":"矩形 17","bbox":[782,416,436,1]}
+{"kind":"textbox","id":"sh/t83at0ri","slide":25,"name":"矩形 18","text":"load_daily_report_context","textPreview":"load_daily_report_context","textChars":25,"textLines":1,"bbox":[782,421,220,71.67]}
+{"kind":"textbox","id":"sh/1czihwva","slide":25,"name":"矩形 19","text":"加载字段、配置、草稿和同步数据","textPreview":"加载字段、配置、草稿和同步数据","textChars":15,"textLines":1,"bbox":[1024,421,194,71.67]}
+{"kind":"shape","id":"sh/gbq1obep","slide":25,"name":"矩形 20","bbox":[782,494.67,436,1]}
+{"kind":"textbox","id":"sh/fax0f6d4","slide":25,"name":"矩形 21","text":"collect_daily_report_content","textPreview":"collect_daily_report_content","textChars":28,"textLines":1,"bbox":[782,499.67,220,71.67]}
+{"kind":"textbox","id":"sh/e9ojm1wj","slide":25,"name":"矩形 22","text":"收集或修改日报工作内容","textPreview":"收集或修改日报工作内容","textChars":11,"textLines":1,"bbox":[1024,499.67,194,71.67]}
+{"kind":"shape","id":"sh/t8fidwfe","slide":25,"name":"矩形 23","bbox":[782,573.33,436,1]}
+{"kind":"textbox","id":"sh/s761kret","slide":25,"name":"矩形 24","text":"collect_daily_report_date","textPreview":"collect_daily_report_date","textChars":25,"textLines":1,"bbox":[782,578.33,220,71.67]}
+{"kind":"textbox","id":"sh/r6x0bmx8","slide":25,"name":"矩形 25","text":"收集日期并重载当天上下文","textPreview":"收集日期并重载当天上下文","textChars":12,"textLines":1,"bbox":[1024,578.33,194,71.67]}
+{"kind":"image","id":"im/q1436lov","slide":25,"name":"图片 33","bbox":[58,194.63,672,408.74]}
+{"kind":"notes","id":"nt/69wfm9o7","slide":25,"text":"【使用建议】这一页作为问答备用，不主动展开。\n\n[Sources]\n- User-provided LangGraph Studio screenshot: C:/Users/EDY/AppData/Local/Temp/codex-clipboard-05e8c312-0ae2-40a4-b844-9af537fa1dea.png\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/graph/daily_report_workflow.py\n- D:/PythonProject/LearnOne/ai_approval_assistant/app/agents/daily_report_chat_agent.py\n[/Sources]"}

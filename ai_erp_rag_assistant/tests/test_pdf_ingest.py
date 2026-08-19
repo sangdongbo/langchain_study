@@ -15,3 +15,6 @@ def test_employee_handbook_is_text_extractable():
     assert empty_pages == []
     assert all(row["source"] == pdf.name for row in rows)
     assert all(row["page"] >= 1 for row in rows)
+    assert all(row["title"] for row in rows)
+    assert all(row["version"] == "2026" for row in rows)
+    assert all(row["effective_date"] == "2026-04-11" for row in rows)

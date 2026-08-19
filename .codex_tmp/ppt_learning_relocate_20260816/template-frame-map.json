@@ -1,0 +1,310 @@
+{
+  "outputSlides": [
+    {
+      "outputSlide": 1,
+      "sourceSlide": 1,
+      "narrativeRole": "opening thesis",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 2,
+      "sourceSlide": 2,
+      "narrativeRole": "agenda",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 3,
+      "sourceSlide": 3,
+      "narrativeRole": "business scenarios",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 4,
+      "sourceSlide": 4,
+      "narrativeRole": "industry context",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 5,
+      "sourceSlide": 5,
+      "narrativeRole": "industry evidence",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 6,
+      "sourceSlide": 6,
+      "narrativeRole": "industry evidence",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 7,
+      "sourceSlide": 7,
+      "narrativeRole": "implementation path",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 8,
+      "sourceSlide": 8,
+      "narrativeRole": "architecture",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 9,
+      "sourceSlide": 9,
+      "narrativeRole": "approval workflow",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 10,
+      "sourceSlide": 10,
+      "narrativeRole": "daily report workflow",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 11,
+      "sourceSlide": 11,
+      "narrativeRole": "agent comparison",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 12,
+      "sourceSlide": 12,
+      "narrativeRole": "framework comparison",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 13,
+      "sourceSlide": 13,
+      "narrativeRole": "langgraph rationale",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 14,
+      "sourceSlide": 14,
+      "narrativeRole": "deep agents exploration",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 15,
+      "sourceSlide": 15,
+      "narrativeRole": "solution selection",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 16,
+      "sourceSlide": 16,
+      "narrativeRole": "expected effects",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 17,
+      "sourceSlide": 17,
+      "narrativeRole": "business demo",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 18,
+      "sourceSlide": 18,
+      "narrativeRole": "problems",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 19,
+      "sourceSlide": 19,
+      "narrativeRole": "observability",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 20,
+      "sourceSlide": 20,
+      "narrativeRole": "next steps",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 21,
+      "sourceSlide": 21,
+      "narrativeRole": "core conclusion",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 22,
+      "sourceSlide": 22,
+      "narrativeRole": "delivery roadmap",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/6987itcr",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/p43q1sva",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/436507qx",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/2honyx8r",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/gf65w7ql",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/1cj61w7q",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/krihkz2d",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/yp0zipk7",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/wnihgf2h",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/bm9gnu1w",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/907ylkjq",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/qtwz2547",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/cvy14fmx",
+          "action": "rewrite"
+        },
+        {
+          "sourceElementId": "sh/exgj6p43",
+          "action": "rewrite"
+        }
+      ]
+    },
+    {
+      "outputSlide": 23,
+      "sourceSlide": 23,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 24,
+      "sourceSlide": 24,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 25,
+      "sourceSlide": 25,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 26,
+      "sourceSlide": 26,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 27,
+      "sourceSlide": 27,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 28,
+      "sourceSlide": 28,
+      "narrativeRole": "workflow appendix",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 29,
+      "sourceSlide": 29,
+      "narrativeRole": "enterprise rag",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 30,
+      "sourceSlide": 30,
+      "narrativeRole": "milvus",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 31,
+      "sourceSlide": 31,
+      "narrativeRole": "rag comparison",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 32,
+      "sourceSlide": 32,
+      "narrativeRole": "rag erp langgraph workflow",
+      "reuseMode": "duplicate-slide",
+      "editTargets": []
+    },
+    {
+      "outputSlide": 33,
+      "sourceSlide": 22,
+      "narrativeRole": "future learning and exploration",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/k7qpgjul",
+          "action": "rewrite"
+        }
+      ]
+    },
+    {
+      "outputSlide": 34,
+      "sourceSlide": 33,
+      "narrativeRole": "closing thesis",
+      "reuseMode": "duplicate-slide",
+      "editTargets": [
+        {
+          "sourceElementId": "sh/nml47a5w",
+          "action": "rewrite"
+        }
+      ]
+    }
+  ],
+  "omittedSourceSlides": []
+}

@@ -16,10 +16,13 @@ class ErpRagState(TypedDict, total=False):
     plan: dict[str, Any]
     user_context: dict[str, Any]
     template: dict[str, Any]
+    template_candidates: list[dict[str, Any]]
+    conversation: list[dict[str, str]]
     fields: dict[str, Any]
     evidence: list[dict[str, Any]]
     erp_data: dict[str, Any]
     preview: dict[str, Any]
+    active_approval: bool
     tool_calls: list[dict[str, Any]]
     errors: list[str]
     pending_question: str
@@ -39,6 +42,7 @@ def initial_state(
     prior: ErpRagState | None = None,
 ) -> ErpRagState:
     prior = prior or {}
+    prior_active_approval = bool(prior.get("active_approval", False))
     return {
         "session_id": session_id,
         "user_id": user_id,
@@ -49,13 +53,24 @@ def initial_state(
         "department": department or prior.get("department", ""),
         "confirm": confirm,
         "route": "unknown",
-        "plan": {},
+        "plan": dict(prior.get("plan", {})),
+        "user_context": {},
+        "template": dict(prior.get("template", {})),
+        "template_candidates": list(prior.get("template_candidates", [])),
+        "conversation": [
+            *list(prior.get("conversation", [])),
+            *([{"role": "assistant", "content": str(prior["pending_question"])}] if prior.get("pending_question") else []),
+            {"role": "user", "content": message},
+        ][-16:],
         "fields": dict(prior.get("fields", {})),
         "evidence": [],
         "erp_data": {},
-        "preview": dict(prior.get("preview", {})),
+        # A closed preview may be returned once for display, but it must not
+        # become an actionable draft again on the next turn.
+        "preview": dict(prior.get("preview", {})) if prior_active_approval else {},
+        "active_approval": prior_active_approval,
         "tool_calls": [],
         "errors": [],
-        "pending_question": "",
+        "pending_question": str(prior.get("pending_question", "")),
         "assistant_message": "",
     }

@@ -1,0 +1,5 @@
+Source deck: D:/PythonProject/LearnOne/ERP与AI融合实践-智能审批与日报-RAG扩展版-流程优化版.pptx
+Audience: department AI application sharing meeting; leaders, department heads, HRBP, and technical/business colleagues.
+Communication job: by the end, the audience should understand how natural-language interaction can enter ERP workflows while ERP retains permissions, rules, state, and trusted writes.
+Primary evidence sources are preserved in the existing slide speaker notes, including McKinsey 2025, PwC 2026, project documentation, LangGraph workflow files, Milvus documentation, Microsoft GraphRAG documentation, and the LightRAG repository.
+No new external claims or assets are introduced in this revision.

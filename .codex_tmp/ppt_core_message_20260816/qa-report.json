@@ -1,0 +1,15 @@
+{
+  "slideCount": 33,
+  "outOfBounds": 0,
+  "emptyPlaceholders": 0,
+  "pageMarkerErrors": [],
+  "layoutWarnings": 0,
+  "missingPhrases": [],
+  "stalePhrases": [],
+  "notesWithoutSources": [],
+  "keyTitles": {
+    "1": "ERP 与 AI 融合实践",
+    "21": "核心结论：AI 增加自然语言入口，ERP 保证可信执行",
+    "33": "谢谢"
+  }
+}

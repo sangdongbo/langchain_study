@@ -1,0 +1,4 @@
+Slide 17: replace the blank “解决的方案” page with the source slide 19 two-column pattern. The page explicitly states that memory boundaries, hallucination protection, observability, and Agent Runtime governance were not completed in this iteration and remain future optimization work.
+Slide 27: replace the blank daily-report appendix page with the source slide 12 explanatory pattern. The page explains daily_report_create_agent from the actual implementation, without inventing a missing LangGraph Studio screenshot.
+Source slides 17 and 27 are omitted because they are blank placeholders. No new slides, diagrams, images, or external claims are introduced.
+

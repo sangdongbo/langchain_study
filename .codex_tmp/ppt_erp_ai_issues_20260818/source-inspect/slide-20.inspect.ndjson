@@ -1,0 +1,42 @@
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/zyxsni5k","slide":20,"title":"核心结论：AI 增加自然语言入口，ERP 保证可信执行","textShapes":20}
+{"kind":"shape","id":"sh/2hczqdwf","slide":20,"name":"矩形 38","bbox":[0,0,1280,116]}
+{"kind":"textbox","id":"sh/qpwjmh8n","slide":20,"name":"矩形 1","text":"核心结论：AI 增加自然语言入口，ERP 保证可信执行","textPreview":"核心结论：AI 增加自然语言入口，ERP 保证可信执行","textChars":27,"textLines":1,"bbox":[72,29,1030,60]}
+{"kind":"textbox","id":"sh/rq50vmp8","slide":20,"name":"矩形 2","text":"CORE TAKEAWAYS","textPreview":"CORE TAKEAWAYS","textChars":14,"textLines":1,"bbox":[1000,48,205,26]}
+{"kind":"textbox","id":"sh/4nu1krqh","slide":20,"name":"矩形 3","text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1170,674,42,20]}
+{"kind":"shape","id":"sh/po3itc72","slide":20,"name":"圆角矩形 4","bbox":[72,151,554,94]}
+{"kind":"shape","id":"sh/2lczih8r","slide":20,"name":"椭圆 5","bbox":[92,173,50,50]}
+{"kind":"textbox","id":"sh/3ml0rmpw","slide":20,"name":"矩形 6","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[92,185,50,25]}
+{"kind":"textbox","id":"sh/gjuhg7ql","slide":20,"name":"矩形 7","text":"AI没有替代ERP，而是为ERP增加自然语言业务入口。","textPreview":"AI没有替代ERP，而是为ERP增加自然语言业务入口。","textChars":27,"textLines":1,"bbox":[163,171,431,58]}
+{"kind":"shape","id":"sh/hk3ipcr6","slide":20,"name":"圆角矩形 8","bbox":[72,262,554,94]}
+{"kind":"shape","id":"sh/dkfmp4zy","slide":20,"name":"椭圆 9","bbox":[92,284,50,50]}
+{"kind":"textbox","id":"sh/cj65wzyd","slide":20,"name":"矩形 10","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[92,296,50,25]}
+{"kind":"textbox","id":"sh/rid4nuhs","slide":20,"name":"矩形 11","text":"首批选择审批和日报，因为高频、典型、容易验证闭环。","textPreview":"首批选择审批和日报，因为高频、典型、容易验证闭环。","textChars":25,"textLines":1,"bbox":[163,282,431,58]}
+{"kind":"shape","id":"sh/qh4nupg7","slide":20,"name":"圆角矩形 12","bbox":[72,373,554,94]}
+{"kind":"shape","id":"sh/pwvmlkzm","slide":20,"name":"椭圆 13","bbox":[92,395,50,50]}
+{"kind":"textbox","id":"sh/4vm5sfy1","slide":20,"name":"矩形 14","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[92,407,50,25]}
+{"kind":"textbox","id":"sh/3ud4juhg","slide":20,"name":"矩形 15","text":"用户只说业务目标，AI负责理解和补充信息。","textPreview":"用户只说业务目标，AI负责理解和补充信息。","textChars":21,"textLines":1,"bbox":[163,393,431,58]}
+{"kind":"shape","id":"sh/2t4nqpgb","slide":20,"name":"圆角矩形 16","bbox":[72,484,554,94]}
+{"kind":"shape","id":"sh/hsvmhkzq","slide":20,"name":"椭圆 17","bbox":[92,506,50,50]}
+{"kind":"textbox","id":"sh/grm5ofy5","slide":20,"name":"矩形 18","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[92,518,50,25]}
+{"kind":"textbox","id":"sh/8b654f61","slide":20,"name":"矩形 19","text":"ERP继续负责权限、规则、字段和最终写入。","textPreview":"ERP继续负责权限、规则、字段和最终写入。","textChars":21,"textLines":1,"bbox":[163,504,431,58]}
+{"kind":"shape","id":"sh/tcz6dk7m","slide":20,"name":"圆角矩形 20","bbox":[654,151,554,94]}
+{"kind":"shape","id":"sh/69on25ov","slide":20,"name":"椭圆 21","bbox":[674,173,50,50]}
+{"kind":"textbox","id":"sh/7ax4bapg","slide":20,"name":"矩形 22","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[674,185,50,25]}
+{"kind":"textbox","id":"sh/k7650f6p","slide":20,"name":"矩形 23","text":"LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。","textPreview":"LangChain提供基础组件，LangGraph负责流程，Deep Agents探索自主规划。","textChars":48,"textLines":1,"bbox":[745,171,431,58]}
+{"kind":"shape","id":"sh/l8fm907a","slide":20,"name":"圆角矩形 24","bbox":[654,262,554,94]}
+{"kind":"shape","id":"sh/y5ony58z","slide":20,"name":"椭圆 25","bbox":[674,284,50,50]}
+{"kind":"textbox","id":"sh/j6x47ap4","slide":20,"name":"矩形 26","text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[674,296,50,25]}
+{"kind":"textbox","id":"sh/43q5cz69","slide":20,"name":"矩形 27","text":"最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。","textPreview":"最终选择LangGraph，是因为ERP更需要可控、可恢复和可审计。","textChars":34,"textLines":1,"bbox":[745,282,431,58]}
+{"kind":"shape","id":"sh/54j6l47e","slide":20,"name":"圆角矩形 28","bbox":[654,373,554,94]}
+{"kind":"shape","id":"sh/za50r2ds","slide":20,"name":"椭圆 29","bbox":[674,395,50,50]}
+{"kind":"textbox","id":"sh/e9wzyxcn","slide":20,"name":"矩形 30","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[674,407,50,25]}
+{"kind":"textbox","id":"sh/1cnitsvy","slide":20,"name":"矩形 31","text":"当前最大问题是动态字段、流程分支和状态复杂度。","textPreview":"当前最大问题是动态字段、流程分支和状态复杂度。","textChars":23,"textLines":1,"bbox":[745,393,431,58]}
+{"kind":"shape","id":"sh/0beh07ud","slide":20,"name":"圆角矩形 32","bbox":[654,484,554,94]}
+{"kind":"shape","id":"sh/ny50v2d4","slide":20,"name":"椭圆 33","bbox":[674,506,50,50]}
+{"kind":"textbox","id":"sh/mdwz2xcj","slide":20,"name":"矩形 34","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[674,518,50,25]}
+{"kind":"textbox","id":"sh/907ixcva","slide":20,"name":"矩形 35","text":"下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。","textPreview":"下一步要把试点沉淀为统一Schema、统一Tool和统一观测体系。","textChars":33,"textLines":1,"bbox":[745,504,431,58]}
+{"kind":"shape","id":"sh/8zeh47up","slide":20,"name":"圆角矩形 36","bbox":[74,619,1132,56]}
+{"kind":"textbox","id":"sh/32lgjid0","slide":20,"name":"矩形 37","text":"用户从“找功能、填表单”转向“说目标、确认结果”","textPreview":"用户从“找功能、填表单”转向“说目标、确认结果”","textChars":24,"textLines":1,"bbox":[102,634,1076,28]}
+{"kind":"notes","id":"nt/zyxsni5k","slide":20,"text":"【只记一句】AI没有替代ERP，而是为ERP增加自然语言业务入口。\n\n【可直接照读】最后把这次实践收敛成一个核心结论：AI没有替代ERP，而是为ERP增加自然语言业务入口。用户不再需要先理解系统菜单，而是直接说出请假、写日报这样的业务目标；AI负责理解意图、补充信息和组织交互，ERP继续负责权限、规则、字段以及最终写入。所以变化的是用户与ERP交互的方式，不变的是ERP对业务执行的控制。技术上，LangChain提供基础组件，LangGraph负责可控流程，Deep Agents用于探索自主规划。\n\n【领导追问时可补充】可以概括为：AI负责理解与交互，ERP负责规则与执行；用户从找功能、填表单，转向说目标、确认结果。\n\n【时间建议】约 60 秒\n\n[Sources]\n- D:/PythonProject/LearnOne/ai_approval_assistant/README.md\n- D:/PythonProject/LearnOne/ai_approval_assistant/docs/architecture.md\n[/Sources]"}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from hashlib import sha256
 from typing import Any
 
 from fastapi import APIRouter, Header
@@ -14,6 +15,14 @@ router = APIRouter(prefix="/api")
 workflow = create_workflow()
 
 
+def _thread_id(request: ChatRequest) -> str:
+    tenant = request.company_id.strip() or "default"
+    principal = request.uid.strip() or request.user_id.strip()
+    session = request.session_id.strip()
+    digest = sha256(f"{tenant}\x1f{principal}\x1f{session}".encode()).hexdigest()
+    return f"erp-rag:{digest}"
+
+
 @router.post("/chat", response_model=ChatResponse)
 def chat(
     request: ChatRequest,
@@ -25,7 +34,7 @@ def chat(
             "authorization": request.authorization or authorization or "",
             "uid": request.uid or uid or "",
         })
-    config = {"configurable": {"thread_id": request.session_id}}
+    config = {"configurable": {"thread_id": _thread_id(request)}}
     prior: ErpRagState = {}
     if not request.reset:
         snapshot = workflow.get_state(config)
@@ -64,4 +73,5 @@ def chat(
         errors=result.get("errors", []),
         pending_question=result.get("pending_question", ""),
         erp_mode=str(erp_data.get("erp_mode") or result.get("user_context", {}).get("erp_mode") or get_settings().erp_mode),
+        erp_write_mode=str(erp_data.get("erp_write_mode") or get_settings().erp_write_mode),
     )

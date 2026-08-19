@@ -1,0 +1,25 @@
+{
+  "source": "D:/PythonProject/LearnOne/ERP与AI融合实践.pptx",
+  "slideCount": 34,
+  "masters": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "",
+      "placeholders": []
+    }
+  ],
+  "layouts": [
+    {
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "name": "",
+      "parentLayoutId": "",
+      "placeholders": []
+    },
+    {
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Title Slide",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "placeholders": []
+    }
+  ]
+}

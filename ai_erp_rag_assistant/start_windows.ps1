@@ -1,6 +1,6 @@
 param(
     [string]$BindHost = "127.0.0.1",
-    [int]$Port = 8020,
+    [int]$Port = 8021,
     [switch]$NoReload,
     [switch]$SkipSync
 )
