@@ -5,6 +5,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.langgraph_api/
 logs/
 
 # Private company documents and generated index inputs stay local.

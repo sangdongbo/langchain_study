@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -45,8 +46,10 @@ class Settings(BaseModel):
     erp_form_fields_path: str = "/api/field/formFields"
     erp_get_nodes_path: str = "/api/approval/getNodes"
     erp_add_approval_path: str = "/api/approval/add"
+    erp_related_list_path: str = "/api/Company/getRelatedList"
     erp_holiday_rule_path: str = "/api/attendance/getHolidayRuleByUser"
     erp_calculate_holiday_duration_path: str = "/api/attendance/calculateHolidayDuration"
+    erp_user_list_path: str = "/api/User/getList"
     erp_userinfo_path: str = "/api/User/userinfo"
     erp_approval_status_path: str = "/api/approval/myList"
     erp_uid: str = ""
@@ -57,6 +60,18 @@ class Settings(BaseModel):
     llm_base_url: str = ""
     llm_model: str = ""
     llm_timeout: float = 60.0
+    langsmith_tracing: bool = False
+    langsmith_api_key: str = ""
+    langsmith_project: str = "ai-erp-rag-assistant"
+    audit_log_path: str = "logs/ai_erp_audit.jsonl"
+    assistant_key: str = "erp-rag"
+    session_store: str = "memory"
+    mysql_host: str = "127.0.0.1"
+    mysql_port: int = 3306
+    mysql_database: str = ""
+    mysql_user: str = ""
+    mysql_password: str = ""
+    mysql_connect_timeout: int = 5
     embedding_base_url: str = ""
     embedding_api_key: str = ""
     embedding_model: str = ""
@@ -64,13 +79,21 @@ class Settings(BaseModel):
 
     @classmethod
     def from_env(cls) -> "Settings":
-        # The assistant has its own .env, while model credentials are commonly
-        # kept in the repository .env. Empty project values must not mask them.
+        # Load repository defaults first, then let process-level variables win.
+        # Empty values are ignored so a blank project .env entry cannot mask a
+        # usable shared credential from the repository-level file.
         values: dict[str, str] = {}
         for env_path in (PROJECT_ROOT.parent / ".env", PROJECT_ROOT / ".env"):
             for key, value in dotenv_values(env_path).items():
                 if value is not None and str(value).strip():
                     values[key] = str(value).strip()
+        values.update(
+            {
+                key: str(value).strip()
+                for key, value in os.environ.items()
+                if str(value).strip()
+            }
+        )
         llm_api_key = values.get("LLM_API_KEY") or ""
         llm_base_url = values.get("LLM_BASE_URL") or ""
         llm_model = values.get("LLM_MODEL") or ""
@@ -80,7 +103,12 @@ class Settings(BaseModel):
             llm_model = values.get("DASHSCOPE_OPENAI_MODEL") or "qwen-plus"
         if not llm_api_key:
             llm_api_key = values.get("DEEPSEEK_API_KEY") or values.get("OPENAI_API_KEY") or ""
-            llm_base_url = llm_base_url or values.get("DEEPSEEK_BASE_URL") or "https://api.deepseek.com/v1"
+            llm_base_url = (
+                llm_base_url
+                or values.get("DEEPSEEK_BASE_URL")
+                or values.get("OPENAI_BASE_URL")
+                or "https://api.deepseek.com/v1"
+            )
             llm_model = llm_model or values.get("DEEPSEEK_MODEL") or values.get("OPENAI_MODEL") or "deepseek-chat"
         embedding_api_key = (
             values.get("EMBEDDING_API_KEY")
@@ -90,7 +118,12 @@ class Settings(BaseModel):
         )
         embedding_base_url = values.get("EMBEDDING_BASE_URL") or ""
         if not embedding_base_url and values.get("DASHSCOPE_API_KEY"):
-            embedding_base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            # Workspace keys should use the same OpenAI-compatible endpoint as
+            # the configured DashScope LLM; a custom endpoint may be required.
+            embedding_base_url = (
+                values.get("DASHSCOPE_BASE_URL")
+                or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            )
         embedding_model = (
             values.get("EMBEDDING_MODEL")
             or values.get("DASHSCOPE_EMBEDDING_MODEL")
@@ -121,13 +154,20 @@ class Settings(BaseModel):
                 "mock" if (values.get("ERP_READ_MODE") or values.get("ERP_MODE") or "remote").lower() == "mock" else "disabled"
             ),
             erp_skip_userinfo_validation=_bool_from_env(values.get("ERP_SKIP_USERINFO_VALIDATION")),
-            erp_base_url=values.get("ERP_BASE_URL") or "http://127.0.0.1:8002",
+            # 兼容其他 ERP 项目使用的变量名；本项目的 ERP_BASE_URL 优先。
+            erp_base_url=(
+                values.get("ERP_BASE_URL")
+                or values.get("AI_APPROVAL_CRM_BASE_URL")
+                or "http://127.0.0.1:8002"
+            ),
             erp_approval_list_path=values.get("ERP_APPROVAL_LIST_PATH") or "/api/approval/list",
             erp_form_fields_path=values.get("ERP_FORM_FIELDS_PATH") or "/api/field/formFields",
             erp_get_nodes_path=values.get("ERP_GET_NODES_PATH") or "/api/approval/getNodes",
             erp_add_approval_path=values.get("ERP_ADD_APPROVAL_PATH") or "/api/approval/add",
+            erp_related_list_path=values.get("ERP_RELATED_LIST_PATH") or "/api/Company/getRelatedList",
             erp_holiday_rule_path=values.get("ERP_HOLIDAY_RULE_PATH") or "/api/attendance/getHolidayRuleByUser",
             erp_calculate_holiday_duration_path=values.get("ERP_CALCULATE_HOLIDAY_DURATION_PATH") or "/api/attendance/calculateHolidayDuration",
+            erp_user_list_path=values.get("ERP_USER_LIST_PATH") or "/api/User/getList",
             erp_userinfo_path=values.get("ERP_USERINFO_PATH") or "/api/User/userinfo",
             erp_approval_status_path=values.get("ERP_APPROVAL_STATUS_PATH") or "/api/approval/myList",
             erp_uid=values.get("ERP_UID") or "",
@@ -138,6 +178,18 @@ class Settings(BaseModel):
             llm_base_url=llm_base_url,
             llm_model=llm_model,
             llm_timeout=float(values.get("LLM_TIMEOUT") or 60),
+            langsmith_tracing=_bool_from_env(values.get("LANGSMITH_TRACING")),
+            langsmith_api_key=values.get("LANGSMITH_API_KEY") or "",
+            langsmith_project=values.get("LANGSMITH_PROJECT") or "ai-erp-rag-assistant",
+            audit_log_path=values.get("AI_ERP_AUDIT_LOG_PATH") or "logs/ai_erp_audit.jsonl",
+            assistant_key=values.get("AI_ERP_ASSISTANT_KEY") or "erp-rag",
+            session_store=(values.get("AI_ERP_SESSION_STORE") or "memory").lower(),
+            mysql_host=values.get("AI_ERP_MYSQL_HOST") or "127.0.0.1",
+            mysql_port=int(values.get("AI_ERP_MYSQL_PORT") or 3306),
+            mysql_database=values.get("AI_ERP_MYSQL_DATABASE") or "",
+            mysql_user=values.get("AI_ERP_MYSQL_USER") or "",
+            mysql_password=values.get("AI_ERP_MYSQL_PASSWORD") or "",
+            mysql_connect_timeout=int(values.get("AI_ERP_MYSQL_CONNECT_TIMEOUT") or 5),
             embedding_base_url=embedding_base_url,
             embedding_api_key=embedding_api_key,
             embedding_model=embedding_model,

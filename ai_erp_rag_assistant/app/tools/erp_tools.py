@@ -64,5 +64,28 @@ def get_approval_nodes(
     return erp_client.get_approval_nodes(template_id, fields, user=user or {})
 
 
+def get_approval_field_options(
+    template_id: str,
+    field_key: str,
+    company_id: str,
+    *,
+    title: str = "",
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 20,
+    user: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    return erp_client.get_field_options(
+        template_id,
+        field_key,
+        company_id=company_id,
+        title=title,
+        keyword=keyword,
+        page=page,
+        page_size=page_size,
+        user=user or {},
+    )
+
+
 def submit_approval(preview: dict[str, Any], *, user: dict[str, Any] | None = None) -> dict[str, Any]:
     return erp_client.submit_approval(preview, user=user or {})

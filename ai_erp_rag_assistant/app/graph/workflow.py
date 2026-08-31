@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import re
+import json
 from datetime import date, datetime, time
+from hashlib import sha256
 from typing import Any
 from uuid import uuid4
 
@@ -9,6 +11,13 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from ai_erp_rag_assistant.app.graph.state import ErpRagState
+from ai_erp_rag_assistant.app.services.approval_form_service import (
+    build_form_schema,
+    build_submit_nodes,
+    missing_assignee_nodes,
+    normalize_approval_nodes,
+)
+from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
 from ai_erp_rag_assistant.app.services.model_service import model_service
 from ai_erp_rag_assistant.app.tools.erp_tools import (
     get_current_user,
@@ -24,6 +33,16 @@ from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
 def _record(state: ErpRagState, tool: str, **data: Any) -> list[dict[str, Any]]:
     calls = list(state.get("tool_calls", []))
     calls.append({"tool": tool, **data})
+    write_audit_event(
+        "workflow.tool",
+        {
+            "tool": tool,
+            "session_id": state.get("session_id"),
+            "company_id": state.get("company_id") or state.get("user_context", {}).get("company_id"),
+            "user_id": state.get("user_id"),
+            "data": data,
+        },
+    )
     return calls
 
 
@@ -32,6 +51,7 @@ def _has_value(value: Any) -> bool:
 
 
 def _parse_temporal(value: Any) -> date | datetime | time | None:
+    value = _actual_value(value)
     if isinstance(value, (date, datetime, time)):
         return value
     text = str(value).strip().replace("Z", "+00:00")
@@ -41,6 +61,12 @@ def _parse_temporal(value: Any) -> date | datetime | time | None:
         except ValueError:
             continue
     return None
+
+
+def _actual_value(value: Any) -> Any:
+    if isinstance(value, dict) and "value" in value:
+        return value.get("value")
+    return value
 
 
 def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[list[str], list[str]]:
@@ -57,8 +83,15 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
             continue
         if not _has_value(value):
             continue
+        actual_value = _actual_value(value)
         options = [str(option) for option in field.get("options", []) if option is not None]
-        if options and str(value) not in options:
+        option_values = [
+            str(option.get("value"))
+            for option in field.get("option_values", [])
+            if isinstance(option, dict) and option.get("value") is not None
+        ]
+        submitted_values = actual_value if isinstance(actual_value, list) else [actual_value]
+        if options and any(str(item) not in {*options, *option_values} for item in submitted_values):
             invalid.append(f"{label}必须是：{'、'.join(options)}")
             continue
         field_type = str(field.get("type") or "").lower()
@@ -74,7 +107,7 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
                 invalid.append(f"{label}必须是有效时间")
         elif any(token in field_type for token in ("number", "integer", "float", "decimal")):
             try:
-                float(value)
+                float(actual_value)
             except (TypeError, ValueError):
                 invalid.append(f"{label}必须是数字")
 
@@ -90,6 +123,32 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
             except TypeError:
                 invalid.append("开始时间与结束时间格式必须一致")
     return missing, invalid
+
+
+def _validation_contract(
+    template: dict[str, Any],
+    fields: dict[str, Any],
+    invalid_messages: list[str],
+) -> tuple[list[str], list[dict[str, str]]]:
+    missing_keys: list[str] = []
+    invalid_fields: list[dict[str, str]] = []
+    for field in template.get("fields", []):
+        if not isinstance(field, dict):
+            continue
+        key = str(field.get("name") or "")
+        label = str(field.get("label") or key)
+        if field.get("required") and not _has_value(fields.get(key)):
+            missing_keys.append(key)
+        for message in invalid_messages:
+            if message.startswith(label) or (
+                "开始时间" in message and any(marker in key.lower() for marker in ("start", "begin"))
+            ) or (
+                "结束时间" in message and any(marker in key.lower() for marker in ("end", "finish"))
+            ):
+                item = {"field_key": key, "message": message}
+                if item not in invalid_fields:
+                    invalid_fields.append(item)
+    return missing_keys, invalid_fields
 
 
 def _select_candidate_id(message: str, candidates: list[dict[str, Any]]) -> str:
@@ -271,6 +330,46 @@ def _explicit_template_change(message: str) -> bool:
     return any(marker in message for marker in ("改成", "换成", "切换到", "改为", "另一个审批", "重新申请"))
 
 
+def _explicit_field_change(message: str) -> bool:
+    return any(marker in message for marker in ("改成", "换成", "改为", "修改", "调整", "重新填写"))
+
+
+def _is_confirmation_message(message: str) -> bool:
+    compact = _compact_match_text(message).strip("，。,.!！")
+    return compact in {"确认", "确认提交", "同意提交", "提交", "提交申请"}
+
+
+def _has_frozen_preview_confirmation(state: ErpRagState) -> bool:
+    preview = state.get("preview", {})
+    return bool(
+        state.get("active_approval")
+        and preview
+        and preview.get("requires_confirmation", True)
+        and not _explicit_field_change(state.get("user_message", ""))
+        and (state.get("confirm") is True or _is_confirmation_message(state.get("user_message", "")))
+    )
+
+
+def _route_from_start(state: ErpRagState) -> str:
+    return "frozen_confirmation" if _has_frozen_preview_confirmation(state) else "planner"
+
+
+def accept_frozen_preview_confirmation(state: ErpRagState) -> ErpRagState:
+    """Turn an explicit confirmation into a command without re-running the LLM."""
+    return {
+        "route": "approval_workflow",
+        "confirm": True,
+        "pending_question": "",
+        "workflow_status": "preview_ready",
+        "tool_calls": _record(
+            state,
+            "workflow.preview_confirmed",
+            preview_id=state.get("preview", {}).get("preview_id"),
+            preview_version=state.get("preview", {}).get("preview_version"),
+        ),
+    }
+
+
 def agent_planner(state: ErpRagState) -> ErpRagState:
     previous_plan = dict(state.get("plan", {}))
     active_approval = bool(state.get("active_approval"))
@@ -308,13 +407,16 @@ def agent_planner(state: ErpRagState) -> ErpRagState:
 
 
 def load_erp_context(state: ErpRagState) -> ErpRagState:
-    user = get_current_user(
-        state["user_id"],
-        uid=state.get("uid", ""),
-        authorization=state.get("authorization", ""),
-        company_id=state.get("company_id", ""),
-        department=state.get("department", ""),
-    )
+    user = state.get("user_context", {})
+    reused = bool(user.get("company_id") and user.get("erp_mode"))
+    if not reused:
+        user = get_current_user(
+            state["user_id"],
+            uid=state.get("uid", ""),
+            authorization=state.get("authorization", ""),
+            company_id=state.get("company_id", ""),
+            department=state.get("department", ""),
+        )
     return {
         "user_context": user,
         "tool_calls": _record(
@@ -323,6 +425,7 @@ def load_erp_context(state: ErpRagState) -> ErpRagState:
             mode=user.get("erp_mode"),
             company_id=user.get("company_id"),
             department=user.get("department"),
+            reused=reused,
         ),
     }
 
@@ -392,6 +495,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                 "fields": {},
                 "pending_question": question,
                 "assistant_message": question,
+                "workflow_status": "waiting_user",
                 "tool_calls": _record(state, "erp.approval_list", query=approval_query, result_count=0),
             }
         selected_id = _select_candidate_id(state["user_message"], candidates)
@@ -413,6 +517,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                 "fields": {},
                 "pending_question": question,
                 "assistant_message": question,
+                "workflow_status": "waiting_user",
                 "tool_calls": _record(
                     state,
                     "erp.approval_list",
@@ -476,9 +581,16 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
             fields.update(matched_duration_fields)
         except RuntimeError as exc:
             extraction_error = str(exc)
+    draft_key = str(state.get("draft_key") or "") if reuse_template else ""
+    if not draft_key:
+        draft_key = uuid4().hex
+    form_schema = build_form_schema(template, fields)
     return {
         "template": template,
         "fields": fields,
+        "draft_key": draft_key,
+        "form_schema": form_schema,
+        "workflow_status": "collecting_fields",
         "tool_calls": _record(
             state,
             "erp.approval_template",
@@ -505,6 +617,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
             "template": {},
             "template_candidates": [],
             "conversation": [],
+            "workflow_status": "cancelled",
             "active_approval": False,
             "tool_calls": _record(state, "erp.cancel_draft", cancelled=True),
         }
@@ -515,10 +628,18 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
             "preview": {},
             "assistant_message": state.get("assistant_message") or "请先选择一个 ERP 审批模板。",
             "pending_question": state.get("pending_question") or "请先选择一个 ERP 审批模板。",
+            "workflow_status": "waiting_user",
             "active_approval": True,
             "tool_calls": _record(state, "erp.validate_fields", valid=False, reason="template_not_selected"),
         }
     missing, invalid = _validate_fields(template, fields)
+    missing_field_keys, invalid_fields = _validation_contract(template, fields, invalid)
+    form_schema = build_form_schema(
+        template,
+        fields,
+        missing_field_keys=missing_field_keys,
+        invalid_fields=invalid_fields,
+    )
     if missing or invalid:
         parts: list[str] = []
         if missing:
@@ -530,15 +651,12 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
             "pending_question": question,
             "assistant_message": question,
             "preview": {},
+            "form_schema": form_schema,
+            "workflow_status": "waiting_user",
             "active_approval": True,
             "tool_calls": _record(state, "erp.validate_fields", valid=False, missing=missing, invalid=invalid),
         }
     existing_preview = state.get("preview", {})
-    reuse_idempotency_key = bool(
-        existing_preview.get("fields") == fields
-        and existing_preview.get("template_id") == template.get("template_id")
-        and existing_preview.get("idempotency_key")
-    )
     submission_fields = _submission_fields(template, fields)
     nodes: list[dict[str, Any]] = []
     node_error = ""
@@ -549,20 +667,74 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
             nodes = get_approval_nodes(template_id, submission_fields, user=user)
         except RuntimeError as exc:
             node_error = str(exc)
+    approval_flow = normalize_approval_nodes(nodes)
+    selected_assignees = dict(state.get("selected_assignees", {}))
+    missing_assignee_node_ids = missing_assignee_nodes(approval_flow, selected_assignees)
+    submit_nodes = build_submit_nodes(nodes, selected_assignees)
+    preview_hash = _preview_hash(template.get("template_id"), submission_fields, submit_nodes)
+    same_preview = bool(
+        existing_preview
+        and (
+            existing_preview.get("preview_hash") == preview_hash
+            or (
+                not existing_preview.get("preview_hash")
+                and existing_preview.get("fields") == fields
+                and existing_preview.get("template_id") == template.get("template_id")
+            )
+        )
+    )
+    previous_version = int(existing_preview.get("preview_version") or 0)
     preview = {
+        "preview_id": existing_preview.get("preview_id") if same_preview else uuid4().hex,
+        "preview_version": previous_version if same_preview and previous_version else previous_version + 1,
+        "preview_hash": preview_hash,
         "template_code": template.get("template_code"),
         "template_id": template.get("template_id"),
         "title": template.get("title") or "请假审批",
         "fields": fields,
         "submission_fields": submission_fields,
         "nodes": nodes,
-        "requires_confirmation": True,
-        "idempotency_key": existing_preview.get("idempotency_key") if reuse_idempotency_key else uuid4().hex,
+        "submit_nodes": submit_nodes,
+        "approval_flow": approval_flow,
+        "selected_assignees": selected_assignees,
+        "missing_assignee_node_ids": missing_assignee_node_ids,
+        "form_schema": form_schema,
+        "requires_confirmation": not missing_assignee_node_ids and not node_error,
+        "idempotency_key": existing_preview.get("idempotency_key") if same_preview else uuid4().hex,
     }
+    if missing_assignee_node_ids:
+        question = "表单字段已补齐，请在审批流程中选择审批人后再确认提交。"
+        return {
+            "preview": preview,
+            "form_schema": form_schema,
+            "pending_question": question,
+            "assistant_message": question,
+            "workflow_status": "waiting_assignee",
+            "active_approval": True,
+            "tool_calls": _record(
+                state,
+                "erp.validate_assignees",
+                valid=False,
+                missing_node_ids=missing_assignee_node_ids,
+            ),
+        }
+    if node_error:
+        question = f"表单字段已补齐，但审批流程加载失败：{node_error}"
+        return {
+            "preview": preview,
+            "form_schema": form_schema,
+            "pending_question": question,
+            "assistant_message": question,
+            "workflow_status": "waiting_erp",
+            "active_approval": True,
+            "tool_calls": _record(state, "erp.approval_nodes", valid=False, error=node_error),
+        }
     return {
         "preview": preview,
+        "form_schema": form_schema,
         "pending_question": "",
         "assistant_message": "字段已补齐，已生成审批预览。请回复“确认提交”或“取消”。",
+        "workflow_status": "preview_ready",
         "active_approval": True,
         "tool_calls": _record(
             state,
@@ -578,6 +750,26 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
 def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
     if state.get("confirm") is not True or not state.get("preview"):
         return state
+    if not state.get("preview", {}).get("requires_confirmation", True):
+        message = state.get("pending_question") or "当前审批预览尚未满足提交条件，请先补齐页面提示的信息。"
+        return {
+            "assistant_message": message,
+            "pending_question": message,
+            "confirm": None,
+            "workflow_status": state.get("workflow_status") or "waiting_user",
+            "active_approval": True,
+            "tool_calls": _record(state, "workflow.preview_not_submittable"),
+        }
+    mismatch = _confirmation_mismatch(state)
+    if mismatch:
+        return {
+            "assistant_message": mismatch,
+            "pending_question": mismatch,
+            "confirm": None,
+            "workflow_status": "preview_ready",
+            "active_approval": True,
+            "tool_calls": _record(state, "workflow.preview_confirmation_rejected", reason=mismatch),
+        }
     result = submit_approval(state["preview"], user=state.get("user_context", {}))
     write_mode = str(result.get("erp_write_mode") or "")
     if write_mode == "disabled":
@@ -590,6 +782,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
         return {
             "erp_data": result,
             "assistant_message": message,
+            "consumed_preview": closed_preview,
             # Keep the exact preview visible in this response, but close the
             # draft so the same confirmation cannot be consumed repeatedly.
             "preview": closed_preview,
@@ -599,6 +792,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
             "conversation": [],
             "pending_question": "",
             "confirm": None,
+            "workflow_status": "blocked",
             "active_approval": False,
             "tool_calls": _record(state, "erp.approval_submit", mode=result.get("erp_mode"), result=result),
         }
@@ -607,6 +801,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
     return {
         "erp_data": result,
         "assistant_message": message,
+        "consumed_preview": dict(state.get("preview", {})),
         "preview": {},
         "fields": {},
         "template": {},
@@ -614,6 +809,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
         "conversation": [],
         "pending_question": "",
         "confirm": None,
+        "workflow_status": "submitted",
         "active_approval": False,
         "tool_calls": _record(state, "erp.approval_submit", mode=result.get("erp_mode"), result=result),
     }
@@ -640,8 +836,33 @@ def handle_error(state: ErpRagState, error: Exception) -> ErpRagState:
     return {
         "assistant_message": message,
         "errors": [*state.get("errors", []), str(error)],
+        "workflow_status": "failed",
         "tool_calls": _record(state, "system.error", error=str(error)),
     }
+
+
+def _preview_hash(template_id: Any, submission_fields: dict[str, Any], nodes: list[dict[str, Any]]) -> str:
+    payload = json.dumps(
+        {"template_id": template_id, "submission_fields": submission_fields, "nodes": nodes},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
+    return sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _confirmation_mismatch(state: ErpRagState) -> str:
+    preview = state.get("preview", {})
+    checks = (
+        (state.get("confirm_preview_id"), preview.get("preview_id"), "预览标识"),
+        (state.get("confirm_preview_version"), preview.get("preview_version"), "预览版本"),
+        (state.get("confirm_preview_hash"), preview.get("preview_hash"), "预览内容"),
+    )
+    for requested, current, label in checks:
+        if requested not in (None, "") and str(requested) != str(current):
+            return f"{label}已变化，请查看并确认最新审批预览。"
+    return ""
 
 
 def _route_after_erp_context(state: ErpRagState) -> str:
@@ -657,9 +878,10 @@ def _route_after_erp_context(state: ErpRagState) -> str:
     return str(state.get("route") or "general_chat")
 
 
-def create_workflow():
+def create_workflow(*, with_checkpointer: bool = True):
     builder = StateGraph(ErpRagState)
     builder.add_node("agent_planner", agent_planner)
+    builder.add_node("accept_frozen_preview_confirmation", accept_frozen_preview_confirmation)
     builder.add_node("load_erp_context", load_erp_context)
     builder.add_node("retrieve_rag", retrieve_rag)
     builder.add_node("query_erp_status", query_erp_status_node)
@@ -667,7 +889,15 @@ def create_workflow():
     builder.add_node("validate_and_preview", validate_and_preview)
     builder.add_node("submit_if_confirmed", submit_if_confirmed)
     builder.add_node("answer_with_llm", answer_with_llm)
-    builder.add_edge(START, "agent_planner")
+    builder.add_conditional_edges(
+        START,
+        _route_from_start,
+        {
+            "planner": "agent_planner",
+            "frozen_confirmation": "accept_frozen_preview_confirmation",
+        },
+    )
+    builder.add_edge("accept_frozen_preview_confirmation", "load_erp_context")
     builder.add_conditional_edges(
         "agent_planner",
         lambda state: state["route"],
@@ -698,4 +928,6 @@ def create_workflow():
     )
     builder.add_edge("submit_if_confirmed", END)
     builder.add_edge("answer_with_llm", END)
-    return builder.compile(checkpointer=MemorySaver())
+    if with_checkpointer:
+        return builder.compile(checkpointer=MemorySaver())
+    return builder.compile()

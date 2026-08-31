@@ -1,13 +1,25 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from copy import deepcopy
+from datetime import datetime, timedelta, timezone
+from time import monotonic
 from typing import Any
 from uuid import uuid4
 
 import httpx
 
 from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.services.approval_form_service import (
+    find_field,
+    normalize_approval_nodes,
+    normalize_erp_fields,
+    project_chat_fields,
+)
+from ai_erp_rag_assistant.app.services.audit_log_service import (
+    summarize_response,
+    write_audit_event,
+)
 
 
 logger = logging.getLogger("ai_erp_rag_assistant.erp")
@@ -75,12 +87,59 @@ class ErpClient:
         url = f"{self.settings.erp_base_url.rstrip('/')}{path}"
         headers = self._headers(user)
         headers.update(extra_headers or {})
-        response = httpx.post(url, headers=headers, json=body, timeout=15)
-        response.raise_for_status()
-        payload = response.json()
-        if not isinstance(payload, dict):
-            raise RuntimeError(f"ERP 返回不是 JSON 对象：{path}")
-        return payload
+        request_id = uuid4().hex
+        started_at = monotonic()
+        status_code: int | None = None
+        write_audit_event(
+            "erp.request",
+            {
+                "request_id": request_id,
+                "path": path,
+                "company_id": user.get("company_id"),
+                "user_id": user.get("user_id"),
+                "uid": user.get("uid"),
+                "body": body,
+            },
+        )
+        try:
+            response = httpx.post(url, headers=headers, json=body, timeout=15)
+            status_code = response.status_code
+            response.raise_for_status()
+            payload = response.json()
+            if not isinstance(payload, dict):
+                raise RuntimeError(f"ERP 返回不是 JSON 对象：{path}")
+            write_audit_event(
+                "erp.response",
+                {
+                    "request_id": request_id,
+                    "path": path,
+                    "status_code": status_code,
+                    **summarize_response(payload),
+                },
+            )
+            return payload
+        except Exception as exc:
+            write_audit_event(
+                "erp.error",
+                {
+                    "request_id": request_id,
+                    "path": path,
+                    "status_code": status_code,
+                    "error_type": type(exc).__name__,
+                    "error": str(exc)[:300],
+                },
+            )
+            raise
+        finally:
+            write_audit_event(
+                "erp.timing",
+                {
+                    "request_id": request_id,
+                    "path": path,
+                    "status_code": status_code,
+                    "duration_ms": max(0, int((monotonic() - started_at) * 1000)),
+                },
+            )
 
     def get_current_user(self, user_id: str, *, uid: str, authorization: str, company_id: str, department: str) -> dict[str, Any]:
         user = {
@@ -225,14 +284,29 @@ class ErpClient:
             }
         fields_payload = self._post(self.settings.erp_form_fields_path, {"field_form": f"approval_type_{template_id}"}, user)
         _require_success(fields_payload, "审批表单字段")
-        fields = _normalize_fields(fields_payload.get("data") or [])
-        self._enrich_dynamic_fields(fields, user)
+        form_fields = normalize_erp_fields(fields_payload.get("data") or [])
+        self._enrich_dynamic_fields(form_fields, user)
+        fields = project_chat_fields(form_fields)
         return {
             "template_code": template_id,
             "template_id": template_id,
             "title": title or template_id,
             "company_id": company_id,
             "fields": fields,
+            "all_fields": form_fields,
+            "form_schema": {
+                "schema_version": "1.0",
+                "template": {
+                    "template_id": str(template_id),
+                    "template_code": str(template_id),
+                    "title": title or template_id,
+                    "company_id": company_id,
+                },
+                "fields": deepcopy(form_fields),
+                "values": {},
+                "missing_field_keys": [],
+                "invalid_fields": [],
+            },
             "erp_mode": "remote",
             "erp_write_mode": self.write_mode,
         }
@@ -269,7 +343,7 @@ class ErpClient:
         if self.read_mode == "mock" or not str(template_id).isdigit():
             return []
         form_value = [
-            {"field_key": str(key), "value": value}
+            {"field_key": str(key), "value": _structured_value(value)}
             for key, value in fields.items()
         ]
         payload = self._post(
@@ -279,25 +353,165 @@ class ErpClient:
         )
         _require_success(payload, "审批节点")
         data = payload.get("data")
-        return data if isinstance(data, list) else []
+        nodes = data if isinstance(data, list) else []
+        self._enrich_unrestricted_node_candidates(nodes, user)
+        return nodes
 
     def _enrich_dynamic_fields(self, fields: list[dict[str, Any]], user: dict[str, Any]) -> None:
         """Load options ERP exposes through a separate endpoint."""
-        holiday_field = next((field for field in fields if field.get("name") == "rest_holiday_rule_id"), None)
+        holiday_field = find_field(fields, "rest_holiday_rule_id")
         if not holiday_field or self.read_mode == "mock":
             return
-        payload = self._post(self.settings.erp_holiday_rule_path, {}, user)
-        _require_success(payload, "假期类型")
-        items = payload.get("data") if isinstance(payload.get("data"), list) else []
-        option_values = []
-        for item in items:
-            if not isinstance(item, dict) or item.get("id") is None:
-                continue
-            label = str(item.get("name") or item.get("title") or item.get("label") or "").strip()
-            if label:
-                option_values.append({"label": label, "value": item.get("id")})
+        option_values = [_holiday_rule_option(item) for item in self.get_holiday_rules(user)]
+        option_values = [option for option in option_values if option]
         holiday_field["option_values"] = option_values
         holiday_field["options"] = [str(option["label"]) for option in option_values]
+        holiday_field["option_source"] = {
+            "type": "holiday_rule",
+            "lazy": False,
+            "searchable": False,
+        }
+
+    def get_field_options(
+        self,
+        template_id: str,
+        field_key: str,
+        *,
+        company_id: str,
+        user: dict[str, Any],
+        title: str = "",
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 20,
+    ) -> dict[str, Any]:
+        """Resolve static or remote options for one dynamic ERP field."""
+        template = self.get_approval_template(
+            template_id,
+            company_id=company_id,
+            title=title,
+            user=user,
+        )
+        field_definitions = template.get("all_fields") or template.get("fields") or []
+        if field_definitions and not any(
+            isinstance(item, dict) and item.get("component") for item in field_definitions
+        ):
+            field_definitions = normalize_erp_fields(field_definitions)
+        field = find_field(field_definitions, field_key)
+        if not field:
+            raise RuntimeError(f"审批模板中不存在字段：{field_key}")
+        source = field.get("option_source") if isinstance(field.get("option_source"), dict) else {}
+        source_type = str(source.get("type") or "")
+        options = list(field.get("option_values") or [])
+        if not options:
+            options = [
+                {"label": str(option), "value": option, "disabled": False, "meta": {}}
+                for option in field.get("options", [])
+                if option not in (None, "")
+            ]
+        total: int | None = len(options)
+        if source_type == "related_list":
+            items, total = self.get_related_list(
+                str(source.get("relate_type") or ""),
+                user=user,
+                keyword=keyword,
+                page=page,
+                page_size=page_size,
+            )
+            options = [_related_item_option(item) for item in items]
+        elif source_type == "user_list":
+            items = self.get_user_list(user, keyword=keyword, page_size=page_size)
+            options = [_user_option(item) for item in items]
+            total = len(options)
+        options = [option for option in options if option]
+        if keyword and source_type in {"", "static", "holiday_rule"}:
+            marker = keyword.lower().strip()
+            options = [option for option in options if marker in str(option.get("label") or "").lower()]
+            total = len(options)
+        return {
+            "template_id": str(template_id),
+            "field_key": str(field_key),
+            "source": source or {"type": "static", "lazy": False, "searchable": False},
+            "options": options,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "has_more": bool(total is not None and page * page_size < total),
+        }
+
+    def get_related_list(
+        self,
+        relate_type: str,
+        *,
+        user: dict[str, Any],
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[dict[str, Any]], int | None]:
+        payload = self._post(
+            self.settings.erp_related_list_path,
+            {
+                "relate_type": relate_type,
+                "page": page,
+                "pageSize": page_size,
+                "keyword": keyword,
+                "status": 0,
+                "created_at": "",
+                "hasNoAccess": False,
+                "type": "",
+            },
+            user,
+        )
+        _require_success(payload, "关联字段选项")
+        data = payload.get("data")
+        if isinstance(data, dict):
+            items = data.get("data") or data.get("list") or data.get("items") or []
+            total_value = data.get("total") or data.get("count")
+            total = int(total_value) if str(total_value or "").isdigit() else None
+        else:
+            items, total = data or [], None
+        return [item for item in items if isinstance(item, dict)], total
+
+    def get_holiday_rules(self, user: dict[str, Any]) -> list[dict[str, Any]]:
+        payload = self._post(self.settings.erp_holiday_rule_path, {}, user)
+        _require_success(payload, "假期类型")
+        data = payload.get("data")
+        return [item for item in data if isinstance(item, dict)] if isinstance(data, list) else []
+
+    def get_user_list(
+        self,
+        user: dict[str, Any],
+        *,
+        keyword: str = "",
+        page_size: int = 2000,
+    ) -> list[dict[str, Any]]:
+        payload = self._post(
+            self.settings.erp_user_list_path,
+            {"keyword": keyword, "pageSize": page_size},
+            user,
+        )
+        _require_success(payload, "可选人员")
+        data = payload.get("data")
+        if isinstance(data, dict):
+            data = data.get("data") or data.get("list") or data.get("items") or []
+        return [item for item in data if isinstance(item, dict)] if isinstance(data, list) else []
+
+    def _enrich_unrestricted_node_candidates(
+        self,
+        nodes: list[dict[str, Any]],
+        user: dict[str, Any],
+    ) -> None:
+        normalized = normalize_approval_nodes(nodes)
+        needs_users = any(
+            node.get("requires_selection") and not node.get("candidates")
+            for node in normalized
+        )
+        if not needs_users:
+            return
+        users = self.get_user_list(user)
+        for node in nodes:
+            handle = _node_handle(node.get("handle"))
+            if str(handle.get("type") or "") == "submitter_choice" and not _node_candidate_items(handle):
+                handle["relate_user"] = users
 
     def submit_approval(self, preview: dict[str, Any], *, user: dict[str, Any]) -> dict[str, Any]:
         if self.write_mode == "disabled":
@@ -322,28 +536,31 @@ class ErpClient:
             raise RuntimeError("ERP 提交需要远程 approval_set_id，当前模板没有返回数字 ID。")
         submission_fields = preview.get("submission_fields") or preview.get("fields") or {}
         form_value = [
-            {"field_key": str(key), "value": value}
+            {"field_key": str(key), "value": _structured_value(value)}
             for key, value in submission_fields.items()
         ]
-        nodes = preview.get("nodes") or []
+        nodes = preview.get("submit_nodes") or preview.get("nodes") or []
         if not nodes:
             node_payload = self._post(
                 self.settings.erp_get_nodes_path,
                 {"approval_set_id": int(template_id), "form_value": form_value},
                 user,
             )
+            _require_success(node_payload, "审批节点")
             nodes = node_payload.get("data") if isinstance(node_payload.get("data"), list) else []
         idempotency_key = str(preview.get("idempotency_key") or uuid4().hex)
+        form_data = self._remote_submission_form_data(submission_fields, user)
         payload = self._post(
             self.settings.erp_add_approval_path,
             {
                 "approval_set_id": int(template_id),
                 "node_list": nodes,
-                "form_data": _remote_form_data(submission_fields),
+                "form_data": form_data,
             },
             user,
             extra_headers={"Idempotency-Key": idempotency_key},
         )
+        _require_success(payload, "创建审批")
         data = payload.get("data")
         approval_id = ""
         if isinstance(data, dict):
@@ -367,6 +584,55 @@ class ErpClient:
             "nodes": nodes,
             "idempotency_key": idempotency_key,
         }
+
+    def _remote_submission_form_data(
+        self,
+        fields: dict[str, Any],
+        user: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Add ERP-derived leave control values before the real write call."""
+        form_data = _remote_form_data(fields)
+        holiday_rule_id = _structured_value(form_data.get("rest_holiday_rule_id"))
+        start_date = _structured_value(form_data.get("rest_start_time"))
+        end_date = _structured_value(form_data.get("rest_end_time"))
+        if holiday_rule_id is None or not start_date or not end_date:
+            return form_data
+        selected_rule = next(
+            (
+                item
+                for item in self.get_holiday_rules(user)
+                if str(item.get("id")) == str(holiday_rule_id)
+            ),
+            None,
+        )
+        if not selected_rule:
+            raise RuntimeError("ERP 未找到所选假期规则，不能提交请假审批。")
+        start_text, end_text = _normalize_leave_time_fields(
+            form_data,
+            selected_rule,
+            str(start_date),
+            str(end_date),
+        )
+        duration_payload = self._post(
+            self.settings.erp_calculate_holiday_duration_path,
+            {
+                "attendance_holiday_config_id": int(holiday_rule_id),
+                "start_date": start_text,
+                "end_date": end_text,
+            },
+            user,
+        )
+        _require_success(duration_payload, "请假时长计算")
+        duration_data = duration_payload.get("data") if isinstance(duration_payload.get("data"), dict) else {}
+        rest_rule_json = deepcopy(selected_rule)
+        rest_rule_json["holiday_day_list"] = duration_data.get("holiday_day_list") or []
+        rest_rule_json["web_show_day_list"] = duration_data.get("web_show_day_list") or []
+        form_data["rest_rule_json"] = rest_rule_json
+        if duration_data.get("all_duration") is not None:
+            duration = duration_data["all_duration"]
+            form_data["rest_duration"] = {"label": str(duration), "value": duration}
+        form_data.setdefault("rest_prove", [])
+        return form_data
 
 
 def _first_approval(data: Any) -> dict[str, Any] | None:
@@ -582,62 +848,27 @@ def _compact_text(value: Any) -> str:
 
 
 def _normalize_fields(data: Any) -> list[dict[str, Any]]:
-    """Normalize common ERP field payload variants into an agent-facing schema."""
-    if isinstance(data, dict):
-        for key in ("fields", "list", "data", "items", "children", "_child"):
-            found = _normalize_fields(data.get(key))
-            if found:
-                return found
-        return []
-    if not isinstance(data, list):
-        return []
-    normalized: list[dict[str, Any]] = []
-    for item in data:
-        if not isinstance(item, dict):
+    """Backward-compatible compact field projection for existing callers."""
+    result: list[dict[str, Any]] = []
+    for field in normalize_erp_fields(data):
+        if not field.get("required"):
             continue
-        children = item.get("children") or item.get("fields") or item.get("_child")
-        if children:
-            normalized.extend(_normalize_fields(children))
-            continue
-        name = str(item.get("field_key") or item.get("field_id") or item.get("name") or "").strip()
-        label = str(item.get("field_name") or item.get("label") or item.get("title") or name).strip()
-        if not name:
-            continue
-        raw_required = item.get("required", item.get("is_required", item.get("isRequired", False)))
-        required = raw_required in (True, 1, "1", "true", "True")
-        extend = item.get("extend") if isinstance(item.get("extend"), dict) else {}
-        options = extend.get("options") or extend.get("option") or item.get("options") or item.get("option_values") or item.get("values") or []
-        normalized_options = []
-        option_values = []
-        for option in options if isinstance(options, list) else []:
-            if isinstance(option, dict):
-                label_value = option.get("label") or option.get("name") or option.get("text") or option.get("value")
-                value = option.get("value", label_value)
-                normalized_options.append(label_value)
-                option_values.append({"label": label_value, "value": value})
-            else:
-                normalized_options.append(option)
-                option_values.append({"label": option, "value": option})
-        field_type = str(item.get("field_type") or item.get("type") or item.get("input_type") or "text").lower()
-        if field_type in {"select", "radio", "checkbox", "checkbox_order"}:
-            normalized_type = "enum"
-        elif field_type in {"number", "money", "duration"}:
-            normalized_type = "number"
-        elif field_type in {"date", "datetime", "attendance_date"}:
-            normalized_type = "datetime" if field_type in {"datetime", "attendance_date"} else "date"
-        else:
-            normalized_type = "text"
-        normalized.append({
-            "name": name,
-            "label": label,
-            "required": required,
-            "type": normalized_type,
-            "erp_field_type": field_type,
-            "options": [str(option) for option in normalized_options if option is not None],
-            "option_values": option_values,
-            "input_type": item.get("input_type") or "",
-        })
-    return normalized
+        result.append(
+            {
+                "name": field["name"],
+                "label": field["label"],
+                "required": True,
+                "type": field["type"],
+                "erp_field_type": field["erp_field_type"],
+                "options": field.get("options", []),
+                "option_values": [
+                    {"label": option.get("label"), "value": option.get("value")}
+                    for option in field.get("option_values", [])
+                ],
+                "input_type": field.get("input_type") or "",
+            }
+        )
+    return result
 
 
 def _remote_form_data(fields: dict[str, Any]) -> dict[str, Any]:
@@ -646,6 +877,109 @@ def _remote_form_data(fields: dict[str, Any]) -> dict[str, Any]:
     for key, value in fields.items():
         result[str(key)] = value if isinstance(value, (dict, list)) else {"value": value}
     return result
+
+
+def _structured_value(value: Any) -> Any:
+    if isinstance(value, dict) and "value" in value:
+        return value.get("value")
+    return value
+
+
+def _holiday_rule_option(item: dict[str, Any]) -> dict[str, Any] | None:
+    rule_id = item.get("id")
+    name = str(item.get("name") or item.get("title") or item.get("label") or "").strip()
+    if rule_id is None or not name:
+        return None
+    unit = "小时" if item.get("time_unit") == "hour" else "天"
+    if int(item.get("balance_rule") or 0) == 1:
+        label = f"{name}（余{item.get('balance') or 0}{unit}）"
+    else:
+        rule = item.get("json_rule") if isinstance(item.get("json_rule"), dict) else {}
+        if int(rule.get("is_continuous_holidays") or 0) == 1:
+            label = f"{name}（{rule.get('continuous_holidays_day') or 0}{unit}）"
+        else:
+            label = name
+    return {
+        "label": label,
+        "value": rule_id,
+        "disabled": False,
+        "meta": {"time_unit": item.get("time_unit")},
+    }
+
+
+def _related_item_option(item: dict[str, Any]) -> dict[str, Any] | None:
+    label = ""
+    for key in ("order_num", "name", "title", "num", "no", "id"):
+        value = item.get(key)
+        if isinstance(value, dict):
+            value = value.get("text") or value.get("value") or value.get("name")
+        if str(value or "").strip():
+            label = str(value).strip()
+            break
+    if not label:
+        return None
+    value = item.get("id") or item.get("value") or label
+    return {"label": label, "value": value, "disabled": False, "meta": {}}
+
+
+def _user_option(item: dict[str, Any]) -> dict[str, Any] | None:
+    uid = item.get("uid") or item.get("id")
+    name = str(item.get("display_name") or item.get("name") or "").strip()
+    if uid is None or not name:
+        return None
+    return {
+        "label": name,
+        "value": uid,
+        "disabled": False,
+        "meta": {"avatar": item.get("avatar")},
+    }
+
+
+def _node_handle(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, list):
+        handles = [item for item in value if isinstance(item, dict)]
+        return next(
+            (item for item in handles if str(item.get("type") or "") == "submitter_choice"),
+            handles[0] if handles else {},
+        )
+    return {}
+
+
+def _node_candidate_items(handle: dict[str, Any]) -> list[Any]:
+    items = handle.get("relate_id") if int(handle.get("is_all_company") or 0) == 2 else handle.get("relate_user")
+    return items if isinstance(items, list) else []
+
+
+def _normalize_leave_time_fields(
+    form_data: dict[str, Any],
+    holiday_rule: dict[str, Any],
+    start_date: str,
+    end_date: str,
+) -> tuple[str, str]:
+    if str(holiday_rule.get("time_unit") or "") != "day":
+        return start_date, end_date
+    start_day = start_date[:10]
+    end_day = end_date[:10]
+    next_end_day = (
+        datetime.strptime(end_day, "%Y-%m-%d") + timedelta(days=1)
+    ).strftime("%Y-%m-%d")
+    form_data["rest_start_time"] = {
+        "label": start_day,
+        "value": start_day,
+        "text": start_day,
+        "time_unit": "05:00",
+        "real_date": start_day,
+    }
+    form_data["rest_end_time"] = {
+        "label": end_day,
+        "value": end_day,
+        "text": end_day,
+        "time_unit": "05:00",
+        "real_date": next_end_day,
+    }
+    return start_day, end_day
 
 
 def _string_list(value: Any) -> list[str]:

@@ -21,4 +21,6 @@ flowchart LR
 
 ## 安全边界
 
-RAG 检索只按 `company_id`、`department` 和 `is_active` 做数据边界过滤，不再要求 ERP 返回本地自定义知识库权限标签。ERP 提交携带幂等键，并通过应用日志和 `tool_calls` 保留审计证据。
+RAG 检索只按已验证的 `company_id`、`department` 和 `is_active` 做数据边界过滤。
+请求体中的 `permission_tags` 不会直接作为权限依据，避免用户自行伪造标签造成越权；
+待 ERP 返回已验证权限后，再将权限映射为 Milvus 过滤条件。ERP 提交携带幂等键，并通过应用日志和 `tool_calls` 保留审计证据。

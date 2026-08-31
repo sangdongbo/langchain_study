@@ -4,11 +4,12 @@ from fastapi import FastAPI
 
 from ai_erp_rag_assistant.app.api import router
 from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.database import mysql_configured
 
 
 app = FastAPI(
     title="AI ERP RAG Assistant",
-    description="RAG + ERP Tool + LangGraph three-layer collaboration demo.",
+    description="Enterprise RAG, ERP tools and LangGraph approval workflows.",
 )
 app.include_router(router)
 
@@ -24,6 +25,15 @@ def health() -> dict[str, str]:
         "erp_read_mode": settings.erp_read_mode,
         "erp_write_mode": settings.erp_write_mode,
         "erp_skip_userinfo_validation": str(settings.erp_skip_userinfo_validation).lower(),
+        "session_store": settings.session_store,
+        "session_store_configured": str(
+            settings.session_store != "mysql"
+            or bool(settings.mysql_database and settings.mysql_user)
+        ).lower(),
         "llm_configured": str(bool(settings.llm_api_key)).lower(),
         "embedding_configured": str(bool(settings.embedding_api_key)).lower(),
+        "mysql_configured": str(mysql_configured(settings)).lower(),
+        "langsmith_tracing": str(settings.langsmith_tracing).lower(),
+        "langsmith_configured": str(bool(settings.langsmith_api_key)).lower(),
+        "langsmith_project": settings.langsmith_project,
     }

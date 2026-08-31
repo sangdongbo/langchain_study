@@ -139,7 +139,7 @@ def main() -> None:
     if args.write_milvus:
         from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 
-        inserted = milvus_service.upsert_chunks(all_rows)
+        inserted = milvus_service.upsert_chunks(all_rows, company_id=settings.rag_company_id)
         print(f"Milvus 入库完成：{inserted} 个 Chunk，collection={settings.milvus_collection}")
     else:
         print("未写入 Milvus。复核 JSONL 后，如需入库请显式追加 --write-milvus。")

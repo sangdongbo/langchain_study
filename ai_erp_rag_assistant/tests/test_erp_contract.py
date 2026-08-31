@@ -3,6 +3,12 @@ from ai_erp_rag_assistant.app.services.erp_client import (
     _approval_items,
     _normalize_fields,
 )
+from ai_erp_rag_assistant.app.services.approval_form_service import (
+    build_submit_nodes,
+    normalize_approval_nodes,
+    normalize_erp_fields,
+)
+from ai_erp_rag_assistant.app.services.audit_log_service import sanitize_for_log
 
 
 def test_normalize_fields_uses_real_erp_field_contract():
@@ -190,3 +196,78 @@ def test_disabled_write_returns_preview_only(monkeypatch):
     assert result["erp_write_mode"] == "disabled"
     assert result["status"].startswith("演示模式")
     assert add_calls == []
+
+
+def test_dynamic_form_contract_keeps_complex_erp_controls_for_frontend():
+    fields = normalize_erp_fields(
+        [
+            {
+                "field_key": "control",
+                "field_name": "出差控件组",
+                "field_type": "control",
+                "_child": [
+                    {"field_key": "traveler", "field_name": "同行人", "field_type": "user", "is_required": 1},
+                    {
+                        "field_key": "orders",
+                        "field_name": "关联订单",
+                        "field_type": "checkbox_order",
+                        "is_required": 0,
+                    },
+                    {
+                        "field_key": "lines",
+                        "field_name": "行程明细",
+                        "field_type": "detail",
+                        "is_required": 1,
+                        "_child": [{"field_key": "city", "field_name": "城市", "field_type": "input"}],
+                    },
+                    {"field_key": "proof", "field_name": "附件", "field_type": "upload", "is_required": 0},
+                ],
+            }
+        ]
+    )
+
+    assert [field["component"] for field in fields] == [
+        "entity-select",
+        "related-select",
+        "detail-table",
+        "attachment",
+    ]
+    assert fields[0]["group"] == {"key": "control", "label": "出差控件组", "type": "field-group"}
+    assert fields[1]["option_source"]["lazy"] is True
+    assert fields[2]["children"][0]["name"] == "city"
+
+
+def test_submitter_choice_contract_preserves_raw_node_and_selection():
+    nodes = [
+        {
+            "id": 22,
+            "name": "办理",
+            "type": "conduct",
+            "handle": {
+                "type": "submitter_choice",
+                "is_single": 1,
+                "relate_user": [{"uid": 863, "name": "张三"}],
+            },
+        }
+    ]
+
+    flow = normalize_approval_nodes(nodes)
+    submitted = build_submit_nodes(nodes, {"22": ["863"]})
+
+    assert flow[0]["requires_selection"] is True
+    assert submitted[0]["handle_uids"] == [863]
+    assert submitted[0]["handle"]["relate_user"][0]["name"] == "张三"
+
+
+def test_audit_sanitizer_removes_credentials_and_form_values():
+    sanitized = sanitize_for_log(
+        {
+            "authorization": "Bearer secret",
+            "form_data": {"reason": "private", "amount": 10},
+            "nested": {"token": "private-token"},
+        }
+    )
+
+    assert sanitized["authorization"] == "[REDACTED]"
+    assert sanitized["form_data"] == {"field_keys": ["reason", "amount"], "field_count": 2}
+    assert sanitized["nested"]["token"] == "[REDACTED]"

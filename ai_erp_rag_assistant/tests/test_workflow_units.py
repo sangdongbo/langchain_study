@@ -1,16 +1,35 @@
+from types import SimpleNamespace
+
+from ai_erp_rag_assistant.app.api import _anonymize_trace
 from ai_erp_rag_assistant.app.graph.state import initial_state
 from ai_erp_rag_assistant.app.graph.workflow import (
     _extract_dynamic_duration_fields,
     _extract_dynamic_option_fields,
+    _confirmation_mismatch,
+    _route_from_start,
     _route_after_erp_context,
     _submission_fields,
     _validate_fields,
+    accept_frozen_preview_confirmation,
     load_approval_template,
+    load_erp_context,
     submit_if_confirmed,
+    validate_and_preview,
 )
 from ai_erp_rag_assistant.app.services.model_service import ModelService
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
 from scripts.ingest_pdf import document_metadata, infer_title, split_text
+
+
+def test_langsmith_trace_anonymizer_redacts_credentials():
+    sanitized = _anonymize_trace({
+        "authorization": "opaque-erp-token",
+        "nested": {"api_key": "private-key", "message": "keep me"},
+    })
+
+    assert sanitized["authorization"] == "[REDACTED]"
+    assert sanitized["nested"]["api_key"] == "[REDACTED]"
+    assert sanitized["nested"]["message"] == "keep me"
 
 
 def test_initial_state_preserves_active_approval_context():
@@ -31,6 +50,28 @@ def test_initial_state_preserves_active_approval_context():
     assert state["active_approval"] is True
 
 
+def test_prevalidated_erp_identity_is_reused_without_second_userinfo_call(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_current_user",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("不应重复调用用户信息接口")),
+    )
+    state = {
+        "user_id": "863",
+        "user_context": {
+            "uid": "863",
+            "company_id": "16",
+            "department": "研发部",
+            "erp_mode": "remote",
+        },
+        "tool_calls": [],
+    }
+
+    result = load_erp_context(state)
+
+    assert result["user_context"]["company_id"] == "16"
+    assert result["tool_calls"][-1]["reused"] is True
+
+
 def test_initial_state_does_not_reactivate_closed_preview():
     state = initial_state(
         "session",
@@ -43,6 +84,37 @@ def test_initial_state_does_not_reactivate_closed_preview():
     )
 
     assert state["preview"] == {}
+    assert state["workflow_status"] == "idle"
+
+
+def test_explicit_confirmation_skips_planner_for_frozen_preview():
+    state = {
+        "user_message": "确认提交",
+        "confirm": None,
+        "active_approval": True,
+        "preview": {
+            "preview_id": "preview-1",
+            "preview_version": 2,
+            "requires_confirmation": True,
+        },
+        "tool_calls": [],
+    }
+
+    assert _route_from_start(state) == "frozen_confirmation"
+    accepted = accept_frozen_preview_confirmation(state)
+    assert accepted["confirm"] is True
+    assert accepted["route"] == "approval_workflow"
+    assert accepted["tool_calls"][-1]["tool"] == "workflow.preview_confirmed"
+
+
+def test_confirmation_with_field_change_still_uses_planner():
+    state = {
+        "user_message": "确认前把原因修改为就医",
+        "active_approval": True,
+        "preview": {"requires_confirmation": True},
+    }
+
+    assert _route_from_start(state) == "planner"
 
 
 def test_confirmation_routes_directly_to_frozen_preview_submission():
@@ -86,6 +158,66 @@ def test_disabled_write_consumes_confirmation_without_reopening_draft(monkeypatc
     assert result["preview"]["requires_confirmation"] is False
     assert result["preview"]["confirmation_status"] == "write_disabled"
     assert result["active_approval"] is False
+    assert result["confirm"] is None
+
+
+def test_preview_has_stable_identity_and_new_version_after_change(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_nodes",
+        lambda *args, **kwargs: [],
+    )
+    base = {
+        "template": {
+            "template_id": "5911",
+            "title": "请假申请",
+            "fields": [{"name": "reason", "label": "原因", "required": True}],
+        },
+        "fields": {"reason": "就医"},
+        "user_context": {},
+        "plan": {"decision": "continue"},
+        "tool_calls": [],
+    }
+
+    first = validate_and_preview(base)
+    same = validate_and_preview({**base, "preview": first["preview"]})
+    changed = validate_and_preview({
+        **base,
+        "fields": {"reason": "复诊"},
+        "preview": first["preview"],
+    })
+
+    assert first["workflow_status"] == "preview_ready"
+    assert first["preview"]["preview_version"] == 1
+    assert same["preview"]["preview_id"] == first["preview"]["preview_id"]
+    assert same["preview"]["preview_hash"] == first["preview"]["preview_hash"]
+    assert same["preview"]["idempotency_key"] == first["preview"]["idempotency_key"]
+    assert changed["preview"]["preview_version"] == 2
+    assert changed["preview"]["preview_id"] != first["preview"]["preview_id"]
+    assert changed["preview"]["idempotency_key"] != first["preview"]["idempotency_key"]
+
+
+def test_stale_preview_confirmation_is_rejected_before_erp_submit(monkeypatch):
+    submit_calls: list[dict] = []
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.submit_approval",
+        lambda preview, user: submit_calls.append(preview),
+    )
+    state = {
+        "confirm": True,
+        "confirm_preview_id": "old-preview",
+        "preview": {
+            "preview_id": "latest-preview",
+            "preview_version": 2,
+            "preview_hash": "latest-hash",
+        },
+        "tool_calls": [],
+    }
+
+    assert _confirmation_mismatch(state).startswith("预览标识已变化")
+    result = submit_if_confirmed(state)
+
+    assert submit_calls == []
+    assert result["workflow_status"] == "preview_ready"
     assert result["confirm"] is None
 
 
@@ -323,6 +455,50 @@ def test_knowledge_answer_appends_deduplicated_citations():
 
     assert answer.count("第 9 页") == 1
     assert "第 10 页" in answer
+
+
+def test_model_overrides_allow_generation_controls_only():
+    safe = ModelService._safe_model_overrides(
+        {
+            "model": "qwen-plus",
+            "temperature": 0.7,
+            "max_tokens": 2048,
+            "api_key": "must-not-pass",
+            "base_url": "https://attacker.invalid",
+            "unknown": True,
+        }
+    )
+
+    assert safe == {"model": "qwen-plus", "temperature": 0.7, "max_tokens": 2048}
+
+
+def test_model_overrides_reject_invalid_generation_values():
+    assert ModelService._safe_model_overrides(
+        {"temperature": 3, "max_tokens": 0, "model": ""}
+    ) == {}
+
+
+def test_answer_passes_model_overrides_to_the_llm_boundary(monkeypatch):
+    calls = {}
+
+    class FakeModel:
+        def invoke(self, _messages):
+            return SimpleNamespace(content="回答")
+
+    service = ModelService()
+
+    def fake_model(overrides=None):
+        calls["overrides"] = overrides
+        return FakeModel()
+
+    monkeypatch.setattr(service, "_model", fake_model)
+
+    assert service.answer(
+        "问题",
+        route="general_chat",
+        model_overrides={"model": "qwen-plus", "temperature": 0.4},
+    ) == "回答"
+    assert calls["overrides"] == {"model": "qwen-plus", "temperature": 0.4}
 
 
 def test_planner_decision_normalization_accepts_only_explicit_actions():
