@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from ai_erp_rag_assistant.app import api as api_module
-from ai_erp_rag_assistant.app.api_dependencies import rag_identity, rag_runtime_config
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
@@ -27,9 +26,6 @@ from ai_erp_rag_assistant.app.services.document_ingest_service import (
     DocumentParseError,
     build_chunk_rows,
 )
-from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
-from ai_erp_rag_assistant.app.services.model_service import model_service
-from ai_erp_rag_assistant.app.tools.erp_tools import get_current_user
 from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 

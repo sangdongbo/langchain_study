@@ -7,19 +7,12 @@ from typing import Any
 from fastapi import APIRouter, Header, HTTPException
 
 from ai_erp_rag_assistant.app import api as api_module
-from ai_erp_rag_assistant.app.api_dependencies import erp_user, with_header_identity
 from ai_erp_rag_assistant.app.schemas import (
     ApprovalFieldOptionsRequest,
     ApprovalFormSchemaRequest,
     ApprovalTemplatesRequest,
 )
-from ai_erp_rag_assistant.app.services.approval_form_service import build_form_schema
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
-from ai_erp_rag_assistant.app.tools.erp_tools import (
-    get_approval_field_options,
-    get_approval_template,
-    list_approval_templates,
-)
 
 
 router = APIRouter(tags=["ERP Approvals"])

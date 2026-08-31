@@ -57,6 +57,19 @@ RAG 不负责实时审批状态，ERP Tool 不替代制度知识，真实写入�
 
 ## 启动
 
+### API 目录结构
+
+HTTP 接口按功能拆分在 `app/routes/` 下，公共身份校验、租户隔离和运行时配置保留在
+`app/api.py`，`app/api.py` 只负责注册路由并兼容旧导入：
+
+| 模块 | 负责接口 |
+|---|---|
+| `app/routes/chat.py` | `/api/chat` 对话工作流 |
+| `app/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
+| `app/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
+| `app/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
+| `app/rag_admin_api.py` | `/api/rag/admin/*` Assistant、Prompt、知识库和数据源管理 |
+
 ```powershell
 Copy-Item .env.example .env
 uv sync --no-dev

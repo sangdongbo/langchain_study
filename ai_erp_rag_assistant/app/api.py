@@ -12,12 +12,11 @@ from typing import Any
 
 import langsmith.anonymizer as langsmith_anonymizer
 from fastapi import APIRouter, HTTPException
-from langsmith import Client, tracing_context
+from langsmith import Client
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ai_erp_rag_assistant.app.config import get_settings
-from ai_erp_rag_assistant.app.graph.workflow import create_workflow
 from ai_erp_rag_assistant.app.rag_admin_api import router as rag_admin_router
 from ai_erp_rag_assistant.app.rag_admin_repository import (
     AdminNotFoundError,
@@ -41,8 +40,8 @@ from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 # ``/api`` is the public prefix; individual modules only own their feature paths.
 router = APIRouter(prefix="/api")
-workflow = create_workflow()
-stateless_workflow = create_workflow(with_checkpointer=False)
+workflow = None
+stateless_workflow = None
 
 _SENSITIVE_TRACE_FIELDS = {
     "api_key",
@@ -204,6 +203,11 @@ def _rag_runtime_config(
 # Import feature routers after shared helpers so route modules can reference the
 # compatibility surface above without introducing an initialization cycle.
 from ai_erp_rag_assistant.app.routes import approvals, chat as chat_routes, rag, sessions
+
+# The chat module owns workflow construction; these aliases preserve the old
+# ``app.api.workflow`` integration point without creating a second graph.
+workflow = chat_routes.workflow
+stateless_workflow = chat_routes.stateless_workflow
 
 router.include_router(rag_admin_router)
 router.include_router(chat_routes.router)

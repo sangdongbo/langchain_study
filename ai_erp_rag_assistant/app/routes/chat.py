@@ -11,7 +11,7 @@ from fastapi import APIRouter, Header
 from langchain_core.runnables import RunnableConfig
 from langsmith import Client, tracing_context
 
-from ai_erp_rag_assistant.app.api_dependencies import persistent_identity
+from ai_erp_rag_assistant.app import api as api_module
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.graph.state import ErpRagState, initial_state
 from ai_erp_rag_assistant.app.graph.workflow import create_workflow
@@ -98,7 +98,7 @@ def chat(
     persistent_user: dict[str, Any] = {}
     if session_repository.enabled:
         request, persistent_user, resolved_company, persistent_user_id = (
-            persistent_identity(request, None, None)
+            api_module._persistent_identity(request, None, None)
         )
         request = request.model_copy(
             update={"company_id": resolved_company, "user_id": persistent_user_id}
