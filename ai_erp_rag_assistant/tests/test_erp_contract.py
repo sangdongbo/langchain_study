@@ -1,6 +1,7 @@
 from ai_erp_rag_assistant.app.services.erp_client import (
     ErpClient,
     _approval_items,
+    _list_values,
     _normalize_fields,
 )
 from ai_erp_rag_assistant.app.services.approval_form_service import (
@@ -79,6 +80,55 @@ def test_remote_list_flattens_grouped_approval_payload(monkeypatch):
             "company_id": "C001",
         }
     ]
+
+
+def test_remote_userinfo_does_not_fallback_to_request_tenant_or_department(monkeypatch):
+    client = ErpClient()
+    client.settings.erp_read_mode = "remote"
+    client.settings.erp_skip_userinfo_validation = False
+    monkeypatch.setattr(
+        client,
+        "_post",
+        lambda path, body, user: {"code": 200, "data": {"uid": "863"}},
+    )
+
+    user = client.get_current_user(
+        "863",
+        uid="863",
+        authorization="Bearer token",
+        company_id="spoofed-company",
+        department="spoofed-department",
+    )
+
+    # ERP 没有返回可信租户字段时，上层会拒绝请求或只开放公共文档。
+    assert user["company_id"] == ""
+    assert user["department"] == ""
+
+
+def test_remote_userinfo_uses_department_name_for_acl_matching(monkeypatch):
+    client = ErpClient()
+    client.settings.erp_read_mode = "remote"
+    monkeypatch.setattr(
+        client,
+        "_post",
+        lambda path, body, user: {
+            "code": 200,
+            "data": {
+                "company_id": "C001",
+                "department": {"id": 8, "name": "研发部"},
+            },
+        },
+    )
+
+    user = client.get_current_user(
+        "863",
+        uid="863",
+        authorization="Bearer token",
+        company_id="C001",
+        department="旧部门",
+    )
+
+    assert user["department"] == "研发部"
 
 
 def test_approval_items_preserves_nested_parent_group():
@@ -271,3 +321,64 @@ def test_audit_sanitizer_removes_credentials_and_form_values():
     assert sanitized["authorization"] == "[REDACTED]"
     assert sanitized["form_data"] == {"field_keys": ["reason", "amount"], "field_count": 2}
     assert sanitized["nested"]["token"] == "[REDACTED]"
+
+
+def test_workbench_summary_keeps_other_modules_when_one_fails(monkeypatch):
+    client = ErpClient()
+    client.settings.erp_read_mode = "remote"
+    monkeypatch.setattr(client, "get_workstation_layout", lambda **kwargs: [])
+    monkeypatch.setattr(
+        client,
+        "get_todo_count",
+        lambda **kwargs: {"basic": 3, "approval": 2, "total": 5},
+    )
+    monkeypatch.setattr(client, "get_todo_types", lambda **kwargs: [{"type": "order", "count": 3}])
+    monkeypatch.setattr(client, "get_pending_approvals", lambda **kwargs: (_ for _ in ()).throw(RuntimeError("approval unavailable")))
+    monkeypatch.setattr(client, "get_approval_center_counts", lambda **kwargs: {})
+
+    summary = client.get_workbench_summary(
+        user={"uid": 8, "name": "测试用户"},
+        modules={"layout", "todo", "approvals"},
+    )
+
+    assert summary["counts"]["todo_total"] == 5
+    assert summary["todo"]["status"] == "ok"
+    assert summary["approvals"]["status"] == "error"
+
+
+def test_workbench_list_extractor_accepts_common_erp_wrappers():
+    item = {"id": 1, "title": "待处理"}
+    for payload in (
+        [item],
+        {"data": [item]},
+        {"list": [item]},
+        {"items": [item]},
+        {"rows": [item]},
+        {"records": [item]},
+        {"data": {"list_data": [item]}},
+    ):
+        assert _list_values(payload) == [item]
+
+
+def test_workbench_extended_todo_is_opt_in_and_cards_do_not_use_fallback_types(monkeypatch):
+    client = ErpClient()
+    client.settings.erp_read_mode = "remote"
+    calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(client, "get_workstation_layout", lambda **kwargs: [{"type": "statsDashboard"}])
+    monkeypatch.setattr(client, "get_todo_count", lambda **kwargs: {"basic": 0, "approval": 0, "total": 0})
+    monkeypatch.setattr(client, "get_todo_types", lambda **kwargs: [])
+    monkeypatch.setattr(client, "get_todo_items", lambda **kwargs: [])
+    monkeypatch.setattr(client, "get_user_layout", lambda layout_type, **kwargs: [])
+    monkeypatch.setattr(client, "get_stats_dashboard", lambda types, **kwargs: calls.append(("stats", types)) or {})
+    monkeypatch.setattr(client, "get_oa_todo_items", lambda **kwargs: calls.append(("oa", True)) or [{"id": 9}])
+
+    summary = client.get_workbench_summary(
+        user={"uid": 8},
+        modules={"layout", "todo"},
+        include_todo_items=True,
+        include_cards=True,
+    )
+
+    assert summary["todo"]["items"] == []
+    assert all(name != "oa" for name, _ in calls)
+    assert all(name != "stats" for name, _ in calls)

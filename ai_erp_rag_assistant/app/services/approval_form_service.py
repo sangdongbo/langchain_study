@@ -1,3 +1,5 @@
+"""将 ERP 动态审批字段和节点规范化为稳定的前端表单契约。"""
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -13,13 +15,13 @@ _ATTACHMENT_TYPES = {"attachment", "attachments", "file", "files", "upload", "im
 
 
 def normalize_erp_fields(data: Any) -> list[dict[str, Any]]:
-    """Convert ERP-specific form definitions to one stable frontend contract."""
+    """将 ERP 专用表单定义转换为稳定的前端契约。"""
     items = _field_items(data)
     return _normalize_items(items)
 
 
 def project_chat_fields(fields: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Keep the compact field shape expected by the conversational workflow."""
+    """保留对话工作流所需的紧凑字段结构。"""
     result: list[dict[str, Any]] = []
     for field in fields:
         if not isinstance(field, dict) or not field.get("required"):
@@ -49,7 +51,7 @@ def build_form_schema(
     missing_field_keys: list[str] | None = None,
     invalid_fields: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
-    """Build the complete dynamic-form payload returned to a frontend."""
+    """构建返回给前端的完整动态表单数据。"""
     raw_fields = template.get("all_fields") or template.get("fields") or []
     fields = (
         deepcopy(raw_fields)
@@ -72,6 +74,7 @@ def build_form_schema(
 
 
 def find_field(fields: list[dict[str, Any]], field_key: str) -> dict[str, Any] | None:
+    """递归查找普通字段或明细表子字段。"""
     for field in fields:
         if str(field.get("name") or "") == str(field_key):
             return field
@@ -82,7 +85,7 @@ def find_field(fields: list[dict[str, Any]], field_key: str) -> dict[str, Any] |
 
 
 def normalize_approval_nodes(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Expose approval routing without forcing the frontend to parse ERP handle data."""
+    """暴露审批路由，避免前端自行解析 ERP 的 handle 数据。"""
     result: list[dict[str, Any]] = []
     for item in nodes:
         if not isinstance(item, dict):
@@ -111,16 +114,18 @@ def build_submit_nodes(
     nodes: list[dict[str, Any]],
     selected_assignees: dict[str, list[str]] | None = None,
 ) -> list[dict[str, Any]]:
-    """Keep ERP node metadata and apply submitter-selected assignees."""
+    """保留 ERP 节点元数据，并应用提交人选择的审批人。"""
     selected_assignees = selected_assignees or {}
     submit_nodes: list[dict[str, Any]] = []
     for raw_node, frontend_node in zip(nodes, normalize_approval_nodes(nodes), strict=False):
+        # 深拷贝原始节点，提交所需的其他 ERP 元数据必须原样保留。
         node = deepcopy(raw_node)
         node_id = frontend_node["node_id"]
         candidates = frontend_node["candidates"]
         requested = {str(uid) for uid in selected_assignees.get(node_id, [])}
         selected = [item for item in candidates if not requested or str(item["uid"]) in requested]
         if frontend_node["requires_selection"] and not requested:
+            # 提交人选择节点不能默认全选候选人，必须等待用户明确选择。
             selected = []
         node["handle_uids"] = [_numeric_uid(item["uid"]) for item in selected]
         node["handle_uids_info"] = [
@@ -144,6 +149,7 @@ def missing_assignee_nodes(
     approval_flow: list[dict[str, Any]],
     selected_assignees: dict[str, list[str]] | None,
 ) -> list[str]:
+    """返回仍需要提交人选择审批人的节点 ID。"""
     selected_assignees = selected_assignees or {}
     return [
         str(node.get("node_id") or "")
@@ -154,6 +160,7 @@ def missing_assignee_nodes(
 
 
 def _field_items(data: Any) -> list[dict[str, Any]]:
+    """从 ERP 多种嵌套响应外壳中递归定位字段数组。"""
     if isinstance(data, list):
         return [item for item in data if isinstance(item, dict)]
     if not isinstance(data, dict):
@@ -193,6 +200,7 @@ def _normalize_field(
     children: list[dict[str, Any]],
     parent_group: dict[str, str] | None,
 ) -> dict[str, Any]:
+    """将单个 ERP 字段映射为稳定组件、校验和选项契约。"""
     name = _field_key(item)
     label = _field_label(item) or name
     extend = item.get("extend") if isinstance(item.get("extend"), dict) else {}
@@ -203,11 +211,13 @@ def _normalize_field(
         "true",
         "True",
     )
+    # 同时保留新前端 component/value_type 与旧聊天流程 type，避免契约割裂。
     component, value_type, legacy_type = _component_types(raw_type, extend)
     option_values = _option_values(item, extend)
     multiple = raw_type in {"checkbox", "checkbox_order", "checkbox_approval"} or bool(extend.get("multiple"))
     child_fields = _normalize_items(children) if children else []
     if raw_type in _DETAIL_TYPES and child_fields:
+        # 明细表自身负责必填，子列不能要求空白的新行立即通过必填校验。
         child_fields = [dict(field, required=False) for field in child_fields]
     if raw_type in _DETAIL_TYPES:
         component, value_type, legacy_type = "detail-table", "array", "array"
@@ -222,6 +232,7 @@ def _normalize_field(
         }.items()
         if value not in (None, "")
     }
+    # 返回结构同时包含展示、校验、分组和 ERP 回传信息，前端无需解析原始 extend。
     return {
         "name": name,
         "label": label,
@@ -262,6 +273,8 @@ def _normalize_field(
 
 
 def _component_types(raw_type: str, extend: dict[str, Any]) -> tuple[str, str, str]:
+    """把 ERP 字段类型映射为前端组件、值类型和校验类型。"""
+    # 文本、数值和日期类优先映射到浏览器可直接编辑的基础控件。
     if raw_type == "textarea":
         return "textarea", "string", "text"
     if raw_type in {"number", "duration"}:
@@ -272,6 +285,7 @@ def _component_types(raw_type: str, extend: dict[str, Any]) -> tuple[str, str, s
         return "date", "date", "date"
     if raw_type in {"date", "datetime", "attendance_date"}:
         return "datetime", "datetime", "datetime"
+    # 枚举与关联字段区分静态选择和需要远程加载的实体选择。
     if raw_type == "radio":
         return "radio", "string", "enum"
     if raw_type == "select":
@@ -286,6 +300,7 @@ def _component_types(raw_type: str, extend: dict[str, Any]) -> tuple[str, str, s
         return "entity-select", "array", "array"
     if raw_type in _DEPARTMENT_TYPES:
         return "entity-select", "array", "array"
+    # 附件、地址等结构化类型保持数组/对象值，未知类型安全降级为文本。
     if raw_type in _ATTACHMENT_TYPES:
         return "attachment", "array", "array"
     if raw_type == "address":
@@ -300,6 +315,7 @@ def _option_source(
     extend: dict[str, Any],
     option_values: list[dict[str, Any]],
 ) -> dict[str, Any] | None:
+    """判断字段选项来自静态配置、假期、人员还是关联对象接口。"""
     if option_values:
         return {"type": "static", "lazy": False, "searchable": False}
     if name == "rest_holiday_rule_id":

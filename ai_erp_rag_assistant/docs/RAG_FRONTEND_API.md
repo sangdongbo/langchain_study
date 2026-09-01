@@ -33,6 +33,9 @@ Authorization: Bearer <ERP_TOKEN>
 不能通过修改 `company_id` 访问其他公司。不要把 LLM、Embedding、Milvus、MySQL 或
 LangSmith 的密钥放在浏览器代码中。
 
+如果请求体同时带有 `uid` 或 `authorization`，服务端以 HTTP 请求头为准；请求头是当前
+ERP 登录态，请求体字段只用于兼容旧页面。
+
 前端请求封装示例：
 
 ```js
@@ -49,7 +52,14 @@ async function request(path, options = {}) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload.detail || `请求失败（${response.status}）`);
+    const detail = payload.detail;
+    const error = new Error(
+      typeof detail === "string"
+        ? detail
+        : detail?.message || `请求失败（${response.status}）`,
+    );
+    error.detail = detail;
+    throw error;
   }
   return payload;
 }
@@ -174,12 +184,28 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
 
 `status` 可选值为 `active`、`disabled`、`archived`。
 
+### 编辑或停用 Assistant
+
+`POST /api/rag/admin/assistants/{assistant_id}/update`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "name": "新版员工制度助手",
+  "status": "active"
+}
+```
+
+`name`、`status` 至少提交一个。`assistant_key` 是稳定业务标识，创建后不可修改；配置和
+Prompt 内容也不在这里原地修改，仍通过创建新版本并发布完成。
+
 ### 创建配置版本
 
 `POST /api/rag/admin/assistants/{assistant_id}/configs`
 
 `model_config` 目前只允许 `model`、`temperature`、`max_tokens`，不能在这里保存 API Key、
-Base URL、密码或 Token。`retrieval_config` 可配置 `top_k` 和 `score_threshold`。
+Base URL、密码或 Token。`retrieval_config` 可配置召回数量、阈值和 LLM 重排。
 
 ```json
 {
@@ -193,7 +219,9 @@ Base URL、密码或 Token。`retrieval_config` 可配置 `top_k` 和 `score_thr
   },
   "retrieval_config": {
     "top_k": 5,
-    "score_threshold": 0.35
+    "score_threshold": 0.35,
+    "rerank_enabled": true,
+    "rerank_candidates": 15
   },
   "feature_flags": {}
 }
@@ -264,7 +292,12 @@ status = published
   "chunk_overlap": 120,
   "default_top_k": 5,
   "default_score_threshold": 0.35,
-  "permission_config": {}
+  "permission_config": {
+    "allowed_departments": ["人力资源部"],
+    "required_tags": ["employee"],
+    "write_required_tags": ["knowledge:write"],
+    "delete_required_tags": ["knowledge:admin"]
+  }
 }
 ```
 
@@ -291,6 +324,29 @@ embedding_dimension = 2048
 }
 ```
 
+### 编辑或停用知识库
+
+`POST /api/rag/admin/knowledge-bases/{knowledge_base_id}/update`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "name": "员工制度知识库",
+  "description": "员工制度、考勤和休假规则",
+  "status": "active",
+  "chunk_size": 900,
+  "chunk_overlap": 120,
+  "default_top_k": 8,
+  "default_score_threshold": 0.4,
+  "permission_config": {}
+}
+```
+
+以上业务字段均可选，但至少提交一个。传空字符串可清空 `description`，传空对象可清空
+`permission_config`。`knowledge_key`、`milvus_collection`、Embedding 模型和向量维度创建
+后不可修改，避免新旧向量不兼容；需要更换这些参数时应新建知识库并重新导入文档。
+
 ### 绑定 Assistant 和知识库
 
 `POST /api/rag/admin/bindings/assistant-knowledge-base`
@@ -305,14 +361,38 @@ embedding_dimension = 2048
   "priority": 0,
   "retrieval_config": {
     "top_k": 5,
-    "score_threshold": 0.35
+    "score_threshold": 0.35,
+    "rerank_enabled": true,
+    "rerank_candidates": 15
   },
-  "permission_filter": {}
+  "permission_filter": {
+    "any_tags": ["hr", "manager"]
+  }
 }
 ```
 
 如果 `/api/rag/chat` 同时传了 `assistant_key` 和 `knowledge_base_key`，服务端会校验
 Assistant 已绑定该知识库；未绑定会返回 `404`。
+
+权限字段只使用 ERP 身份接口返回的部门、权限和角色，不信任前端请求中的权限标签。
+`required_tags` 要求全部具备，`any_tags` 要求至少具备一个；`read_required_tags`、
+`write_required_tags`、`delete_required_tags` 可以分别限制查询、导入和删除。知识库策略与
+Assistant 绑定策略会依次校验，绑定配置不能放宽知识库本身的权限。
+
+查询绑定：`POST /api/rag/admin/bindings/assistant-knowledge-base/list`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "assistant_id": 1,
+  "knowledge_base_id": 10,
+  "enabled": true
+}
+```
+
+三个过滤字段均可省略，响应为 `{ "items": [], "count": 0 }`。修改绑定时再次调用上面的
+绑定接口即可；服务端按 `company_id + assistant_id + knowledge_base_id` 更新原记录。
 
 ## 6. 数据源管理接口
 
@@ -377,6 +457,32 @@ Assistant 已绑定该知识库；未绑定会返回 `404`。
 
 响应为 `{ "items": [], "count": 0 }`，`status` 可选 `active`、`disabled`、`archived`。
 
+### 编辑或停用数据源
+
+`POST /api/rag/admin/data-sources/{data_source_id}/update`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "name": "ERP 只读数据源",
+  "status": "disabled",
+  "config": {
+    "host": "db.internal",
+    "port": 3306,
+    "database": "erp"
+  },
+  "credentials_ref": "vault://erp/read-only",
+  "sync_config": {
+    "max_rows": 5000
+  }
+}
+```
+
+以上字段均可选，但至少提交一个。`source_key`、`source_type` 创建后不可修改；需要切换
+来源类型时应新建数据源。`config` 和 `sync_config` 仍禁止保存密码、Token 或 API Key，
+传空对象或空字符串可清除对应配置。
+
 ### 绑定知识库和数据源
 
 `POST /api/rag/admin/bindings/knowledge-base-source`
@@ -397,6 +503,21 @@ Assistant 已绑定该知识库；未绑定会返回 `404`。
 
 当前绑定接口用于保存平台配置；真正从数据库/API 数据源自动同步到 Milvus 的任务接口
 尚未启用，前端不要把它显示为“已完成同步”。
+
+查询绑定：`POST /api/rag/admin/bindings/knowledge-base-source/list`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "knowledge_base_id": 10,
+  "data_source_id": 20,
+  "enabled": true
+}
+```
+
+三个过滤字段均可省略，响应为 `{ "items": [], "count": 0 }`。修改绑定仍调用上面的绑定
+接口，服务端按 `company_id + knowledge_base_id + data_source_id` 更新原记录。
 
 ## 7. 文档导入接口
 
@@ -465,7 +586,11 @@ async function ingestDocument(file, knowledgeBaseKey) {
     },
   );
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload.detail || "文档导入失败");
+  if (!response.ok) {
+    const error = new Error(payload.detail?.message || payload.detail || "文档导入失败");
+    error.detail = payload.detail;
+    throw error;
+  }
   return payload;
 }
 ```
@@ -481,12 +606,22 @@ async function ingestDocument(file, knowledgeBaseKey) {
   "empty_pages": [],
   "company_id": "16",
   "knowledge_base_key": "employee_handbook",
-  "collection": "erp_knowledge_chunks_v2"
+  "collection": "erp_knowledge_chunks_v2",
+  "job_id": 101,
+  "job_key": "7b02bd7e9a7145bba4d66f8b221f619e"
 }
 ```
 
 `chunk_size`、`chunk_overlap` 不传时使用知识库后台配置；没有知识库配置时使用项目默认值。
 扫描版 PDF 没有文字层时会返回 `422`，当前接口不会自动 OCR。
+同一知识库中再次导入相同的 `source + version` 时，新 Chunk 成功写入后会清理旧 Chunk，
+因此修改文档后重新上传不会继续检索到已经删除的旧段落。
+`version` 可以留空；此时空字符串作为一个独立的“未版本化”分组，只会替换同一 `source`
+且同样未填写版本的旧 Chunk，不会影响其他版本。
+通用文档的 `permission_tags` 使用逗号分隔，必须是当前 ERP 用户已拥有权限的子集；最多
+32 个标签、单个标签最多 256 个字符，超限或越权分别返回 `422`/`403`。
+配置 MySQL 且指定已创建的 `knowledge_base_key` 时，响应会同时返回 `job_id` 和 `job_key`；
+未配置 MySQL 时两者为空，但同步导入本身仍可使用。
 
 ### 文本导入
 
@@ -511,6 +646,12 @@ async function ingestDocument(file, knowledgeBaseKey) {
 }
 ```
 
+`chunk_size` 和 `chunk_overlap` 可以省略；省略时优先使用知识库管理配置，未配置知识库时
+使用 `.env` 中的 `RAG_CHUNK_SIZE`、`RAG_CHUNK_OVERLAP`。请求体中的 `department` 会被
+ERP 返回的真实部门覆盖。`permission_tags` 会写入文档 ACL，必须是当前 ERP 用户已拥有的
+权限标签子集，否则返回 `403`，不能通过上传参数给文档扩大可见范围；最多 32 个标签，
+单个标签最多 256 个字符。
+
 响应格式与通用文档导入相同。
 
 ### PDF 导入
@@ -524,7 +665,151 @@ Content-Type: application/pdf
 ```
 
 `company_id`、`user_id`、`source`、`knowledge_base_key` 等使用 Query 参数。响应格式与
-通用文档导入相同。
+通用文档导入相同。`permission_tags` 也是可选 Query 参数，使用逗号分隔；每个标签都必须
+属于当前 ERP 用户已拥有的权限，否则返回 `403`。最多 32 个标签、单个标签最多 256 个
+字符；不传标签表示公共 ACL 文档。
+
+例如：
+
+```text
+/api/rag/ingest/pdf
+  ?company_id=16
+  &user_id=863
+  &knowledge_base_key=employee_handbook
+  &source=员工手册.pdf
+  &version=2026
+  &permission_tags=hr,manager
+```
+
+### 查询导入状态
+
+`POST /api/rag/ingest/jobs/status`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "knowledge_base_key": "employee_handbook",
+  "job_id": 101
+}
+```
+
+```json
+{
+  "id": 101,
+  "job_key": "7b02bd7e9a7145bba4d66f8b221f619e",
+  "status": "failed",
+  "document_id": 55,
+  "document_status": "failed",
+  "source": "employee-handbook.docx",
+  "knowledge_base_key": "employee_handbook",
+  "total_pages": 18,
+  "parsed_pages": 18,
+  "chunk_count": 23,
+  "inserted_chunk_count": 0,
+  "error_code": "embedding_or_milvus_failed",
+  "error_message": "Milvus 写入失败：...",
+  "retryable": true
+}
+```
+
+状态依次为 `pending`、`parsing`、`embedding`、`completed` 或 `failed`。接口仍按
+`company_id + knowledge_base_key + ERP 写入权限` 校验，不能查询其他租户或无权知识库的任务。
+
+### 重试失败导入
+
+`POST /api/rag/ingest/jobs/retry`
+
+请求体与状态查询相同。只有 `failed` 且服务端源文件仍可用的任务能重试；服务端会创建
+新的任务记录，保留旧失败任务用于审计。成功响应与文档导入一致，并返回新的
+`job_id/job_key`。重试不需要浏览器重新上传文件；服务端会按当前 ERP 用户权限重新校验
+历史文档 ACL，且在 ACL 校验通过前不会创建新的任务记录；用户权限被收回时重试会返回
+`403`，原失败任务仍可由有权限的管理员继续补偿。
+
+跟踪开启时，导入失败的 HTTP `detail` 是对象而不是字符串：
+
+```json
+{
+  "detail": {
+    "message": "Milvus 写入失败：...",
+    "status": "failed",
+    "retryable": true,
+    "job_id": 101,
+    "job_key": "7b02bd7e9a7145bba4d66f8b221f619e"
+  }
+}
+```
+
+### 文档列表
+
+`POST /api/rag/documents/list`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "knowledge_base_key": "employee_handbook",
+  "keyword": "员工手册",
+  "page": 1,
+  "page_size": 20
+}
+```
+
+响应中的文档由 Milvus Chunk 按 `source + version` 聚合：
+
+```json
+{
+  "items": [
+    {
+      "source": "employee-handbook.docx",
+      "title": "员工手册",
+      "version": "2026",
+      "effective_date": "2026-01-01",
+      "department": "公共制度",
+      "permission_tags": ["knowledge:employee_handbook"],
+      "chunk_count": 23,
+      "page_count": 18
+    }
+  ],
+  "count": 1,
+  "total": 1,
+  "page": 1,
+  "page_size": 20,
+  "company_id": "16",
+  "knowledge_base_key": "employee_handbook",
+  "collection": "erp_knowledge_chunks_v2"
+}
+```
+
+### 删除文档
+
+`POST /api/rag/documents/delete`
+
+必须同时传入精确的 `source` 和 `version`，避免误删同名的其他版本：
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "knowledge_base_key": "employee_handbook",
+  "source": "employee-handbook.docx",
+  "version": "2026"
+}
+```
+
+```json
+{
+  "status": "deleted",
+  "source": "employee-handbook.docx",
+  "version": "2026",
+  "deleted_chunk_count": 23,
+  "company_id": "16",
+  "knowledge_base_key": "employee_handbook",
+  "collection": "erp_knowledge_chunks_v2"
+}
+```
+
+文档不存在或当前 ERP 用户无权访问时返回 `404`。删除成功后对应 Chunk 不再参与检索。
 
 ## 8. 搜索接口
 
@@ -560,7 +845,21 @@ Content-Type: application/pdf
       "effective_date": "2026-01-01",
       "is_active": true,
       "permission_tags": ["hr"],
-      "score": 0.86
+      "score": 0.86,
+      "retrieval_rank": 3,
+      "rerank_score": 0.96,
+      "rank": 1
+    }
+  ],
+  "citations": [
+    {
+      "citation_id": 1,
+      "chunk_id": "16:employee_handbook:...",
+      "source": "employee-handbook.docx",
+      "title": "病假管理",
+      "page": 9,
+      "score": 0.96,
+      "snippet": "病假申请需要提交就医材料。"
     }
   ],
   "count": 1,
@@ -570,8 +869,10 @@ Content-Type: application/pdf
 }
 ```
 
-前端展示引用时使用 `source` 和 `page`，不要直接展示 `chunk_id`。`top_k` 范围为 `1..50`，
-未传时使用知识库或服务默认值。
+前端引用列表直接使用 `citations`；`chunk_id` 只用于原文定位，不作为展示文案。
+`score` 是向量相似度，`rerank_score` 是 LLM 重排相关度，`rank` 是最终顺序。
+`top_k` 范围为 `1..50`，未传时使用知识库或服务默认值。重排失败时服务端自动回退到
+向量顺序，此时不会提供 `rerank_score`。
 
 ## 9. LLM 问答接口
 
@@ -599,12 +900,23 @@ Content-Type: application/pdf
 
 ```json
 {
-  "message": "根据员工手册，病假申请需要提交就医材料。\n\n依据：《employee-handbook.docx》第 9 页",
+  "message": "根据员工手册，病假申请需要提交就医材料。\n\n依据：[1]《employee-handbook.docx》第 9 页",
   "evidence": [
     {
       "source": "employee-handbook.docx",
       "page": 9,
       "score": 0.86
+    }
+  ],
+  "citations": [
+    {
+      "citation_id": 1,
+      "chunk_id": "16:employee_handbook:...",
+      "source": "employee-handbook.docx",
+      "title": "病假管理",
+      "page": 9,
+      "score": 0.96,
+      "snippet": "病假申请需要提交就医材料。"
     }
   ],
   "count": 1,
@@ -614,8 +926,13 @@ Content-Type: application/pdf
 }
 ```
 
-`message` 是最终答案，`evidence` 与搜索接口结构相同。没有检索到证据时，LLM 必须明确
-说明没有检索到制度依据，前端不要自行补写答案。
+`message` 是最终答案，`evidence` 与搜索接口结构相同，`citations` 用于前端来源区。
+没有检索到证据时服务端直接返回“未检索到与当前问题匹配的知识库依据，暂时无法确认答案”，
+不会让 LLM 凭常识补写答案；前端应把它当作无答案状态展示，并提供重新提问或切换知识库的入口。
+
+问答的固定数据流是：ERP 身份校验 → 知识库/Assistant 权限校验 → Milvus 向量召回 → 可选
+LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM 只能处理已过滤的证据，不能
+绕过 `company_id`、部门或权限标签隔离。
 
 ## 10. 会话接口（可选）
 
@@ -679,7 +996,7 @@ Content-Type: application/pdf
 
 ## 11. 错误处理
 
-统一错误响应通常为：
+统一错误响应通常为字符串；可重试导入失败时 `detail` 为上一节所示对象：
 
 ```json
 {
@@ -692,7 +1009,7 @@ Content-Type: application/pdf
 | 状态码 | 含义 | 前端处理建议 |
 |---|---|---|
 | `401` | ERP 身份校验失败 | 重新获取登录凭据 |
-| `403` | `company_id` 与 ERP 用户公司不一致 | 禁止继续提交，检查登录态 |
+| `403` | 公司、部门或权限标签不满足知识库策略，或上传文档 ACL 超出当前用户权限 | 禁止继续提交，检查登录态、文档标签和管理员配置 |
 | `404` | Assistant、知识库或 Prompt 配置不存在 | 提示管理员完成配置 |
 | `409` | 业务标识或版本重复 | 刷新列表，避免重复提交 |
 | `415` | PDF 请求未使用 `application/pdf` | 修正上传 Content-Type |
@@ -708,8 +1025,8 @@ idle -> uploading -> parsing -> embedding -> completed
                                       \-> failed
 ```
 
-当前后端最终只返回 `completed` 或 HTTP 错误，不提供异步任务 ID。前端在请求期间显示
-“处理中”，不要把同步请求伪装成后台任务。
+接口仍同步等待处理完成；配置 MySQL 后可使用返回的 `job_id` 查询失败阶段并触发补偿，
+但它不是后台轮询任务。前端在原请求期间显示“处理中”，失败后再显示“重试”操作。
 
 问答页面建议保存：
 
@@ -719,6 +1036,7 @@ knowledge_base_key
 query
 message
 evidence
+citations
 ```
 
 `company_id`、`UID`、`Authorization` 来自当前 ERP 登录态，不要让用户在普通页面手工编辑。
@@ -726,7 +1044,8 @@ evidence
 ## 13. 当前限制
 
 - 不支持扫描 PDF OCR。
-- 同步导入暂不写入 MySQL 文档/任务记录。
-- `permission_tags` 是文档元数据，不能直接当作用户权限；请求体中的标签不会被当作可信 ACL。
+- 配置 MySQL 且指定知识库时，同步导入会写文档和任务状态；未配置时不提供状态查询与服务端重试。
+- 文档列表暂由 Milvus Chunk 聚合；单个 Collection 超过 `16384` 个可见 Chunk 后应改为 MySQL 文档记录分页。
+- `permission_tags` 是文档 ACL 元数据；检索使用 ERP 验证后的 `permissions/roles`，请求体中的标签不会被当作可信用户权限。
 - 不支持通过浏览器直接提交任意 SQL；数据库数据源目前只有管理配置接口。
 - 单文件最大 `20MB`。

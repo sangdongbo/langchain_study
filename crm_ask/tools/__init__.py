@@ -1,1 +1,1 @@
-"""LangChain tools used by the Streamlit v2 ERP agent."""
+"""Streamlit v2 ERP Agent 使用的 LangChain 工具。"""

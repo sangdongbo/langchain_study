@@ -1,9 +1,13 @@
+"""LangGraph ERP/RAG 工作流共享状态及跨轮恢复规则。"""
+
 from __future__ import annotations
 
 from typing import Any, TypedDict
 
 
 class ErpRagState(TypedDict, total=False):
+    """一次会话中路由、检索、审批草稿和审计信息的统一状态。"""
+
     session_id: str
     user_id: str
     user_message: str
@@ -54,6 +58,7 @@ def initial_state(
     selected_assignees: dict[str, list[str]] | None = None,
     prior: ErpRagState | None = None,
 ) -> ErpRagState:
+    """合并上一轮安全状态与本轮输入，并重置本轮临时输出。"""
     prior = prior or {}
     prior_active_approval = bool(prior.get("active_approval", False))
     return {
@@ -88,8 +93,7 @@ def initial_state(
         "consumed_preview": {},
         "evidence": [],
         "erp_data": {},
-        # A closed preview may be returned once for display, but it must not
-        # become an actionable draft again on the next turn.
+        # 已关闭的预览可以在当前响应中返回一次供展示，但下一轮不能重新变成可操作草稿。
         "preview": dict(prior.get("preview", {})) if prior_active_approval else {},
         "workflow_status": str(
             (

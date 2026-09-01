@@ -1,1 +1,1 @@
-"""External service adapters used by the ERP assistant."""
+"""ERP 助手使用的外部服务适配器。"""

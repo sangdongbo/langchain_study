@@ -27,6 +27,7 @@ HEADING_PATTERN = re.compile(r"第[一二三四五六七八九十百零〇0-9]+[
 
 
 def split_text(text: str, size: int, overlap: int) -> list[str]:
+    """优先在标题或中文标点处切分文本，并保留指定重叠。"""
     normalized = re.sub(r"\s+", " ", text).strip()
     if not normalized:
         return []
@@ -51,6 +52,7 @@ def split_text(text: str, size: int, overlap: int) -> list[str]:
 
 
 def infer_title(text: str, fallback: str) -> str:
+    """从 Chunk 中提取章节标题，未找到时使用文件名。"""
     match = HEADING_PATTERN.search(text)
     if match:
         return match.group(0).strip()
@@ -58,6 +60,7 @@ def infer_title(text: str, fallback: str) -> str:
 
 
 def document_metadata(pdf_path: Path, text: str, settings) -> dict[str, object]:
+    """从文件名和首页文本推断版本、生效日期及租户元数据。"""
     version_match = re.search(r"(20\d{2})\s*年?\s*(?:修订版|版)", f"{pdf_path.stem} {text}")
     effective_match = re.search(
         r"生效日期\s*[:：]?\s*(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日",
@@ -77,11 +80,14 @@ def document_metadata(pdf_path: Path, text: str, settings) -> dict[str, object]:
 
 
 def extract_pdf(pdf_path: Path, settings) -> tuple[list[dict[str, object]], list[int]]:
+    """按页解析 PDF 并生成可审查的 Milvus Chunk 行。"""
     reader = PdfReader(str(pdf_path))
     page_texts = [page.extract_text() or "" for page in reader.pages]
+    # 版本和生效日期通常出现在文件名或前两页，避免扫描全文只为提取元数据。
     metadata = document_metadata(pdf_path, " ".join(page_texts[:2]), settings)
     rows: list[dict[str, object]] = []
     empty_pages: list[int] = []
+    # 每页单独切分，输出 Chunk 的 page 可以直接用于引用和人工复核。
     for page_number, page_text in enumerate(page_texts, start=1):
         if not page_text.strip():
             empty_pages.append(page_number)
@@ -109,6 +115,7 @@ def extract_pdf(pdf_path: Path, settings) -> tuple[list[dict[str, object]], list
 
 
 def main() -> None:
+    """生成 JSONL 和解析报告，仅在显式参数下写入 Milvus。"""
     parser = argparse.ArgumentParser(description="解析员工手册并可显式写入本项目 Milvus collection")
     parser.add_argument(
         "--write-milvus",
@@ -119,9 +126,10 @@ def main() -> None:
     settings = get_settings()
     pdfs = sorted(settings.rag_source_dir.glob("*.pdf"))
     if not pdfs:
-        raise SystemExit(f"No PDF found under {settings.rag_source_dir}")
+        raise SystemExit(f"在 {settings.rag_source_dir} 下没有找到 PDF 文件")
     settings.rag_processed_dir.mkdir(parents=True, exist_ok=True)
 
+    # 先汇总所有本地 PDF 的 Chunk 和空页报告，默认只生成可人工检查的中间文件。
     all_rows: list[dict[str, object]] = []
     report: list[dict[str, object]] = []
     for pdf_path in pdfs:
@@ -137,6 +145,7 @@ def main() -> None:
     print(f"Chunk 输出：{output}")
     print(f"解析报告：{report_path}")
     if args.write_milvus:
+        # 只有显式 --write-milvus 才加载外部服务并执行向量写入。
         from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 
         inserted = milvus_service.upsert_chunks(all_rows, company_id=settings.rag_company_id)

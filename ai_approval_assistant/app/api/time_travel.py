@@ -24,7 +24,7 @@ def list_checkpoints(
     session_id: str,
     user_id: str = Query(min_length=1),
 ) -> list[TimeTravelCheckpointSummary]:
-    """List checkpoints recorded for a chat session."""
+    """列出聊天会话记录的检查点。"""
     return time_travel_service.list(session_id, user_id)
 
 
@@ -37,7 +37,7 @@ def get_checkpoint(
     checkpoint_id: str,
     user_id: str = Query(min_length=1),
 ) -> TimeTravelCheckpointDetail:
-    """Read a checkpoint snapshot for inspection."""
+    """读取检查点快照供查看。"""
     checkpoint = time_travel_service.get(session_id, checkpoint_id, user_id)
     if checkpoint is None:
         raise HTTPException(status_code=404, detail="Checkpoint not found")
@@ -52,7 +52,7 @@ def restore_checkpoint(
     session_id: str,
     request: RestoreCheckpointRequest,
 ) -> RestoreCheckpointResponse:
-    """Restore a session to a previous checkpoint."""
+    """将会话恢复到之前的检查点。"""
     state = time_travel_service.restore(
         session_id,
         request.checkpoint_id,
@@ -77,7 +77,7 @@ def fork_checkpoint(
     session_id: str,
     request: ForkCheckpointRequest,
 ) -> ForkCheckpointResponse:
-    """Fork a checkpoint into a new session."""
+    """从检查点分叉出一个新会话。"""
     state = time_travel_service.fork(
         session_id,
         request.checkpoint_id,

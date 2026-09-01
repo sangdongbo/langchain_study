@@ -8,7 +8,7 @@ ApprovalStatus = Literal["idle", "collecting", "awaiting_confirmation", "submitt
 
 
 class ApprovalState(TypedDict, total=False):
-    """State shared by the approval graph."""
+    """审批工作流共享的状态。"""
 
     user_message: str
     approval_type: ApprovalType | None
@@ -26,7 +26,7 @@ class ApprovalState(TypedDict, total=False):
 
 
 def initial_state() -> ApprovalState:
-    """Return a clean approval flow state."""
+    """返回干净的审批流程初始状态。"""
 
     return {
         "user_message": "",
@@ -43,4 +43,3 @@ def initial_state() -> ApprovalState:
         "route": "classify",
         "tool_result": None,
     }
-

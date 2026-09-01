@@ -12,8 +12,11 @@ from ai_erp_rag_assistant.app.rag_admin_api import _knowledge_embedding_config
 from ai_erp_rag_assistant.app.rag_admin_repository import RagAdminRepository
 from ai_erp_rag_assistant.app.rag_admin_schemas import (
     AssistantConfigCreateRequest,
+    AssistantUpdateRequest,
     DataSourceCreateRequest,
+    DataSourceUpdateRequest,
     KnowledgeBaseCreateRequest,
+    KnowledgeBaseUpdateRequest,
 )
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
 
@@ -52,6 +55,65 @@ def test_admin_config_keeps_model_config_as_external_json_name():
     assert request.model_dump(by_alias=True)["model_config"] == {
         "provider": "openai-compatible"
     }
+
+
+def test_admin_updates_require_a_change_and_keep_secrets_out():
+    with pytest.raises(ValidationError, match="至少需要提交一个可修改字段"):
+        AssistantUpdateRequest(company_id="C001")
+
+    with pytest.raises(ValidationError, match="api_token"):
+        DataSourceUpdateRequest(
+            company_id="C001",
+            config={"endpoint": "https://example.test", "api_token": "secret"},
+        )
+
+
+def test_knowledge_base_update_validates_partial_chunk_settings(monkeypatch):
+    row = SimpleNamespace(chunk_size=800, chunk_overlap=120)
+
+    class FakeSession:
+        saved = None
+
+        def add(self, value):
+            self.saved = value
+
+        def commit(self):
+            pass
+
+    repository = RagAdminRepository(FakeSession())
+    monkeypatch.setattr(repository, "get_knowledge_base", lambda company_id, row_id: row)
+
+    with pytest.raises(ValueError, match="chunk_overlap"):
+        repository.update_knowledge_base("C001", 21, {"chunk_size": 100})
+
+    updated = repository.update_knowledge_base("C001", 21, {"chunk_overlap": 80})
+    assert updated.chunk_overlap == 80
+
+    with pytest.raises(ValidationError, match="chunk_overlap"):
+        KnowledgeBaseUpdateRequest(
+            company_id="C001", chunk_size=800, chunk_overlap=800
+        )
+
+
+def test_binding_lists_apply_tenant_and_requested_filters():
+    statements = []
+
+    class FakeSession:
+        def scalars(self, statement):
+            statements.append(str(statement))
+            return SimpleNamespace(all=lambda: [])
+
+    repository = RagAdminRepository(FakeSession())
+    assert repository.list_assistant_knowledge_base_bindings(
+        "C001", assistant_id=11, enabled=False
+    ) == []
+    assert repository.list_knowledge_base_source_bindings(
+        "C001", knowledge_base_id=21, data_source_id=31
+    ) == []
+
+    assert all("company_id" in statement for statement in statements)
+    assert "assistant_id" in statements[0] and "enabled" in statements[0]
+    assert "knowledge_base_id" in statements[1] and "data_source_id" in statements[1]
 
 
 def test_collection_name_fits_mysql_column_and_milvus_rules():
@@ -168,9 +230,18 @@ def test_rag_admin_routes_are_in_openapi_without_opening_database():
     paths = app.openapi()["paths"]
 
     assert "/api/rag/admin/assistants" in paths
+    assert "/api/rag/admin/assistants/{assistant_id}/update" in paths
     assert "/api/rag/admin/assistants/{assistant_id}/prompts/{prompt_id}/publish" in paths
     assert "/api/rag/admin/knowledge-bases" in paths
+    assert "/api/rag/admin/knowledge-bases/{knowledge_base_id}/update" in paths
     assert "/api/rag/admin/data-sources" in paths
+    assert "/api/rag/admin/data-sources/{data_source_id}/update" in paths
+    assert "/api/rag/admin/bindings/assistant-knowledge-base/list" in paths
+    assert "/api/rag/admin/bindings/knowledge-base-source/list" in paths
     assert "/api/rag/ingest/document" in paths
+    assert "/api/rag/ingest/jobs/status" in paths
+    assert "/api/rag/ingest/jobs/retry" in paths
+    assert "/api/rag/documents/list" in paths
+    assert "/api/rag/documents/delete" in paths
     assert "/api/sessions/list" in paths
     assert "/api/sessions/messages" in paths

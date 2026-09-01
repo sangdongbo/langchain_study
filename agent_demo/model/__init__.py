@@ -1,1 +1,1 @@
-"""Model factory package for agent_demo."""
+"""agent_demo 模型工厂包。"""

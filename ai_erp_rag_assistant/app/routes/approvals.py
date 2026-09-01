@@ -1,4 +1,4 @@
-"""ERP approval discovery and dynamic form endpoints."""
+"""ERP 审批发现和动态表单接口。"""
 
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ def approval_templates(
     authorization: str | None = Header(default=None),
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
+    """返回当前 ERP 用户可用的审批模板列表。"""
     request = api_module._with_header_identity(request, authorization, uid)
     try:
         user = api_module._erp_user(request)
@@ -52,6 +53,7 @@ def approval_form_schema(
     authorization: str | None = Header(default=None),
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
+    """将指定 ERP 审批模板转换为前端动态表单结构。"""
     request = api_module._with_header_identity(request, authorization, uid)
     try:
         user = api_module._erp_user(request)
@@ -80,8 +82,11 @@ def approval_field_options(
     authorization: str | None = Header(default=None),
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
+    """分页返回一个动态审批字段的真实 ERP 候选项。"""
+    # HTTP 头中的身份信息优先，避免前端 JSON 中的旧凭据覆盖当前登录态。
     request = api_module._with_header_identity(request, authorization, uid)
     try:
+        # 字段选项依赖真实公司与用户，人员、假期和关联数据不能跨租户查询。
         user = api_module._erp_user(request)
         return api_module.get_approval_field_options(
             request.template_id,

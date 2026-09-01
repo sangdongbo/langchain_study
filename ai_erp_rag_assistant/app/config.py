@@ -1,3 +1,5 @@
+"""集中加载服务配置，并处理项目级、共享级和进程环境变量的优先级。"""
+
 from __future__ import annotations
 
 import os
@@ -10,8 +12,7 @@ from pydantic import BaseModel, Field
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-# Keep the supported deployment variable names in one place so the example
-# template can be checked for drift without loading credentials or services.
+# 将支持的部署变量集中维护，便于检查示例模板是否漂移，且不需要加载凭据或连接服务。
 SUPPORTED_ENV_KEYS = frozenset(
     {
         "AI_ERP_RAG_HOST",
@@ -25,6 +26,8 @@ SUPPORTED_ENV_KEYS = frozenset(
         "RAG_CHUNK_SIZE",
         "RAG_CHUNK_OVERLAP",
         "RAG_MIN_SCORE",
+        "RAG_RERANK_ENABLED",
+        "RAG_RERANK_CANDIDATES",
         "RAG_COMPANY_ID",
         "RAG_DEPARTMENT",
         "RAG_PERMISSION_TAGS",
@@ -95,6 +98,8 @@ def _bool_from_env(value: str | None, default: bool = False) -> bool:
 
 
 class Settings(BaseModel):
+    """AI、RAG、ERP、Milvus 和可选 MySQL 连接的运行时配置。"""
+
     host: str = "127.0.0.1"
     port: int = 8021
     milvus_uri: str = "http://127.0.0.1:19530"
@@ -106,6 +111,8 @@ class Settings(BaseModel):
     rag_chunk_size: int = Field(default=800, ge=100, le=4000)
     rag_chunk_overlap: int = Field(default=120, ge=0, le=1000)
     rag_min_score: float = Field(default=0.35, ge=-1, le=1)
+    rag_rerank_enabled: bool = True
+    rag_rerank_candidates: int = Field(default=15, ge=1, le=50)
     rag_company_id: str = "lanjing"
     rag_department: str = "公共制度"
     rag_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:employee_handbook"])
@@ -151,9 +158,9 @@ class Settings(BaseModel):
 
     @classmethod
     def from_env(cls) -> "Settings":
-        # Load repository defaults first, then let process-level variables win.
-        # Empty values are ignored so a blank project .env entry cannot mask a
-        # usable shared credential from the repository-level file.
+        """合并两级 .env 与进程变量，并解析兼容的模型供应商变量名。"""
+        # 先加载仓库默认值，再由进程级变量覆盖；空值会被忽略，避免项目 .env 的空项
+        # 把仓库根目录中可用的共享凭据遮蔽掉。
         values: dict[str, str] = {}
         for env_path in (PROJECT_ROOT.parent / ".env", PROJECT_ROOT / ".env"):
             for key, value in dotenv_values(env_path).items():
@@ -190,8 +197,8 @@ class Settings(BaseModel):
         )
         embedding_base_url = values.get("EMBEDDING_BASE_URL") or ""
         if not embedding_base_url and values.get("DASHSCOPE_API_KEY"):
-            # Workspace keys should use the same OpenAI-compatible endpoint as
-            # the configured DashScope LLM; a custom endpoint may be required.
+            # 工作区密钥通常与已配置的 DashScope LLM 共用 OpenAI 兼容端点；
+            # 如果部署环境不同，也可以通过自定义端点覆盖。
             embedding_base_url = (
                 values.get("DASHSCOPE_BASE_URL")
                 or "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -213,6 +220,8 @@ class Settings(BaseModel):
             rag_chunk_size=int(values.get("RAG_CHUNK_SIZE") or 800),
             rag_chunk_overlap=int(values.get("RAG_CHUNK_OVERLAP") or 120),
             rag_min_score=float(values.get("RAG_MIN_SCORE") or 0.35),
+            rag_rerank_enabled=_bool_from_env(values.get("RAG_RERANK_ENABLED"), True),
+            rag_rerank_candidates=int(values.get("RAG_RERANK_CANDIDATES") or 15),
             rag_company_id=values.get("RAG_COMPANY_ID") or values.get("ERP_DEMO_COMPANY_ID") or "lanjing",
             rag_department=values.get("RAG_DEPARTMENT") or "公共制度",
             rag_permission_tags=[
@@ -271,4 +280,5 @@ class Settings(BaseModel):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
+    """返回进程内缓存的配置，避免每次请求重复读取环境文件。"""
     return Settings.from_env()

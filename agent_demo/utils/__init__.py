@@ -1,1 +1,1 @@
-"""Utility helpers for agent_demo."""
+"""agent_demo 工具函数。"""

@@ -1,1 +1,1 @@
-"""ERP and RAG tool adapters."""
+"""ERP 与 RAG 工具适配器。"""

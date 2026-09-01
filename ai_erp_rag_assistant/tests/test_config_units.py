@@ -109,7 +109,7 @@ def test_process_environment_overrides_dotenv(monkeypatch):
 
 
 def test_env_example_covers_supported_settings_keys():
-    """Keep the checked-in template aligned with Settings.from_env()."""
+    """确保仓库中的示例配置与 Settings.from_env() 保持一致。"""
     example_keys = set(config_module.dotenv_values(config_module.PROJECT_ROOT / ".env.example"))
     missing = config_module.SUPPORTED_ENV_KEYS - example_keys
 

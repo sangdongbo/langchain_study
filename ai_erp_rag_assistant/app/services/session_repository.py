@@ -1,3 +1,5 @@
+"""持久化聊天会话、消息、脱敏状态、审批预览和幂等提交记录。"""
+
 from __future__ import annotations
 
 import json
@@ -38,7 +40,7 @@ _CLOSED_STATUSES = {"submitted", "cancelled", "blocked"}
 
 
 def resumable_state(state: dict[str, Any]) -> dict[str, Any]:
-    """Keep only state required by the next turn and remove credentials."""
+    """仅保留下一轮所需状态，并移除认证凭据。"""
     return _strip_secrets({key: state[key] for key in _STATE_KEYS if key in state})
 
 
@@ -47,6 +49,7 @@ class SessionRepository:
 
     @property
     def enabled(self) -> bool:
+        """判断当前部署是否启用 MySQL 长期会话存储。"""
         return get_settings().session_store == "mysql"
 
     def list_sessions(
@@ -61,6 +64,7 @@ class SessionRepository:
     ) -> tuple[list[dict[str, Any]], bool]:
         """按公司、Assistant 和用户隔离查询会话，并返回是否还有下一页。"""
 
+        # 查询直接连接 Assistant 表校验业务 key，不能只依赖可猜测的 session_key。
         connection = self._connect()
         try:
             with connection.cursor() as cursor:
@@ -97,6 +101,7 @@ class SessionRepository:
     ) -> tuple[list[dict[str, Any]], bool]:
         """按会话序号向前分页读取消息，查询条件同时校验会话所有者。"""
 
+        # 所有权条件与消息查询写在同一 SQL 中，避免先查会话再查消息的竞态。
         connection = self._connect()
         try:
             with connection.cursor() as cursor:
@@ -147,6 +152,7 @@ class SessionRepository:
 
         if not self.enabled:
             return {}
+        # 只恢复 active 会话，已归档或删除会话不能重新进入审批流程。
         connection = self._connect()
         try:
             with connection.cursor() as cursor:
@@ -164,6 +170,7 @@ class SessionRepository:
                     (company_id, assistant_key, user_id, session_key),
                 )
                 row = cursor.fetchone()
+                # state_json 写入前已经脱敏，这里仍通过统一 JSON 解析器兼容驱动返回字符串。
                 return _json_object(row.get("state_json")) if row else {}
         finally:
             connection.close()
@@ -181,6 +188,7 @@ class SessionRepository:
 
         if not self.enabled or not request_id:
             return None
+        # 只读取 assistant 角色的完成消息，用户消息本身不代表请求已经处理成功。
         connection = self._connect()
         try:
             with connection.cursor() as cursor:
@@ -203,6 +211,7 @@ class SessionRepository:
                 )
                 row = cursor.fetchone()
                 metadata = _json_object(row.get("metadata_json")) if row else {}
+                # 只有保存过完整 response 的助手消息才可作为幂等缓存命中。
                 response = metadata.get("response")
                 return response if isinstance(response, dict) else None
         finally:
@@ -228,6 +237,7 @@ class SessionRepository:
         connection = self._connect()
         try:
             with connection.cursor() as cursor:
+                # 先解析租户内 Assistant 与发布配置，再锁定会话行分配连续消息序号。
                 assistant_id, config_version_id = self._assistant(cursor, company_id, assistant_key)
                 cursor.execute(
                     """
@@ -241,6 +251,7 @@ class SessionRepository:
                 )
                 session = cursor.fetchone()
                 if not session:
+                    # 首轮请求创建会话，并把脱敏后的工作流状态作为恢复起点。
                     cursor.execute(
                         """
                         INSERT INTO ai_erp_sessions (
@@ -268,6 +279,7 @@ class SessionRepository:
                     session_id = int(session["id"])
                     last_seq = int(session.get("last_message_seq") or 0)
                 if request_id:
+                    # request_id 已存在说明该前端请求已保存，直接结束避免重复消息和提交记录。
                     cursor.execute(
                         "SELECT id FROM ai_erp_messages WHERE session_id = %s AND request_id = %s LIMIT 1",
                         (session_id, request_id),
@@ -275,6 +287,7 @@ class SessionRepository:
                     if cursor.fetchone():
                         connection.commit()
                         return
+                # 用户与助手消息必须成对写入，同一轮分别占用连续序号。
                 self._insert_message(
                     cursor,
                     company_id,
@@ -301,6 +314,7 @@ class SessionRepository:
                     state.get("route"),
                     {"response": _strip_secrets(response)},
                 )
+                # 草稿、工具事件和提交尝试与消息共用当前事务，任何一步失败全部回滚。
                 draft_id = self._persist_approval_state(
                     cursor,
                     company_id=company_id,
@@ -326,6 +340,7 @@ class SessionRepository:
                     request_id=request_id,
                     state=state,
                 )
+                # 最后推进会话状态版本与序号，使读取方只看到完整交换后的状态。
                 cursor.execute(
                     """
                     UPDATE ai_erp_sessions
@@ -349,6 +364,7 @@ class SessionRepository:
                 )
             connection.commit()
         except Exception:
+            # 禁止部分保存消息或预览；失败交给上层记录审计并返回 503。
             connection.rollback()
             raise
         finally:
@@ -364,6 +380,7 @@ class SessionRepository:
         user_id: str,
         state: dict[str, Any],
     ) -> int | None:
+        """在当前事务内保存审批草稿、预览版本及确认消费状态。"""
         draft_key = str(state.get("draft_key") or "")
         preview = state.get("preview") or state.get("consumed_preview") or {}
         template = state.get("template") or {}
@@ -377,6 +394,7 @@ class SessionRepository:
             return None
         workflow_status = str(state.get("workflow_status") or "collecting_fields")
         if template_id:
+            # draft_key 唯一标识同一审批草稿，多轮补字段通过 upsert 递增状态版本。
             cursor.execute(
                 """
                 INSERT INTO ai_erp_approval_drafts (
@@ -418,6 +436,7 @@ class SessionRepository:
             return None
         draft_id = int(row["id"])
         if workflow_status in _CLOSED_STATUSES:
+            # 草稿关闭后清空字段和审批人，避免后续状态恢复重新激活敏感业务数据。
             cursor.execute(
                 """
                 UPDATE ai_erp_approval_drafts
@@ -429,6 +448,7 @@ class SessionRepository:
             )
         preview_id = str(preview.get("preview_id") or "")
         if preview_id:
+            # 预览按 preview_id/version/hash 持久化，确认状态只允许随工作流结果更新。
             workflow_status = str(state.get("workflow_status") or "")
             confirmation_status = str(preview.get("confirmation_status") or "")
             if not confirmation_status:
@@ -477,11 +497,14 @@ class SessionRepository:
         request_id: str,
         tool_calls: list[Any],
     ) -> None:
+        """将脱敏后的工具调用摘要关联到当前会话和请求。"""
         for call in tool_calls:
             if not isinstance(call, dict):
                 continue
             tool_name = str(call.get("tool") or "unknown")
             failed = tool_name == "system.error" or bool(call.get("error"))
+            # 只持久化摘要、数量和键名，原始 ERP/RAG 返回不进入审计事件表。
+            # system.error 或显式 error 字段统一标记失败，其他工具事件只记录决策结果。
             cursor.execute(
                 """
                 INSERT INTO ai_erp_tool_events (
@@ -521,6 +544,7 @@ class SessionRepository:
             return
         preview = state.get("preview") or state.get("consumed_preview") or {}
         write_mode = str(result.get("erp_write_mode") or "")
+        # 写入被禁用记录为 blocked；真实或 Mock 成功均由 erp_write_mode 保留来源。
         status = "blocked" if write_mode == "disabled" else "succeeded"
         cursor.execute(
             """
@@ -585,6 +609,9 @@ class SessionRepository:
         route: Any,
         metadata: dict[str, Any] | None,
     ) -> None:
+        """按会话序号插入一条不可变消息及其脱敏元数据。"""
+        # message_seq 和 request_id 由数据库约束保证同一会话内顺序与请求幂等。
+        # metadata 再次经过 _strip_secrets，调用方漏脱敏时也不会落库凭据。
         cursor.execute(
             """
             INSERT INTO ai_erp_messages (
@@ -608,6 +635,7 @@ class SessionRepository:
 
     @staticmethod
     def _connect() -> Any:
+        """校验配置并创建带超时和 utf8mb4 的 PyMySQL 连接。"""
         settings = get_settings()
         missing = [
             name
@@ -662,6 +690,7 @@ def _json_object(value: Any) -> dict[str, Any]:
 
 
 def _tool_summary(call: dict[str, Any]) -> dict[str, Any]:
+    """压缩工具调用为标量、数量和键名摘要，并移除敏感字段。"""
     summary: dict[str, Any] = {"tool": str(call.get("tool") or "unknown")}
     for key, value in call.items():
         if key == "tool":

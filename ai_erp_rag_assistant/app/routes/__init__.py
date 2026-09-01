@@ -1,1 +1,1 @@
-"""HTTP route modules grouped by user-facing capability."""
+"""按用户功能划分的 HTTP 路由模块。"""

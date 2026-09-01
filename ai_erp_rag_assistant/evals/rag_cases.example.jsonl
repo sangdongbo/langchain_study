@@ -1,0 +1,8 @@
+# 复制本文件为 rag_cases.jsonl，并把 expected_sources/expected_chunk_ids 改成真实来源。
+# 评测集故意覆盖：明确制度、相邻制度、跨部门权限和无答案问题。
+{"id":"leave_required_materials","query":"病假需要提交什么材料？","company_id":"16","knowledge_base_key":"employee_handbook","department":"公共制度","permission_tags":["knowledge:employee_handbook"],"expected_sources":["员工手册.pdf"],"expected_citations":[{"source":"员工手册.pdf","page":9}],"should_answer":true,"top_k":5}
+{"id":"leave_duration_rule","query":"员工病假最多可以申请多少天？","company_id":"16","knowledge_base_key":"employee_handbook","department":"公共制度","permission_tags":["knowledge:employee_handbook"],"expected_sources":["员工手册.pdf"],"expected_citations":[{"source":"员工手册.pdf","page":10}],"should_answer":true,"top_k":5}
+{"id":"adjacent_annual_leave","query":"年假和病假的申请材料有什么区别？","company_id":"16","knowledge_base_key":"employee_handbook","department":"公共制度","permission_tags":["knowledge:employee_handbook"],"expected_sources":["员工手册.pdf"],"expected_citations":[{"source":"员工手册.pdf","page":11}],"should_answer":true,"top_k":5}
+{"id":"department_policy","query":"研发部门发布版本前需要谁审批？","company_id":"16","knowledge_base_key":"employee_handbook","department":"研发部","permission_tags":["knowledge:employee_handbook","department:研发"],"expected_sources":["研发发布规范.pdf"],"expected_citations":[{"source":"研发发布规范.pdf","page":3}],"should_answer":true,"top_k":5}
+{"id":"permission_boundary","query":"财务部门的报销额度规则是什么？","company_id":"16","knowledge_base_key":"employee_handbook","department":"研发部","permission_tags":["knowledge:employee_handbook"],"should_answer":false,"top_k":5}
+{"id":"unrelated_mars_benefit","query":"公司是否提供火星旅游补贴？","company_id":"16","knowledge_base_key":"employee_handbook","department":"公共制度","permission_tags":["knowledge:employee_handbook"],"should_answer":false,"top_k":5}

@@ -1,5 +1,5 @@
--- Long-term company- and assistant-scoped sessions (MySQL 8.0.16+)
--- Requires 001_mysql8_assistant_config.sql. Review before execution.
+-- 公司和 Assistant 范围内的长期会话（MySQL 8.0.16+）。
+-- 依赖 001_mysql8_assistant_config.sql，执行前请先审查。
 
 CREATE TABLE `ai_erp_sessions` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '会话主键ID',

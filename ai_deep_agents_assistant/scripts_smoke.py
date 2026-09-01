@@ -10,7 +10,7 @@ from ai_deep_agents_assistant.app.services.approval_service import approval_serv
 
 
 def main() -> None:
-    """Offline smoke check for deterministic approval rules."""
+    """离线冒烟检查确定性审批规则。"""
     message = "我要报销差旅费，金额 5200 元，因为去上海拜访客户，发票已提供"
     draft = approval_service.build_draft(message, existing_slots={})
     print(json.dumps(draft.model_dump(), ensure_ascii=False, indent=2))

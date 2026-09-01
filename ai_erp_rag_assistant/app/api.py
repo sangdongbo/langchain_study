@@ -1,7 +1,7 @@
-"""API composition root and shared request helpers.
+"""API 组合根与共享请求辅助函数。
 
-Endpoint implementations live in :mod:`app.routes`; this module keeps the
-stable ``app.api`` import surface used by the application and tests.
+具体端点实现位于 :mod:`app.routes`；本模块保留应用和测试依赖的稳定
+``app.api`` 导入面。
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ from ai_erp_rag_assistant.app.tools.erp_tools import (
 from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 
-# ``/api`` is the public prefix; individual modules only own their feature paths.
+# ``/api`` 是所有接口的公共前缀，各路由模块只负责自己的业务路径。
 router = APIRouter(prefix="/api")
 workflow = None
 stateless_workflow = None
@@ -58,8 +58,7 @@ def _identity_anonymizer(data: Any) -> Any:
     return data
 
 
-# Older LangSmith releases do not expose create_secret_anonymizer; field-level
-# redaction remains enabled in either case.
+# 兼容旧版 LangSmith：如果没有 create_secret_anonymizer，仍保留字段级脱敏。
 _secret_anonymizer_factory: Any = getattr(
     langsmith_anonymizer, "create_secret_anonymizer", None
 )
@@ -99,10 +98,12 @@ def _thread_id(request: Any) -> str:
 
 
 def _with_header_identity(request: Any, authorization: str | None, uid: str | None) -> Any:
+    """合并请求身份；HTTP 请求头优先，JSON 字段仅用于非浏览器兼容调用。"""
     return request.model_copy(
         update={
-            "authorization": request.authorization or authorization or "",
-            "uid": request.uid or uid or "",
+            # 浏览器可能复用包含旧凭据的请求对象，显式请求头必须覆盖请求体中的旧值。
+            "authorization": authorization or request.authorization or "",
+            "uid": uid or request.uid or "",
         }
     )
 
@@ -117,23 +118,58 @@ def _erp_user(request: Any) -> dict[str, Any]:
     )
 
 
+def _verified_access_tags(user: dict[str, Any]) -> list[str]:
+    """把 ERP 权限和角色规范成非空标签，并忽略显式禁用的字典项。"""
+    tags: set[str] = set()
+
+    def add(raw: Any) -> None:
+        if isinstance(raw, str):
+            tags.update(item.strip() for item in raw.split(",") if item.strip())
+            return
+        if isinstance(raw, dict):
+            # ERP 常见的 {"hr": true} 权限映射不能把 false 项当成已授权标签。
+            if raw and all(isinstance(enabled, bool) for enabled in raw.values()):
+                tags.update(str(key).strip() for key, enabled in raw.items() if enabled and str(key).strip())
+                return
+            if raw.get("enabled") is False:
+                return
+            value = raw.get("code") or raw.get("permission") or raw.get("role") or raw.get("name") or raw.get("value")
+            if value not in (None, ""):
+                add(str(value))
+            return
+        if isinstance(raw, (list, tuple, set)):
+            for item in raw:
+                add(item)
+            return
+        if raw not in (None, ""):
+            tags.add(str(raw).strip())
+
+    # 请求体中的 permission_tags 不在这里读取；它不是可信身份来源。
+    for key in ("permissions", "permission_tags", "roles", "role"):
+        add(user.get(key))
+    return sorted(tag for tag in tags if tag)
+
+
 def _persistent_identity(
     request: Any,
     authorization: str | None,
     uid: str | None,
 ) -> tuple[Any, dict[str, Any], str, str]:
-    """Use verified ERP identity to determine durable session ownership."""
+    """使用已验证的 ERP 身份确定持久化会话归属。"""
+    # 认证头优先于请求体中的同名字段，避免客户端复用过期或伪造的身份。
     request = _with_header_identity(request, authorization, uid)
     try:
+        # 持久化前必须先从 ERP 取得可信用户，后续所有归属判断都基于该结果。
         user = _erp_user(request)
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
+    # 会话数据按公司和用户隔离；没有公司 ID 时不能安全地写入持久化存储。
     if not company_id:
         raise HTTPException(status_code=403, detail="当前用户没有可用的 company_id")
     if request.company_id and request.company_id.strip() != company_id:
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
-    # The page-supplied user_id is not an isolation boundary; prefer verified ERP IDs.
+    # 页面提交的 user_id 不能作为租户隔离边界，优先使用 ERP 返回的可信 ID。
     user_id = str(user.get("uid") or request.uid or user.get("user_id") or request.user_id).strip()
     if not user_id:
         raise HTTPException(status_code=403, detail="当前用户没有可用的用户ID")
@@ -144,19 +180,32 @@ def _rag_identity(
     request: Any,
     authorization: str | None,
     uid: str | None,
-) -> tuple[Any, str, str]:
+) -> tuple[Any, str, str, list[str]]:
+    """解析已验证的租户、部门以及 RAG 访问标签。"""
+    # 先把 HTTP 头中的身份凭据合并到请求对象，避免信任请求体中的旧值。
     request = _with_header_identity(request, authorization, uid)
     try:
+        # ERP 是身份信息的唯一可信来源；检索权限不能由前端自行声明。
         user = _erp_user(request)
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
     requested_company = request.company_id.strip()
+    # 缺少公司 ID 时无法建立租户边界，必须在进入检索前拒绝请求。
     if not company_id:
         raise HTTPException(status_code=403, detail="当前用户没有可用的 company_id")
+    # 请求中的公司 ID 只能用于校验，不能切换到 ERP 身份之外的公司。
     if requested_company != company_id:
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
-    return request, company_id, str(user.get("department") or request.department).strip()
+    # 用户请求里的 permission_tags 不可信，只汇总 ERP 身份接口返回的权限与角色。
+    access_tags = _verified_access_tags(user)
+    return (
+        request,
+        company_id,
+        # ERP 未返回部门时必须保持为空；Milvus 会因此只允许公共文档，不能信任请求体部门。
+        str(user.get("department") or "").strip(),
+        access_tags,
+    )
 
 
 def _rag_runtime_config(
@@ -166,17 +215,21 @@ def _rag_runtime_config(
     knowledge_base_key: str,
     assistant_key: str,
 ) -> RagRuntimeConfig:
-    """Resolve DB-backed RAG settings, falling back to process defaults."""
+    """读取数据库中的 RAG 配置，缺少配置时回退到进程默认值。"""
+    # 默认 Collection 名称由租户和知识库 key 确定，即使未配置 MySQL 也不会串库。
     fallback = RagRuntimeConfig(
         collection=milvus_service.collection_name(
             company_id=company_id, knowledge_base_key=knowledge_base_key
         ),
         chunk_size=get_settings().rag_chunk_size,
         chunk_overlap=get_settings().rag_chunk_overlap,
+        rerank_enabled=get_settings().rag_rerank_enabled,
+        rerank_candidates=get_settings().rag_rerank_candidates,
     )
     if db is None:
         return fallback
     try:
+        # MySQL 只覆盖已配置项，空值继续沿用进程级安全默认值。
         configured = RagAdminRepository(db).runtime_config(
             company_id, knowledge_base_key, assistant_key
         )
@@ -192,6 +245,13 @@ def _rag_runtime_config(
             ),
             top_k=configured.top_k,
             score_threshold=configured.score_threshold,
+            rerank_enabled=(
+                configured.rerank_enabled
+                if configured.rerank_enabled is not None
+                else fallback.rerank_enabled
+            ),
+            rerank_candidates=configured.rerank_candidates or fallback.rerank_candidates,
+            permission_policies=configured.permission_policies,
         )
     except AdminNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -200,22 +260,30 @@ def _rag_runtime_config(
         raise HTTPException(status_code=503, detail="MySQL 读取 RAG 配置失败") from exc
 
 
-# Import feature routers after shared helpers so route modules can reference the
-# compatibility surface above without introducing an initialization cycle.
-from ai_erp_rag_assistant.app.routes import approvals, chat as chat_routes, rag, sessions
+# 共享辅助函数定义完成后再导入业务路由，避免路由模块引用兼容层时产生循环导入。
+from ai_erp_rag_assistant.app.routes import (
+    approvals,
+    chat as chat_routes,
+    rag,
+    rag_documents,
+    sessions,
+    workbench,
+)
 
-# The chat module owns workflow construction; these aliases preserve the old
-# ``app.api.workflow`` integration point without creating a second graph.
+# 工作流由 chat 模块统一构建；这里仅保留旧的 ``app.api.workflow`` 兼容入口，
+# 不重复创建第二份图。
 workflow = chat_routes.workflow
 stateless_workflow = chat_routes.stateless_workflow
 
 router.include_router(rag_admin_router)
 router.include_router(chat_routes.router)
 router.include_router(rag.router)
+router.include_router(rag_documents.router)
 router.include_router(sessions.router)
 router.include_router(approvals.router)
+router.include_router(workbench.router)
 
-# Preserve the historical ``app.api.<endpoint>`` imports for integrations/tests.
+# 保留历史 ``app.api.<endpoint>`` 导入路径，兼容已有集成代码和测试。
 chat = chat_routes.chat
 rag_search = rag.rag_search
 rag_chat = rag.rag_chat
@@ -224,8 +292,11 @@ rag_ingest_pdf = rag.rag_ingest_pdf
 rag_ingest_document = rag.rag_ingest_document
 _rag_rows_from_text = rag._rag_rows_from_text
 _rag_rows_from_pdf = rag._rag_rows_from_pdf
+list_rag_documents = rag_documents.list_rag_documents
+delete_rag_document = rag_documents.delete_rag_document
 session_list = sessions.session_list
 session_messages = sessions.session_messages
 approval_templates = approvals.approval_templates
 approval_form_schema = approvals.approval_form_schema
 approval_field_options = approvals.approval_field_options
+workbench_summary = workbench.workbench_summary

@@ -37,7 +37,7 @@ class TimeTravelCheckpoint:
 
 
 class TimeTravelService:
-    """In-memory checkpoints for learning LangGraph-style time travel."""
+    """用于学习 LangGraph 式时间旅行的内存检查点服务。"""
 
     def __init__(self, max_checkpoints_per_session: int = DEFAULT_MAX_CHECKPOINTS_PER_SESSION):
         self._max_checkpoints_per_session = max(1, max_checkpoints_per_session)
@@ -51,6 +51,7 @@ class TimeTravelService:
     ) -> TimeTravelCheckpoint:
         session_id = state["session_id"]
         checkpoints = self._checkpoints.setdefault(session_id, [])
+        # 深拷贝快照，避免工作流后续修改 state 时反向污染历史检查点。
         checkpoint = TimeTravelCheckpoint(
             checkpoint_id=f"ckpt_{uuid4().hex}",
             session_id=session_id,
@@ -86,6 +87,7 @@ class TimeTravelService:
         checkpoint = self._find(session_id, checkpoint_id, user_id)
         if checkpoint is None:
             return None
+        # 对外只返回脱敏状态，认证信息等敏感字段不能通过时间旅行接口泄露。
         return TimeTravelCheckpointDetail(
             **self._to_summary(checkpoint).model_dump(),
             state=self._public_state(checkpoint.state),
@@ -100,6 +102,7 @@ class TimeTravelService:
         checkpoint = self._find(session_id, checkpoint_id, user_id)
         if checkpoint is None:
             return None
+        # 恢复结果也使用独立副本，调用方修改恢复状态不会影响原检查点。
         return deepcopy(checkpoint.state)
 
     def fork(
@@ -128,6 +131,7 @@ class TimeTravelService:
         checkpoint_id: str,
         user_id: str,
     ) -> TimeTravelCheckpoint | None:
+        # session、checkpoint 和 user 三个条件必须同时匹配，防止跨用户读取快照。
         return next(
             (
                 checkpoint
@@ -186,7 +190,7 @@ class TimeTravelService:
 
 
 class RedisTimeTravelService(TimeTravelService):
-    """Redis-backed checkpoints with the same API as the in-memory service."""
+    """基于 Redis 的检查点服务，提供与内存服务相同的 API。"""
 
     def __init__(
         self,

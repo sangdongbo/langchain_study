@@ -1,4 +1,4 @@
-"""Synchronous document parsing and chunk preparation for RAG ingestion."""
+"""RAG 同步文档解析和 Chunk 准备服务。"""
 
 from __future__ import annotations
 
@@ -17,11 +17,13 @@ from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 
 class DocumentParseError(ValueError):
-    """Raised when a document cannot be parsed into text pages."""
+    """文档无法解析为文本页面时抛出的异常。"""
 
 
 @dataclass(frozen=True)
 class ParsedPage:
+    """解析后保留原始页码的一段文档文本。"""
+
     page: int
     text: str
 
@@ -31,7 +33,7 @@ _DOCX_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
 
 def parse_document(content: bytes, source: str) -> tuple[list[ParsedPage], list[int]]:
-    """Extract text while preserving page numbers where the format provides them."""
+    """提取文本，并在格式支持时保留原始页码。"""
 
     if not content:
         raise DocumentParseError("文档内容为空")
@@ -69,11 +71,10 @@ def build_chunk_rows(
     chunk_size: int = 800,
     chunk_overlap: int = 120,
 ) -> tuple[list[dict[str, Any]], list[int]]:
-    """Parse and split one document into Milvus-ready rows.
+    """解析并切分一个文档，生成可写入 Milvus 的 Chunk 行。
 
-    Embedding is deliberately performed by ``MilvusService.upsert_chunks`` so
-    that every ingestion path shares the same vector dimension and collection
-    validation.
+    Embedding 统一交给 ``MilvusService.upsert_chunks``，保证所有导入路径
+    使用相同的向量维度和 Collection 校验。
     """
 
     company_id = company_id.strip()
@@ -87,11 +88,13 @@ def build_chunk_rows(
     if not 0 <= chunk_overlap < chunk_size:
         raise DocumentParseError("chunk_overlap 必须小于 chunk_size")
 
+    # 解析器负责保留格式可提供的页码；扫描件空页在这里统一收集。
     pages, empty_pages = parse_document(content, source)
     knowledge_key = knowledge_base_key.strip() or "default"
     fallback_title = title.strip() or Path(source).name or source
     tags = [str(item).strip() for item in (permission_tags or []) if str(item).strip()]
     rows: list[dict[str, Any]] = []
+    # 每页独立切分，避免一个 Chunk 跨页导致引用页码失真。
     for parsed_page in pages:
         page_text = parsed_page.text.strip()
         if not page_text:
@@ -99,8 +102,9 @@ def build_chunk_rows(
             continue
         chunks = split_text(page_text, chunk_size, chunk_overlap)
         for chunk_number, chunk in enumerate(chunks, start=1):
+            # 内容参与哈希，文档修改后生成新 ID；相同内容重试保持稳定。
             digest = sha256(
-                f"{source}:{parsed_page.page}:{chunk_number}:{chunk}".encode()
+                f"{source}:{version}:{parsed_page.page}:{chunk_number}:{chunk}".encode()
             ).hexdigest()[:32]
             rows.append(
                 {
@@ -118,6 +122,7 @@ def build_chunk_rows(
                 }
             )
     if not rows:
+        # 所有支持格式最终都走同一个无文本错误，便于前端提示 OCR。
         raise DocumentParseError("文档没有可提取文本；扫描件请先生成文字层")
     return rows, sorted(set(empty_pages))
 
@@ -134,6 +139,7 @@ def _parse_pdf(content: bytes) -> tuple[list[ParsedPage], list[int]]:
 
 
 def _parse_docx(content: bytes) -> tuple[list[ParsedPage], list[int]]:
+    """从 DOCX XML 中按文档顺序提取段落和表格行。"""
     try:
         with ZipFile(BytesIO(content)) as archive:
             xml = archive.read("word/document.xml")
@@ -150,8 +156,7 @@ def _parse_docx(content: bytes) -> tuple[list[ParsedPage], list[int]]:
             if text:
                 blocks.append(text)
         elif child.tag == f"{{{_DOCX_NS['w']}}}tbl":
-            # Preserve each table row as one searchable record instead of
-            # flattening cells into an unreadable paragraph stream.
+            # 每个表格行保留为一条可检索记录，避免把单元格压平成难以阅读的段落流。
             for row in child.findall("w:tr", _DOCX_NS):
                 cells = [_docx_element_text(cell) for cell in row.findall("w:tc", _DOCX_NS)]
                 cells = [cell for cell in cells if cell]
@@ -174,6 +179,7 @@ def _parse_json_text(content: bytes) -> str:
 
 
 def _parse_csv_text(content: bytes) -> str:
+    """优先按表头输出字段值记录，无法识别表头时保留原始行。"""
     decoded = _decode_text(content)
     try:
         rows = list(csv.reader(StringIO(decoded)))
@@ -202,18 +208,21 @@ class _VisibleTextParser(HTMLParser):
         self._ignored_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """进入不可见节点时暂停收集，并为块级元素补换行。"""
         if tag in self._ignored:
             self._ignored_depth += 1
         elif not self._ignored_depth and tag in self._block:
             self.parts.append("\n")
 
     def handle_endtag(self, tag: str) -> None:
+        """离开不可见节点时恢复收集，并结束块级元素。"""
         if tag in self._ignored and self._ignored_depth:
             self._ignored_depth -= 1
         elif not self._ignored_depth and tag in self._block:
             self.parts.append("\n")
 
     def handle_data(self, data: str) -> None:
+        """仅保存非隐藏节点中的可见文本。"""
         if not self._ignored_depth and data.strip():
             self.parts.append(data)
 
@@ -237,8 +246,7 @@ def _parse_xml_text(content: bytes) -> str:
 
 
 def _decode_text(content: bytes) -> str:
-    # BOMs are authoritative; otherwise try UTF-8 before the permissive
-    # GB18030 decoder, which can accept arbitrary binary-looking bytes.
+    # 有 BOM 时以 BOM 指定的编码为准；否则先尝试 UTF-8，再尝试兼容性更强的 GB18030。
     if content.startswith((b"\xff\xfe", b"\xfe\xff")):
         return content.decode("utf-16")
     if content.startswith(b"\xef\xbb\xbf"):

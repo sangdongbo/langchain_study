@@ -55,6 +55,13 @@ D:\PythonProject\LearnOne\docker\milvus-embed\volumes\milvus
 
 RAG 不负责实时审批状态，ERP Tool 不替代制度知识，真实写入必须经过 LangGraph 确认闸门。
 
+## RAG 效果评测
+
+离线评测工具位于 `app/services/rag_evaluation_service.py` 和
+`scripts/evaluate_rag.py`，样例集见 `evals/rag_cases.example.jsonl`。它可以量化
+Recall@K、Rerank Top-1、无答案拒答率和引用落地准确率，不写数据库或修改 Milvus。
+完整字段说明和运行方式见 [RAG_EVALUATION.md](RAG_EVALUATION.md)。
+
 ## 启动
 
 ### API 目录结构
@@ -68,6 +75,7 @@ HTTP 接口按功能拆分在 `app/routes/` 下，公共身份校验、租户隔
 | `app/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
 | `app/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
 | `app/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
+| `app/routes/workbench.py` | `/api/workbench/summary` 个人工作台只读聚合 |
 | `app/rag_admin_api.py` | `/api/rag/admin/*` Assistant、Prompt、知识库和数据源管理 |
 
 ```powershell
@@ -100,14 +108,15 @@ LANGSMITH_PROJECT=ai-erp-rag-assistant
 
 当前已经完成一次真实入库：23 个 Chunk，Embedding 使用 `text-embedding-v4`，Milvus 使用 Docker Standalone 的持久化卷。检索请求会返回来源文件、页码、版本和权限元数据，再交给 LLM 生成带引用的答案。
 
-知识检索会强制要求 `company_id`，并应用部门、有效状态和最低相关度过滤；不再依赖 ERP 返回本地自定义的知识库权限标签。
+知识检索会强制要求 `company_id`，并应用部门、有效状态、最低相关度以及 ERP 已验证的
+`permissions/roles` 过滤；请求体中的权限标签不会作为可信 ACL。
 
 ## RAG API
 
 前端页面对接请优先阅读 [RAG_FRONTEND_API.md](RAG_FRONTEND_API.md)，其中包含请求头、
 配置顺序、上传示例、搜索/问答响应和错误处理。
 
-FastAPI 当前提供五个直接连接现有 Embedding、Milvus 和 LLM 服务的接口：
+FastAPI 当前提供以下直接连接现有 Embedding、Milvus 和 LLM 服务的接口：
 
 | 接口 | 作用 |
 |---|---|
@@ -116,11 +125,15 @@ FastAPI 当前提供五个直接连接现有 Embedding、Milvus 和 LLM 服务�
 | `POST /api/rag/ingest/text` | 将文本切分、Embedding 并写入知识库 |
 | `POST /api/rag/ingest/pdf` | 读取原始 PDF 请求体并写入知识库 |
 | `POST /api/rag/ingest/document` | 同步解析 PDF、DOCX、TXT、Markdown、JSON、CSV 等文档并写入知识库 |
+| `POST /api/rag/documents/list` | 按来源和版本列出知识库文档及 Chunk 统计 |
+| `POST /api/rag/documents/delete` | 精确删除指定来源和版本的文档 Chunk |
 
 搜索、问答和导入都强制要求 `company_id`。远程 ERP 模式下还必须提供 `UID` 和
 `Authorization` 请求头，服务端会通过 ERP 用户信息校验请求公司，不能通过替换请求体中的
 `company_id` 访问其他租户。`knowledge_base_key` 为空时兼容原有默认 Collection；不为空时，
 服务端按 `company_id + knowledge_base_key` 生成独立且稳定的 Collection 名称。
+请求体同时带有身份字段时，以 HTTP 请求头为准；远程 `/userinfo` 未返回公司或部门时，
+服务端不会回退信任请求体字段。
 
 检索示例：
 
@@ -152,16 +165,27 @@ Invoke-RestMethod -Method Post http://127.0.0.1:8021/api/rag/search `
 }
 ```
 
+文本导入的 `chunk_size`、`chunk_overlap` 可省略，服务端会按“本次请求 → 知识库配置 →
+进程默认值”解析；`permission_tags` 只能使用 ERP 身份返回的权限标签，不能通过请求体扩大
+文档可见范围，最多 32 个标签且单个标签不超过 256 个字符。ERP 未返回部门时仅允许公共
+文档。`version` 可省略，空版本只替换相同来源的空版本文档。
+
 PDF 接口使用 `Content-Type: application/pdf` 的原始请求体，`company_id`、`user_id`、
-`knowledge_base_key` 和 `source` 通过 Query 参数传入，单个文件限制为 20MB。扫描版 PDF
-必须先生成文字层。
+`knowledge_base_key`、`source` 和可选 `permission_tags` 通过 Query 参数传入，单个文件限制
+为 20MB。`permission_tags` 最多 32 个且单个标签不超过 256 个字符。扫描版 PDF 必须先生成
+文字层；不传 `permission_tags` 时按公共 ACL 文档处理。
 
 通用文档接口同样接收原始请求体，不需要 `python-multipart`。`source` 通过 Query 参数传入，
 后缀用于选择解析器；支持 `.pdf`、`.docx`、`.txt`、`.md`、`.markdown`、`.json`、`.csv`、
 `.xml` 和 `.html`。`permission_tags` 使用逗号分隔，`title`、`department`、`version`、
-`effective_date`、`chunk_size` 和 `chunk_overlap` 也可通过 Query 参数覆盖。接口在一次请求内
+`effective_date`、`chunk_size` 和 `chunk_overlap` 也可通过 Query 参数覆盖；权限标签最多 32 个，
+单个标签最多 256 个字符，且只能使用 ERP 已验证的权限。接口在一次请求内
 完成文档解析、切分、Embedding 和 Milvus upsert，成功返回 `completed`、Chunk 数量、空页列表
 和目标 Collection；单个文件限制为 20MB。
+相同 `source + version` 再次导入时会在新向量写入成功后清理旧 Chunk，避免残留旧内容。
+
+问答没有召回证据时，服务端会直接返回明确的无依据提示，不调用 LLM 生成猜测内容；有证据时
+才执行“召回 → 可选 Rerank → LLM → 可信引用”的完整链路。
 
 DOCX 正文和表格都会被提取，表格每行按 `列值 | 列值` 保留；JSON 会格式化为可检索文本，
 CSV 会优先按首行表头生成 `字段: 值` 记录，HTML 会过滤 `script/style` 后只保留可见文本。
@@ -179,9 +203,11 @@ Invoke-RestMethod -Method Post `
   -InFile .\员工手册.docx
 ```
 
-当前三个导入接口同步执行并直接返回 `completed`，不会向 MySQL 写文档或任务记录。
-`ai_erp_knowledge_ingest_jobs` 和 `ai_erp_data_source_sync_jobs` 尚未用于持久化任务状态。配置 MySQL 后，接口会从
-`ai_erp_knowledge_bases` 读取目标 Collection；未配置时继续使用原有确定性 Collection 名称。
+三个导入接口仍同步执行。配置 MySQL 且指定知识库后，会把源文件、文档元数据和
+`ai_erp_knowledge_ingest_jobs` 阶段写入任务记录，失败任务可通过
+`/api/rag/ingest/jobs/status` 查询并用 `/api/rag/ingest/jobs/retry` 补偿重试。
+`ai_erp_data_source_sync_jobs` 仍只保留表设计，数据库/API 数据源自动同步尚未启用。
+未配置 MySQL 时继续使用确定性 Collection 名称，但不提供任务状态和服务端文件重试。
 
 ## RAG 管理 API
 
@@ -190,15 +216,15 @@ Invoke-RestMethod -Method Post `
 
 | 接口 | 作用 |
 |---|---|
-| `POST /assistants`、`POST /assistants/list` | 创建、查询 Assistant |
+| `POST /assistants`、`POST /assistants/list`、`POST /assistants/{id}/update` | 创建、查询、编辑或停用 Assistant |
 | `POST /assistants/{id}/configs`、`POST /assistants/{id}/configs/list` | 创建、查询配置版本 |
 | `POST /assistants/{id}/configs/{config_id}/publish` | 发布配置并归档旧发布版本 |
 | `POST /assistants/{id}/prompts`、`POST /assistants/{id}/prompts/list` | 创建、查询 Prompt 版本 |
 | `POST /assistants/{id}/prompts/{prompt_id}/publish` | 发布 Prompt 并归档同用途旧版本 |
-| `POST /knowledge-bases`、`POST /knowledge-bases/list` | 创建、查询知识库 |
-| `POST /data-sources`、`POST /data-sources/list` | 创建、查询文件、数据库或 API 数据源 |
-| `POST /bindings/assistant-knowledge-base` | 绑定 Assistant 与知识库 |
-| `POST /bindings/knowledge-base-source` | 绑定知识库与数据源 |
+| `POST /knowledge-bases`、`POST /knowledge-bases/list`、`POST /knowledge-bases/{id}/update` | 创建、查询、编辑或停用知识库 |
+| `POST /data-sources`、`POST /data-sources/list`、`POST /data-sources/{id}/update` | 创建、查询、编辑或停用文件、数据库或 API 数据源 |
+| `POST /bindings/assistant-knowledge-base`、`POST /bindings/assistant-knowledge-base/list` | 保存、查询 Assistant 与知识库绑定 |
+| `POST /bindings/knowledge-base-source`、`POST /bindings/knowledge-base-source/list` | 保存、查询知识库与数据源绑定 |
 
 数据源的 `config`、`sync_config` 只能保存非敏感配置，密码、Token 和 API Key 必须使用
 `credentials_ref` 指向外部密钥管理。要在问答时使用平台 Prompt，请在 `/api/rag/chat`

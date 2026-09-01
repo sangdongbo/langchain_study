@@ -1,3 +1,5 @@
+"""映射人工创建的 RAG 管理、文档和同步任务表，不负责建表。"""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -10,10 +12,14 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
+    """项目 SQLAlchemy ORM 模型的声明式基类。"""
+
     pass
 
 
 class Assistant(Base):
+    """公司内稳定的 Assistant 身份及当前发布配置指针。"""
+
     __tablename__ = "ai_erp_assistants"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -29,6 +35,8 @@ class Assistant(Base):
 
 
 class AssistantConfigVersion(Base):
+    """Assistant 的不可变版本配置及发布状态。"""
+
     __tablename__ = "ai_erp_assistant_config_versions"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -52,6 +60,8 @@ class AssistantConfigVersion(Base):
 
 
 class PromptVersion(Base):
+    """按用途和变体保存的版本化 Prompt。"""
+
     __tablename__ = "ai_erp_prompt_versions"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -75,6 +85,8 @@ class PromptVersion(Base):
 
 
 class BlockedTerm(Base):
+    """Assistant 级敏感词或阻断词回复规则。"""
+
     __tablename__ = "ai_erp_blocked_terms"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -91,6 +103,8 @@ class BlockedTerm(Base):
 
 
 class KnowledgeBase(Base):
+    """知识库检索、切分、Embedding 与 Milvus Collection 配置。"""
+
     __tablename__ = "ai_erp_knowledge_bases"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -116,6 +130,8 @@ class KnowledgeBase(Base):
 
 
 class DataSource(Base):
+    """文件、数据库或 API 来源的非敏感同步配置。"""
+
     __tablename__ = "ai_erp_data_sources"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -134,6 +150,8 @@ class DataSource(Base):
 
 
 class KnowledgeBaseSource(Base):
+    """知识库与数据源之间的租户内绑定关系。"""
+
     __tablename__ = "ai_erp_knowledge_base_sources"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -148,6 +166,8 @@ class KnowledgeBaseSource(Base):
 
 
 class AssistantKnowledgeBase(Base):
+    """Assistant 与知识库之间的检索及权限绑定配置。"""
+
     __tablename__ = "ai_erp_assistant_knowledge_bases"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -163,6 +183,8 @@ class AssistantKnowledgeBase(Base):
 
 
 class KnowledgeDocument(Base):
+    """可追溯、可版本化的知识文档元数据。"""
+
     __tablename__ = "ai_erp_knowledge_documents"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -191,6 +213,8 @@ class KnowledgeDocument(Base):
 
 
 class KnowledgeIngestJob(Base):
+    """文档解析、切分和向量写入过程的审计任务记录。"""
+
     __tablename__ = "ai_erp_knowledge_ingest_jobs"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
@@ -213,6 +237,8 @@ class KnowledgeIngestJob(Base):
 
 
 class DataSourceSyncJob(Base):
+    """数据库或 API 数据源同步过程的进度与错误记录。"""
+
     __tablename__ = "ai_erp_data_source_sync_jobs"
 
     id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)

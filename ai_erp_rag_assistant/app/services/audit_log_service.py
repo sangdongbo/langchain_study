@@ -1,3 +1,5 @@
+"""对 ERP/RAG 调用进行脱敏后写入结构化审计日志。"""
+
 from __future__ import annotations
 
 import json
@@ -24,7 +26,7 @@ _VALUE_CONTAINER_KEYS = {"fields", "form_data", "form_value", "submission_fields
 
 
 def write_audit_event(event: str, payload: dict[str, Any]) -> None:
-    """Write one JSON audit event after removing credentials and form values."""
+    """移除凭据和表单值后写入一条 JSON 审计事件。"""
     sanitized = sanitize_for_log(payload)
     logger.info(
         "%s %s",
@@ -47,6 +49,7 @@ def write_audit_event(event: str, payload: dict[str, Any]) -> None:
 
 
 def sanitize_for_log(value: Any, *, parent_key: str = "") -> Any:
+    """递归移除凭据和表单值，仅保留排障需要的结构信息。"""
     if isinstance(value, dict):
         if parent_key.lower() in _VALUE_CONTAINER_KEYS:
             return {"field_keys": [str(key) for key in value.keys()], "field_count": len(value)}
@@ -66,7 +69,7 @@ def sanitize_for_log(value: Any, *, parent_key: str = "") -> Any:
 
 
 def summarize_request_body(body: dict[str, Any]) -> dict[str, Any]:
-    """Retain routing metadata and field names, never personal form contents."""
+    """保留路由元数据和字段名称，绝不记录个人表单内容。"""
     summary: dict[str, Any] = {}
     for key, value in body.items():
         normalized_key = str(key).lower()
@@ -97,6 +100,7 @@ def summarize_request_body(body: dict[str, Any]) -> dict[str, Any]:
 
 
 def summarize_response(payload: dict[str, Any]) -> dict[str, Any]:
+    """将 ERP 响应缩减为状态、类型和数量摘要。"""
     data = payload.get("data")
     result: dict[str, Any] = {
         "code": payload.get("code"),

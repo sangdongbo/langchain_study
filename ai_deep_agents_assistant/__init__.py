@@ -1,2 +1,1 @@
-"""Deep Agents version of the approval assistant demo."""
-
+"""审批助手的 Deep Agents 版本示例。"""

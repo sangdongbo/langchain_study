@@ -29,28 +29,28 @@ def _safe_number(value: str) -> float:
 
 @tool("submit_leave_request")
 def submit_leave_request(slots: dict[str, str], user_id: str = "U001") -> dict[str, Any]:
-    """Submit a leave approval request after user confirmation."""
+    """用户确认后提交请假审批申请。"""
 
     return _submit("leave", "LR", slots, user_id)
 
 
 @tool("submit_expense_request")
 def submit_expense_request(slots: dict[str, str], user_id: str = "U001") -> dict[str, Any]:
-    """Submit an expense approval request after user confirmation."""
+    """用户确认后提交报销审批申请。"""
 
     return _submit("expense", "EX", slots, user_id)
 
 
 @tool("submit_purchase_request")
 def submit_purchase_request(slots: dict[str, str], user_id: str = "U001") -> dict[str, Any]:
-    """Submit a purchase approval request after user confirmation."""
+    """用户确认后提交采购审批申请。"""
 
     return _submit("purchase", "PR", slots, user_id)
 
 
 @tool("get_leave_balance")
 def get_leave_balance(user_id: str = "U001") -> dict[str, Any]:
-    """Query mock leave balances for the current user."""
+    """查询当前用户的模拟假期余额。"""
 
     return {
         "source": "mock",

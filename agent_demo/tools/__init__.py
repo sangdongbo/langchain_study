@@ -1,1 +1,1 @@
-"""Mock teaching tools for agent_demo."""
+"""agent_demo 的模拟教学工具。"""

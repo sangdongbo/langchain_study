@@ -1,3 +1,5 @@
+"""编排 RAG 问答、ERP 查询和带人工确认闸门的审批工作流。"""
+
 from __future__ import annotations
 
 import re
@@ -70,6 +72,7 @@ def _actual_value(value: Any) -> Any:
 
 
 def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[list[str], list[str]]:
+    """按 ERP 字段类型校验必填、枚举、数值和时间范围。"""
     missing: list[str] = []
     invalid: list[str] = []
     for field in template.get("fields", []):
@@ -83,6 +86,7 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
             continue
         if not _has_value(value):
             continue
+        # ERP 选择器可能提交 {label, value} 包装，校验时必须比较真实 value。
         actual_value = _actual_value(value)
         options = [str(option) for option in field.get("options", []) if option is not None]
         option_values = [
@@ -94,6 +98,7 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
         if options and any(str(item) not in {*options, *option_values} for item in submitted_values):
             invalid.append(f"{label}必须是：{'、'.join(options)}")
             continue
+        # 字段 name 往往比 ERP type 更能表达日期语义，两者一起判断兼容历史模板。
         field_type = str(field.get("type") or "").lower()
         semantic_type = f"{name.lower()} {field_type}"
         if any(token in semantic_type for token in ("datetime", "date_time", "start_time", "end_time")):
@@ -111,6 +116,7 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
             except (TypeError, ValueError):
                 invalid.append(f"{label}必须是数字")
 
+    # 单字段合法后再做跨字段顺序检查，避免结束时间早于开始时间。
     start_keys = [key for key in fields if any(token in key.lower() for token in ("start", "begin"))]
     end_keys = [key for key in fields if any(token in key.lower() for token in ("end", "finish"))]
     if start_keys and end_keys:
@@ -130,6 +136,7 @@ def _validation_contract(
     fields: dict[str, Any],
     invalid_messages: list[str],
 ) -> tuple[list[str], list[dict[str, str]]]:
+    """将内部校验消息转换为前端表单需要的字段级错误结构。"""
     missing_keys: list[str] = []
     invalid_fields: list[dict[str, str]] = []
     for field in template.get("fields", []):
@@ -168,7 +175,7 @@ def _select_candidate_id(message: str, candidates: list[dict[str, Any]]) -> str:
 
 
 def _submission_fields(template: dict[str, Any], fields: dict[str, Any]) -> dict[str, Any]:
-    """Convert display labels back to ERP option values for getNodes/add."""
+    """将展示标签还原为 getNodes/add 所需的 ERP 选项值。"""
     result = dict(fields)
     for field in template.get("fields", []):
         if not isinstance(field, dict):
@@ -190,12 +197,11 @@ def _extract_dynamic_option_fields(
     message: str,
     template_fields: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Bind option words in the message to the real dynamic ERP field keys.
+    """把消息中的选项词绑定到 ERP 真实的动态字段键。
 
-    The planner may understand "病假" but call it ``leave_type`` while ERP
-    exposes ``rest_holiday_rule_id``.  Matching against the template's live
-    option metadata keeps template IDs and field keys fully dynamic and also
-    supports labels such as "病假（余10天）".
+    Planner 可能理解“病假”却使用 ``leave_type``，而 ERP 暴露的字段是
+    ``rest_holiday_rule_id``。匹配模板实时选项元数据可以保持模板 ID 和字段键
+    的动态性，也支持“病假（余10天）”这类展示标签。
     """
     normalized_message = _compact_match_text(message)
     if not normalized_message:
@@ -212,6 +218,7 @@ def _extract_dynamic_option_fields(
         if not option_labels:
             continue
 
+        # 先匹配完整展示标签，再降级到去余额后缀等核心词。
         exact_matches: list[str] = []
         core_matches: list[str] = []
         for label in option_labels:
@@ -226,6 +233,7 @@ def _extract_dynamic_option_fields(
 
         matches = exact_matches or core_matches
         unique_matches = list(dict.fromkeys(matches))
+        # 多个候选同时命中时保持空值，让用户明确选择而不是自动猜测。
         if len(unique_matches) == 1:
             result[name] = unique_matches[0]
     return result
@@ -235,12 +243,11 @@ def _extract_dynamic_duration_fields(
     message: str,
     template_fields: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Bind natural duration phrases to the ERP's real duration field.
+    """把自然语言时长表达绑定到 ERP 真实的时长字段。
 
-    ERP exposes leave duration as a numeric field such as ``rest_duration``.
-    Users naturally say "半天" instead of naming that field, so a generic
-    planner key such as ``duration`` would otherwise be filtered out before
-    validation.
+    ERP 通常以 ``rest_duration`` 这类数字字段表示请假时长。用户会直接说“半天”，
+    不会说出字段名；如果只依赖 ``duration`` 这类通用 Planner 键，字段可能在校验前
+    被过滤掉。
     """
     value = _duration_value_from_text(message)
     if value is None:
@@ -262,6 +269,7 @@ def _extract_dynamic_duration_fields(
 
 
 def _duration_value_from_text(message: str) -> int | float | None:
+    """从中文时长表达中提取天数或小时数值。"""
     compact = _compact_match_text(message)
     if not compact:
         return None
@@ -296,6 +304,7 @@ def _small_chinese_number(value: str) -> int | None:
 
 
 def _field_option_labels(field: dict[str, Any]) -> list[str]:
+    """合并结构化和简写选项并按出现顺序去重。"""
     labels: list[str] = []
     for option in field.get("option_values", []):
         if isinstance(option, dict):
@@ -316,7 +325,7 @@ def _option_core_markers(label: str) -> list[str]:
             core = core.split(marker, 1)[0].strip()
             break
     markers = [_compact_match_text(core)] if core else []
-    # ERP often labels the option "调休假" while users naturally say "调休".
+    # ERP 常把选项标为“调休假”，用户日常表达通常只说“调休”。
     if core.endswith("假") and len(core) > 2:
         markers.append(_compact_match_text(core[:-1]))
     return list(dict.fromkeys(marker for marker in markers if marker))
@@ -355,7 +364,7 @@ def _route_from_start(state: ErpRagState) -> str:
 
 
 def accept_frozen_preview_confirmation(state: ErpRagState) -> ErpRagState:
-    """Turn an explicit confirmation into a command without re-running the LLM."""
+    """将明确确认转换为命令，不重新调用 LLM。"""
     return {
         "route": "approval_workflow",
         "confirm": True,
@@ -371,6 +380,7 @@ def accept_frozen_preview_confirmation(state: ErpRagState) -> ErpRagState:
 
 
 def agent_planner(state: ErpRagState) -> ErpRagState:
+    """结合当前消息与会话状态规划本轮业务路由和动作。"""
     previous_plan = dict(state.get("plan", {}))
     active_approval = bool(state.get("active_approval"))
     context = {
@@ -384,8 +394,7 @@ def agent_planner(state: ErpRagState) -> ErpRagState:
     }
     plan = model_service.plan(state["user_message"], context=context)
     if active_approval and not _explicit_template_change(state["user_message"]):
-        # During field collection, words such as "事假" are field values, not
-        # a request to search the template catalog again.
+        # 收集字段时，“事假”等词是字段值，不代表用户要重新搜索审批模板目录。
         plan.approval_type = ""
     if active_approval and (
         plan.route == "general_chat"
@@ -407,6 +416,7 @@ def agent_planner(state: ErpRagState) -> ErpRagState:
 
 
 def load_erp_context(state: ErpRagState) -> ErpRagState:
+    """通过 ERP 校验当前用户身份，并加载可信公司和部门信息。"""
     user = state.get("user_context", {})
     reused = bool(user.get("company_id") and user.get("erp_mode"))
     if not reused:
@@ -431,13 +441,19 @@ def load_erp_context(state: ErpRagState) -> ErpRagState:
 
 
 def retrieve_rag(state: ErpRagState) -> ErpRagState:
+    """按已验证的租户、部门和权限检索知识库证据。"""
     user = state["user_context"]
-    permissions = user.get("permissions") or user.get("permission_tags") or []
+    # ERP 可能把 ACL 放在 permissions、permission_tags 或 roles，统一合并后再过滤。
+    permissions: set[str] = set()
+    for key in ("permissions", "permission_tags", "roles"):
+        raw = user.get(key) or []
+        values = [raw] if isinstance(raw, str) else raw
+        permissions.update(str(item).strip() for item in values if str(item).strip())
     evidence = search_knowledge(
         state.get("plan", {}).get("query") or state["user_message"],
         company_id=str(user.get("company_id", "")),
         department=str(user.get("department", "")),
-        permission_tags=[str(item) for item in permissions if item],
+        permission_tags=sorted(permissions),
     )
     return {
         "evidence": evidence,
@@ -451,6 +467,7 @@ def retrieve_rag(state: ErpRagState) -> ErpRagState:
 
 
 def query_erp_status_node(state: ErpRagState) -> ErpRagState:
+    """查询当前用户的实时 ERP 审批状态。"""
     data = query_approval_status(state["user_id"], user=state.get("user_context", {}))
     return {
         "erp_data": data,
@@ -459,6 +476,7 @@ def query_erp_status_node(state: ErpRagState) -> ErpRagState:
 
 
 def load_approval_template(state: ErpRagState) -> ErpRagState:
+    """选择审批模板并加载真实字段、动态选项和审批节点。"""
     user = state["user_context"]
     planner_type = str(state.get("plan", {}).get("approval_type") or "").strip()
     approval_query = planner_type or (
@@ -539,8 +557,8 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     template_changed = bool(existing_template and not reuse_template)
     field_names = {str(item.get("name")) for item in template.get("fields", []) if isinstance(item, dict)}
     previous_fields = {} if template_changed else dict(state.get("fields", {}))
-    # Planner fields use generic names and must not leak into the real ERP
-    # payload. Preserve only keys that actually exist in the selected template.
+    # Planner 字段可能使用通用名称，不能直接泄漏到 ERP 请求体；只保留所选模板
+    # 中真实存在的字段键。
     fields = {
         str(name): value
         for name, value in previous_fields.items()
@@ -575,8 +593,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                 conversation=state.get("conversation", []),
             )
             fields.update(extracted_fields)
-            # Deterministic matches are grounded in the live ERP options and
-            # therefore take precedence over a conflicting LLM extraction.
+            # 确定性匹配来自 ERP 实时选项，因此优先于冲突的 LLM 抽取结果。
             fields.update(matched_option_fields)
             fields.update(matched_duration_fields)
         except RuntimeError as exc:
@@ -608,6 +625,8 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
 
 
 def validate_and_preview(state: ErpRagState) -> ErpRagState:
+    """校验已收集字段，缺失时追问，完整时生成提交预览。"""
+    # 取消操作立即清空草稿和对话上下文，后续确认不能复用旧预览。
     if state.get("plan", {}).get("decision") == "cancel":
         return {
             "preview": {},
@@ -623,6 +642,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
         }
     template = state.get("template", {})
     fields = state.get("fields", {})
+    # 模板未确定时不允许进入字段或节点校验阶段。
     if not template.get("template_id"):
         return {
             "preview": {},
@@ -641,6 +661,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
         invalid_fields=invalid_fields,
     )
     if missing or invalid:
+        # 同时返回自然语言追问和字段级错误，兼容聊天与动态表单两种前端。
         parts: list[str] = []
         if missing:
             parts.append("缺少：" + "、".join(missing))
@@ -662,6 +683,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
     node_error = ""
     template_id = str(template.get("template_id") or "")
     user = state.get("user_context", {})
+    # 只有真实数字模板和完整 ERP 凭据才读取动态审批流；Mock 模板跳过远程节点。
     if template_id.isdigit() and user.get("uid") and user.get("authorization"):
         try:
             nodes = get_approval_nodes(template_id, submission_fields, user=user)
@@ -671,6 +693,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
     selected_assignees = dict(state.get("selected_assignees", {}))
     missing_assignee_node_ids = missing_assignee_nodes(approval_flow, selected_assignees)
     submit_nodes = build_submit_nodes(nodes, selected_assignees)
+    # 哈希覆盖模板、提交字段和审批人，任一变化都会生成新预览版本。
     preview_hash = _preview_hash(template.get("template_id"), submission_fields, submit_nodes)
     same_preview = bool(
         existing_preview
@@ -684,6 +707,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
         )
     )
     previous_version = int(existing_preview.get("preview_version") or 0)
+    # 内容未变化时保留 preview_id、版本和幂等键，页面重试不会制造新草稿。
     preview = {
         "preview_id": existing_preview.get("preview_id") if same_preview else uuid4().hex,
         "preview_version": previous_version if same_preview and previous_version else previous_version + 1,
@@ -703,6 +727,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
         "idempotency_key": existing_preview.get("idempotency_key") if same_preview else uuid4().hex,
     }
     if missing_assignee_node_ids:
+        # 表单完整但审批人未选时允许展示预览，明确禁止确认提交。
         question = "表单字段已补齐，请在审批流程中选择审批人后再确认提交。"
         return {
             "preview": preview,
@@ -719,6 +744,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
             ),
         }
     if node_error:
+        # 节点接口失败不能退化为无审批流提交，保留草稿等待 ERP 恢复。
         question = f"表单字段已补齐，但审批流程加载失败：{node_error}"
         return {
             "preview": preview,
@@ -748,6 +774,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
 
 
 def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
+    """仅在预览标识、版本和哈希全部匹配时执行 ERP 写入。"""
     if state.get("confirm") is not True or not state.get("preview"):
         return state
     if not state.get("preview", {}).get("requires_confirmation", True):
@@ -783,8 +810,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
             "erp_data": result,
             "assistant_message": message,
             "consumed_preview": closed_preview,
-            # Keep the exact preview visible in this response, but close the
-            # draft so the same confirmation cannot be consumed repeatedly.
+            # 当前响应仍展示完全一致的预览，但同时关闭草稿，避免同一次确认被重复消费。
             "preview": closed_preview,
             "fields": {},
             "template": {},
@@ -816,6 +842,7 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
 
 
 def answer_with_llm(state: ErpRagState) -> ErpRagState:
+    """根据路由结果、知识证据和 ERP 数据生成最终回复。"""
     route = state.get("route", "general_chat")
     if route == "approval_workflow":
         return state
@@ -832,6 +859,7 @@ def answer_with_llm(state: ErpRagState) -> ErpRagState:
 
 
 def handle_error(state: ErpRagState, error: Exception) -> ErpRagState:
+    """将节点异常写入状态，供接口返回可见错误而非伪造答案。"""
     message = f"执行失败：{error}"
     return {
         "assistant_message": message,
@@ -871,15 +899,16 @@ def _route_after_erp_context(state: ErpRagState) -> str:
         and state.get("confirm") is True
         and state.get("preview")
     ):
-        # Confirmation applies to the already displayed snapshot. Reloading
-        # the template or rebuilding the preview here could change what the
-        # user is about to submit and can re-open a closed confirmation loop.
+        # 确认只适用于已经展示的快照；此处重新加载模板或生成预览可能改变用户即将
+        # 提交的内容，并重新打开已经关闭的确认流程。
         return "approval_submit"
     return str(state.get("route") or "general_chat")
 
 
 def create_workflow(*, with_checkpointer: bool = True):
+    """构建并编译工作流，可选启用进程内会话 Checkpointer。"""
     builder = StateGraph(ErpRagState)
+    # 先注册纯节点，再集中声明路由，便于审查每条写入路径。
     builder.add_node("agent_planner", agent_planner)
     builder.add_node("accept_frozen_preview_confirmation", accept_frozen_preview_confirmation)
     builder.add_node("load_erp_context", load_erp_context)
@@ -889,6 +918,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder.add_node("validate_and_preview", validate_and_preview)
     builder.add_node("submit_if_confirmed", submit_if_confirmed)
     builder.add_node("answer_with_llm", answer_with_llm)
+    # 已冻结预览的确认请求绕过 Planner，防止 LLM 改写用户将要提交的内容。
     builder.add_conditional_edges(
         START,
         _route_from_start,
@@ -898,6 +928,7 @@ def create_workflow(*, with_checkpointer: bool = True):
         },
     )
     builder.add_edge("accept_frozen_preview_confirmation", "load_erp_context")
+    # 普通请求先由 Planner 分流；一般聊天不需要加载 ERP 身份。
     builder.add_conditional_edges(
         "agent_planner",
         lambda state: state["route"],
@@ -921,6 +952,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder.add_edge("retrieve_rag", "answer_with_llm")
     builder.add_edge("query_erp_status", "answer_with_llm")
     builder.add_edge("load_approval_template", "validate_and_preview")
+    # 只有明确确认且已经生成预览，校验节点才允许流向真实提交节点。
     builder.add_conditional_edges(
         "validate_and_preview",
         lambda state: "submit" if state.get("confirm") is True and state.get("preview") else "end",
@@ -928,6 +960,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     )
     builder.add_edge("submit_if_confirmed", END)
     builder.add_edge("answer_with_llm", END)
+    # MySQL 长期会话模式会传 False，避免状态同时写入内存 Checkpointer。
     if with_checkpointer:
         return builder.compile(checkpointer=MemorySaver())
     return builder.compile()

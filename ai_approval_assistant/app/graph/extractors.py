@@ -160,7 +160,7 @@ def _extract_enum_option(field: ApprovalField, text: str) -> str | None:
         and str(item.get("label") or "").strip() in text
     ]
     if exact_matches:
-        # Prefer the longest label when one option is a prefix of another.
+        # 当一个选项是另一个选项的前缀时，优先选择更长的完整标签。
         exact_matches.sort(
             key=lambda item: len(str(item.get("label") or "")), reverse=True
         )
@@ -181,8 +181,8 @@ def _extract_enum_option(field: ApprovalField, text: str) -> str | None:
                 core_matches.append((candidate, item))
                 break
 
-    # A short/core label can correspond to more than one option (for example,
-    # two annual-leave balances), so only auto-select an unambiguous match.
+    # 短标签或核心名称可能对应多个选项（例如两种年假余额），只有匹配结果唯一时
+    # 才自动选择。
     matched_labels = {str(item.get("label") or "").strip() for _, item in core_matches}
     if len(matched_labels) != 1:
         return None

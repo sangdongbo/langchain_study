@@ -1,1 +1,1 @@
-"""Agent orchestration for ERP workflows."""
+"""ERP 工作流的 Agent 编排。"""

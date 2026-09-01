@@ -32,9 +32,10 @@ CANCEL_WORDS = (
 
 
 def create_approval_graph():
-    """Create the approval workflow graph."""
+    """创建审批工作流图。"""
 
     builder = StateGraph(ApprovalState)
+    # 节点按“识别 -> 收集 -> 校验 -> 预览 -> 提交/取消”拆分，便于观察每个状态变化。
     builder.add_node("classify", classify_node)
     builder.add_node("collect", collect_node)
     builder.add_node("validate", validate_node)
@@ -45,6 +46,7 @@ def create_approval_graph():
     builder.add_node("clarify", clarify_node)
 
     builder.add_edge(START, "classify")
+    # 识别节点统一决定后续分支，余额查询和澄清提示都在这里提前结束流程。
     builder.add_conditional_edges(
         "classify",
         route_after_classify,
@@ -82,11 +84,12 @@ def create_approval_graph():
 
 
 def classify_node(state: ApprovalState) -> ApprovalState:
-    """Determine whether this is a new flow, confirmation, cancellation, or update."""
+    """判断当前消息是新流程、确认、取消还是修改。"""
 
     text = state.get("user_message", "").strip()
     current_status = state.get("status", "idle")
 
+    # 取消优先级最高，避免用户在填写过程中说“不要了”仍继续推进审批。
     if current_status in {"collecting", "awaiting_confirmation"} and _is_cancel(text):
         return {**state, "route": "cancel"}
 
@@ -96,6 +99,7 @@ def classify_node(state: ApprovalState) -> ApprovalState:
     detected_type = classify_approval_type(text, allow_model=current_status == "idle")
 
     if current_status == "awaiting_confirmation":
+        # 确认阶段只接受明确提交或字段修改，不再重新猜测审批类型。
         if _is_confirm(text):
             return {**state, "route": "submit", "confirmed": True}
         modifications = extract_modifications(text)
@@ -159,7 +163,7 @@ def classify_node(state: ApprovalState) -> ApprovalState:
 
 
 def collect_node(state: ApprovalState) -> ApprovalState:
-    """Ask for the next missing field, or continue to validation."""
+    """询问下一个缺失字段，或继续进入校验。"""
 
     approval_type = state.get("approval_type")
     if not approval_type:
@@ -170,6 +174,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
     text = state.get("user_message", "").strip()
 
     extracted_slots = _filter_slots(approval_type, extract_slots(approval_type, text))
+    # 只合并当前审批类型允许的字段，防止上一轮或其他类型的字段混入草稿。
     if _mentions_other_approval_type(approval_type, text):
         extracted_slots = {key: value for key, value in extracted_slots.items() if key == awaiting}
     if awaiting in {"leave_type", "expense_type"} and awaiting not in extracted_slots:
@@ -201,7 +206,7 @@ def collect_node(state: ApprovalState) -> ApprovalState:
 
 
 def validate_node(state: ApprovalState) -> ApprovalState:
-    """Validate collected fields before preview."""
+    """在生成预览前校验已收集的字段。"""
 
     approval_type = state.get("approval_type")
     slots = state.get("slots", {})
@@ -235,7 +240,7 @@ def validate_node(state: ApprovalState) -> ApprovalState:
 
 
 def preview_node(state: ApprovalState) -> ApprovalState:
-    """Build a human-readable preview and wait for explicit confirmation."""
+    """生成易读的审批预览，并等待用户明确确认。"""
 
     approval_type = state["approval_type"]
     definition = APPROVAL_DEFINITIONS[approval_type]
@@ -267,7 +272,7 @@ def preview_node(state: ApprovalState) -> ApprovalState:
 
 
 def submit_node(state: ApprovalState) -> ApprovalState:
-    """Submit only after explicit user confirmation."""
+    """仅在用户明确确认后提交审批。"""
 
     approval_type = state["approval_type"]
     definition = APPROVAL_DEFINITIONS[approval_type]
@@ -293,7 +298,7 @@ def submit_node(state: ApprovalState) -> ApprovalState:
 
 
 def cancel_node(state: ApprovalState) -> ApprovalState:
-    """Cancel the current approval flow."""
+    """取消当前审批流程。"""
 
     return {
         **state,
@@ -312,7 +317,7 @@ def cancel_node(state: ApprovalState) -> ApprovalState:
 
 
 def balance_node(state: ApprovalState) -> ApprovalState:
-    """Answer leave-balance queries without starting an approval flow."""
+    """回答假期余额查询，不启动审批流程。"""
 
     tool_result = get_leave_balance.invoke({"user_id": "U001"})
     balances = tool_result["data"]["balances"]
@@ -337,7 +342,7 @@ def balance_node(state: ApprovalState) -> ApprovalState:
 
 
 def clarify_node(state: ApprovalState) -> ApprovalState:
-    """Return a clarification message."""
+    """返回澄清提示。"""
 
     message = state.get("assistant_message") or "请告诉我要办理哪类审批：请假、报销或采购。"
     return {**state, "assistant_message": message, "route": "clarify"}

@@ -1,10 +1,12 @@
+"""封装 OpenAI 兼容 Embedding 客户端及部署配置检查。"""
+
 from __future__ import annotations
 
 from ai_erp_rag_assistant.app.config import get_settings
 
 
 class EmbeddingService:
-    """OpenAI-compatible embeddings, normally DashScope text-embedding-v4."""
+    """OpenAI 兼容的 Embedding 客户端，默认使用 DashScope text-embedding-v4。"""
 
     def __init__(self) -> None:
         self.settings = get_settings()
@@ -28,10 +30,22 @@ class EmbeddingService:
         return OpenAIEmbeddings(**kwargs)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        return self._embeddings().embed_documents(texts)
+        """批量生成文档 Chunk 向量。"""
+        try:
+            return self._embeddings().embed_documents(texts)
+        except RuntimeError:
+            raise
+        except Exception as exc:
+            raise RuntimeError(f"Embedding 文档向量生成失败：{exc}") from exc
 
     def embed_query(self, text: str) -> list[float]:
-        return self._embeddings().embed_query(text)
+        """生成单个检索问题向量。"""
+        try:
+            return self._embeddings().embed_query(text)
+        except RuntimeError:
+            raise
+        except Exception as exc:
+            raise RuntimeError(f"Embedding 查询向量生成失败：{exc}") from exc
 
 
 embedding_service = EmbeddingService()

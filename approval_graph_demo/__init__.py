@@ -1,2 +1,1 @@
-"""LangGraph approval workflow demo."""
-
+"""LangGraph 审批工作流示例。"""

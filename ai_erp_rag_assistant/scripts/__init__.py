@@ -1,1 +1,1 @@
-"""Local knowledge ingestion scripts."""
+"""本地知识导入脚本。"""

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class TimeTravelCheckpointSummary(BaseModel):
-    """A compact checkpoint row for timeline displays."""
+    """用于时间线展示的精简检查点记录。"""
 
     checkpoint_id: str
     session_id: str
@@ -21,7 +21,7 @@ class TimeTravelCheckpointSummary(BaseModel):
 
 
 class TimeTravelCheckpointDetail(TimeTravelCheckpointSummary):
-    """A checkpoint with a readable state snapshot."""
+    """包含可读状态快照的检查点。"""
 
     state: dict[str, Any] = Field(default_factory=dict)
 

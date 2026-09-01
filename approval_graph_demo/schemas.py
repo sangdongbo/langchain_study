@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ApprovalDefinition:
-    """Configuration for one approval workflow."""
+    """一种审批工作流的配置。"""
 
     approval_type: str
     title: str
@@ -71,4 +71,3 @@ QUESTIONS: dict[str, str] = {
     "budget": "请告诉我采购预算，例如 12000。",
     "purpose": "请说明采购用途。",
 }
-

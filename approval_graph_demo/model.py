@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 def load_env() -> None:
-    """Load the project .env from the current directory or its parents."""
+    """从当前目录或父目录加载项目 .env 文件。"""
 
     current = Path.cwd().resolve()
     for path in [current, *current.parents]:
@@ -18,7 +18,7 @@ def load_env() -> None:
 
 
 def build_deepseek_model():
-    """Create a DeepSeek chat model when credentials are available."""
+    """在存在凭据时创建 DeepSeek 聊天模型。"""
 
     load_env()
     api_key = os.getenv("DEEPSEEK_API_KEY")
@@ -34,4 +34,3 @@ def build_deepseek_model():
         timeout=float(os.getenv("DEEPSEEK_TIMEOUT", "60")),
         max_retries=int(os.getenv("DEEPSEEK_MAX_RETRIES", "2")),
     )
-

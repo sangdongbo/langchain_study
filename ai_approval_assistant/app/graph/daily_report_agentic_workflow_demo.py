@@ -15,7 +15,7 @@ from app.graph.state import ApprovalState
 
 
 def create_daily_report_agentic_workflow_demo():
-    """Create a standalone demo graph for agentic workflow daily reports."""
+    """创建独立的 Agentic Workflow 日报示例图。"""
     builder = StateGraph(ApprovalState)
     builder.add_node("demo_agent_plan", demo_agent_plan_node)
     builder.add_node("demo_confirm_date", demo_confirm_date_node)

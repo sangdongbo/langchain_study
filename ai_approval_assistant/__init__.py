@@ -1,1 +1,1 @@
-"""Standalone AI approval assistant package."""
+"""独立的 AI 审批助手包。"""

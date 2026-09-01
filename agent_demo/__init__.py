@@ -1,1 +1,1 @@
-"""Teaching Agent demo package."""
+"""教学 Agent 示例包。"""

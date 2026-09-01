@@ -1,3 +1,5 @@
+"""FastAPI 应用入口和不触发外部连接的健康检查。"""
+
 from __future__ import annotations
 
 from fastapi import FastAPI
@@ -16,6 +18,7 @@ app.include_router(router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
+    """返回各组件是否已配置，不验证或暴露真实凭据。"""
     settings = get_settings()
     return {
         "status": "ok",

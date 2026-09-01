@@ -457,6 +457,61 @@ def test_knowledge_answer_appends_deduplicated_citations():
     assert "第 10 页" in answer
 
 
+def test_rerank_accepts_only_input_chunks_and_keeps_stable_fallback(monkeypatch):
+    service = ModelService()
+    monkeypatch.setattr(service, "is_configured", lambda: True)
+    monkeypatch.setattr(
+        service,
+        "_invoke",
+        lambda *args, **kwargs: {
+            "items": [
+                {"chunk_id": "chunk-2", "relevance": 0.95},
+                {"chunk_id": "invented", "relevance": 1.0},
+            ]
+        },
+    )
+
+    evidence = service.rerank(
+        "病假材料",
+        [
+            {"chunk_id": "chunk-1", "text": "年假", "score": 0.9},
+            {"chunk_id": "chunk-2", "text": "病假证明", "score": 0.8},
+        ],
+        top_k=2,
+    )
+
+    assert [item["chunk_id"] for item in evidence] == ["chunk-2", "chunk-1"]
+    assert evidence[0]["rerank_score"] == 0.95
+    assert all(item["chunk_id"] != "invented" for item in evidence)
+
+
+def test_structured_citations_keep_source_page_score_and_snippet():
+    citations = ModelService.build_citations(
+        [
+            {
+                "chunk_id": "chunk-9",
+                "source": "员工手册.pdf",
+                "title": "病假制度",
+                "page": 9,
+                "text": "病假需要提供医院证明。",
+                "rerank_score": 0.96,
+            }
+        ]
+    )
+
+    assert citations == [
+        {
+            "citation_id": 1,
+            "chunk_id": "chunk-9",
+            "source": "员工手册.pdf",
+            "title": "病假制度",
+            "page": 9,
+            "score": 0.96,
+            "snippet": "病假需要提供医院证明。",
+        }
+    ]
+
+
 def test_model_overrides_allow_generation_controls_only():
     safe = ModelService._safe_model_overrides(
         {

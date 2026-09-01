@@ -116,11 +116,22 @@ def test_text_decoder_honors_utf16_bom_and_csv_quoted_newlines():
 def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monkeypatch):
     monkeypatch.setattr(
         "ai_erp_rag_assistant.app.api.get_current_user",
-        lambda *args, **kwargs: {"company_id": "C001", "department": "研发部"},
+        lambda *args, **kwargs: {
+            "company_id": "C001",
+            "department": "研发部",
+            "permissions": ["研发", "manager"],
+        },
     )
     monkeypatch.setattr(
         "ai_erp_rag_assistant.app.api._rag_runtime_config",
-        lambda *args, **kwargs: type("Runtime", (), {"collection": "c001_handbook"})(),
+        lambda *args, **kwargs: type(
+            "Runtime",
+            (),
+            {
+                "collection": "c001_handbook",
+                "require_access": lambda self, **values: None,
+            },
+        )(),
     )
     calls: dict[str, object] = {}
 
@@ -154,6 +165,7 @@ def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monk
         "company_id": "C001",
         "knowledge_base_key": "handbook",
         "collection_name": "c001_handbook",
+        "replace_existing": True,
     }
     assert calls["rows"][0]["department"] == "研发部"
     assert calls["rows"][0]["permission_tags"] == ["研发", "manager"]
@@ -169,7 +181,12 @@ def test_document_ingest_uses_knowledge_base_chunk_defaults(monkeypatch):
         lambda *args, **kwargs: type(
             "Runtime",
             (),
-            {"collection": "c001_handbook", "chunk_size": 200, "chunk_overlap": 20},
+            {
+                "collection": "c001_handbook",
+                "chunk_size": 200,
+                "chunk_overlap": 20,
+                "require_access": lambda self, **values: None,
+            },
         )(),
     )
     captured: dict[str, int] = {}
@@ -233,6 +250,55 @@ def test_milvus_upsert_embeds_rows_before_writing(monkeypatch):
     assert inserted == 1
     assert writes["collection_name"] == "c001_handbook"
     assert writes["data"][0]["dense"] == [0.1, 0.2]
+
+
+def test_reimport_removes_only_stale_chunks_after_successful_upsert(monkeypatch):
+    service = MilvusService()
+    calls: dict[str, object] = {}
+
+    class FakeClient:
+        @staticmethod
+        def query(**kwargs):
+            return [{"chunk_id": "current"}, {"chunk_id": "stale"}]
+
+        @staticmethod
+        def upsert(**kwargs):
+            calls["upsert"] = kwargs
+
+        @staticmethod
+        def delete(**kwargs):
+            calls["delete"] = kwargs
+
+    monkeypatch.setattr(service, "ensure_collection", lambda name: name)
+    monkeypatch.setattr(service, "_client", lambda: FakeClient())
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.milvus_service.embedding_service.embed_documents",
+        lambda texts: [[0.1, 0.2] for _ in texts],
+    )
+
+    inserted = service.upsert_chunks(
+        [
+            {
+                "chunk_id": "current",
+                "text": "新制度内容",
+                "source": "policy.txt",
+                "page": 1,
+                "title": "制度",
+                "company_id": "C001",
+                "department": "公共制度",
+                "version": "2026",
+                "effective_date": "",
+                "is_active": True,
+                "permission_tags": [],
+            }
+        ],
+        company_id="C001",
+        collection_name="c001_handbook",
+        replace_existing=True,
+    )
+
+    assert inserted == 1
+    assert calls["delete"]["ids"] == ["stale"]
 
 
 def test_milvus_rejects_existing_collection_with_wrong_dimension(monkeypatch):

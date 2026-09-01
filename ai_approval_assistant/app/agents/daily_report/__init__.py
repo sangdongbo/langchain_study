@@ -1,1 +1,1 @@
-"""Daily report sub-agents."""
+"""日报子 Agent。"""

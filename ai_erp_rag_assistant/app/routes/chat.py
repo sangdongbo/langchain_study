@@ -1,4 +1,4 @@
-"""Chat endpoint backed by the LangGraph ERP/RAG workflow."""
+"""由 LangGraph ERP/RAG 工作流驱动的聊天接口。"""
 
 from __future__ import annotations
 
@@ -39,8 +39,7 @@ def _identity_anonymizer(data: Any) -> Any:
     return data
 
 
-# Older LangSmith releases do not expose create_secret_anonymizer; field-level
-# redaction remains enabled in either case.
+# 旧版 LangSmith 可能没有 create_secret_anonymizer，但两种版本都启用字段级脱敏。
 _secret_anonymizer_factory: Any = getattr(
     langsmith_anonymizer, "create_secret_anonymizer", None
 )
@@ -85,7 +84,8 @@ def chat(
     authorization: str | None = Header(default=None),
     uid: str | None = Header(default=None, alias="UID"),
 ) -> ChatResponse:
-    """Run one conversational turn and optionally persist its state."""
+    """执行一轮对话，并按配置选择是否持久化状态。"""
+    # 认证头优先来自 HTTP 传输层；请求体仅用于兼容非浏览器调用方。
     if authorization or uid:
         request = request.model_copy(
             update={
@@ -97,6 +97,7 @@ def chat(
     assistant_key = request.assistant_key.strip() or settings.assistant_key
     persistent_user: dict[str, Any] = {}
     if session_repository.enabled:
+        # 长期会话必须先用 ERP 身份锁定租户和用户，再检查 request_id 幂等缓存。
         request, persistent_user, resolved_company, persistent_user_id = (
             api_module._persistent_identity(request, None, None)
         )
@@ -122,6 +123,7 @@ def chat(
     }
     prior: ErpRagState = {}
     if not request.reset:
+        # MySQL 与内存 Checkpointer 二选一，避免同一会话出现两个状态真相源。
         if session_repository.enabled:
             prior = cast(
                 ErpRagState,
@@ -154,6 +156,7 @@ def chat(
         prior=prior,
     )
     if persistent_user:
+        # 复用已验证身份，避免工作流首节点对同一次请求重复调用 ERP userinfo。
         state["user_context"] = persistent_user
 
     try:
@@ -163,12 +166,13 @@ def chat(
             client=client,
             project_name=settings.langsmith_project,
         ):
+            # MySQL 模式由 Repository 持久化状态，因此使用无 Checkpointer 的工作流实例。
             runtime_workflow = (
                 stateless_workflow if session_repository.enabled else workflow
             )
             result = runtime_workflow.invoke(state, config=config)
     except Exception as exc:
-        # Keep failures visible to callers instead of returning a fabricated answer.
+        # 将失败明确返回给调用方，不能用看似正常的伪造答案掩盖异常。
         result = {
             **state,
             "assistant_message": f"执行失败：{exc}",
@@ -177,12 +181,14 @@ def chat(
         }
 
     erp_data = result.get("erp_data", {})
+    # 将内部工作流状态收敛为稳定的前端响应契约，不暴露认证和恢复字段。
     response = ChatResponse(
         message=result.get("assistant_message", ""),
         route=result.get("route", "unknown"),
         plan=result.get("plan", {}),
         tool_calls=result.get("tool_calls", []),
         evidence=result.get("evidence", []),
+        citations=api_module.model_service.build_citations(result.get("evidence", [])),
         erp_data=erp_data,
         form_schema=result.get("form_schema") or None,
         preview=result.get("preview") or None,
@@ -200,6 +206,7 @@ def chat(
     )
     if session_repository.enabled:
         try:
+            # 只在工作流完成后原子保存用户消息、回复、状态、预览和工具事件。
             session_repository.save_exchange(
                 company_id=request.company_id,
                 assistant_key=assistant_key,

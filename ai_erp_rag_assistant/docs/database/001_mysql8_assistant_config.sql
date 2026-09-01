@@ -1,5 +1,5 @@
--- Company-scoped assistant, prompt and knowledge-base configuration (MySQL 8.0.16+)
--- Review before execution. This file intentionally contains no DROP/TRUNCATE.
+-- 公司范围内的 Assistant、Prompt 和知识库配置（MySQL 8.0.16+）。
+-- 执行前请先审查；本文件有意不包含 DROP/TRUNCATE。
 
 CREATE TABLE `ai_erp_assistants` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '助手主键ID',

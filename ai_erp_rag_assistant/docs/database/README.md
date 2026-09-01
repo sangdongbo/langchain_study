@@ -24,7 +24,11 @@
 
 ## 应用接入
 
-应用层已接入 MySQL 长期会话，并按以下四张表落库：
+同步 RAG 导入已接入 `ai_erp_knowledge_documents` 和
+`ai_erp_knowledge_ingest_jobs`，记录源文件、解析/Embedding/Milvus 阶段、计数和失败原因；
+失败重试创建新任务并保留旧任务审计。数据库/API 数据源的自动同步任务仍未接入。
+
+应用层也已接入 MySQL 长期会话，并按以下四张表落库：
 
 1. `ai_erp_approval_drafts` 保存可恢复的审批字段和自选审批人。
 2. `ai_erp_approval_previews` 保存不可变预览快照和版本哈希。

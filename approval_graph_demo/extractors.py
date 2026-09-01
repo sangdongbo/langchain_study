@@ -13,7 +13,7 @@ QUERY_WORDS = ("查", "查询", "余额", "剩", "还有多少", "多少天", "�
 
 
 def classify_approval_type(text: str, allow_model: bool = True) -> str | None:
-    """Classify approval type with deterministic rules first."""
+    """优先使用确定性规则识别审批类型。"""
 
     if any(word in text for word in ("请假", "休假", "病假", "年假", "调休", "事假")):
         return "leave"
@@ -29,13 +29,13 @@ def classify_approval_type(text: str, allow_model: bool = True) -> str | None:
 
 
 def is_leave_balance_query(text: str) -> bool:
-    """Return True when the user is asking about remaining leave days."""
+    """判断用户是否在查询剩余假期天数。"""
 
     return any(word in text for word in LEAVE_BALANCE_WORDS) and any(word in text for word in QUERY_WORDS)
 
 
 def extract_slots(approval_type: str, text: str) -> dict[str, str]:
-    """Extract slots for one approval type."""
+    """提取一种审批类型对应的字段值。"""
 
     if approval_type == "leave":
         slots = _extract_leave(text)
@@ -52,7 +52,7 @@ def extract_slots(approval_type: str, text: str) -> dict[str, str]:
 
 
 def extract_modifications(text: str) -> dict[str, str]:
-    """Extract field modifications from a confirmation-stage message."""
+    """从确认阶段的消息中提取字段修改内容。"""
 
     slots: dict[str, str] = {}
     amount = _find_number_after(text, ("金额",))

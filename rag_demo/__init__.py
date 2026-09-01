@@ -1,1 +1,1 @@
-"""Simple Streamlit RAG demo package."""
+"""简单的 Streamlit RAG 示例包。"""

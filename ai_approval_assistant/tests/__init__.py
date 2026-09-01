@@ -1,1 +1,1 @@
-"""Tests for AI approval assistant."""
+"""AI 审批助手测试包。"""
