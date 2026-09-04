@@ -29,8 +29,8 @@ UID: 863
 Authorization: Bearer <ERP_TOKEN>
 ```
 
-`company_id` 必须放在请求体或 Query 参数中，但服务端会用 ERP 返回的用户公司再次校验，
-不能通过修改 `company_id` 访问其他公司。不要把 LLM、Embedding、Milvus、MySQL 或
+`company_id` 可以省略：服务端会从 ERP 已验证的登录态解析公司；如果请求体或 Query 显式
+携带，也会再次校验，不能通过修改 `company_id` 访问其他公司。不要把 LLM、Embedding、Milvus、MySQL 或
 LangSmith 的密钥放在浏览器代码中。
 
 如果请求体同时带有 `uid` 或 `authorization`，服务端以 HTTP 请求头为准；请求头是当前
@@ -77,18 +77,26 @@ async function request(path, options = {}) {
 4. 创建 Prompt 版本：`POST /api/rag/admin/assistants/{assistant_id}/prompts`
 5. 发布 Prompt：`POST /api/rag/admin/assistants/{assistant_id}/prompts/{prompt_id}/publish`
 6. 创建知识库：`POST /api/rag/admin/knowledge-bases`
-7. 绑定 Assistant 和知识库：`POST /api/rag/admin/bindings/assistant-knowledge-base`
-8. 上传文档：`POST /api/rag/ingest/document`
+7. 上传文档：`POST /api/rag/ingest/document`
+
+Assistant 的 Prompt、模型和检索默认参数只配置一套。知识库只管理文档和启用状态，
+不需要再建立 Assistant-知识库绑定；旧绑定接口仅用于兼容历史页面。
 
 ### 用户侧问答页面
 
-1. 用户选择 `knowledge_base_key`。
-2. 用户输入问题，调用 `POST /api/rag/chat`。
-3. 使用 `message` 显示答案，使用 `evidence` 显示来源文件、页码和相关度。
-4. 需要只看检索结果时调用 `POST /api/rag/search`，不调用 LLM。
+1. 调用 `POST /api/assistants/list` 获取固定审批助手和当前公司的 RAG 助手。
+2. 用户选择助手后调用 `POST /api/chat`；服务端根据 `assistant_key` 判断助手类型。
+3. RAG 助手的配置决定默认检索范围；固定审批助手不读取 RAG Assistant 配置。
+4. `company_enabled` 自动检索当前公司所有启用知识库；`selected` 使用配置版本中保存的
+   `knowledge_base_keys`，不要求聊天页面再次选择知识库。
+5. 仅为兼容临时收窄范围时，才在请求中传 `search_scope: "selected"` 和
+   `knowledge_base_key`/`knowledge_base_keys`。
+6. 使用 `message` 显示答案，使用 `citations` 展示知识库、文件、页码和相关度。
+7. 需要只看检索结果时调用 `POST /api/rag/search`，不调用 LLM。
 
-没有 MySQL 配置时，搜索、问答和导入仍可以使用确定性的默认 Collection；管理接口
-必须配置 MySQL，因为管理接口需要读写 Assistant、Prompt 和知识库配置表。
+没有 MySQL 配置时，搜索、问答和导入仍可以使用显式知识库对应的确定性 Collection；
+只有配置 MySQL 后，服务端才能自动枚举公司下全部启用知识库、过滤已启用文件并使用管理端
+的 Assistant/Prompt 配置。
 
 ## 3. 健康检查
 
@@ -122,7 +130,8 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
 
 ## 4. Assistant 管理接口
 
-管理接口统一前缀：`/api/rag/admin`。所有管理请求 JSON 至少包含：
+管理接口统一前缀：`/api/rag/admin`。推荐只在请求头携带登录态；`company_id`、`user_id` 可选，
+服务端会从 ERP 已验证身份补齐公司并执行租户校验。兼容旧页面时仍可显式传入：
 
 ```json
 {
@@ -223,9 +232,28 @@ Base URL、密码或 Token。`retrieval_config` 可配置召回数量、阈值�
     "rerank_enabled": true,
     "rerank_candidates": 15
   },
+  "retrieval_scope": "company_enabled",
+  "knowledge_base_keys": [],
   "feature_flags": {}
 }
 ```
+
+`retrieval_scope=company_enabled` 是默认值，表示该 Assistant 使用公司内所有启用知识库；
+`knowledge_base_keys` 必须为空。选择 `retrieval_scope=selected` 时，页面必须至少选择一个
+启用知识库，并传入其 Key 数组：
+
+```json
+{
+  "retrieval_scope": "selected",
+  "knowledge_base_keys": ["finance-policy", "expense-process"]
+}
+```
+
+服务端会校验每个 Key 属于当前公司且知识库处于 active；不存在、停用或跨公司的 Key 会拒绝保存。
+配置发布后，问答请求直接使用该版本保存的范围，不需要建立旧的 Assistant-知识库绑定。
+
+响应中的配置版本会返回前端字段 `knowledge_base_keys`；数据库内部列名为
+`knowledge_base_keys_json`，前端不需要感知该列名。
 
 响应状态为 `201`，返回 `item.id` 和配置版本状态。发布配置：
 
@@ -346,8 +374,21 @@ embedding_dimension = 2048
 以上业务字段均可选，但至少提交一个。传空字符串可清空 `description`，传空对象可清空
 `permission_config`。`knowledge_key`、`milvus_collection`、Embedding 模型和向量维度创建
 后不可修改，避免新旧向量不兼容；需要更换这些参数时应新建知识库并重新导入文档。
+`chunk_size`、`chunk_overlap` 属于该知识库的入库参数；`default_top_k` 和
+`default_score_threshold` 仅在 Assistant 没有全局覆盖时作为兼容兜底，日常检索参数统一在
+Assistant 配置版本中维护。
 
-### 绑定 Assistant 和知识库
+### Assistant 默认检索范围
+
+Assistant 配置版本通过 `retrieval_scope` 和 `knowledge_base_keys` 保存默认检索范围：
+
+- `company_enabled`：`knowledge_base_keys` 必须为空，自动检索公司内所有启用知识库；
+- `selected`：`knowledge_base_keys` 必须至少包含一个启用知识库 Key，问答和搜索默认只检索这些库。
+
+知识库选择器应调用 `POST /api/rag/admin/knowledge-bases/list` 并筛选 `status=active`，保存配置时
+提交 Key 数组。后端会再次校验公司归属和启用状态，不能仅依赖前端校验。
+
+### Assistant-知识库绑定（兼容接口，不再是必需步骤）
 
 `POST /api/rag/admin/bindings/assistant-knowledge-base`
 
@@ -371,13 +412,14 @@ embedding_dimension = 2048
 }
 ```
 
-如果 `/api/rag/chat` 同时传了 `assistant_key` 和 `knowledge_base_key`，服务端会校验
-Assistant 已绑定该知识库；未绑定会返回 `404`。
+新版本不再要求调用此接口。默认范围和指定范围都应通过 Assistant 配置版本完成；此绑定表仅供
+历史页面查询和维护，不能替代配置版本中的 `knowledge_base_keys`。已存在的绑定记录仍可查询，
+但不会决定公司级检索准入。
 
 权限字段只使用 ERP 身份接口返回的部门、权限和角色，不信任前端请求中的权限标签。
 `required_tags` 要求全部具备，`any_tags` 要求至少具备一个；`read_required_tags`、
-`write_required_tags`、`delete_required_tags` 可以分别限制查询、导入和删除。知识库策略与
-Assistant 绑定策略会依次校验，绑定配置不能放宽知识库本身的权限。
+`write_required_tags`、`delete_required_tags` 可以分别限制查询、导入和删除。每个知识库
+自己的权限策略独立校验；无权访问的知识库会从本次多库检索中跳过，不会泄露其文档。
 
 查询绑定：`POST /api/rag/admin/bindings/assistant-knowledge-base/list`
 
@@ -664,7 +706,8 @@ ERP 返回的真实部门覆盖。`permission_tags` 会写入文档 ACL，必须
 Content-Type: application/pdf
 ```
 
-`company_id`、`user_id`、`source`、`knowledge_base_key` 等使用 Query 参数。响应格式与
+`company_id`、`user_id`、`source`、`knowledge_base_key` 等使用 Query 参数；其中 `company_id`、
+`user_id` 可省略并由登录态补齐。响应格式与
 通用文档导入相同。`permission_tags` 也是可选 Query 参数，使用逗号分隔；每个标签都必须
 属于当前 ERP 用户已拥有的权限，否则返回 `403`。最多 32 个标签、单个标签最多 256 个
 字符；不传标签表示公共 ACL 文档。
@@ -748,7 +791,6 @@ Content-Type: application/pdf
 {
   "company_id": "16",
   "user_id": "863",
-  "knowledge_base_key": "employee_handbook",
   "keyword": "员工手册",
   "page": 1,
   "page_size": 20
@@ -762,6 +804,8 @@ Content-Type: application/pdf
   "items": [
     {
       "source": "employee-handbook.docx",
+      "knowledge_base_key": "employee_handbook",
+      "knowledge_base_name": "员工手册",
       "title": "员工手册",
       "version": "2026",
       "effective_date": "2026-01-01",
@@ -776,10 +820,39 @@ Content-Type: application/pdf
   "page": 1,
   "page_size": 20,
   "company_id": "16",
-  "knowledge_base_key": "employee_handbook",
-  "collection": "erp_knowledge_chunks_v2"
+  "knowledge_base_key": "",
+  "knowledge_base_keys": ["employee_handbook", "attendance-policy"],
+  "searched_knowledge_bases": [
+    {"knowledge_base_key": "employee_handbook", "knowledge_base_name": "员工手册"},
+    {"knowledge_base_key": "attendance-policy", "knowledge_base_name": "考勤制度"}
+  ],
+  "collection": "",
+  "collections": ["erp_knowledge_chunks_v2_employee_handbook", "erp_knowledge_chunks_v2_attendance-policy"]
 }
 ```
+
+`knowledge_base_key` 省略时列出当前公司所有启用知识库中的可见文件；返回的每一项都会带上
+`knowledge_base_key` 和 `knowledge_base_name`，前端无需再反查来源。
+
+### 启用或停用文件
+
+`POST /api/rag/documents/status`
+
+该接口只切换文件是否参与检索，不删除原始文件或历史向量：
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "knowledge_base_key": "employee_handbook",
+  "source": "employee-handbook.docx",
+  "version": "2026",
+  "enabled": false
+}
+```
+
+只有 `status=published` 且 `search_enabled=true` 的文件会被公司级搜索召回。停用后再次调用
+该接口传 `enabled: true` 即可恢复；该管理接口需要 MySQL 配置和当前用户的文档写权限。
 
 ### 删除文档
 
@@ -823,10 +896,28 @@ Content-Type: application/pdf
   "user_id": "863",
   "company_id": "16",
   "assistant_key": "employee-rag",
-  "knowledge_base_key": "employee_handbook",
+  "search_scope": "company_enabled",
+  "knowledge_base_keys": [],
   "top_k": 5
 }
 ```
+
+`search_scope` 未传时采用已发布 Assistant 配置。配置为 `company_enabled` 时表示当前公司所有启用知识库；
+配置为 `selected` 时使用配置版本保存的 `knowledge_base_keys`。请求级 `knowledge_base_key` 或
+`knowledge_base_keys` 只允许收窄已配置范围，不允许把专用 Assistant 扩大到公司全库。
+临时指定范围示例：
+
+```json
+{
+  "query": "报销住宿费需要什么材料？",
+  "assistant_key": "finance-assistant",
+  "search_scope": "selected",
+  "knowledge_base_keys": ["finance-policy", "expense-process"]
+}
+```
+
+旧前端只传单个 `knowledge_base_key` 仍然兼容。`search_scope=selected` 且 Assistant 配置也为
+`selected` 时，不传请求 Key 会自动使用配置中保存的数组；如果配置版本没有保存任何 Key，接口返回 `422`。
 
 响应：
 
@@ -835,6 +926,8 @@ Content-Type: application/pdf
   "evidence": [
     {
       "chunk_id": "16:employee_handbook:...",
+      "knowledge_base_key": "employee_handbook",
+      "knowledge_base_name": "员工手册",
       "text": "病假申请需要提交就医材料。",
       "source": "employee-handbook.docx",
       "page": 9,
@@ -855,8 +948,11 @@ Content-Type: application/pdf
     {
       "citation_id": 1,
       "chunk_id": "16:employee_handbook:...",
+      "knowledge_base_key": "employee_handbook",
+      "knowledge_base_name": "员工手册",
       "source": "employee-handbook.docx",
       "title": "病假管理",
+      "version": "2026",
       "page": 9,
       "score": 0.96,
       "snippet": "病假申请需要提交就医材料。"
@@ -864,12 +960,20 @@ Content-Type: application/pdf
   ],
   "count": 1,
   "company_id": "16",
-  "knowledge_base_key": "employee_handbook",
-  "collection": "erp_knowledge_chunks_v2"
+  "knowledge_base_key": "",
+  "knowledge_base_keys": ["employee_handbook", "attendance-policy"],
+  "searched_knowledge_bases": [
+    {"knowledge_base_key": "employee_handbook", "knowledge_base_name": "员工手册"},
+    {"knowledge_base_key": "attendance-policy", "knowledge_base_name": "考勤制度"}
+  ],
+  "collection": "",
+  "collections": ["erp_knowledge_chunks_v2_employee_handbook", "erp_knowledge_chunks_v2_attendance-policy"]
 }
 ```
 
-前端引用列表直接使用 `citations`；`chunk_id` 只用于原文定位，不作为展示文案。
+前端引用列表直接使用 `citations`；展示时优先使用 `knowledge_base_name`、`source` 和 `page`，
+`chunk_id` 只用于原文定位，不作为展示文案。多库搜索会返回 `knowledge_base_keys`、
+`searched_knowledge_bases` 和 `collections`，单库旧字段仍保留兼容。
 `score` 是向量相似度，`rerank_score` 是 LLM 重排相关度，`rank` 是最终顺序。
 `top_k` 范围为 `1..50`，未传时使用知识库或服务默认值。重排失败时服务端自动回退到
 向量顺序，此时不会提供 `rerank_score`。
@@ -886,7 +990,8 @@ Content-Type: application/pdf
   "user_id": "863",
   "company_id": "16",
   "assistant_key": "employee-rag",
-  "knowledge_base_key": "employee_handbook",
+  "search_scope": "company_enabled",
+  "knowledge_base_keys": [],
   "top_k": 5,
   "system_context": "请用简洁、正式的中文回答。"
 }
@@ -900,7 +1005,7 @@ Content-Type: application/pdf
 
 ```json
 {
-  "message": "根据员工手册，病假申请需要提交就医材料。\n\n依据：[1]《employee-handbook.docx》第 9 页",
+  "message": "根据员工手册，病假申请需要提交就医材料。\n\n依据：[1] [员工手册]《employee-handbook.docx》版本 2026 第 9 页",
   "evidence": [
     {
       "source": "employee-handbook.docx",
@@ -912,8 +1017,11 @@ Content-Type: application/pdf
     {
       "citation_id": 1,
       "chunk_id": "16:employee_handbook:...",
+      "knowledge_base_key": "employee_handbook",
+      "knowledge_base_name": "员工手册",
       "source": "employee-handbook.docx",
       "title": "病假管理",
+      "version": "2026",
       "page": 9,
       "score": 0.96,
       "snippet": "病假申请需要提交就医材料。"
@@ -921,23 +1029,177 @@ Content-Type: application/pdf
   ],
   "count": 1,
   "company_id": "16",
-  "knowledge_base_key": "employee_handbook",
-  "collection": "erp_knowledge_chunks_v2"
+  "knowledge_base_key": "",
+  "knowledge_base_keys": ["employee_handbook", "attendance-policy"],
+  "searched_knowledge_bases": [
+    {"knowledge_base_key": "employee_handbook", "knowledge_base_name": "员工手册"},
+    {"knowledge_base_key": "attendance-policy", "knowledge_base_name": "考勤制度"}
+  ],
+  "collection": "",
+  "collections": ["erp_knowledge_chunks_v2_employee_handbook", "erp_knowledge_chunks_v2_attendance-policy"]
 }
 ```
 
-`message` 是最终答案，`evidence` 与搜索接口结构相同，`citations` 用于前端来源区。
+`message` 是最终答案，`evidence` 与搜索接口结构相同，`citations` 用于前端来源区，包含
+知识库、文件、版本、页码和引用片段。
 没有检索到证据时服务端直接返回“未检索到与当前问题匹配的知识库依据，暂时无法确认答案”，
 不会让 LLM 凭常识补写答案；前端应把它当作无答案状态展示，并提供重新提问或切换知识库的入口。
 
-问答的固定数据流是：ERP 身份校验 → 知识库/Assistant 权限校验 → Milvus 向量召回 → 可选
+问答的固定数据流是：ERP 身份校验 → 公司启用知识库和文件筛选 → Milvus 多 Collection 向量召回 → 可选
 LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM 只能处理已过滤的证据，不能
 绕过 `company_id`、部门或权限标签隔离。
 
-## 10. 会话接口（可选）
+## 10. 统一助手与聊天接口
 
-只有 `AI_ERP_SESSION_STORE=mysql` 启用后，下面两个接口才会读取长期会话；默认内存模式
-下会返回 `503`。会话始终按 `company_id + assistant_key + ERP 用户` 隔离。
+### 助手列表
+
+`POST /api/assistants/list`
+
+该接口给 AI 助手页面使用，会把服务端固定的审批助手和数据库中的 RAG 助手合并返回。
+`POST /api/rag/admin/assistants/list` 仍只返回管理端创建的 RAG 助手。
+
+请求：
+
+```json
+{
+  "user_id": "863",
+  "company_id": "16",
+  "status": "active"
+}
+```
+
+响应：
+
+```json
+{
+  "items": [
+    {
+      "id": null,
+      "assistant_key": "approval-assistant",
+      "name": "审批助手",
+      "assistant_type": "approval",
+      "is_system": true,
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "assistant_key": "employee-rag",
+      "name": "员工制度助手",
+      "assistant_type": "rag",
+      "is_system": false,
+      "status": "active"
+    }
+  ],
+  "count": 2
+}
+```
+
+审批助手的 `assistant_key` 固定为 `approval-assistant`，不保存到
+`ai_erp_assistants`，也不能通过 RAG 管理接口创建同名助手。
+
+### 统一聊天
+
+`POST /api/chat`
+
+前端只传选中项的 `assistant_key`，不传 `assistant_type`。服务端只根据保留键判断真实类型：
+
+- `approval-assistant`：允许查询审批状态、发起审批和普通对话，不允许知识库检索。
+- 其他 Key：按数据库中的 RAG Assistant 加载配置，允许知识问答和普通对话，不允许查询或发起审批。
+
+```json
+{
+  "message": "帮我发起一个请假审批",
+  "session_id": "approval-001",
+  "request_id": "request-001",
+  "user_id": "863",
+  "company_id": "16",
+  "assistant_key": "approval-assistant"
+}
+```
+
+审批预览确认仍通过同一个接口提交 `confirm`、`preview_id`、`preview_version` 和
+`preview_hash`。如果请求内容超出当前助手职责，接口返回 `workflow_status: "blocked"`
+并提示切换助手，不会调用越界工具。响应中的 `assistant_type` 是服务端根据
+`assistant_key` 推导的最终类型，可用于前端校验当前选择。
+
+### 流式聊天
+
+`POST /api/chat` 默认继续返回完整 JSON。请求体增加 `stream: true` 后，响应类型改为
+`text/event-stream`，身份信息仍通过 `Authorization` 和 `UID` 请求头传递：
+
+```json
+{
+  "message": "一个月有多少病假？",
+  "session_id": "rag-session-001",
+  "request_id": "request-002",
+  "user_id": "863",
+  "assistant_key": "employee-rag",
+  "stream": true
+}
+```
+
+事件按以下顺序返回：
+
+| 事件 | 数据 | 说明 |
+|---|---|---|
+| `metadata` | `assistant_key`、`session_id`、`cached` | 本次流的基本信息 |
+| `token` | `content` | 最终回答节点产生的文本片段，可出现多次 |
+| `error` | `message`、`errors` | 流建立后发生的执行或持久化错误 |
+| `final` | 完整 `ChatResponse` | 最终权威结果，包含引用、工具调用、表单和预览 |
+| `done` | `{}` | 事件流结束 |
+
+前端必须使用 `fetch` 读取 POST 响应流；原生 `EventSource` 不能提交 JSON，也不能设置当前接口
+需要的认证头：
+
+```js
+const response = await fetch(`${API_BASE_URL}/api/chat`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: currentUser.authorization,
+    UID: currentUser.uid,
+  },
+  body: JSON.stringify({ ...chatRequest, stream: true }),
+});
+
+if (!response.ok || !response.body) {
+  throw new Error((await response.json()).detail || "聊天请求失败");
+}
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let buffer = "";
+
+while (true) {
+  const { value, done } = await reader.read();
+  buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+  const frames = buffer.split("\n\n");
+  buffer = frames.pop() || "";
+
+  for (const frame of frames) {
+    const event = frame.match(/^event: (.+)$/m)?.[1];
+    const raw = frame.match(/^data: (.+)$/m)?.[1];
+    if (!event || !raw) continue;
+    const data = JSON.parse(raw);
+
+    if (event === "token") appendAssistantText(data.content);
+    if (event === "error") showChatError(data.message);
+    if (event === "final") replaceAssistantMessage(data);
+  }
+  if (done) break;
+}
+```
+
+`final.message` 是权威文本，可能比 Token 拼接结果多出服务端生成的可信引用，因此收到 `final`
+后应替换当前消息并渲染 `citations`。相同 `request_id` 命中幂等缓存时不会重复生成 Token，而是
+直接发送 `metadata -> final -> done`。流开始前的身份或参数错误仍使用非 `2xx` JSON；流开始后的
+错误通过 `error` 事件返回，此时 HTTP 状态已经是 `200`。
+
+## 11. 会话接口（可选）
+
+只有 `AI_ERP_SESSION_STORE=mysql` 启用后，RAG 助手才会使用下面两个长期会话接口；默认内存模式
+下会返回 `503`。固定审批助手只保留当前服务进程中的多轮状态，不保存历史会话，这两个接口
+对它返回空列表。RAG 会话始终按 `company_id + assistant_key + ERP 用户` 隔离。
 
 ### 会话列表
 
@@ -991,10 +1253,12 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 ```
 
 响应中的 `items` 按聊天显示顺序返回，每条消息包含 `message_seq`、`request_id`、`role`、
-`content`、`route`、`status` 和 `created_at`。向上翻页时，把响应中的
+`content`、`route`、`status` 和 `created_at`。助手消息额外可包含 `response`，其结构与
+`/api/chat` 响应一致，用于恢复 `form_schema`、`preview`、引用和提交结果等卡片；该对象已在
+写库前脱敏，不包含 Authorization、Token、Cookie、密码或刷新令牌。向上翻页时，把响应中的
 `next_before_seq` 作为下一次请求的 `before_seq`。
 
-## 11. 错误处理
+## 12. 错误处理
 
 统一错误响应通常为字符串；可重试导入失败时 `detail` 为上一节所示对象：
 
@@ -1009,14 +1273,14 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 | 状态码 | 含义 | 前端处理建议 |
 |---|---|---|
 | `401` | ERP 身份校验失败 | 重新获取登录凭据 |
-| `403` | 公司、部门或权限标签不满足知识库策略，或上传文档 ACL 超出当前用户权限 | 禁止继续提交，检查登录态、文档标签和管理员配置 |
+| `403` | 公司、部门或权限标签不满足知识库策略，或请求的知识库不在 Assistant 已配置范围 | 禁止继续提交，检查登录态、范围选择和管理员配置 |
 | `404` | Assistant、知识库或 Prompt 配置不存在 | 提示管理员完成配置 |
 | `409` | 业务标识或版本重复 | 刷新列表，避免重复提交 |
 | `415` | PDF 请求未使用 `application/pdf` | 修正上传 Content-Type |
-| `422` | 参数、文件格式或 Chunk 配置错误 | 展示 `detail` 并允许用户修改 |
+| `422` | 参数、文件格式或 Chunk 配置错误；selected 模式未选择知识库；检索范围与 Key 冲突 | 展示 `detail` 并要求补选知识库或修正范围 |
 | `503` | MySQL、Embedding、Milvus、Collection 或 LLM 当前不可用 | 展示稍后重试，不要自动无限重试 |
 
-## 12. 前端状态建议
+## 13. 前端状态建议
 
 文档导入按钮至少维护以下状态：
 
@@ -1033,6 +1297,8 @@ idle -> uploading -> parsing -> embedding -> completed
 ```text
 assistant_key
 knowledge_base_key
+search_scope
+knowledge_base_keys
 query
 message
 evidence
@@ -1041,7 +1307,24 @@ citations
 
 `company_id`、`UID`、`Authorization` 来自当前 ERP 登录态，不要让用户在普通页面手工编辑。
 
-## 13. 当前限制
+## 14. 页面改造清单（公司级全库模式）
+
+- Assistant 配置页：保留一套 Prompt、模型和检索默认参数；检索范围选择“公司全部启用库”或
+  “指定知识库”。选择后者时必须显示知识库多选框并至少选择一个；配置版本必须发布后才生效。
+- 知识库页：只管理知识库启用状态、切分参数和权限策略，不再要求“绑定 Assistant”。
+- 文档页：默认调用 `/api/rag/documents/list` 不传 `knowledge_base_key`，按返回的
+  `knowledge_base_name + source + version` 展示来源；使用 `/api/rag/documents/status` 控制文件
+  是否参与检索。
+- 问答页：传当前选中的 `assistant_key`，不要求用户先选知识库；答案下方按
+  `citations[].knowledge_base_name`、`source`、`page` 分组展示引用。
+- ERP 综合对话页调用 `POST /api/chat` 时同样必须传当前选中的 `assistant_key`。服务端会应用
+  该助手已发布的 Prompt、模型参数和知识库范围；前端不需要另外查询或提交知识库 ID。
+- 只有做临时范围收窄时才显示知识库筛选器，传 `search_scope: "selected"` 和
+  `knowledge_base_key`/`knowledge_base_keys`；通常范围应由 Assistant 配置决定。
+- 不要把请求体中的 `company_id`、`uid`、`authorization` 当作可编辑表单项；身份必须来自 ERP
+  登录态和请求头。
+
+## 15. 当前限制
 
 - 不支持扫描 PDF OCR。
 - 配置 MySQL 且指定知识库时，同步导入会写文档和任务状态；未配置时不提供状态查询与服务端重试。

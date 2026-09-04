@@ -22,7 +22,10 @@ from ai_erp_rag_assistant.app.schemas import (
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
 from ai_erp_rag_assistant.app.services.model_service import ModelService
 from ai_erp_rag_assistant.app.services.ingest_job_service import IngestJobTracker
-from ai_erp_rag_assistant.app.routes.rag import _validate_document_permission_tags
+from ai_erp_rag_assistant.app.routes.rag import (
+    _runtime_source_fields,
+    _validate_document_permission_tags,
+)
 
 
 def test_collection_name_is_tenant_scoped_and_supports_chinese_keys():
@@ -139,6 +142,134 @@ def test_search_api_forwards_tenant_and_knowledge_base(monkeypatch):
     assert calls["knowledge_base_key"] == "handbook"
 
 
+def test_search_api_uses_selected_knowledge_base_array(monkeypatch):
+    from ai_erp_rag_assistant.app.rag_admin_repository import (
+        RagKnowledgeBaseTarget,
+        RagRuntimeConfig,
+    )
+
+    calls = {}
+    runtime = RagRuntimeConfig(
+        collection="",
+        top_k=5,
+        knowledge_bases=(
+            RagKnowledgeBaseTarget(
+                knowledge_base_key="finance",
+                knowledge_base_name="财务制度库",
+                collection="c001_finance",
+                document_scope_loaded=True,
+            ),
+            RagKnowledgeBaseTarget(
+                knowledge_base_key="invoice",
+                knowledge_base_name="发票管理库",
+                collection="c001_invoice",
+                document_scope_loaded=True,
+            ),
+        ),
+        retrieval_scope="selected",
+    )
+
+    def fake_runtime(*args, **kwargs):
+        calls["runtime"] = kwargs
+        return runtime
+
+    monkeypatch.setattr("ai_erp_rag_assistant.app.api._rag_runtime_config", fake_runtime)
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.milvus_service.search_many",
+        lambda query, **kwargs: [
+            {
+                "chunk_id": "finance-chunk",
+                "knowledge_base_key": "finance",
+                "knowledge_base_name": "财务制度库",
+                "source": "报销制度.pdf",
+                "score": 0.9,
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api._rag_identity",
+        lambda request, authorization, uid: (
+            request,
+            request.company_id,
+            request.department,
+            [],
+        ),
+    )
+
+    response = rag_search(
+        RagSearchRequest(
+            query="住宿费",
+            company_id="C001",
+            search_scope="selected",
+            knowledge_base_keys=["finance", "invoice"],
+        ),
+        None,
+        None,
+    )
+
+    assert calls["runtime"]["knowledge_base_keys"] == ["finance", "invoice"]
+    assert calls["runtime"]["search_scope"] == "selected"
+    assert response.knowledge_base_keys == ["finance", "invoice"]
+    assert response.citations[0].knowledge_base_key == "finance"
+
+
+def test_milvus_search_many_merges_sources_from_enabled_knowledge_bases(monkeypatch):
+    service = MilvusService()
+
+    def fake_search(query, **kwargs):
+        key = kwargs["knowledge_base_key"]
+        return [
+            {
+                "chunk_id": f"{key}-chunk",
+                "source": f"{key}.pdf",
+                "score": 0.8 if key == "hr" else 0.9,
+            }
+        ]
+
+    monkeypatch.setattr(service, "search", fake_search)
+    results = service.search_many(
+        "病假",
+        company_id="C001",
+        targets=[
+            {
+                "knowledge_base_key": "hr",
+                "knowledge_base_name": "员工制度",
+                "collection": "c001_hr",
+            },
+            {
+                "knowledge_base_key": "attendance",
+                "knowledge_base_name": "考勤制度",
+                "collection": "c001_attendance",
+            },
+        ],
+        top_k=2,
+    )
+
+    assert [item["knowledge_base_key"] for item in results] == ["attendance", "hr"]
+    assert results[0]["knowledge_base_name"] == "考勤制度"
+
+
+def test_milvus_search_many_skips_empty_collection(monkeypatch):
+    service = MilvusService()
+
+    def fake_search(query, **kwargs):
+        if kwargs["knowledge_base_key"] == "empty":
+            raise RuntimeError("Milvus collection 不存在：c001_empty")
+        return [{"chunk_id": "live", "score": 0.8}]
+
+    monkeypatch.setattr(service, "search", fake_search)
+    results = service.search_many(
+        "制度",
+        company_id="C001",
+        targets=[
+            {"knowledge_base_key": "empty", "collection": "c001_empty"},
+            {"knowledge_base_key": "live", "collection": "c001_live"},
+        ],
+    )
+
+    assert [item["knowledge_base_key"] for item in results] == ["live"]
+
+
 def test_rag_identity_rejects_company_switch(monkeypatch):
     monkeypatch.setattr(
         "ai_erp_rag_assistant.app.api._erp_user",
@@ -149,6 +280,55 @@ def test_rag_identity_rejects_company_switch(monkeypatch):
         _rag_identity(RagSearchRequest(query="制度", company_id="C001"), None, None)
 
     assert error.value.status_code == 403
+
+
+def test_rag_identity_uses_verified_company_when_body_company_is_empty(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api._erp_user",
+        lambda request: {"company_id": "C001", "department": "研发部"},
+    )
+
+    _, company_id, department, _ = _rag_identity(
+        RagSearchRequest(query="制度"), None, None
+    )
+
+    assert company_id == "C001"
+    assert department == "研发部"
+
+
+def test_runtime_source_fields_hide_knowledge_bases_without_read_permission():
+    from ai_erp_rag_assistant.app.rag_admin_repository import (
+        RagKnowledgeBaseTarget,
+        RagRuntimeConfig,
+    )
+
+    runtime = RagRuntimeConfig(
+        collection="",
+        knowledge_bases=(
+            RagKnowledgeBaseTarget(
+                knowledge_base_key="finance",
+                knowledge_base_name="财务制度",
+                collection="c001_finance",
+                permission_policies=({"required_tags": ["finance:read"]},),
+            ),
+            RagKnowledgeBaseTarget(
+                knowledge_base_key="hr",
+                knowledge_base_name="员工制度",
+                collection="c001_hr",
+            ),
+        ),
+    )
+
+    _, keys, names, _, collections = _runtime_source_fields(
+        runtime,
+        "",
+        department="研发部",
+        access_tags=["employee"],
+    )
+
+    assert keys == ["hr"]
+    assert names == [{"knowledge_base_key": "hr", "knowledge_base_name": "员工制度"}]
+    assert collections == ["c001_hr"]
 
 
 def test_rag_identity_uses_verified_permissions_instead_of_request_tags(monkeypatch):

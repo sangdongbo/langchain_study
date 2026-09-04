@@ -50,6 +50,10 @@ class AssistantConfigVersion(Base):
     page_config_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     model_config_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     retrieval_config_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    # 默认按公司检索全部启用知识库；selected 仅用于兼容需要限定范围的 Assistant。
+    retrieval_scope: Mapped[str] = mapped_column(String(24), nullable=False, server_default="company_enabled")
+    # selected 模式的默认知识库列表随配置版本冻结，发布后不会被后续编辑覆盖。
+    knowledge_base_keys_json: Mapped[list[str] | None] = mapped_column(JSON)
     feature_flags_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     config_hash: Mapped[str] = mapped_column(CHAR(64), nullable=False)
     created_by: Mapped[str | None] = mapped_column(String(64))
@@ -166,7 +170,7 @@ class KnowledgeBaseSource(Base):
 
 
 class AssistantKnowledgeBase(Base):
-    """Assistant 与知识库之间的检索及权限绑定配置。"""
+    """历史兼容的 Assistant 与知识库检索绑定；公司级检索不再依赖它。"""
 
     __tablename__ = "ai_erp_assistant_knowledge_bases"
 
@@ -201,6 +205,10 @@ class KnowledgeDocument(Base):
     content_sha256: Mapped[str] = mapped_column(CHAR(64), nullable=False)
     version: Mapped[int] = mapped_column(INTEGER(unsigned=True), nullable=False, server_default="1")
     status: Mapped[str] = mapped_column(String(24), nullable=False, server_default="uploaded")
+    # 文件启用开关独立于导入状态；只有 published 且 search_enabled=1 的文件进入检索。
+    search_enabled: Mapped[bool] = mapped_column(TINYINT(1), nullable=False, server_default="1")
+    # 向量里的 version 是前端传入的字符串，单独保存避免和数据库内部版本号混淆。
+    vector_version: Mapped[str | None] = mapped_column(String(128))
     effective_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
     expired_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
     permission_scope_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)

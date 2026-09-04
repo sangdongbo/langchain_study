@@ -115,7 +115,12 @@ class _ReadCursor:
             ]
         else:
             self._rows = [
-                {"message_seq": 5, "role": "assistant", "content": "回复"},
+                {
+                    "message_seq": 5,
+                    "role": "assistant",
+                    "content": "回复",
+                    "metadata_json": {"response": {"preview": {"preview_id": "p-1"}}},
+                },
                 {"message_seq": 4, "role": "user", "content": "问题"},
                 {"message_seq": 3, "role": "assistant", "content": "更早回复"},
             ]
@@ -230,6 +235,7 @@ def test_session_repository_scopes_and_pages_reads_without_real_database(monkeyp
     assert [item["session_id"] for item in sessions] == ["session-3", "session-2"]
     assert more_sessions is True
     assert [item["message_seq"] for item in messages] == [4, 5]
+    assert messages[1]["response"]["preview"]["preview_id"] == "p-1"
     assert more_messages is True
     assert connection.cursor_instance.queries[0][1] == (
         "16",

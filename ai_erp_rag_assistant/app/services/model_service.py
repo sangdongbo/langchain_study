@@ -462,37 +462,60 @@ items 必须按与 question 的语义相关度从高到低排列，只能使用 
         labels = []
         for item in citations:
             page = f"第 {item['page']} 页" if item["page"] else "页码未知"
-            labels.append(f"[{item['citation_id']}]《{item['source']}》{page}")
+            version = f"版本 {item['version']} " if item.get("version") else ""
+            knowledge_base = (
+                f"[{item['knowledge_base_name']}]"
+                if item.get("knowledge_base_name")
+                else ""
+            )
+            labels.append(
+                f"[{item['citation_id']}] {knowledge_base}《{item['source']}》{version}{page}"
+                if knowledge_base
+                else f"[{item['citation_id']}]《{item['source']}》{version}{page}"
+            )
         return f"{answer}\n\n依据：" + "；".join(labels)
 
     @staticmethod
     def build_citations(evidence: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """从可信检索元数据生成去重、可序列化的前端引用列表。"""
         citations: list[dict[str, Any]] = []
-        seen: set[tuple[str, int | None, str]] = set()
+        seen: set[tuple[str, str, str, int | None, str]] = set()
         for item in evidence:
             source = str(item.get("source") or "未知来源")
             raw_page = item.get("page")
             page = int(raw_page) if isinstance(raw_page, (int, float)) and raw_page >= 1 else None
             chunk_id = str(item.get("chunk_id") or "")
-            # 有页码时按“文件 + 页”展示一次；无页码时再用 chunk_id 区分来源。
-            key = (source, page, "" if page is not None else chunk_id)
+            # 同名文件可能存在于不同知识库，去重键必须包含知识库避免丢失来源。
+            knowledge_base_key = str(item.get("knowledge_base_key") or "")
+            version = str(item.get("version") or "")
+            key = (
+                knowledge_base_key,
+                source,
+                version,
+                page,
+                "" if page is not None else chunk_id,
+            )
             if key in seen:
                 continue
             seen.add(key)
             snippet = " ".join(str(item.get("text") or "").split())[:300]
             score = item.get("rerank_score", item.get("score"))
-            citations.append(
-                {
-                    "citation_id": len(citations) + 1,
-                    "chunk_id": chunk_id,
-                    "source": source,
-                    "title": str(item.get("title") or ""),
-                    "page": page,
-                    "score": float(score) if isinstance(score, (int, float)) else None,
-                    "snippet": snippet,
-                }
-            )
+            citation = {
+                "citation_id": len(citations) + 1,
+                "chunk_id": chunk_id,
+                "source": source,
+                "title": str(item.get("title") or ""),
+                "page": page,
+                "score": float(score) if isinstance(score, (int, float)) else None,
+                "snippet": snippet,
+            }
+            # 单知识库旧响应保持原字段；多知识库结果追加可信知识库来源信息。
+            if item.get("knowledge_base_key"):
+                citation["knowledge_base_key"] = str(item["knowledge_base_key"])
+                citation["knowledge_base_name"] = str(item.get("knowledge_base_name") or "")
+            if version:
+                citation["version"] = version
+            citations.append(citation)
         return citations
 
     @staticmethod

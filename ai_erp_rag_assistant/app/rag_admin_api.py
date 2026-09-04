@@ -75,7 +75,10 @@ def _identity(
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
-    if not company_id or company_id != request.company_id.strip():
+    # 前端可不重复提交公司 ID；若显式提交，仍必须与 ERP 已验证租户一致。
+    if not company_id or (
+        request.company_id.strip() and company_id != request.company_id.strip()
+    ):
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
     actor = str(user.get("uid") or user.get("user_id") or request.uid or request.user_id).strip()
     return company_id, actor
@@ -102,6 +105,25 @@ def _run(session: Session, operation: Callable[[], T]) -> T:
 def _list_response(rows: list[Any]) -> dict[str, Any]:
     """将 ORM 列表转换为统一的 items/count 响应结构。"""
     items = [row_dict(row) for row in rows]
+    return {"items": items, "count": len(items)}
+
+
+def _config_response(row: Any) -> dict[str, Any]:
+    """转换配置版本响应，隐藏数据库 JSON 后缀并返回前端可直接使用的字段。"""
+    item = row_dict(row)
+    # 数据库列名保留 JSON 后缀以区分 ORM 原始结构，HTTP 契约使用更直观的数组名称。
+    configured_keys = item.pop("knowledge_base_keys_json", None)
+    item["knowledge_base_keys"] = (
+        [str(key).strip() for key in configured_keys if str(key).strip()]
+        if isinstance(configured_keys, (list, tuple))
+        else []
+    )
+    return item
+
+
+def _config_list_response(rows: list[Any]) -> dict[str, Any]:
+    """批量转换配置版本，确保创建、查询和发布接口返回一致结构。"""
+    items = [_config_response(row) for row in rows]
     return {"items": items, "count": len(items)}
 
 
@@ -202,6 +224,8 @@ def create_config_version(
         "page_config": request.page_config,
         "model_config": request.model_settings,
         "retrieval_config": request.retrieval_config,
+        "retrieval_scope": request.retrieval_scope,
+        "knowledge_base_keys": request.knowledge_base_keys,
         "feature_flags": request.feature_flags,
     }
     row = _run(
@@ -210,7 +234,7 @@ def create_config_version(
             company_id, assistant_id, config, actor
         ),
     )
-    return {"item": row_dict(row)}
+    return {"item": _config_response(row)}
 
 
 @router.post("/assistants/{assistant_id}/configs/list")
@@ -223,7 +247,7 @@ def list_config_versions(
 ) -> dict[str, Any]:
     """按版本倒序列出指定 Assistant 的配置。"""
     company_id, _ = _identity(request, authorization, uid)
-    return _list_response(
+    return _config_list_response(
         _run(db, lambda: RagAdminRepository(db).list_config_versions(company_id, assistant_id))
     )
 
@@ -245,7 +269,7 @@ def publish_config(
             company_id, assistant_id, config_id, actor
         ),
     )
-    return {"item": row_dict(row)}
+    return {"item": _config_response(row)}
 
 
 @router.post("/assistants/{assistant_id}/prompts", status_code=status.HTTP_201_CREATED)

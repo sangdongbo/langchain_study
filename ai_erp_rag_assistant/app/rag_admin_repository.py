@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
-from typing import Any
+from typing import Any, Literal
 
-from sqlalchemy import func, inspect, select, update
+from sqlalchemy import func, inspect, or_, select, update
 from sqlalchemy.orm import Session
+
+from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
 
 from ai_erp_rag_assistant.app.models import (
     Assistant,
@@ -31,8 +34,37 @@ class AdminNotFoundError(LookupError):
 
 
 @dataclass(frozen=True)
+class RagKnowledgeBaseTarget:
+    """公司级自动检索时的一个知识库目标。"""
+
+    knowledge_base_key: str
+    knowledge_base_name: str
+    collection: str
+    # 只允许已经发布且明确启用的文档参与检索；空元组由无 MySQL 的兼容模式使用。
+    active_documents: tuple[tuple[str, str], ...] = ()
+    document_scope_loaded: bool = False
+    permission_policies: tuple[dict[str, Any], ...] = ()
+    score_threshold: float | None = None
+
+    def require_access(
+        self,
+        *,
+        department: str,
+        permission_tags: list[str],
+        action: str = "read",
+    ) -> None:
+        """校验该知识库自己的权限策略，失败时只跳过该库而不影响其他库。"""
+        _require_permission_policies(
+            self.permission_policies,
+            department=department,
+            permission_tags=permission_tags,
+            action=action,
+        )
+
+
+@dataclass(frozen=True)
 class RagRuntimeConfig:
-    """从知识库、Assistant 配置、绑定和 Prompt 合并出的运行时参数。"""
+    """从公司级知识库、Assistant 配置和 Prompt 合并出的运行时参数。"""
 
     collection: str
     system_context: str = ""
@@ -44,8 +76,12 @@ class RagRuntimeConfig:
     score_threshold: float | None = None
     rerank_enabled: bool | None = None
     rerank_candidates: int | None = None
-    # 知识库策略和 Assistant 绑定策略分别校验，任一策略都只能收窄权限。
+    # 多知识库检索优先使用各 target 的独立策略；该字段保留给单库兼容调用。
     permission_policies: tuple[dict[str, Any], ...] = ()
+    # 默认检索范围是当前公司的所有启用知识库；保留 collection 兼容旧导入接口。
+    knowledge_bases: tuple[RagKnowledgeBaseTarget, ...] = ()
+    # Assistant 配置的默认检索范围；请求级 search_scope 只允许收窄，不允许扩大范围。
+    retrieval_scope: Literal["company_enabled", "selected"] = "company_enabled"
 
     def require_access(
         self,
@@ -55,22 +91,38 @@ class RagRuntimeConfig:
         action: str = "read",
     ) -> None:
         """校验运行时知识库策略；身份标签必须来自已经验证的 ERP 用户。"""
-        user_tags = {str(tag).strip() for tag in permission_tags if str(tag).strip()}
-        department = department.strip()
-        for policy in self.permission_policies:
-            allowed_departments = _policy_values(policy, "allowed_departments")
-            if allowed_departments and department not in allowed_departments:
-                raise PermissionError("当前部门无权访问该知识库")
-            # required_tags 是所有动作的基础门禁，动作级标签用于区分查询、导入和删除。
-            required_tags = {
-                *_policy_values(policy, "required_tags"),
-                *_policy_values(policy, f"{action}_required_tags"),
-            }
-            if not required_tags.issubset(user_tags):
-                raise PermissionError("当前用户缺少知识库所需权限")
-            any_tags = _policy_values(policy, "any_tags")
-            if any_tags and user_tags.isdisjoint(any_tags):
-                raise PermissionError("当前用户不在知识库允许的权限范围内")
+        _require_permission_policies(
+            self.permission_policies,
+            department=department,
+            permission_tags=permission_tags,
+            action=action,
+        )
+
+
+def _require_permission_policies(
+    policies: tuple[dict[str, Any], ...],
+    *,
+    department: str,
+    permission_tags: list[str],
+    action: str,
+) -> None:
+    """统一校验权限策略；多知识库检索时每个库独立调用。"""
+    user_tags = {str(tag).strip() for tag in permission_tags if str(tag).strip()}
+    department = department.strip()
+    for policy in policies:
+        allowed_departments = _policy_values(policy, "allowed_departments")
+        if allowed_departments and department not in allowed_departments:
+            raise PermissionError("当前部门无权访问该知识库")
+        # required_tags 是所有动作的基础门禁，动作级标签用于区分查询、导入和删除。
+        required_tags = {
+            *_policy_values(policy, "required_tags"),
+            *_policy_values(policy, f"{action}_required_tags"),
+        }
+        if not required_tags.issubset(user_tags):
+            raise PermissionError("当前用户缺少知识库所需权限")
+        any_tags = _policy_values(policy, "any_tags")
+        if any_tags and user_tags.isdisjoint(any_tags):
+            raise PermissionError("当前用户不在知识库允许的权限范围内")
 
 
 def row_dict(row: Any) -> dict[str, Any]:
@@ -144,6 +196,8 @@ class RagAdminRepository:
 
     def create_assistant(self, company_id: str, assistant_key: str, name: str, created_by: str) -> Assistant:
         """在指定公司内创建 Assistant。"""
+        if assistant_key.strip() == APPROVAL_ASSISTANT_KEY:
+            raise ValueError("该 assistant_key 为系统审批助手保留键")
         return self._save(
             Assistant(
                 company_id=self._company(company_id),
@@ -156,7 +210,9 @@ class RagAdminRepository:
     def list_assistants(self, company_id: str, status: str | None = None) -> list[Assistant]:
         """按公司列出未删除的 Assistant，可选状态过滤。"""
         statement = select(Assistant).where(
-            Assistant.company_id == self._company(company_id), Assistant.deleted_at.is_(None)
+            Assistant.company_id == self._company(company_id),
+            Assistant.assistant_key != APPROVAL_ASSISTANT_KEY,
+            Assistant.deleted_at.is_(None),
         )
         if status:
             statement = statement.where(Assistant.status == status)
@@ -200,11 +256,41 @@ class RagAdminRepository:
                 page_config_json=config["page_config"] or None,
                 model_config_json=config["model_config"] or None,
                 retrieval_config_json=config["retrieval_config"] or None,
+                retrieval_scope=config.get("retrieval_scope") or "company_enabled",
+                knowledge_base_keys_json=(
+                    self._validate_selected_knowledge_bases(
+                        company_id,
+                        config.get("knowledge_base_keys") or [],
+                    )
+                    if (config.get("retrieval_scope") or "company_enabled") == "selected"
+                    else None
+                ),
                 feature_flags_json=config["feature_flags"] or None,
                 config_hash=_content_hash(config),
                 created_by=created_by or None,
             )
         )
+
+    def _validate_selected_knowledge_bases(
+        self, company_id: str, knowledge_base_keys: list[str]
+    ) -> list[str]:
+        """校验配置中选择的知识库属于当前公司且处于启用状态。"""
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for raw_key in knowledge_base_keys:
+            key = str(raw_key).strip()
+            if not key or key in seen:
+                continue
+            normalized.append(key)
+            seen.add(key)
+        if not normalized:
+            raise ValueError("retrieval_scope=selected 时至少选择一个知识库")
+        # 逐个按 company_id 读取，既校验租户边界，也避免把无权知识库名称泄露给前端。
+        for key in normalized:
+            knowledge_base = self.get_knowledge_base_by_key(company_id, key)
+            if knowledge_base.status != "active":
+                raise AdminNotFoundError(f"知识库未启用：{key}")
+        return normalized
 
     def list_config_versions(self, company_id: str, assistant_id: int) -> list[AssistantConfigVersion]:
         """按版本倒序列出一个 Assistant 的全部配置。"""
@@ -549,6 +635,7 @@ class RagAdminRepository:
         *,
         job_key: str,
         source: str,
+        vector_version: str = "",
         title: str,
         mime_type: str,
         storage_uri: str,
@@ -582,6 +669,7 @@ class RagAdminRepository:
             version=int(latest_version or 0) + 1,
             status="uploaded",
             permission_scope_json=permission_scope or None,
+            vector_version=vector_version.strip() or None,
             created_by=created_by or None,
         )
         self.session.add(document)
@@ -628,6 +716,42 @@ class RagAdminRepository:
         )
         return job, document, knowledge_base
 
+    def set_document_search_enabled(
+        self,
+        company_id: str,
+        knowledge_key: str,
+        *,
+        source: str,
+        version: str = "",
+        enabled: bool,
+    ) -> int:
+        """只修改文件检索开关；实际删除和历史任务记录均保留。"""
+        company_id = self._company(company_id)
+        knowledge_base = self.get_knowledge_base_by_key(company_id, knowledge_key)
+        source = source.strip()
+        if not source:
+            raise ValueError("source 不能为空")
+        statement = select(KnowledgeDocument).where(
+            KnowledgeDocument.company_id == company_id,
+            KnowledgeDocument.knowledge_base_id == knowledge_base.id,
+            KnowledgeDocument.file_name == source,
+            KnowledgeDocument.deleted_at.is_(None),
+        )
+        normalized_version = version.strip()
+        if normalized_version:
+            # 新文档按 vector_version 匹配；兼容旧数据时同时接受内部整数版本号。
+            clauses = [KnowledgeDocument.vector_version == normalized_version]
+            if normalized_version.isdigit():
+                clauses.append(KnowledgeDocument.version == int(normalized_version))
+            statement = statement.where(or_(*clauses))
+        rows = list(self.session.scalars(statement).all())
+        if not rows:
+            raise AdminNotFoundError("文档不存在")
+        for row in rows:
+            row.search_enabled = enabled
+        self.session.commit()
+        return len(rows)
+
     def update_ingest_job(
         self,
         company_id: str,
@@ -669,6 +793,8 @@ class RagAdminRepository:
             "completed": "published",
             "failed": "failed",
         }[status]
+        # completed 才允许检索；失败或处理中保持不可检索，避免半成品进入答案。
+        document.search_enabled = status == "completed"
         if total_pages is not None:
             document.page_count = total_pages
         self.session.commit()
@@ -693,25 +819,60 @@ class RagAdminRepository:
             embedding_model=failed_job.embedding_model,
         )
         document.status = "uploaded"
+        document.search_enabled = True
         self.session.add(job)
         self.session.commit()
         return job, document, knowledge_base
 
     def runtime_config(
-        self, company_id: str, knowledge_key: str = "", assistant_key: str = ""
+        self,
+        company_id: str,
+        knowledge_key: str = "",
+        assistant_key: str = "",
+        knowledge_base_keys: Sequence[str] = (),
+        search_scope: Literal["company_enabled", "selected"] | None = None,
     ) -> RagRuntimeConfig:
-        """合并已启用知识库、绑定、已发布配置和 Prompt 的运行时设置。"""
+        """合并 Assistant 配置和知识库目标，返回本次检索真正允许的范围。
+
+        ``selected`` 模式优先使用已发布配置保存的知识库列表；请求级 Key 只能收窄
+        已配置范围，不能借接口参数把一个专用 Assistant 扩大到全公司知识库。
+        """
         company_id = self._company(company_id)
-        # 运行时读取必须同时受 company_id、Assistant 状态和绑定关系约束。
-        knowledge_base = self.get_knowledge_base_by_key(company_id, knowledge_key) if knowledge_key else None
-        if knowledge_base is not None and knowledge_base.status != "active":
-            raise AdminNotFoundError("知识库未启用")
-        binding = None
+        requested_keys: list[str] = []
+        seen_keys: set[str] = set()
+        # 保留旧的单 Key 参数，同时接受前端新的多选数组。
+        for raw_key in (*knowledge_base_keys, knowledge_key):
+            key = str(raw_key or "").strip()
+            if key and key not in seen_keys:
+                requested_keys.append(key)
+                seen_keys.add(key)
+
+        if not assistant_key:
+            # 未指定助手时取公司内最早创建的 active 助手，兼容单助手前端。
+            scalar_query = getattr(self.session, "scalar", None)
+            if callable(scalar_query):
+                default_assistant = scalar_query(
+                    select(Assistant)
+                    .where(
+                        Assistant.company_id == company_id,
+                        Assistant.status == "active",
+                        Assistant.deleted_at.is_(None),
+                    )
+                    .order_by(Assistant.id.asc())
+                )
+                assistant_key = str(
+                    getattr(default_assistant, "assistant_key", None) or ""
+                ).strip()
+
         system_context = ""
         model_overrides: dict[str, Any] = {}
         assistant_retrieval: dict[str, Any] = {}
+        configured_scope: Literal["company_enabled", "selected"] = "company_enabled"
+        configured_keys: list[str] = []
+        legacy_binding = None
+        assistant = None
+        config = None
         if assistant_key:
-            # Assistant 未启用时，即使知识库本身有效也不能加载其 Prompt 或模型参数。
             assistant = self.get_assistant_by_key(company_id, assistant_key)
             if assistant.status != "active":
                 raise AdminNotFoundError("Assistant 未启用")
@@ -730,18 +891,69 @@ class RagAdminRepository:
                 config_retrieval = getattr(config, "retrieval_config_json", None)
                 if isinstance(config_retrieval, dict):
                     assistant_retrieval.update(config_retrieval)
-            if knowledge_base is not None:
-                # 显式提供 Assistant 和知识库时必须存在启用绑定，不能跨配置直接检索。
-                binding = self.session.scalar(
-                    select(AssistantKnowledgeBase).where(
-                        AssistantKnowledgeBase.company_id == company_id,
-                        AssistantKnowledgeBase.assistant_id == assistant.id,
-                        AssistantKnowledgeBase.knowledge_base_id == knowledge_base.id,
-                        AssistantKnowledgeBase.enabled.is_(True),
+                raw_scope = getattr(config, "retrieval_scope", "company_enabled")
+                if raw_scope in {"company_enabled", "selected"}:
+                    configured_scope = raw_scope
+                raw_configured_keys = getattr(config, "knowledge_base_keys_json", None)
+                if isinstance(raw_configured_keys, (list, tuple)):
+                    configured_keys = [
+                        str(key).strip()
+                        for key in raw_configured_keys
+                        if str(key).strip()
+                    ]
+        # 请求级 scope 只能明确收窄 company_enabled，不能绕过已发布 selected 配置。
+        effective_scope = search_scope or (
+            "selected" if requested_keys and configured_scope == "company_enabled" else configured_scope
+        )
+        if effective_scope == "company_enabled":
+            if configured_scope == "selected":
+                raise ValueError("当前 Assistant 已限定知识库范围，不能切换为 company_enabled")
+            if requested_keys and search_scope == "company_enabled":
+                raise ValueError("search_scope=company_enabled 时不能同时指定知识库")
+            selected_keys: list[str] = []
+        else:
+            selected_keys = list(requested_keys or configured_keys)
+            if not selected_keys:
+                raise ValueError("retrieval_scope=selected 时至少选择一个知识库")
+            if configured_scope == "selected" and configured_keys:
+                configured_set = set(configured_keys)
+                if any(key not in configured_set for key in selected_keys):
+                    raise PermissionError("请求的知识库不在 Assistant 已配置范围内")
+
+        # 指定范围时逐个读取并验证 active 状态；公司级模式读取当前公司的全部 active 库。
+        if selected_keys:
+            knowledge_bases = []
+            for key in selected_keys:
+                knowledge_base = self.get_knowledge_base_by_key(company_id, key)
+                if knowledge_base.status != "active":
+                    raise AdminNotFoundError(f"知识库未启用：{key}")
+                knowledge_bases.append(knowledge_base)
+        else:
+            knowledge_bases = list(
+                self.session.scalars(
+                    select(KnowledgeBase)
+                    .where(
+                        KnowledgeBase.company_id == company_id,
+                        KnowledgeBase.status == "active",
+                        KnowledgeBase.deleted_at.is_(None),
                     )
+                    .order_by(KnowledgeBase.id.asc())
+                ).all()
+            )
+            if not knowledge_bases:
+                raise AdminNotFoundError("当前公司没有启用的知识库")
+
+        if assistant is not None and knowledge_key and knowledge_bases:
+            # 历史绑定只保留权限/参数兼容读取，不再决定检索准入。
+            legacy_binding = self.session.scalar(
+                select(AssistantKnowledgeBase).where(
+                    AssistantKnowledgeBase.company_id == company_id,
+                    AssistantKnowledgeBase.assistant_id == assistant.id,
+                    AssistantKnowledgeBase.knowledge_base_id == knowledge_bases[0].id,
                 )
-                if binding is None:
-                    raise AdminNotFoundError("Assistant 未绑定该知识库")
+            )
+
+        if assistant is not None:
             # 当前知识问答固定使用已发布的 knowledge_answer/primary Prompt。
             prompt = self.session.scalar(
                 select(PromptVersion).where(
@@ -756,36 +968,88 @@ class RagAdminRepository:
             if prompt and isinstance(prompt.model_overrides_json, dict):
                 # Prompt 级参数覆盖 Assistant 配置，但不能改变连接凭据。
                 model_overrides.update(prompt.model_overrides_json)
-        # 绑定级检索参数优先于知识库默认值，未绑定场景直接使用知识库配置。
+
+        # 检索参数统一来自 Assistant/Prompt；知识库只保留切分和权限策略。
+        if isinstance(getattr(legacy_binding, "retrieval_config_json", None), dict):
+            assistant_retrieval.update(legacy_binding.retrieval_config_json)
+        top_k = assistant_retrieval.get("top_k")
+        score_threshold = assistant_retrieval.get("score_threshold")
         retrieval = dict(assistant_retrieval)
-        binding_retrieval = getattr(binding, "retrieval_config_json", None)
-        if isinstance(binding_retrieval, dict):
-            retrieval.update(binding_retrieval)
-        top_k = retrieval.get("top_k")
-        score_threshold = retrieval.get("score_threshold")
+        targets: list[RagKnowledgeBaseTarget] = []
+        for item in knowledge_bases:
+            target_key = str(getattr(item, "knowledge_key", None) or "default")
+            target_name = str(getattr(item, "name", None) or target_key)
+            scalar_query = getattr(self.session, "scalars", None)
+            documents = (
+                scalar_query(
+                    select(KnowledgeDocument)
+                    .where(
+                        KnowledgeDocument.company_id == company_id,
+                        KnowledgeDocument.knowledge_base_id == item.id,
+                        KnowledgeDocument.status == "published",
+                        KnowledgeDocument.deleted_at.is_(None),
+                        KnowledgeDocument.search_enabled.is_(True),
+                    )
+                    .order_by(KnowledgeDocument.id.asc())
+                ).all()
+                if callable(scalar_query)
+                else []
+            )
+            active_document_pairs: list[tuple[str, str]] = []
+            for document in documents:
+                source = str(
+                    document.file_name or document.title or document.document_key or ""
+                )
+                if not source:
+                    continue
+                vector_version = str(getattr(document, "vector_version", None) or "")
+                active_document_pairs.append((source, vector_version))
+                if not vector_version:
+                    # 004 之前的旧向量可能没有字符串版本，兼容内部整数版本。
+                    legacy_version = str(getattr(document, "version", "") or "")
+                    if legacy_version and legacy_version != vector_version:
+                        active_document_pairs.append((source, legacy_version))
+            policy_values = [getattr(item, "permission_config_json", None)]
+            if item is knowledge_bases[0] and knowledge_key:
+                # 历史绑定的权限过滤只能收窄显式单库查询，绝不扩大公司级检索范围。
+                policy_values.append(getattr(legacy_binding, "permission_filter_json", None))
+            policies = tuple(
+                policy for policy in policy_values if isinstance(policy, dict) and policy
+            )
+            targets.append(
+                RagKnowledgeBaseTarget(
+                    knowledge_base_key=target_key,
+                    knowledge_base_name=target_name,
+                    collection=str(getattr(item, "milvus_collection", "")),
+                    active_documents=tuple(active_document_pairs),
+                    # 没有 scalars 的旧测试 Session 视为未加载文档范围，保持兼容导入模式。
+                    document_scope_loaded=callable(scalar_query),
+                    permission_policies=policies,
+                    score_threshold=(
+                        float(item.default_score_threshold)
+                        if item.default_score_threshold is not None
+                        else None
+                    ),
+                )
+            )
         policies = tuple(
             policy
-            for policy in (
-                getattr(knowledge_base, "permission_config_json", None),
-                getattr(binding, "permission_filter_json", None),
-            )
-            if isinstance(policy, dict) and policy
+            for target in targets
+            for policy in target.permission_policies
         )
+        first_target = targets[0] if len(targets) == 1 else None
+        first_kb = knowledge_bases[0] if len(knowledge_bases) == 1 else None
         return RagRuntimeConfig(
-            collection=knowledge_base.milvus_collection if knowledge_base else "",
+            collection=first_target.collection if first_target else "",
             system_context=system_context,
             model_overrides=model_overrides or None,
-            chunk_size=int(knowledge_base.chunk_size) if knowledge_base else None,
-            chunk_overlap=int(knowledge_base.chunk_overlap) if knowledge_base else None,
-            top_k=int(top_k if top_k is not None else knowledge_base.default_top_k) if knowledge_base else None,
+            chunk_size=int(first_kb.chunk_size) if first_kb else None,
+            chunk_overlap=int(first_kb.chunk_overlap) if first_kb else None,
+            top_k=int(top_k) if top_k is not None else (int(first_kb.default_top_k) if first_kb else None),
             score_threshold=(
-                float(
-                    score_threshold
-                    if score_threshold is not None
-                    else knowledge_base.default_score_threshold
-                )
-                if knowledge_base
-                else None
+                float(score_threshold)
+                if score_threshold is not None
+                else (float(first_kb.default_score_threshold) if first_kb else None)
             ),
             rerank_enabled=(
                 retrieval.get("rerank_enabled")
@@ -797,5 +1061,7 @@ class RagAdminRepository:
                 if retrieval.get("rerank_candidates") is not None
                 else None
             ),
+            retrieval_scope=("selected" if selected_keys else "company_enabled"),
             permission_policies=policies,
+            knowledge_bases=tuple(targets),
         )

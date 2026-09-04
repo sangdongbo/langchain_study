@@ -61,6 +61,7 @@ class IngestJobTracker:
             knowledge_base_key,
             job_key=job_key,
             source=source,
+            vector_version=str(metadata.get("version") or ""),
             title=title,
             mime_type=mime_type,
             storage_uri=str(source_path),

@@ -19,7 +19,7 @@ CREATE TABLE `ai_erp_assistants` (
     CONSTRAINT `chk_ai_erp_assistants_status`
         CHECK (`status` IN ('active', 'disabled', 'archived'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Company-scoped AI assistant identities';
+  COMMENT='公司范围内的 AI 助手身份';
 
 CREATE TABLE `ai_erp_assistant_config_versions` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '助手配置版本主键ID',
@@ -33,6 +33,8 @@ CREATE TABLE `ai_erp_assistant_config_versions` (
     `page_config_json` JSON NULL COMMENT '页面配置：头像、颜色、标题和开场介绍等',
     `model_config_json` JSON NULL COMMENT '模型与回答配置，不得保存API密钥',
     `retrieval_config_json` JSON NULL COMMENT '检索配置：top_k、相关度阈值和重排等',
+    `retrieval_scope` VARCHAR(24) NOT NULL DEFAULT 'company_enabled' COMMENT '检索范围：公司内全部启用知识库或显式指定知识库',
+    `knowledge_base_keys_json` JSON NULL COMMENT 'selected 模式的默认知识库 Key 数组；company_enabled 时为空',
     `feature_flags_json` JSON NULL COMMENT '历史记录、注册访问、下载和多版本等功能开关',
     `config_hash` CHAR(64) NOT NULL COMMENT '规范化配置内容的SHA-256摘要',
     `created_by` VARCHAR(64) NULL COMMENT '创建人用户ID',
@@ -47,12 +49,23 @@ CREATE TABLE `ai_erp_assistant_config_versions` (
     KEY `idx_ai_erp_config_published` (`company_id`, `assistant_id`, `status`, `published_at`),
     CONSTRAINT `chk_ai_erp_config_status`
         CHECK (`status` IN ('draft', 'published', 'archived')),
+    CONSTRAINT `chk_ai_erp_config_retrieval_scope`
+        CHECK (`retrieval_scope` IN ('company_enabled', 'selected')),
+    CONSTRAINT `chk_ai_erp_config_selected_knowledge_bases`
+        CHECK (
+            (`retrieval_scope` = 'company_enabled' AND `knowledge_base_keys_json` IS NULL)
+            OR
+            (`retrieval_scope` = 'selected'
+                AND `knowledge_base_keys_json` IS NOT NULL
+                AND JSON_TYPE(`knowledge_base_keys_json`) = 'ARRAY'
+                AND JSON_LENGTH(`knowledge_base_keys_json`) > 0)
+        ),
     CONSTRAINT `fk_ai_erp_config_assistant`
         FOREIGN KEY (`company_id`, `assistant_id`)
         REFERENCES `ai_erp_assistants` (`company_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Versioned page, model, retrieval and feature configuration';
+  COMMENT='按版本管理的页面、模型、检索和功能配置';
 
 ALTER TABLE `ai_erp_assistants`
     ADD CONSTRAINT `fk_ai_erp_assistant_published_config`
@@ -92,7 +105,7 @@ CREATE TABLE `ai_erp_prompt_versions` (
         REFERENCES `ai_erp_assistants` (`company_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Versioned company-specific prompts and primary/secondary variants';
+  COMMENT='公司范围内按版本管理的主副 Prompt';
 
 CREATE TABLE `ai_erp_blocked_terms` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '禁用词主键ID',
@@ -118,7 +131,7 @@ CREATE TABLE `ai_erp_blocked_terms` (
         REFERENCES `ai_erp_assistants` (`company_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Company-specific blocked terms and deterministic replies';
+  COMMENT='公司范围内的禁用词和固定回复';
 
 CREATE TABLE `ai_erp_knowledge_bases` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '知识库主键ID',
@@ -157,7 +170,7 @@ CREATE TABLE `ai_erp_knowledge_bases` (
     CONSTRAINT `chk_ai_erp_knowledge_score`
         CHECK (`default_score_threshold` >= 0 AND `default_score_threshold` <= 1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Company-owned knowledge-base definitions backed by Milvus';
+  COMMENT='公司范围内由 Milvus 支持的知识库定义';
 
 CREATE TABLE `ai_erp_data_sources` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '数据源主键ID',
@@ -182,7 +195,7 @@ CREATE TABLE `ai_erp_data_sources` (
     CONSTRAINT `chk_ai_erp_data_source_status`
         CHECK (`status` IN ('active', 'disabled', 'archived'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Company-owned RAG import sources; credentials live outside MySQL';
+  COMMENT='公司范围内的 RAG 导入数据源，凭据保存在 MySQL 之外';
 
 CREATE TABLE `ai_erp_knowledge_base_sources` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '知识库与数据源绑定主键ID',
@@ -209,7 +222,7 @@ CREATE TABLE `ai_erp_knowledge_base_sources` (
         REFERENCES `ai_erp_data_sources` (`company_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Company-scoped knowledge-base data-source bindings';
+  COMMENT='公司范围内的知识库与数据源绑定';
 
 CREATE TABLE `ai_erp_assistant_knowledge_bases` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '助手与知识库绑定主键ID',
@@ -236,7 +249,7 @@ CREATE TABLE `ai_erp_assistant_knowledge_bases` (
         REFERENCES `ai_erp_knowledge_bases` (`company_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Many-to-many bindings between assistants and knowledge bases';
+  COMMENT='历史兼容的助手与知识库绑定，公司级检索不再依赖本表记录';
 
 CREATE TABLE `ai_erp_knowledge_documents` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '知识库文档主键ID',
@@ -252,7 +265,9 @@ CREATE TABLE `ai_erp_knowledge_documents` (
     `source_record_key` VARCHAR(255) NULL COMMENT '数据库/API记录的稳定业务标识',
     `content_sha256` CHAR(64) NOT NULL COMMENT '原始文件或规范化来源内容的SHA-256摘要',
     `version` INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '同一document_key下的文档版本号',
-    `status` VARCHAR(24) NOT NULL DEFAULT 'uploaded' COMMENT '文档状态：uploaded、parsing、embedding、published、failed或expired',
+    `status` VARCHAR(24) NOT NULL DEFAULT 'uploaded' COMMENT '导入状态：uploaded、parsing、embedding、published、failed或expired',
+    `search_enabled` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '文件是否参与公司级检索：1启用，0停用',
+    `vector_version` VARCHAR(128) NULL COMMENT '写入 Milvus 的来源版本字符串；与内部版本号分开保存',
     `effective_at` DATETIME(6) NULL COMMENT '文档生效时间',
     `expired_at` DATETIME(6) NULL COMMENT '文档失效时间',
     `permission_scope_json` JSON NULL COMMENT '文档允许访问的部门、角色或用户范围',
@@ -267,6 +282,7 @@ CREATE TABLE `ai_erp_knowledge_documents` (
     UNIQUE KEY `uk_ai_erp_document_company_kb_id` (`company_id`, `knowledge_base_id`, `id`),
     UNIQUE KEY `uk_ai_erp_document_company_kb_id_version` (`company_id`, `knowledge_base_id`, `id`, `version`),
     KEY `idx_ai_erp_document_status` (`company_id`, `knowledge_base_id`, `status`, `updated_at`),
+    KEY `idx_ai_erp_document_search_scope` (`company_id`, `knowledge_base_id`, `status`, `search_enabled`, `updated_at`),
     KEY `idx_ai_erp_document_hash` (`company_id`, `knowledge_base_id`, `content_sha256`),
     KEY `idx_ai_erp_document_source_record` (`company_id`, `knowledge_base_id`, `data_source_id`, `source_record_key`),
     CONSTRAINT `chk_ai_erp_document_source_type`
@@ -277,6 +293,8 @@ CREATE TABLE `ai_erp_knowledge_documents` (
             OR (`source_type` IN ('database', 'api') AND `data_source_id` IS NOT NULL AND `source_record_key` IS NOT NULL)),
     CONSTRAINT `chk_ai_erp_document_status`
         CHECK (`status` IN ('uploaded', 'parsing', 'embedding', 'published', 'failed', 'expired')),
+    CONSTRAINT `chk_ai_erp_document_search_enabled`
+        CHECK (`search_enabled` IN (0, 1)),
     CONSTRAINT `fk_ai_erp_document_knowledge`
         FOREIGN KEY (`company_id`, `knowledge_base_id`)
         REFERENCES `ai_erp_knowledge_bases` (`company_id`, `id`)
@@ -286,7 +304,7 @@ CREATE TABLE `ai_erp_knowledge_documents` (
         REFERENCES `ai_erp_knowledge_base_sources` (`company_id`, `knowledge_base_id`, `data_source_id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Versioned document metadata; file contents remain in object storage';
+  COMMENT='按版本管理的文档元数据，文件正文保存在对象存储中';
 
 CREATE TABLE `ai_erp_knowledge_ingest_jobs` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '知识库入库任务主键ID',
@@ -317,7 +335,7 @@ CREATE TABLE `ai_erp_knowledge_ingest_jobs` (
         REFERENCES `ai_erp_knowledge_documents` (`company_id`, `knowledge_base_id`, `id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Auditable document parsing, chunking and Milvus ingestion jobs';
+  COMMENT='可审计的文档解析、切分和 Milvus 入库任务';
 
 CREATE TABLE `ai_erp_data_source_sync_jobs` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '数据源同步任务主键ID',
@@ -345,4 +363,4 @@ CREATE TABLE `ai_erp_data_source_sync_jobs` (
         REFERENCES `ai_erp_knowledge_base_sources` (`company_id`, `knowledge_base_id`, `data_source_id`)
         ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-  COMMENT='Auditable database/API extraction jobs before document ingestion';
+  COMMENT='文档入库前可审计的数据库和 API 数据提取任务';

@@ -72,6 +72,7 @@ HTTP 接口按功能拆分在 `app/routes/` 下，公共身份校验、租户隔
 | 模块 | 负责接口 |
 |---|---|
 | `app/routes/chat.py` | `/api/chat` 对话工作流 |
+| `app/routes/assistants.py` | `/api/assistants/list` 固定审批助手与 RAG 助手目录 |
 | `app/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
 | `app/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
 | `app/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
@@ -108,8 +109,8 @@ LANGSMITH_PROJECT=ai-erp-rag-assistant
 
 当前已经完成一次真实入库：23 个 Chunk，Embedding 使用 `text-embedding-v4`，Milvus 使用 Docker Standalone 的持久化卷。检索请求会返回来源文件、页码、版本和权限元数据，再交给 LLM 生成带引用的答案。
 
-知识检索会强制要求 `company_id`，并应用部门、有效状态、最低相关度以及 ERP 已验证的
-`permissions/roles` 过滤；请求体中的权限标签不会作为可信 ACL。
+知识检索会从 ERP 已验证身份解析 `company_id`（请求体显式传入时只作一致性校验），并应用
+部门、有效状态、最低相关度以及 ERP 已验证的 `permissions/roles` 过滤；请求体中的权限标签不会作为可信 ACL。
 
 ## RAG API
 
@@ -125,13 +126,23 @@ FastAPI 当前提供以下直接连接现有 Embedding、Milvus 和 LLM 服务�
 | `POST /api/rag/ingest/text` | 将文本切分、Embedding 并写入知识库 |
 | `POST /api/rag/ingest/pdf` | 读取原始 PDF 请求体并写入知识库 |
 | `POST /api/rag/ingest/document` | 同步解析 PDF、DOCX、TXT、Markdown、JSON、CSV 等文档并写入知识库 |
-| `POST /api/rag/documents/list` | 按来源和版本列出知识库文档及 Chunk 统计 |
+| `POST /api/rag/documents/list` | 列出公司内所有启用知识库的可见文档及 Chunk 统计 |
+| `POST /api/rag/documents/status` | 启用或停用文件的检索开关 |
 | `POST /api/rag/documents/delete` | 精确删除指定来源和版本的文档 Chunk |
 
-搜索、问答和导入都强制要求 `company_id`。远程 ERP 模式下还必须提供 `UID` 和
+AI 助手页面先调用 `POST /api/assistants/list`。服务端会固定返回
+`approval-assistant`（审批助手），再合并当前公司的数据库 RAG 助手。审批助手不写入
+`ai_erp_assistants`；`POST /api/chat` 只根据 `assistant_key` 判断能力范围，前端无需传助手类型。
+审批助手允许审批状态查询和审批发起，RAG 助手仅允许知识库问答，两者都支持普通对话。
+
+搜索、问答、文档列表和文件启停可以省略 `company_id`，服务端从 ERP 登录态补齐；导入接口也
+支持省略并由已验证身份补齐，显式传入时仍会校验一致性。远程 ERP 模式下还必须提供 `UID` 和
 `Authorization` 请求头，服务端会通过 ERP 用户信息校验请求公司，不能通过替换请求体中的
-`company_id` 访问其他租户。`knowledge_base_key` 为空时兼容原有默认 Collection；不为空时，
-服务端按 `company_id + knowledge_base_key` 生成独立且稳定的 Collection 名称。
+`company_id` 访问其他租户。配置 MySQL 时，Assistant 配置版本的
+`retrieval_scope=company_enabled` 会读取公司内所有 `status=active` 的知识库并合并检索；
+`retrieval_scope=selected` 会读取配置中保存的 `knowledge_base_keys` 数组。搜索请求仍兼容
+传入 `knowledge_base_key` 或 `knowledge_base_keys` 临时收窄范围，但不能扩大专用 Assistant
+的已配置范围。没有 MySQL 时才兼容原有默认 Collection。
 请求体同时带有身份字段时，以 HTTP 请求头为准；远程 `/userinfo` 未返回公司或部门时，
 服务端不会回退信任请求体字段。
 
@@ -143,7 +154,9 @@ $body = @{
   query = "病假需要什么材料？"
   user_id = "863"
   company_id = "公司ID"
-  knowledge_base_key = "employee_handbook"
+  assistant_key = "employee-rag"
+  search_scope = "company_enabled"
+  knowledge_base_keys = @()
   top_k = 5
 } | ConvertTo-Json
 Invoke-RestMethod -Method Post http://127.0.0.1:8021/api/rag/search `
@@ -228,8 +241,10 @@ Invoke-RestMethod -Method Post `
 
 数据源的 `config`、`sync_config` 只能保存非敏感配置，密码、Token 和 API Key 必须使用
 `credentials_ref` 指向外部密钥管理。要在问答时使用平台 Prompt，请在 `/api/rag/chat`
-请求中同时传 `assistant_key`；服务端会读取已发布的 `knowledge_answer/primary` Prompt，
-并校验该 Assistant 已绑定目标知识库。
+请求中传 `assistant_key`；服务端会读取已发布的 `knowledge_answer/primary` Prompt。Assistant
+默认检索公司内所有启用知识库；配置为 `retrieval_scope: "selected"` 时，必须在配置版本中
+保存 `knowledge_base_keys` 数组。请求中的 `search_scope` 和知识库 Key 仅用于临时收窄范围，
+不能扩大专用 Assistant 的已配置范围。
 
 Assistant 配置的 `model_config` 和 Prompt 的 `model_overrides` 会真正作用于 RAG 问答的
 LLM 调用。Prompt 参数优先于 Assistant 配置，目前只支持 `model`、`temperature`（0..2）
@@ -253,8 +268,9 @@ AI_ERP_MYSQL_PASSWORD=从部署环境注入
 AI_ERP_MYSQL_CONNECT_TIMEOUT=5
 ```
 
-ORM Model 覆盖 `001_mysql8_assistant_config.sql` 的 11 张 RAG 配置、文档和任务表。
-当前管理 API 覆盖 Assistant、配置、Prompt、知识库、数据源及绑定；后台 Worker、
+ORM Model 覆盖 `001_mysql8_assistant_config.sql` 的 11 张 RAG 配置、文档和任务表；已经执行
+旧版 001 的环境还需人工审查 `004_mysql8_rag_unified_search.sql`，补充文件检索开关和向量版本。
+当前管理 API 覆盖 Assistant、配置、Prompt、知识库、数据源及兼容绑定；后台 Worker、
 文档元数据和任务状态写入留到异步导入阶段。
 
 ERP 接入有读写两个独立边界：
@@ -293,7 +309,7 @@ ERP 接入有读写两个独立边界：
 }
 ```
 
-生产长期会话使用 `AI_ERP_SESSION_STORE=mysql`。启用前必须人工审查并执行 `docs/database/001`、`002`、`003`，同时为每家公司建立对应的 `AI_ERP_ASSISTANT_KEY`。启用后会话、消息、审批草稿、冻结预览、提交尝试和工具事件在同一事务写入；未配置时继续使用进程内状态。
+生产长期会话使用 `AI_ERP_SESSION_STORE=mysql`。启用前必须人工审查并执行 `docs/database/001`、`002`、`003`，同时为每家公司建立对应的 RAG Assistant。启用后 RAG 助手的会话和消息写入 MySQL；固定审批助手不依赖 Assistant 表，只保留服务进程内的多轮状态，重启后清空。
 
 前端长期会话接口：
 
@@ -326,6 +342,10 @@ Invoke-RestMethod -Method Post http://127.0.0.1:8021/api/chat `
   -ContentType 'application/json' `
   -Body '{"message":"帮我明天下午请半天事假","user_id":"U001","session_id":"demo-001"}'
 ```
+
+`/api/chat` 请求体可增加 `"stream": true`，此时返回 `text/event-stream`，依次发送
+`metadata`、多个 `token`、`final` 和 `done` 事件；未传或为 `false` 时保持上述 JSON 响应。
+浏览器端使用 `fetch + ReadableStream`，完整事件定义见 `docs/RAG_FRONTEND_API.md`。
 
 多轮审批示例：第一轮填写业务目标，第二轮补充 Graph 追问的必填字段，第三轮发送 `确认提交`（或请求体传 `confirm=true`）。只有确认节点才会调用 ERP 提交工具。确认冻结预览时，页面建议同时回传响应中的 `preview_id`、`preview_version` 和 `preview_hash`：
 

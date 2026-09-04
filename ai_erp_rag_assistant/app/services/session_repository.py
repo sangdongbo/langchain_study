@@ -108,7 +108,7 @@ class SessionRepository:
                 cursor.execute(
                     """
                     SELECT m.message_seq, m.request_id, m.role, m.content,
-                           m.route, m.status, m.created_at
+                           m.route, m.status, m.metadata_json, m.created_at
                     FROM ai_erp_messages AS m
                     INNER JOIN ai_erp_sessions AS s
                         ON s.company_id = m.company_id
@@ -134,6 +134,12 @@ class SessionRepository:
                     ),
                 )
                 rows = list(cursor.fetchall())
+                for row in rows:
+                    # Assistant 消息保存的 response 可让历史界面恢复动态表单和审批预览卡片。
+                    metadata = _json_object(row.pop("metadata_json", None))
+                    response = metadata.get("response")
+                    if isinstance(response, dict):
+                        row["response"] = _strip_secrets(response)
                 has_more = len(rows) > page_size
                 # SQL 倒序取最近一页，返回前恢复为聊天界面需要的时间正序。
                 return list(reversed(rows[:page_size])), has_more

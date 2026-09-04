@@ -9,6 +9,7 @@ class ErpRagState(TypedDict, total=False):
     """一次会话中路由、检索、审批草稿和审计信息的统一状态。"""
 
     session_id: str
+    assistant_type: str
     user_id: str
     user_message: str
     uid: str
@@ -46,6 +47,7 @@ def initial_state(
     user_id: str,
     message: str,
     *,
+    assistant_type: str = "",
     uid: str = "",
     authorization: str = "",
     company_id: str = "",
@@ -63,6 +65,7 @@ def initial_state(
     prior_active_approval = bool(prior.get("active_approval", False))
     return {
         "session_id": session_id,
+        "assistant_type": assistant_type or str(prior.get("assistant_type", "")),
         "user_id": user_id,
         "user_message": message,
         "uid": uid or prior.get("uid", ""),

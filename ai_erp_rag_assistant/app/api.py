@@ -21,6 +21,7 @@ from ai_erp_rag_assistant.app.rag_admin_api import router as rag_admin_router
 from ai_erp_rag_assistant.app.rag_admin_repository import (
     AdminNotFoundError,
     RagAdminRepository,
+    RagKnowledgeBaseTarget,
     RagRuntimeConfig,
 )
 from ai_erp_rag_assistant.app.services.approval_form_service import build_form_schema
@@ -194,8 +195,8 @@ def _rag_identity(
     # 缺少公司 ID 时无法建立租户边界，必须在进入检索前拒绝请求。
     if not company_id:
         raise HTTPException(status_code=403, detail="当前用户没有可用的 company_id")
-    # 请求中的公司 ID 只能用于校验，不能切换到 ERP 身份之外的公司。
-    if requested_company != company_id:
+    # 请求中的公司 ID 只能用于可选校验；留空时直接使用 ERP 身份，不能切换租户。
+    if requested_company and requested_company != company_id:
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
     # 用户请求里的 permission_tags 不可信，只汇总 ERP 身份接口返回的权限与角色。
     access_tags = _verified_access_tags(user)
@@ -214,24 +215,59 @@ def _rag_runtime_config(
     company_id: str,
     knowledge_base_key: str,
     assistant_key: str,
+    knowledge_base_keys: list[str] | tuple[str, ...] = (),
+    search_scope: str | None = None,
 ) -> RagRuntimeConfig:
     """读取数据库中的 RAG 配置，缺少配置时回退到进程默认值。"""
     # 默认 Collection 名称由租户和知识库 key 确定，即使未配置 MySQL 也不会串库。
-    fallback = RagRuntimeConfig(
-        collection=milvus_service.collection_name(
+    # 兼容旧单库参数，同时为无 MySQL 的多库调试调用构造多个稳定 Collection 目标。
+    requested_keys: list[str] = []
+    seen_keys: set[str] = set()
+    for raw_key in (*knowledge_base_keys, knowledge_base_key):
+        key = str(raw_key or "").strip()
+        if key and key not in seen_keys:
+            requested_keys.append(key)
+            seen_keys.add(key)
+    if search_scope == "company_enabled" and requested_keys:
+        raise ValueError("search_scope=company_enabled 时不能同时指定知识库")
+    if search_scope == "selected" and not requested_keys:
+        raise ValueError("search_scope=selected 时至少指定一个 knowledge_base_key")
+    fallback_targets = tuple(
+        RagKnowledgeBaseTarget(
+            knowledge_base_key=key,
+            knowledge_base_name="",
+            collection=milvus_service.collection_name(
+                company_id=company_id, knowledge_base_key=key
+            ),
+        )
+        for key in requested_keys
+    )
+    fallback_collection = (
+        fallback_targets[0].collection
+        if len(fallback_targets) == 1
+        else milvus_service.collection_name(
             company_id=company_id, knowledge_base_key=knowledge_base_key
-        ),
+        )
+    )
+    fallback = RagRuntimeConfig(
+        collection=fallback_collection,
         chunk_size=get_settings().rag_chunk_size,
         chunk_overlap=get_settings().rag_chunk_overlap,
         rerank_enabled=get_settings().rag_rerank_enabled,
         rerank_candidates=get_settings().rag_rerank_candidates,
+        retrieval_scope=("selected" if requested_keys else "company_enabled"),
+        knowledge_bases=fallback_targets,
     )
     if db is None:
         return fallback
     try:
         # MySQL 只覆盖已配置项，空值继续沿用进程级安全默认值。
         configured = RagAdminRepository(db).runtime_config(
-            company_id, knowledge_base_key, assistant_key
+            company_id,
+            knowledge_base_key,
+            assistant_key,
+            knowledge_base_keys=knowledge_base_keys,
+            search_scope=search_scope,
         )
         return RagRuntimeConfig(
             collection=configured.collection or fallback.collection,
@@ -251,7 +287,9 @@ def _rag_runtime_config(
                 else fallback.rerank_enabled
             ),
             rerank_candidates=configured.rerank_candidates or fallback.rerank_candidates,
+            retrieval_scope=configured.retrieval_scope,
             permission_policies=configured.permission_policies,
+            knowledge_bases=configured.knowledge_bases or fallback.knowledge_bases,
         )
     except AdminNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -263,6 +301,7 @@ def _rag_runtime_config(
 # 共享辅助函数定义完成后再导入业务路由，避免路由模块引用兼容层时产生循环导入。
 from ai_erp_rag_assistant.app.routes import (
     approvals,
+    assistants,
     chat as chat_routes,
     rag,
     rag_documents,
@@ -276,6 +315,7 @@ workflow = chat_routes.workflow
 stateless_workflow = chat_routes.stateless_workflow
 
 router.include_router(rag_admin_router)
+router.include_router(assistants.router)
 router.include_router(chat_routes.router)
 router.include_router(rag.router)
 router.include_router(rag_documents.router)
@@ -294,6 +334,7 @@ _rag_rows_from_text = rag._rag_rows_from_text
 _rag_rows_from_pdf = rag._rag_rows_from_pdf
 list_rag_documents = rag_documents.list_rag_documents
 delete_rag_document = rag_documents.delete_rag_document
+update_rag_document_status = rag_documents.update_rag_document_status
 session_list = sessions.session_list
 session_messages = sessions.session_messages
 approval_templates = approvals.approval_templates

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from hashlib import sha256
-from typing import Any
+from typing import Any, Sequence
 
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.services.embedding_service import embedding_service
@@ -198,8 +198,10 @@ class MilvusService:
         knowledge_base_key: str = "",
         collection_name: str = "",
         min_score: float | None = None,
+        document_filters: Sequence[tuple[str, str]] | None = None,
+        restrict_to_documents: bool = False,
     ) -> list[dict[str, Any]]:
-        """按公司、部门、文档 ACL 和最低分数执行向量检索。"""
+        """按公司、知识库、启用文档、部门和 ACL 执行向量检索。"""
         client = self._client()
         company_id = company_id.strip()
         if not company_id:
@@ -218,6 +220,9 @@ class MilvusService:
         # 查询向量与文档向量必须来自同一进程级模型和维度配置。
         vector = embedding_service.embed_query(query)
         filters = _visibility_filters(company_id, department, permission_tags)
+        if restrict_to_documents:
+            # MySQL 已配置时只允许 published + search_enabled 文档的 source/version 命中。
+            filters.append(_active_document_filter(document_filters or []))
         # 先多取候选，再在应用层做最低分、去重和精确 top_k 截断。
         try:
             results = client.search(
@@ -243,10 +248,73 @@ class MilvusService:
             if chunk_id in seen_chunk_ids:
                 continue
             seen_chunk_ids.add(chunk_id)
-            evidence.append({key: _plain(value) for key, value in {**entity, "score": score}.items()})
+            evidence_item = {
+                key: _plain(value) for key, value in {**entity, "score": score}.items()
+            }
+            if knowledge_base_key:
+                # Collection 内没有重复存储知识库标识，服务端检索时补齐可信来源。
+                evidence_item["knowledge_base_key"] = knowledge_base_key
+            evidence.append(evidence_item)
             if len(evidence) >= top_k:
                 break
         return evidence
+
+    def search_many(
+        self,
+        query: str,
+        *,
+        company_id: str,
+        department: str = "",
+        permission_tags: list[str] | None = None,
+        targets: Sequence[dict[str, Any]] = (),
+        top_k: int = 5,
+        min_score: float | None = None,
+    ) -> list[dict[str, Any]]:
+        """跨公司内多个启用知识库检索，并按统一得分合并候选结果。"""
+        merged: list[dict[str, Any]] = []
+        seen_chunk_ids: set[str] = set()
+        for target in targets:
+            key = str(target.get("knowledge_base_key") or "").strip()
+            collection = str(target.get("collection") or "").strip()
+            if not collection:
+                continue
+            try:
+                rows = self.search(
+                    query,
+                    company_id=company_id,
+                    department=department,
+                    permission_tags=permission_tags,
+                    top_k=top_k,
+                    knowledge_base_key=key,
+                    collection_name=collection,
+                    min_score=(
+                        min_score
+                        if min_score is not None
+                        else target.get("score_threshold")
+                    ),
+                    document_filters=target.get("active_documents") or (),
+                    restrict_to_documents=bool(target.get("document_scope_loaded")),
+                )
+            except RuntimeError as exc:
+                # 公司下新建但尚未导入文件的知识库没有 Collection，不应阻断其他知识库。
+                if "collection 不存在" in str(exc):
+                    continue
+                raise
+            for row in rows:
+                chunk_id = str(row.get("chunk_id") or "")
+                if chunk_id and chunk_id in seen_chunk_ids:
+                    continue
+                if chunk_id:
+                    seen_chunk_ids.add(chunk_id)
+                item = dict(row)
+                item["knowledge_base_key"] = key
+                item["knowledge_base_name"] = str(
+                    target.get("knowledge_base_name") or key
+                )
+                item["collection"] = collection
+                merged.append(item)
+        merged.sort(key=lambda item: float(item.get("score") or 0.0), reverse=True)
+        return merged[:top_k]
 
     def list_documents(
         self,
@@ -259,6 +327,8 @@ class MilvusService:
         keyword: str = "",
         page: int = 1,
         page_size: int = 20,
+        document_filters: Sequence[tuple[str, str]] | None = None,
+        restrict_to_documents: bool = False,
     ) -> tuple[list[dict[str, Any]], int]:
         """将可见 Milvus Chunk 按来源和版本聚合为文档摘要。"""
         company_id = company_id.strip()
@@ -275,10 +345,13 @@ class MilvusService:
         except Exception as exc:
             raise RuntimeError(f"Milvus Collection 状态查询失败：{exc}") from exc
         # 当前文档元数据尚未落 MySQL，先读取可见 Chunk 再按 source + version 聚合。
+        query_filters = _visibility_filters(company_id, department, permission_tags)
+        if restrict_to_documents:
+            query_filters.append(_active_document_filter(document_filters or []))
         try:
             rows = client.query(
                 collection_name=collection_name,
-                filter=" and ".join(_visibility_filters(company_id, department, permission_tags)),
+                filter=" and ".join(query_filters),
                 output_fields=[
                     "chunk_id",
                     "source",
@@ -305,6 +378,10 @@ class MilvusService:
                     "source": source,
                     "title": str(row.get("title") or source),
                     "version": version,
+                    # 单库列表也返回可信知识库来源，前端无需根据 Collection 反查。
+                    "knowledge_base_key": knowledge_base_key,
+                    "knowledge_base_name": knowledge_base_key,
+                    "collection": collection_name,
                     "effective_date": str(row.get("effective_date") or ""),
                     "department": str(row.get("department") or ""),
                     "permission_tags": _plain(row.get("permission_tags") or []),
@@ -327,6 +404,59 @@ class MilvusService:
         total = len(items)
         start = (page - 1) * page_size
         return items[start : start + page_size], total
+
+    def list_documents_many(
+        self,
+        *,
+        company_id: str,
+        department: str = "",
+        permission_tags: list[str] | None = None,
+        targets: Sequence[dict[str, Any]] = (),
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[dict[str, Any]], int]:
+        """聚合公司内多个启用知识库的可见文件，并补齐知识库来源。"""
+        all_items: list[dict[str, Any]] = []
+        for target in targets:
+            try:
+                items, _ = self.list_documents(
+                    company_id=company_id,
+                    department=department,
+                    permission_tags=permission_tags,
+                    collection_name=str(target.get("collection") or ""),
+                    knowledge_base_key=str(target.get("knowledge_base_key") or ""),
+                    keyword=keyword,
+                    page=1,
+                    page_size=16384,
+                    document_filters=target.get("active_documents") or (),
+                    restrict_to_documents=bool(target.get("document_scope_loaded")),
+                )
+            except RuntimeError as exc:
+                if "collection 不存在" in str(exc):
+                    continue
+                raise
+            for item in items:
+                item = dict(item)
+                item["knowledge_base_key"] = str(target.get("knowledge_base_key") or "")
+                item["knowledge_base_name"] = str(
+                    target.get("knowledge_base_name")
+                    or target.get("knowledge_base_key")
+                    or ""
+                )
+                item["collection"] = str(target.get("collection") or "")
+                all_items.append(item)
+        all_items.sort(
+            key=lambda item: (
+                str(item.get("knowledge_base_key") or "").casefold(),
+                str(item.get("source") or "").casefold(),
+                str(item.get("version") or ""),
+            ),
+            reverse=True,
+        )
+        total = len(all_items)
+        start = (page - 1) * page_size
+        return all_items[start : start + page_size], total
 
     def delete_document(
         self,
@@ -422,6 +552,17 @@ def _document_filter(company_id: str, *, source: str, version: str) -> str:
             f'version == "{_escape(version)}"',
         ]
     )
+
+
+def _active_document_filter(document_filters: Sequence[tuple[str, str]]) -> str:
+    """构造只允许启用文档 source/version 的 Milvus 过滤表达式。"""
+    clauses = [
+        f'(source == "{_escape(source)}" and version == "{_escape(version)}")'
+        for source, version in document_filters
+        if str(source).strip()
+    ]
+    # 已启用知识库但没有已发布文件时，必须返回空结果而不是放开过滤。
+    return "(" + " or ".join(clauses) + ")" if clauses else '(source == "__no_active_document__")'
 
 
 def _validate_collection_name(value: str) -> str:

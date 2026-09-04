@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ChatRequest(BaseModel):
@@ -26,6 +26,19 @@ class ChatRequest(BaseModel):
     form_values: dict[str, Any] = Field(default_factory=dict)
     selected_assignees: dict[str, list[str]] = Field(default_factory=dict)
     reset: bool = False
+    # 默认保持原 JSON 响应；开启后同一接口改用 SSE 逐步返回回答。
+    stream: bool = False
+
+
+class AssistantListRequest(BaseModel):
+    """统一助手目录请求，身份由 ERP 登录态校验。"""
+
+    user_id: str = Field(default="U001", min_length=1, max_length=64)
+    uid: str = Field(default="", max_length=64)
+    authorization: str = ""
+    company_id: str = Field(default="", max_length=64)
+    department: str = Field(default="", max_length=256)
+    status: Literal["active", "disabled", "archived"] | None = "active"
 
 
 class ChatResponse(BaseModel):
@@ -33,6 +46,7 @@ class ChatResponse(BaseModel):
 
     message: str
     route: Literal["knowledge", "erp_status", "approval_workflow", "general_chat", "unknown"]
+    assistant_type: Literal["approval", "rag"] = "rag"
     plan: dict[str, Any] = Field(default_factory=dict)
     tool_calls: list[dict[str, Any]] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
@@ -134,12 +148,35 @@ class RagSearchRequest(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
+    # company_id 可由 ERP 登录态解析；保留空字符串兼容只在 Header 传身份的前端。
+    company_id: str = Field(default="", max_length=64)
     assistant_key: str = Field(default="", max_length=64)
     knowledge_base_key: str = Field(default="", max_length=64)
+    knowledge_base_keys: list[str] = Field(default_factory=list, max_length=100)
+    # 默认搜索当前公司所有 active 知识库；传单 Key 或数组时收窄为指定知识库集合。
+    # 留空时采用已发布 Assistant 配置，selected 模式优先使用配置中保存的集合。
+    search_scope: Literal["company_enabled", "selected"] | None = None
     department: str = Field(default="", max_length=256)
     permission_tags: list[str] = Field(default_factory=list, max_length=32)
     top_k: int | None = Field(default=None, ge=1, le=50)
+
+    @model_validator(mode="after")
+    def normalize_knowledge_base_keys(self) -> "RagSearchRequest":
+        """规范单 Key 和多选数组，避免同一个知识库重复检索。"""
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for raw_key in [*self.knowledge_base_keys, self.knowledge_base_key]:
+            key = str(raw_key or "").strip()
+            if not key:
+                continue
+            if len(key) > 64:
+                raise ValueError("knowledge_base_key 不能超过 64 个字符")
+            if key not in seen:
+                normalized.append(key)
+                seen.add(key)
+        self.knowledge_base_keys = normalized
+        self.knowledge_base_key = normalized[0] if normalized else ""
+        return self
 
 
 class RagChatRequest(RagSearchRequest):
@@ -153,8 +190,11 @@ class RagCitation(BaseModel):
 
     citation_id: int = Field(ge=1)
     chunk_id: str = ""
+    knowledge_base_key: str = ""
+    knowledge_base_name: str = ""
     source: str
     title: str = ""
+    version: str = ""
     page: int | None = Field(default=None, ge=1)
     score: float | None = None
     snippet: str = ""
@@ -168,7 +208,10 @@ class RagEvidenceResponse(BaseModel):
     count: int = 0
     company_id: str
     knowledge_base_key: str = ""
+    knowledge_base_keys: list[str] = Field(default_factory=list)
+    searched_knowledge_bases: list[dict[str, str]] = Field(default_factory=list)
     collection: str
+    collections: list[str] = Field(default_factory=list)
 
 
 class RagChatResponse(BaseModel):
@@ -180,7 +223,10 @@ class RagChatResponse(BaseModel):
     count: int = 0
     company_id: str
     knowledge_base_key: str = ""
+    knowledge_base_keys: list[str] = Field(default_factory=list)
+    searched_knowledge_bases: list[dict[str, str]] = Field(default_factory=list)
     collection: str
+    collections: list[str] = Field(default_factory=list)
 
 
 class RagTextIngestRequest(BaseModel):
@@ -190,7 +236,8 @@ class RagTextIngestRequest(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
+    # 写入前仍由服务端从 ERP 身份取得真实公司，数据库字段继续保持必填。
+    company_id: str = Field(default="", max_length=64)
     source: str = Field(min_length=1, max_length=1000)
     title: str = Field(default="", max_length=1000)
     knowledge_base_key: str = Field(default="", max_length=64)
@@ -224,7 +271,8 @@ class RagIngestJobRequest(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
+    # 任务查询允许省略公司，服务端使用已验证 ERP 身份补齐并校验租户边界。
+    company_id: str = Field(default="", max_length=64)
     knowledge_base_key: str = Field(min_length=1, max_length=64)
     department: str = Field(default="", max_length=256)
     job_id: int = Field(ge=1)
@@ -255,8 +303,10 @@ class RagDocumentListRequest(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
-    knowledge_base_key: str = Field(min_length=1, max_length=64)
+    # 文档列表的公司范围来自 ERP 登录态，不要求前端重复维护隐藏字段。
+    company_id: str = Field(default="", max_length=64)
+    # 留空表示当前公司所有启用知识库；传值时只查看指定知识库。
+    knowledge_base_key: str = Field(default="", max_length=64)
     department: str = Field(default="", max_length=256)
     keyword: str = Field(default="", max_length=255)
     page: int = Field(default=1, ge=1)
@@ -269,11 +319,27 @@ class RagDocumentDeleteRequest(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
+    # 删除前仍会以 ERP 返回的公司 ID 构造 Milvus 精确过滤条件。
+    company_id: str = Field(default="", max_length=64)
     knowledge_base_key: str = Field(min_length=1, max_length=64)
     department: str = Field(default="", max_length=256)
     source: str = Field(min_length=1, max_length=1000)
     version: str = Field(default="", max_length=128)
+
+
+class RagDocumentStatusRequest(BaseModel):
+    """切换文件是否参与公司级检索，不删除原始文件或历史向量。"""
+
+    user_id: str = Field(default="", max_length=64)
+    uid: str = Field(default="", max_length=64)
+    authorization: str = ""
+    # 文件启停使用登录态公司，避免普通页面手工填写可切换租户的字段。
+    company_id: str = Field(default="", max_length=64)
+    knowledge_base_key: str = Field(min_length=1, max_length=64)
+    department: str = Field(default="", max_length=256)
+    source: str = Field(min_length=1, max_length=1000)
+    version: str = Field(default="", max_length=128)
+    enabled: bool
 
 
 class RagDocumentListResponse(BaseModel):
@@ -285,8 +351,11 @@ class RagDocumentListResponse(BaseModel):
     page: int
     page_size: int
     company_id: str
-    knowledge_base_key: str
+    knowledge_base_key: str = ""
+    knowledge_base_keys: list[str] = Field(default_factory=list)
+    searched_knowledge_bases: list[dict[str, str]] = Field(default_factory=list)
     collection: str
+    collections: list[str] = Field(default_factory=list)
 
 
 class RagDocumentDeleteResponse(BaseModel):
@@ -299,3 +368,15 @@ class RagDocumentDeleteResponse(BaseModel):
     company_id: str
     knowledge_base_key: str
     collection: str
+
+
+class RagDocumentStatusResponse(BaseModel):
+    """文件检索开关修改结果。"""
+
+    status: Literal["updated"] = "updated"
+    source: str
+    version: str = ""
+    enabled: bool
+    updated_count: int
+    company_id: str
+    knowledge_base_key: str

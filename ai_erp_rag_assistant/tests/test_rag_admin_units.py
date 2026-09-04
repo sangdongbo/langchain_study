@@ -57,6 +57,29 @@ def test_admin_config_keeps_model_config_as_external_json_name():
     }
 
 
+def test_selected_assistant_config_requires_and_normalizes_knowledge_bases():
+    request = AssistantConfigCreateRequest(
+        company_id="C001",
+        retrieval_scope="selected",
+        knowledge_base_keys=[" finance-policy ", "finance-policy", "expense-process"],
+    )
+
+    assert request.knowledge_base_keys == ["finance-policy", "expense-process"]
+
+    with pytest.raises(ValidationError, match="至少选择一个"):
+        AssistantConfigCreateRequest(
+            company_id="C001",
+            retrieval_scope="selected",
+        )
+
+    with pytest.raises(ValidationError, match="不应传"):
+        AssistantConfigCreateRequest(
+            company_id="C001",
+            retrieval_scope="company_enabled",
+            knowledge_base_keys=["finance-policy"],
+        )
+
+
 def test_admin_updates_require_a_change_and_keep_secrets_out():
     with pytest.raises(ValidationError, match="至少需要提交一个可修改字段"):
         AssistantUpdateRequest(company_id="C001")
@@ -167,6 +190,96 @@ def test_runtime_config_does_not_require_mysql_when_unconfigured():
     assert config.chunk_overlap == 120
 
 
+def test_runtime_config_defaults_to_all_company_enabled_knowledge_bases():
+    knowledge_bases = [
+        SimpleNamespace(
+            id=21,
+            knowledge_key="hr",
+            name="员工制度",
+            status="active",
+            milvus_collection="c001_hr",
+            chunk_size=800,
+            chunk_overlap=120,
+            default_top_k=5,
+            default_score_threshold=0.65,
+            permission_config_json=None,
+        ),
+        SimpleNamespace(
+            id=22,
+            knowledge_key="attendance",
+            name="考勤制度",
+            status="active",
+            milvus_collection="c001_attendance",
+            chunk_size=800,
+            chunk_overlap=120,
+            default_top_k=5,
+            default_score_threshold=0.65,
+            permission_config_json=None,
+        ),
+    ]
+
+    class FakeResult:
+        def __init__(self, rows):
+            self.rows = rows
+
+        def all(self):
+            return list(self.rows)
+
+    class FakeSession:
+        def __init__(self):
+            self.calls = 0
+
+        def scalars(self, _statement):
+            self.calls += 1
+            return FakeResult(knowledge_bases if self.calls == 1 else [])
+
+    runtime = RagAdminRepository(FakeSession()).runtime_config("C001")
+
+    assert runtime.collection == ""
+    assert [target.knowledge_base_key for target in runtime.knowledge_bases] == [
+        "hr",
+        "attendance",
+    ]
+    assert all(target.document_scope_loaded for target in runtime.knowledge_bases)
+
+
+def test_document_search_switch_only_changes_search_flag(monkeypatch):
+    document = SimpleNamespace(search_enabled=True)
+
+    class FakeResult:
+        def all(self):
+            return [document]
+
+    class FakeSession:
+        def __init__(self):
+            self.committed = False
+
+        def scalars(self, _statement):
+            return FakeResult()
+
+        def commit(self):
+            self.committed = True
+
+    repository = RagAdminRepository(FakeSession())
+    monkeypatch.setattr(
+        repository,
+        "get_knowledge_base_by_key",
+        lambda company_id, knowledge_key: SimpleNamespace(id=21),
+    )
+
+    updated = repository.set_document_search_enabled(
+        "C001",
+        "hr",
+        source="policy.pdf",
+        version="2026",
+        enabled=False,
+    )
+
+    assert updated == 1
+    assert document.search_enabled is False
+    assert repository.session.committed is True
+
+
 def test_runtime_config_merges_published_assistant_and_prompt_model_settings(monkeypatch):
     assistant = SimpleNamespace(
         id=11,
@@ -184,6 +297,7 @@ def test_runtime_config_merges_published_assistant_and_prompt_model_settings(mon
     )
     config = SimpleNamespace(
         model_config_json={"model": "qwen-plus", "temperature": 0.2},
+        retrieval_scope="selected",
     )
     binding = SimpleNamespace(
         retrieval_config_json={"top_k": 8},
@@ -224,6 +338,112 @@ def test_runtime_config_merges_published_assistant_and_prompt_model_settings(mon
     assert runtime.chunk_size == 800
     assert runtime.chunk_overlap == 120
     assert runtime.top_k == 8
+    assert runtime.retrieval_scope == "selected"
+
+
+def test_runtime_config_uses_published_selected_knowledge_base_keys(monkeypatch):
+    assistant = SimpleNamespace(id=11, status="active", published_config_version_id=7)
+    config = SimpleNamespace(
+        model_config_json=None,
+        retrieval_config_json=None,
+        retrieval_scope="selected",
+        knowledge_base_keys_json=["finance", "invoice"],
+    )
+    knowledge_bases = {
+        key: SimpleNamespace(
+            id=index,
+            knowledge_key=key,
+            name=key.title(),
+            status="active",
+            milvus_collection=f"c001_{key}",
+            chunk_size=800,
+            chunk_overlap=120,
+            default_top_k=5,
+            default_score_threshold=0.65,
+            permission_config_json=None,
+        )
+        for index, key in enumerate(("finance", "invoice"), start=21)
+    }
+
+    class FakeResult:
+        def all(self):
+            return []
+
+    class FakeSession:
+        def __init__(self):
+            self.rows = iter(
+                [config, SimpleNamespace(content="", model_overrides_json=None)]
+            )
+
+        def scalar(self, _statement):
+            return next(self.rows)
+
+        def scalars(self, _statement):
+            return FakeResult()
+
+    monkeypatch.setattr(
+        RagAdminRepository,
+        "get_assistant_by_key",
+        lambda self, company_id, assistant_key: assistant,
+    )
+    monkeypatch.setattr(
+        RagAdminRepository,
+        "get_knowledge_base_by_key",
+        lambda self, company_id, knowledge_key: knowledge_bases[knowledge_key],
+    )
+
+    runtime = RagAdminRepository(FakeSession()).runtime_config(
+        "C001", assistant_key="finance-assistant"
+    )
+
+    assert runtime.retrieval_scope == "selected"
+    assert [target.knowledge_base_key for target in runtime.knowledge_bases] == [
+        "finance",
+        "invoice",
+    ]
+
+
+def test_create_config_persists_selected_knowledge_base_keys(monkeypatch):
+    saved = {}
+
+    class FakeSession:
+        def scalar(self, _statement):
+            return 0
+
+        def add(self, value):
+            saved["row"] = value
+
+        def commit(self):
+            pass
+
+    repository = RagAdminRepository(FakeSession())
+    monkeypatch.setattr(
+        repository,
+        "get_assistant",
+        lambda company_id, assistant_id: SimpleNamespace(id=assistant_id),
+    )
+    monkeypatch.setattr(
+        repository,
+        "get_knowledge_base_by_key",
+        lambda company_id, knowledge_key: SimpleNamespace(status="active"),
+    )
+
+    row = repository.create_config_version(
+        "C001",
+        11,
+        {
+            "page_config": {},
+            "model_config": {},
+            "retrieval_config": {},
+            "retrieval_scope": "selected",
+            "knowledge_base_keys": ["finance", "invoice"],
+            "feature_flags": {},
+        },
+        "863",
+    )
+
+    assert row is saved["row"]
+    assert row.knowledge_base_keys_json == ["finance", "invoice"]
 
 
 def test_rag_admin_routes_are_in_openapi_without_opening_database():
@@ -242,6 +462,7 @@ def test_rag_admin_routes_are_in_openapi_without_opening_database():
     assert "/api/rag/ingest/jobs/status" in paths
     assert "/api/rag/ingest/jobs/retry" in paths
     assert "/api/rag/documents/list" in paths
+    assert "/api/rag/documents/status" in paths
     assert "/api/rag/documents/delete" in paths
     assert "/api/sessions/list" in paths
     assert "/api/sessions/messages" in paths

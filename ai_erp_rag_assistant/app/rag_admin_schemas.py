@@ -76,7 +76,8 @@ class AdminContext(BaseModel):
     user_id: str = Field(default="", max_length=64)
     uid: str = Field(default="", max_length=64)
     authorization: str = ""
-    company_id: str = Field(min_length=1, max_length=64)
+    # 管理页也从 ERP 登录态取得公司；数据库记录中的 company_id 仍然不可为空。
+    company_id: str = Field(default="", max_length=64)
     department: str = Field(default="", max_length=256)
 
 
@@ -124,15 +125,39 @@ class AssistantConfigCreateRequest(AdminContext):
         serialization_alias="model_config",
     )
     retrieval_config: dict[str, Any] = Field(default_factory=dict)
+    # Assistant 默认检索公司内全部启用知识库；selected 模式保存一组明确的知识库 Key。
+    retrieval_scope: Literal["company_enabled", "selected"] = "company_enabled"
+    knowledge_base_keys: list[str] = Field(default_factory=list, max_length=100)
     feature_flags: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def reject_inline_secrets(self) -> "AssistantConfigCreateRequest":
         """确保版本配置只包含可持久化的非敏感模型参数。"""
         _reject_inline_secrets(
-            self.page_config, self.model_settings, self.retrieval_config, self.feature_flags
+            self.page_config,
+            self.model_settings,
+            self.retrieval_config,
+            self.feature_flags,
         )
         _validate_retrieval_config(self.retrieval_config)
+        # 先去空格、去重，保证配置版本哈希稳定且前端不会重复显示同一个知识库。
+        normalized_keys: list[str] = []
+        seen_keys: set[str] = set()
+        for raw_key in self.knowledge_base_keys:
+            key = str(raw_key).strip()
+            if not key:
+                raise ValueError("knowledge_base_keys 不能包含空值")
+            if len(key) > 64:
+                raise ValueError("knowledge_base_keys 中的 Key 不能超过 64 个字符")
+            if key not in seen_keys:
+                normalized_keys.append(key)
+                seen_keys.add(key)
+        self.knowledge_base_keys = normalized_keys
+        if self.retrieval_scope == "selected" and not normalized_keys:
+            # 选择指定范围时必须在配置页明确选择至少一个知识库，避免保存一个无法运行的版本。
+            raise ValueError("retrieval_scope=selected 时至少选择一个 knowledge_base_key")
+        if self.retrieval_scope == "company_enabled" and normalized_keys:
+            raise ValueError("retrieval_scope=company_enabled 时不应传 knowledge_base_keys")
         return self
 
 

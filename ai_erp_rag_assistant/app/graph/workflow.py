@@ -6,13 +6,15 @@ import re
 import json
 from datetime import date, datetime, time
 from hashlib import sha256
-from typing import Any
+from typing import Any, cast
 from uuid import uuid4
 
+from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from ai_erp_rag_assistant.app.graph.state import ErpRagState
+from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
 from ai_erp_rag_assistant.app.services.approval_form_service import (
     build_form_schema,
     build_submit_nodes,
@@ -351,7 +353,8 @@ def _is_confirmation_message(message: str) -> bool:
 def _has_frozen_preview_confirmation(state: ErpRagState) -> bool:
     preview = state.get("preview", {})
     return bool(
-        state.get("active_approval")
+        state.get("assistant_type", "approval") == "approval"
+        and state.get("active_approval")
         and preview
         and preview.get("requires_confirmation", True)
         and not _explicit_field_change(state.get("user_message", ""))
@@ -379,8 +382,14 @@ def accept_frozen_preview_confirmation(state: ErpRagState) -> ErpRagState:
     }
 
 
-def agent_planner(state: ErpRagState) -> ErpRagState:
+def agent_planner(
+    state: ErpRagState, config: RunnableConfig
+) -> ErpRagState:
     """结合当前消息与会话状态规划本轮业务路由和动作。"""
+    runtime = cast(
+        RagRuntimeConfig | None,
+        config.get("configurable", {}).get("rag_runtime"),
+    )
     previous_plan = dict(state.get("plan", {}))
     active_approval = bool(state.get("active_approval"))
     context = {
@@ -392,7 +401,11 @@ def agent_planner(state: ErpRagState) -> ErpRagState:
         "previous_approval_type": previous_plan.get("approval_type", ""),
         "template_fields": state.get("template", {}).get("fields", []),
     }
-    plan = model_service.plan(state["user_message"], context=context)
+    plan = model_service.plan(
+        state["user_message"],
+        context=context,
+        model_overrides=runtime.model_overrides if runtime else None,
+    )
     if active_approval and not _explicit_template_change(state["user_message"]):
         # 收集字段时，“事假”等词是字段值，不代表用户要重新搜索审批模板目录。
         plan.approval_type = ""
@@ -405,14 +418,55 @@ def agent_planner(state: ErpRagState) -> ErpRagState:
     if plan.decision == "confirm":
         state["confirm"] = True
     active_approval = active_approval or plan.route == "approval_workflow"
+    plan_data = plan.model_dump()
+    assistant_type = state.get("assistant_type", "")
+    allowed_routes = {
+        "approval": {"erp_status", "approval_workflow", "general_chat"},
+        "rag": {"knowledge", "general_chat"},
+    }
+    if assistant_type in allowed_routes and plan.route not in allowed_routes[assistant_type]:
+        # Planner 只负责识别意图，最终能力边界必须由确定性代码执行。
+        plan_data["requested_route"] = plan.route
+        plan_data["scope_blocked"] = True
+        plan.route = "general_chat"
+        # 仅清理 RAG 助手可能继承的历史审批状态；审批助手被拦截知识问答时保留草稿。
+        if assistant_type == "rag":
+            active_approval = False
     return {
         "route": plan.route,
-        "plan": plan.model_dump(),
+        "plan": plan_data,
         "fields": {**state.get("fields", {}), **plan.fields},
         "confirm": state.get("confirm"),
         "active_approval": active_approval,
         "tool_calls": _record(state, "llm.agent_planner", plan=plan.model_dump()),
     }
+
+
+def reject_out_of_scope(state: ErpRagState) -> ErpRagState:
+    """拒绝当前助手职责之外的意图，避免调用不应开放的工具。"""
+    assistant_type = state.get("assistant_type", "rag")
+    message = (
+        "审批助手不提供知识库检索，请切换到 RAG 助手查询制度或文档。"
+        if assistant_type == "approval"
+        else "RAG 助手仅提供知识库问答，请切换到审批助手查询审批状态或发起审批。"
+    )
+    return {
+        "assistant_message": message,
+        "workflow_status": "blocked",
+        "tool_calls": _record(
+            state,
+            "workflow.scope_blocked",
+            assistant_type=assistant_type,
+            requested_route=state.get("plan", {}).get("requested_route"),
+        ),
+    }
+
+
+def _route_after_planner(state: ErpRagState) -> str:
+    """优先处理助手能力越界，再按业务路由进入后续节点。"""
+    if state.get("plan", {}).get("scope_blocked"):
+        return "scope_blocked"
+    return str(state.get("route") or "general_chat")
 
 
 def load_erp_context(state: ErpRagState) -> ErpRagState:
@@ -440,27 +494,61 @@ def load_erp_context(state: ErpRagState) -> ErpRagState:
     }
 
 
-def retrieve_rag(state: ErpRagState) -> ErpRagState:
+def retrieve_rag(
+    state: ErpRagState, config: RunnableConfig
+) -> ErpRagState:
     """按已验证的租户、部门和权限检索知识库证据。"""
     user = state["user_context"]
+    # HTTP 聊天接口会把已发布 Assistant 配置放入本次运行参数，不写入会话状态。
+    runtime = cast(
+        RagRuntimeConfig | None,
+        config.get("configurable", {}).get("rag_runtime"),
+    )
     # ERP 可能把 ACL 放在 permissions、permission_tags 或 roles，统一合并后再过滤。
-    permissions: set[str] = set()
-    for key in ("permissions", "permission_tags", "roles"):
-        raw = user.get(key) or []
-        values = [raw] if isinstance(raw, str) else raw
-        permissions.update(str(item).strip() for item in values if str(item).strip())
+    permissions = {
+        str(item).strip()
+        for item in user.get("rag_access_tags", [])
+        if str(item).strip()
+    }
+    if not permissions:
+        # 独立运行 Graph 时没有 HTTP 身份预处理，兼容常见的字符串和列表权限结构。
+        for key in ("permissions", "permission_tags", "roles"):
+            raw = user.get(key) or []
+            values = [raw] if isinstance(raw, str) else raw
+            if isinstance(values, (list, tuple, set)):
+                permissions.update(
+                    str(item).strip() for item in values if str(item).strip()
+                )
     evidence = search_knowledge(
         state.get("plan", {}).get("query") or state["user_message"],
         company_id=str(user.get("company_id", "")),
         department=str(user.get("department", "")),
         permission_tags=sorted(permissions),
+        top_k=(runtime.top_k or 5) if runtime else 5,
+        runtime=runtime,
+    )
+    # 审计信息记录本次实际尝试的 Collection，无命中时也能定位检索目标。
+    collections = sorted(
+        {
+            collection
+            for collection in (
+                *(
+                    target.collection
+                    for target in (runtime.knowledge_bases if runtime else ())
+                ),
+                runtime.collection if runtime else "",
+                *(str(item.get("collection") or "") for item in evidence),
+            )
+            if collection
+        }
     )
     return {
         "evidence": evidence,
         "tool_calls": _record(
             state,
             "rag.milvus.search",
-            collection="erp_knowledge_chunks",
+            collections=collections,
+            retrieval_scope=runtime.retrieval_scope if runtime else "legacy",
             result_count=len(evidence),
         ),
     }
@@ -841,16 +929,27 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
     }
 
 
-def answer_with_llm(state: ErpRagState) -> ErpRagState:
+def answer_with_llm(
+    state: ErpRagState, config: RunnableConfig
+) -> ErpRagState:
     """根据路由结果、知识证据和 ERP 数据生成最终回复。"""
     route = state.get("route", "general_chat")
     if route == "approval_workflow":
         return state
+    runtime = cast(
+        RagRuntimeConfig | None,
+        config.get("configurable", {}).get("rag_runtime"),
+    )
     message = model_service.answer(
         state["user_message"],
         route=route,
         evidence=state.get("evidence"),
         erp_data=state.get("erp_data"),
+        # knowledge_answer Prompt 只影响知识问答，不能改变普通聊天或 ERP 回答边界。
+        system_context=(
+            runtime.system_context if runtime and route == "knowledge" else ""
+        ),
+        model_overrides=runtime.model_overrides if runtime else None,
     )
     return {
         "assistant_message": message,
@@ -910,6 +1009,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     builder = StateGraph(ErpRagState)
     # 先注册纯节点，再集中声明路由，便于审查每条写入路径。
     builder.add_node("agent_planner", agent_planner)
+    builder.add_node("reject_out_of_scope", reject_out_of_scope)
     builder.add_node("accept_frozen_preview_confirmation", accept_frozen_preview_confirmation)
     builder.add_node("load_erp_context", load_erp_context)
     builder.add_node("retrieve_rag", retrieve_rag)
@@ -931,14 +1031,16 @@ def create_workflow(*, with_checkpointer: bool = True):
     # 普通请求先由 Planner 分流；一般聊天不需要加载 ERP 身份。
     builder.add_conditional_edges(
         "agent_planner",
-        lambda state: state["route"],
+        _route_after_planner,
         {
+            "scope_blocked": "reject_out_of_scope",
             "knowledge": "load_erp_context",
             "erp_status": "load_erp_context",
             "approval_workflow": "load_erp_context",
             "general_chat": "answer_with_llm",
         },
     )
+    builder.add_edge("reject_out_of_scope", END)
     builder.add_conditional_edges(
         "load_erp_context",
         _route_after_erp_context,

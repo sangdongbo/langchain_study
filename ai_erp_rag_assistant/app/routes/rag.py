@@ -34,53 +34,49 @@ from ai_erp_rag_assistant.app.services.ingest_job_service import (
     ingest_job_status,
     record_ingest_failure,
 )
+from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
 from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 
 router = APIRouter(tags=["RAG"])
 
 
-def _retrieve_rag_evidence(
-    query: str,
-    *,
+def _runtime_source_fields(
     runtime: RagRuntimeConfig,
-    company_id: str,
-    department: str,
-    access_tags: list[str],
-    knowledge_base_key: str,
-    top_k: int,
-) -> list[dict[str, Any]]:
-    """统一执行运行时权限、扩大召回和可降级的 LLM 重排。"""
-    runtime.require_access(
-        department=department, permission_tags=access_tags, action="read"
-    )
-    rerank_enabled = bool(runtime.rerank_enabled)
-    candidate_count = (
-        max(top_k, min(runtime.rerank_candidates or top_k, 50))
-        if rerank_enabled
-        else top_k
-    )
-    evidence = api_module.milvus_service.search(
-        query,
-        company_id=company_id,
-        department=department,
-        permission_tags=access_tags,
-        top_k=candidate_count,
-        knowledge_base_key=knowledge_base_key,
-        collection_name=runtime.collection,
-        min_score=runtime.score_threshold,
-    )
-    if rerank_enabled:
-        return api_module.model_service.rerank(
-            query,
-            evidence,
-            top_k=top_k,
-            model_overrides=runtime.model_overrides,
-        )
-    return [
-        {**item, "retrieval_rank": index, "rank": index}
-        for index, item in enumerate(evidence[:top_k], start=1)
+    requested_key: str,
+    *,
+    department: str = "",
+    access_tags: list[str] | None = None,
+) -> tuple[str, list[str], list[dict[str, str]], str, list[str]]:
+    """把运行时检索目标整理成前端可展示的知识库和 Collection 信息。"""
+    targets = list(runtime.knowledge_bases)
+    if access_tags is not None:
+        visible_targets = []
+        for target in targets:
+            try:
+                target.require_access(
+                    department=department,
+                    permission_tags=access_tags,
+                    action="read",
+                )
+            except PermissionError:
+                continue
+            visible_targets.append(target)
+        targets = visible_targets
+    if not targets and requested_key:
+        return requested_key, [requested_key], [], runtime.collection, [runtime.collection]
+    keys = [target.knowledge_base_key for target in targets]
+    collections = [target.collection for target in targets]
+    names = [
+        {
+            "knowledge_base_key": target.knowledge_base_key,
+            "knowledge_base_name": target.knowledge_base_name or target.knowledge_base_key,
+        }
+        for target in targets
     ]
+    single_key = keys[0] if len(keys) == 1 else ""
+    single_collection = runtime.collection or (collections[0] if len(collections) == 1 else "")
+    return single_key, keys, names, single_collection, collections
 
 
 def _start_ingest_tracker(
@@ -246,24 +242,41 @@ def rag_search(
             company_id=company_id,
             knowledge_base_key=knowledge_base_key,
             assistant_key=request.assistant_key.strip(),
+            knowledge_base_keys=request.knowledge_base_keys,
+            search_scope=request.search_scope,
         )
         # 检索参数优先使用本次 top_k，其余来自知识库运行时配置。
-        evidence = _retrieve_rag_evidence(
+        evidence = search_knowledge(
             request.query,
             runtime=runtime,
             company_id=company_id,
             department=department,
-            access_tags=access_tags,
+            permission_tags=access_tags,
             top_k=request.top_k or runtime.top_k or 5,
             knowledge_base_key=knowledge_base_key,
+        )
+        (
+            response_key,
+            response_keys,
+            searched_knowledge_bases,
+            response_collection,
+            response_collections,
+        ) = _runtime_source_fields(
+            runtime,
+            knowledge_base_key,
+            department=department,
+            access_tags=access_tags,
         )
         return RagEvidenceResponse(
             evidence=evidence,
             citations=api_module.model_service.build_citations(evidence),
             count=len(evidence),
             company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
-            collection=runtime.collection,
+            knowledge_base_key=response_key,
+            knowledge_base_keys=response_keys,
+            searched_knowledge_bases=searched_knowledge_bases,
+            collection=response_collection,
+            collections=response_collections,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -294,13 +307,15 @@ def rag_chat(
             company_id=company_id,
             knowledge_base_key=knowledge_base_key,
             assistant_key=request.assistant_key.strip(),
+            knowledge_base_keys=request.knowledge_base_keys,
+            search_scope=request.search_scope,
         )
-        evidence = _retrieve_rag_evidence(
+        evidence = search_knowledge(
             request.query,
             runtime=runtime,
             company_id=company_id,
             department=department,
-            access_tags=access_tags,
+            permission_tags=access_tags,
             top_k=request.top_k or runtime.top_k or 5,
             knowledge_base_key=knowledge_base_key,
         )
@@ -315,14 +330,29 @@ def rag_chat(
             system_context=system_context,
             model_overrides=runtime.model_overrides,
         )
+        (
+            response_key,
+            response_keys,
+            searched_knowledge_bases,
+            response_collection,
+            response_collections,
+        ) = _runtime_source_fields(
+            runtime,
+            knowledge_base_key,
+            department=department,
+            access_tags=access_tags,
+        )
         return RagChatResponse(
             message=answer,
             evidence=evidence,
             citations=api_module.model_service.build_citations(evidence),
             count=len(evidence),
             company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
-            collection=runtime.collection,
+            knowledge_base_key=response_key,
+            knowledge_base_keys=response_keys,
+            searched_knowledge_bases=searched_knowledge_bases,
+            collection=response_collection,
+            collections=response_collections,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -470,7 +500,10 @@ def _resolve_ingest_identity(
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     resolved_company = str(user.get("company_id") or "").strip()
-    if not resolved_company or resolved_company != company_id.strip():
+    requested_company = company_id.strip()
+    if not resolved_company or (
+        requested_company and resolved_company != requested_company
+    ):
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
     # 请求参数中的权限标签不参与授权，只使用 ERP 身份返回的权限和角色。
     access_tags = api_module._verified_access_tags(user)
@@ -517,6 +550,9 @@ def _ingest_runtime(
     chunk_overlap: int | None,
 ) -> tuple[RagRuntimeConfig, int, int]:
     """合并知识库与单次请求的切分参数，并验证最终组合。"""
+    if db is not None and not knowledge_base_key.strip():
+        # 公司级自动检索可以不选库；导入必须明确归属，避免文件落到错误的 Collection。
+        raise HTTPException(status_code=422, detail="导入文件必须指定 knowledge_base_key")
     # 单次 Query 参数优先，其次知识库配置，最后回退到进程默认值。
     runtime = api_module._rag_runtime_config(
         db,
@@ -548,7 +584,7 @@ def _ingest_runtime(
 @router.post("/rag/ingest/pdf", response_model=RagIngestResponse)
 async def rag_ingest_pdf(
     request: Request,
-    company_id: str,
+    company_id: str = "",
     user_id: str = "",
     source: str = "uploaded.pdf",
     knowledge_base_key: str = "",
@@ -691,8 +727,8 @@ async def rag_ingest_pdf(
 @router.post("/rag/ingest/document", response_model=RagIngestResponse)
 async def rag_ingest_document(
     request: Request,
-    company_id: str,
     source: str,
+    company_id: str = "",
     user_id: str = "",
     knowledge_base_key: str = "",
     department: str = "",
