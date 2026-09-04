@@ -122,7 +122,7 @@ def build_submit_nodes(
         node = deepcopy(raw_node)
         node_id = frontend_node["node_id"]
         candidates = frontend_node["candidates"]
-        requested = {str(uid) for uid in selected_assignees.get(node_id, [])}
+        requested = set(_requested_assignee_ids(selected_assignees.get(node_id, [])))
         selected = [item for item in candidates if not requested or str(item["uid"]) in requested]
         if frontend_node["requires_selection"] and not requested:
             # 提交人选择节点不能默认全选候选人，必须等待用户明确选择。
@@ -157,6 +157,54 @@ def missing_assignee_nodes(
         if node.get("requires_selection")
         and not selected_assignees.get(str(node.get("node_id") or ""))
     ]
+
+
+def invalid_assignee_nodes(
+    approval_flow: list[dict[str, Any]],
+    selected_assignees: dict[str, list[str]] | None,
+) -> list[dict[str, str]]:
+    """校验审批人必须来自 ERP 候选集，并符合节点单/多人规则。"""
+    selected_assignees = selected_assignees or {}
+    errors: list[dict[str, str]] = []
+    known_node_ids = {str(node.get("node_id") or "") for node in approval_flow}
+    for node in approval_flow:
+        node_id = str(node.get("node_id") or "")
+        requested = _requested_assignee_ids(selected_assignees.get(node_id, []))
+        if not requested:
+            if node.get("requires_selection") and not node.get("candidates"):
+                errors.append({"node_id": node_id, "message": "ERP未返回可用审批人"})
+            continue
+        candidates = {
+            str(item.get("uid"))
+            for item in node.get("candidates", [])
+            if isinstance(item, dict) and item.get("uid") not in (None, "")
+        }
+        invalid = [uid for uid in requested if uid not in candidates]
+        if invalid:
+            errors.append(
+                {
+                    "node_id": node_id,
+                    "message": "所选审批人不在 ERP 返回的候选范围内：" + "、".join(invalid),
+                }
+            )
+        if not node.get("multiple") and len(requested) > 1:
+            errors.append({"node_id": node_id, "message": "该审批节点只能选择一名审批人"})
+    for node_id in selected_assignees:
+        normalized_id = str(node_id or "")
+        if normalized_id and normalized_id not in known_node_ids:
+            errors.append({"node_id": normalized_id, "message": "审批节点不存在或已发生变化，请刷新审批流程"})
+    return errors
+
+
+def _requested_assignee_ids(value: Any) -> list[str]:
+    """兼容表单传入的列表、集合或单值，并去重保留顺序。"""
+    values = value if isinstance(value, (list, tuple, set)) else [value]
+    result: list[str] = []
+    for item in values:
+        normalized = str(item or "").strip()
+        if normalized and normalized not in result:
+            result.append(normalized)
+    return result
 
 
 def _field_items(data: Any) -> list[dict[str, Any]]:
@@ -224,11 +272,15 @@ def _normalize_field(
     validation = {
         key: value
         for key, value in {
-            "min": extend.get("min"),
-            "max": extend.get("max"),
-            "min_length": extend.get("min_length"),
-            "max_length": extend.get("max_length"),
-            "pattern": extend.get("pattern") or extend.get("regex"),
+            "min": _constraint_value(item, extend, "min", "minimum", "min_value", "minValue"),
+            "max": _constraint_value(item, extend, "max", "maximum", "max_value", "maxValue"),
+            "min_length": _constraint_value(item, extend, "min_length", "minLength", "min_len"),
+            "max_length": _constraint_value(item, extend, "max_length", "maxLength", "max_len"),
+            "min_items": _constraint_value(item, extend, "min_items", "minItems", "min_count", "minCount"),
+            "max_items": _constraint_value(item, extend, "max_items", "maxItems", "max_count", "maxCount"),
+            "scale": _constraint_value(item, extend, "scale", "decimal_places", "decimalPlaces"),
+            "precision": _constraint_value(item, extend, "precision"),
+            "pattern": _constraint_value(item, extend, "pattern", "regex"),
         }.items()
         if value not in (None, "")
     }
@@ -359,6 +411,16 @@ def _option_values(item: dict[str, Any], extend: dict[str, Any]) -> list[dict[st
         if label not in (None, ""):
             result.append({"label": str(label), "value": value, "disabled": disabled, "meta": meta})
     return result
+
+
+def _constraint_value(item: dict[str, Any], extend: dict[str, Any], *keys: str) -> Any:
+    """读取 ERP 常见 snake_case/camelCase 约束键，保留 0 这类有效值。"""
+    for source in (extend, item):
+        for key in keys:
+            value = source.get(key)
+            if value not in (None, ""):
+                return value
+    return None
 
 
 def _field_key(item: dict[str, Any]) -> str:

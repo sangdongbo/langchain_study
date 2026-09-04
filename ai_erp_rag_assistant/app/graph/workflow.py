@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import json
 from datetime import date, datetime, time
+from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 from typing import Any, cast
 from uuid import uuid4
@@ -18,6 +19,7 @@ from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
 from ai_erp_rag_assistant.app.services.approval_form_service import (
     build_form_schema,
     build_submit_nodes,
+    invalid_assignee_nodes,
     missing_assignee_nodes,
     normalize_approval_nodes,
 )
@@ -73,13 +75,29 @@ def _actual_value(value: Any) -> Any:
     return value
 
 
+def _template_fields(template: dict[str, Any]) -> list[dict[str, Any]]:
+    """返回完整 ERP 字段；旧的 mock 模板仍可只提供 fields。"""
+    fields = template.get("all_fields") or template.get("fields") or []
+    return [field for field in fields if isinstance(field, dict)]
+
+
+def _constraint(field: dict[str, Any], *keys: str) -> Any:
+    validation = field.get("validation")
+    sources = [validation] if isinstance(validation, dict) else []
+    sources.append(field)
+    for source in sources:
+        for key in keys:
+            value = source.get(key)
+            if value not in (None, ""):
+                return value
+    return None
+
+
 def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[list[str], list[str]]:
-    """按 ERP 字段类型校验必填、枚举、数值和时间范围。"""
+    """按 ERP 字段元数据校验必填、枚举、长度、范围、精度和时间范围。"""
     missing: list[str] = []
     invalid: list[str] = []
-    for field in template.get("fields", []):
-        if not isinstance(field, dict):
-            continue
+    for field in _template_fields(template):
         name = str(field.get("name") or "")
         label = str(field.get("label") or name)
         value = fields.get(name)
@@ -97,12 +115,15 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
             if isinstance(option, dict) and option.get("value") is not None
         ]
         submitted_values = actual_value if isinstance(actual_value, list) else [actual_value]
-        if options and any(str(item) not in {*options, *option_values} for item in submitted_values):
-            invalid.append(f"{label}必须是：{'、'.join(options)}")
+        submitted_values = [_actual_value(item) for item in submitted_values]
+        allowed_values = {*options, *option_values}
+        if allowed_values and any(str(item) not in allowed_values for item in submitted_values):
+            display_options = options or option_values
+            invalid.append(f"{label}必须是：{'、'.join(display_options)}")
             continue
         # 字段 name 往往比 ERP type 更能表达日期语义，两者一起判断兼容历史模板。
-        field_type = str(field.get("type") or "").lower()
-        semantic_type = f"{name.lower()} {field_type}"
+        field_type = str(field.get("erp_field_type") or field.get("type") or "").lower()
+        semantic_type = f"{name.lower()} {field_type} {str(field.get('erp_field_type') or '').lower()} {str(field.get('value_type') or '').lower()}"
         if any(token in semantic_type for token in ("datetime", "date_time", "start_time", "end_time")):
             if not isinstance(_parse_temporal(value), datetime):
                 invalid.append(f"{label}必须是完整日期时间")
@@ -112,11 +133,66 @@ def _validate_fields(template: dict[str, Any], fields: dict[str, Any]) -> tuple[
         elif "time" in semantic_type:
             if not isinstance(_parse_temporal(value), (time, datetime)):
                 invalid.append(f"{label}必须是有效时间")
-        elif any(token in field_type for token in ("number", "integer", "float", "decimal")):
+        elif any(token in semantic_type for token in ("number", "integer", "float", "decimal", "money", "duration")):
             try:
-                float(actual_value)
-            except (TypeError, ValueError):
+                numeric_value = Decimal(str(actual_value))
+            except (InvalidOperation, TypeError, ValueError):
                 invalid.append(f"{label}必须是数字")
+                continue
+            minimum = _constraint(field, "min", "minimum", "min_value", "minValue")
+            maximum = _constraint(field, "max", "maximum", "max_value", "maxValue")
+            try:
+                if minimum not in (None, "") and numeric_value < Decimal(str(minimum)):
+                    invalid.append(f"{label}不能小于{minimum}")
+                if maximum not in (None, "") and numeric_value > Decimal(str(maximum)):
+                    invalid.append(f"{label}不能大于{maximum}")
+            except (InvalidOperation, TypeError, ValueError):
+                # ERP 返回的约束配置异常时不阻断用户，仍保留基本数字校验。
+                pass
+            if "integer" in semantic_type and numeric_value != numeric_value.to_integral_value():
+                invalid.append(f"{label}必须是整数")
+            scale = _constraint(field, "scale", "decimal_places", "precision_scale")
+            if scale not in (None, ""):
+                try:
+                    decimal_places = max(0, -numeric_value.as_tuple().exponent)
+                    if decimal_places > int(scale):
+                        invalid.append(f"{label}最多保留{int(scale)}位小数")
+                except (TypeError, ValueError):
+                    pass
+        elif field_type in {"attachment", "attachments", "file", "files", "upload", "image"}:
+            if not isinstance(actual_value, list) or any(not isinstance(item, dict) for item in actual_value):
+                invalid.append(f"{label}必须使用 ERP 文件引用，不能提交本地文件名")
+        elif field_type in {"detail", "detail_table", "table", "array"}:
+            if not isinstance(actual_value, list) or any(not isinstance(item, dict) for item in actual_value):
+                invalid.append(f"{label}必须是明细行数组")
+
+        if isinstance(actual_value, str):
+            min_length = _constraint(field, "min_length", "minLength", "min_len")
+            max_length = _constraint(field, "max_length", "maxLength", "max_len")
+            try:
+                if min_length not in (None, "") and len(actual_value) < int(min_length):
+                    invalid.append(f"{label}长度不能少于{int(min_length)}个字符")
+                if max_length not in (None, "") and len(actual_value) > int(max_length):
+                    invalid.append(f"{label}长度不能超过{int(max_length)}个字符")
+            except (TypeError, ValueError):
+                pass
+            pattern = _constraint(field, "pattern", "regex")
+            if pattern not in (None, ""):
+                try:
+                    if re.fullmatch(str(pattern), actual_value) is None:
+                        invalid.append(f"{label}格式不正确")
+                except re.error:
+                    pass
+        if isinstance(actual_value, list):
+            min_items = _constraint(field, "min_items", "minItems", "min_length", "minLength")
+            max_items = _constraint(field, "max_items", "maxItems", "max_length", "maxLength")
+            try:
+                if min_items not in (None, "") and len(actual_value) < int(min_items):
+                    invalid.append(f"{label}至少选择{int(min_items)}项")
+                if max_items not in (None, "") and len(actual_value) > int(max_items):
+                    invalid.append(f"{label}最多选择{int(max_items)}项")
+            except (TypeError, ValueError):
+                pass
 
     # 单字段合法后再做跨字段顺序检查，避免结束时间早于开始时间。
     start_keys = [key for key in fields if any(token in key.lower() for token in ("start", "begin"))]
@@ -141,9 +217,7 @@ def _validation_contract(
     """将内部校验消息转换为前端表单需要的字段级错误结构。"""
     missing_keys: list[str] = []
     invalid_fields: list[dict[str, str]] = []
-    for field in template.get("fields", []):
-        if not isinstance(field, dict):
-            continue
+    for field in _template_fields(template):
         key = str(field.get("name") or "")
         label = str(field.get("label") or key)
         if field.get("required") and not _has_value(fields.get(key)):
@@ -179,9 +253,7 @@ def _select_candidate_id(message: str, candidates: list[dict[str, Any]]) -> str:
 def _submission_fields(template: dict[str, Any], fields: dict[str, Any]) -> dict[str, Any]:
     """将展示标签还原为 getNodes/add 所需的 ERP 选项值。"""
     result = dict(fields)
-    for field in template.get("fields", []):
-        if not isinstance(field, dict):
-            continue
+    for field in _template_fields(template):
         name = str(field.get("name") or "")
         value = result.get(name)
         if not name or value in (None, ""):
@@ -575,7 +647,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     existing_template = state.get("template", {})
     candidates = list(state.get("template_candidates", []))
     existing_intent = str(existing_template.get("requested_approval_type") or existing_template.get("title") or "").strip()
-    has_existing = bool(existing_template.get("fields") and existing_template.get("template_id"))
+    has_existing = bool(_template_fields(existing_template) and existing_template.get("template_id"))
     explicit_change = _explicit_template_change(state["user_message"])
     same_intent = has_existing and not explicit_change and (
         not planner_type
@@ -583,7 +655,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
         or planner_type in existing_intent
         or existing_intent in planner_type
     )
-    if existing_template.get("fields") and existing_template.get("template_id") and same_intent:
+    if _template_fields(existing_template) and existing_template.get("template_id") and same_intent:
         template = dict(existing_template)
         reuse_template = True
     else:
@@ -643,7 +715,13 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     approval_type = str(template.get("title") or approval_query)
     template["requested_approval_type"] = approval_type
     template_changed = bool(existing_template and not reuse_template)
-    field_names = {str(item.get("name")) for item in template.get("fields", []) if isinstance(item, dict)}
+    all_fields = _template_fields(template)
+    # fields 是必填字段的对话投影，all_fields 才是允许回传 ERP 的完整白名单。
+    chat_fields = [
+        field for field in (template.get("fields") or all_fields)
+        if isinstance(field, dict)
+    ]
+    field_names = {str(item.get("name")) for item in all_fields if item.get("name")}
     previous_fields = {} if template_changed else dict(state.get("fields", {}))
     # Planner 字段可能使用通用名称，不能直接泄漏到 ERP 请求体；只保留所选模板
     # 中真实存在的字段键。
@@ -659,12 +737,12 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     })
     matched_option_fields = _extract_dynamic_option_fields(
         state["user_message"],
-        template.get("fields", []),
+        chat_fields,
     )
     fields.update(matched_option_fields)
     matched_duration_fields = _extract_dynamic_duration_fields(
         state["user_message"],
-        template.get("fields", []),
+        chat_fields,
     )
     fields.update(matched_duration_fields)
     extracted_fields: dict[str, Any] = {}
@@ -675,7 +753,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                 state["user_message"],
                 approval_type=approval_type,
                 template_title=str(template.get("title") or ""),
-                template_fields=template.get("fields", []),
+                template_fields=chat_fields,
                 known_fields=fields,
                 pending_question=state.get("pending_question", ""),
                 conversation=state.get("conversation", []),
@@ -701,7 +779,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
             "erp.approval_template",
             mode=template.get("erp_mode"),
             template_id=template.get("template_id"),
-            field_count=len(template.get("fields", [])),
+            field_count=len(all_fields),
             reused=reuse_template,
             extracted_fields=sorted(extracted_fields),
             matched_option_fields=sorted(matched_option_fields),
@@ -780,6 +858,7 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
     approval_flow = normalize_approval_nodes(nodes)
     selected_assignees = dict(state.get("selected_assignees", {}))
     missing_assignee_node_ids = missing_assignee_nodes(approval_flow, selected_assignees)
+    assignee_errors = invalid_assignee_nodes(approval_flow, selected_assignees)
     submit_nodes = build_submit_nodes(nodes, selected_assignees)
     # 哈希覆盖模板、提交字段和审批人，任一变化都会生成新预览版本。
     preview_hash = _preview_hash(template.get("template_id"), submission_fields, submit_nodes)
@@ -810,10 +889,29 @@ def validate_and_preview(state: ErpRagState) -> ErpRagState:
         "approval_flow": approval_flow,
         "selected_assignees": selected_assignees,
         "missing_assignee_node_ids": missing_assignee_node_ids,
+        "invalid_assignee_nodes": assignee_errors,
         "form_schema": form_schema,
-        "requires_confirmation": not missing_assignee_node_ids and not node_error,
+        "requires_confirmation": not missing_assignee_node_ids and not assignee_errors and not node_error,
         "idempotency_key": existing_preview.get("idempotency_key") if same_preview else uuid4().hex,
     }
+    if assignee_errors:
+        question = "审批流程中的审批人选择无效，请重新选择：" + "；".join(
+            str(item.get("message") or "") for item in assignee_errors
+        )
+        return {
+            "preview": preview,
+            "form_schema": form_schema,
+            "pending_question": question,
+            "assistant_message": question,
+            "workflow_status": "waiting_assignee",
+            "active_approval": True,
+            "tool_calls": _record(
+                state,
+                "erp.validate_assignees",
+                valid=False,
+                errors=assignee_errors,
+            ),
+        }
     if missing_assignee_node_ids:
         # 表单完整但审批人未选时允许展示预览，明确禁止确认提交。
         question = "表单字段已补齐，请在审批流程中选择审批人后再确认提交。"
@@ -884,6 +982,47 @@ def submit_if_confirmed(state: ErpRagState) -> ErpRagState:
             "workflow_status": "preview_ready",
             "active_approval": True,
             "tool_calls": _record(state, "workflow.preview_confirmation_rejected", reason=mismatch),
+        }
+    preview = state["preview"]
+    # 提交前再次校验冻结快照，防止持久化状态或客户端确认参数被篡改。
+    expected_hash = _preview_hash(
+        preview.get("template_id"),
+        preview.get("submission_fields") or {},
+        preview.get("submit_nodes") or preview.get("nodes") or [],
+    )
+    if preview.get("preview_hash") and str(preview.get("preview_hash")) != expected_hash:
+        message = "审批预览内容已变化，请重新生成预览后再提交。"
+        return {
+            "assistant_message": message,
+            "pending_question": message,
+            "confirm": None,
+            "workflow_status": "preview_ready",
+            "active_approval": True,
+            "tool_calls": _record(state, "workflow.preview_integrity_rejected"),
+        }
+    preview_fields = preview.get("fields") or state.get("fields", {})
+    preview_schema = preview.get("form_schema") or {}
+    validation_template = {
+        "all_fields": preview_schema.get("fields") or state.get("template", {}).get("all_fields")
+        or state.get("template", {}).get("fields") or [],
+    }
+    missing, invalid = _validate_fields(validation_template, preview_fields)
+    if missing or invalid:
+        message = "审批预览校验未通过，请重新填写：" + "；".join(
+            [*(f"缺少{item}" for item in missing), *invalid]
+        )
+        return {
+            "assistant_message": message,
+            "pending_question": message,
+            "confirm": None,
+            "workflow_status": "waiting_user",
+            "active_approval": True,
+            "tool_calls": _record(
+                state,
+                "workflow.preview_validation_rejected",
+                missing=missing,
+                invalid=invalid,
+            ),
         }
     result = submit_approval(state["preview"], user=state.get("user_context", {}))
     write_mode = str(result.get("erp_write_mode") or "")
@@ -1005,18 +1144,29 @@ def _route_after_erp_context(state: ErpRagState) -> str:
 
 
 def create_workflow(*, with_checkpointer: bool = True):
-    """构建并编译工作流，可选启用进程内会话 Checkpointer。"""
+    """构建根编排图；业务细节由 RAG、ERP 和审批子图分别负责。"""
+    from ai_erp_rag_assistant.app.graph.subgraphs import (
+        create_approval_subgraph,
+        create_erp_status_subgraph,
+        create_rag_retrieval_subgraph,
+    )
+
+    rag_retrieval_subgraph = create_rag_retrieval_subgraph(retrieve_rag)
+    erp_status_subgraph = create_erp_status_subgraph(query_erp_status_node)
+    approval_subgraph = create_approval_subgraph(
+        load_approval_template,
+        validate_and_preview,
+        submit_if_confirmed,
+    )
     builder = StateGraph(ErpRagState)
-    # 先注册纯节点，再集中声明路由，便于审查每条写入路径。
+    # 根图只处理通用编排；业务子图内部可以独立演进和增加 Worker。
     builder.add_node("agent_planner", agent_planner)
     builder.add_node("reject_out_of_scope", reject_out_of_scope)
     builder.add_node("accept_frozen_preview_confirmation", accept_frozen_preview_confirmation)
     builder.add_node("load_erp_context", load_erp_context)
-    builder.add_node("retrieve_rag", retrieve_rag)
-    builder.add_node("query_erp_status", query_erp_status_node)
-    builder.add_node("load_approval_template", load_approval_template)
-    builder.add_node("validate_and_preview", validate_and_preview)
-    builder.add_node("submit_if_confirmed", submit_if_confirmed)
+    builder.add_node("rag_retrieval", rag_retrieval_subgraph)
+    builder.add_node("erp_status", erp_status_subgraph)
+    builder.add_node("approval", approval_subgraph)
     builder.add_node("answer_with_llm", answer_with_llm)
     # 已冻结预览的确认请求绕过 Planner，防止 LLM 改写用户将要提交的内容。
     builder.add_conditional_edges(
@@ -1045,22 +1195,15 @@ def create_workflow(*, with_checkpointer: bool = True):
         "load_erp_context",
         _route_after_erp_context,
         {
-            "knowledge": "retrieve_rag",
-            "erp_status": "query_erp_status",
-            "approval_workflow": "load_approval_template",
-            "approval_submit": "submit_if_confirmed",
+            "knowledge": "rag_retrieval",
+            "erp_status": "erp_status",
+            "approval_workflow": "approval",
+            "approval_submit": "approval",
         },
     )
-    builder.add_edge("retrieve_rag", "answer_with_llm")
-    builder.add_edge("query_erp_status", "answer_with_llm")
-    builder.add_edge("load_approval_template", "validate_and_preview")
-    # 只有明确确认且已经生成预览，校验节点才允许流向真实提交节点。
-    builder.add_conditional_edges(
-        "validate_and_preview",
-        lambda state: "submit" if state.get("confirm") is True and state.get("preview") else "end",
-        {"submit": "submit_if_confirmed", "end": END},
-    )
-    builder.add_edge("submit_if_confirmed", END)
+    builder.add_edge("rag_retrieval", "answer_with_llm")
+    builder.add_edge("erp_status", "answer_with_llm")
+    builder.add_edge("approval", END)
     builder.add_edge("answer_with_llm", END)
     # MySQL 长期会话模式会传 False，避免状态同时写入内存 Checkpointer。
     if with_checkpointer:

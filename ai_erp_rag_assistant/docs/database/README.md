@@ -7,6 +7,7 @@
 - `003_mysql8_approval_audit.sql`：审批草稿、冻结预览、提交幂等和工具调用审计。
 - `004_mysql8_rag_unified_search.sql`：旧版本已经创建 001 表时补充文件检索开关、向量版本和公司级检索范围字段。
 - `005_mysql8_assistant_retrieval_targets.sql`：已经创建 001 与 004 表时补充 Assistant 配置版本的指定知识库数组。
+- `006_approval_assistant_seed.sql`：为已有公司补充固定 `approval-assistant` 系统 Assistant 行；不新增表。
 
 全新环境直接执行当前版本的 `001`、`002`、`003`；当前 `001` 已包含统一检索范围和
 指定知识库数组字段，不要再重复执行 `004`、`005`。只有已经按旧版本建过表的环境，才按实际
@@ -41,15 +42,17 @@
 `ai_erp_knowledge_ingest_jobs`，记录源文件、解析/Embedding/Milvus 阶段、计数和失败原因；
 失败重试创建新任务并保留旧任务审计。数据库/API 数据源的自动同步任务仍未接入。
 
-应用层也已接入 MySQL 长期会话，并按以下四张表落库：
+应用层已接入 MySQL 长期会话，并按以下四张表落库：
 
 1. `ai_erp_approval_drafts` 保存可恢复的审批字段和自选审批人。
 2. `ai_erp_approval_previews` 保存不可变预览快照和版本哈希。
 3. `ai_erp_submission_attempts` 保存提交幂等、超时和核对结果。
 4. `ai_erp_tool_events` 保存脱敏后的 ERP/RAG/LLM 工具事件。
 
-设置 `AI_ERP_SESSION_STORE=mysql` 后启用；未启用时使用进程内会话。启用时还必须配置
+设置 `AI_ERP_SESSION_STORE=mysql` 后启用 RAG 会话。审批助手还要求每个公司按 `006` 配置
+`approval-assistant` 系统 Assistant 行，配置完成后同样写入上述会话表；未配置时审批仍可用，
+但会话历史保持进程内状态并在接口中返回 `persistence_status=not_configured`。启用时还必须配置
 `AI_ERP_MYSQL_HOST`、`AI_ERP_MYSQL_PORT`、`AI_ERP_MYSQL_DATABASE`、`AI_ERP_MYSQL_USER`
 和 `AI_ERP_MYSQL_PASSWORD`。数据库不可用或配置缺失时，聊天和会话读取接口返回 `503`，不会
-静默回退到内存，避免审批重试时重复提交。建表和迁移仍必须由人工在明确的目标环境单独执行，
+静默回退到内存（审批助手在系统行尚未配置时除外），避免审批重试时重复提交。建表和迁移仍必须由人工在明确的目标环境单独执行，
 应用不会自动建表。

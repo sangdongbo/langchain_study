@@ -26,6 +26,7 @@ class ErpRagState(TypedDict, total=False):
     fields: dict[str, Any]
     form_schema: dict[str, Any]
     selected_assignees: dict[str, list[str]]
+    invalid_assignee_nodes: list[dict[str, str]]
     draft_key: str
     consumed_preview: dict[str, Any]
     evidence: list[dict[str, Any]]

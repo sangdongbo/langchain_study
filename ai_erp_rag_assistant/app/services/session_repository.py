@@ -52,6 +52,26 @@ class SessionRepository:
         """判断当前部署是否启用 MySQL 长期会话存储。"""
         return get_settings().session_store == "mysql"
 
+    def assistant_available(self, *, company_id: str, assistant_key: str) -> bool:
+        """判断租户是否已配置可关联会话表的 Assistant 系统行。"""
+        if not self.enabled:
+            return False
+        connection = self._connect()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT 1
+                    FROM ai_erp_assistants
+                    WHERE company_id = %s AND assistant_key = %s AND status = 'active'
+                    LIMIT 1
+                    """,
+                    (company_id, assistant_key),
+                )
+                return cursor.fetchone() is not None
+        finally:
+            connection.close()
+
     def list_sessions(
         self,
         *,

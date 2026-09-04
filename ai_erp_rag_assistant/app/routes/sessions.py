@@ -27,15 +27,32 @@ def session_list(
         request, authorization, uid
     )
     assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
-    # 固定审批助手只使用进程内多轮状态，不写入 Assistant 关联的会话表。
+    # 审批助手的系统 Assistant 行由 DBA 按 docs/database/006_approval_assistant_seed.sql 配置。
+    # 未配置时保留空列表，聊天接口仍可用内存模式完成当前审批。
     if assistant_key == APPROVAL_ASSISTANT_KEY:
-        return {
-            "items": [],
-            "count": 0,
-            "page": request.page,
-            "page_size": request.page_size,
-            "has_more": False,
-        }
+        persistence_status = "disabled"
+        if api_module.session_repository.enabled:
+            try:
+                configured = api_module.session_repository.assistant_available(
+                    company_id=company_id,
+                    assistant_key=assistant_key,
+                )
+                persistence_status = "ready" if configured else "not_configured"
+            except Exception as exc:
+                persistence_status = "unavailable"
+                write_audit_event(
+                    "session.list.approval_unavailable",
+                    {"company_id": company_id, "assistant_key": assistant_key, "error": str(exc)[:300]},
+                )
+        if persistence_status != "ready":
+            return {
+                "items": [],
+                "count": 0,
+                "page": request.page,
+                "page_size": request.page_size,
+                "has_more": False,
+                "persistence_status": persistence_status,
+            }
     # 会话接口没有内存降级，避免前端误以为临时状态是长期数据。
     if not api_module.session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
@@ -76,13 +93,34 @@ def session_messages(
     )
     assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
     if assistant_key == APPROVAL_ASSISTANT_KEY:
-        return {
-            "items": [],
-            "count": 0,
-            "session_id": request.session_id,
-            "has_more": False,
-            "next_before_seq": None,
-        }
+        persistence_status = "disabled"
+        if api_module.session_repository.enabled:
+            try:
+                configured = api_module.session_repository.assistant_available(
+                    company_id=company_id,
+                    assistant_key=assistant_key,
+                )
+                persistence_status = "ready" if configured else "not_configured"
+            except Exception as exc:
+                persistence_status = "unavailable"
+                write_audit_event(
+                    "session.messages.approval_unavailable",
+                    {
+                        "company_id": company_id,
+                        "assistant_key": assistant_key,
+                        "session_id": request.session_id,
+                        "error": str(exc)[:300],
+                    },
+                )
+        if persistence_status != "ready":
+            return {
+                "items": [],
+                "count": 0,
+                "session_id": request.session_id,
+                "has_more": False,
+                "next_before_seq": None,
+                "persistence_status": persistence_status,
+            }
     # 与列表接口保持相同的持久化开关和身份边界。
     if not api_module.session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")

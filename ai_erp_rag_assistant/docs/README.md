@@ -277,6 +277,7 @@ ERP 接入有读写两个独立边界：
 
 - `ERP_READ_MODE=remote`：使用真实 ERP 的 `/api/User/userinfo`、`/api/approval/list`、`/api/field/formFields`、`/api/approval/getNodes` 和审批状态接口；需要请求头 `UID`、`Authorization`。
 - `ERP_WRITE_MODE=disabled`：演示默认值。可以读取真实模板、真实字段和审批节点，但确认后只返回预览，不调用 `/api/approval/add`。
+- `ERP_WRITE_MODE=remote`：启用真实写入。仅应在已核对 ERP `/api/approval/add` 契约的测试环境开启；请求必须携带当前用户 `UID` 和 `Authorization`，服务端会在提交前重新校验冻结预览哈希和字段。
 - `ERP_READ_MODE=mock`、`ERP_WRITE_MODE=mock`：仅用于没有 ERP 服务时的离线排练，所有返回都会标记为 Mock。
 
 接口契约与 `ai_approval_assistant` 一致：模板列表使用 `POST /api/approval/list` 和 `{"keyword": ...}`；字段使用 `POST /api/field/formFields` 和 `{"field_form": "approval_type_{id}"}`；节点使用 `POST /api/approval/getNodes` 和 `approval_set_id/form_value`；只有写入开启时才调用 `POST /api/approval/add`。

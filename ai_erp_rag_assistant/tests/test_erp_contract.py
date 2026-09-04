@@ -6,6 +6,7 @@ from ai_erp_rag_assistant.app.services.erp_client import (
 )
 from ai_erp_rag_assistant.app.services.approval_form_service import (
     build_submit_nodes,
+    invalid_assignee_nodes,
     normalize_approval_nodes,
     normalize_erp_fields,
 )
@@ -248,6 +249,60 @@ def test_disabled_write_returns_preview_only(monkeypatch):
     assert add_calls == []
 
 
+def test_remote_write_posts_confirmed_preview_with_idempotency_key(monkeypatch):
+    client = ErpClient()
+    client.settings.erp_write_mode = "remote"
+    calls: list[tuple[str, dict, dict]] = []
+
+    def fake_post(path, body, user, *, extra_headers=None):
+        calls.append((path, body, extra_headers or {}))
+        return {"code": 200, "data": {"id": 12345}, "message": "ok"}
+
+    monkeypatch.setattr(client, "_post", fake_post)
+
+    result = client.submit_approval(
+        {
+            "template_id": "5911",
+            "submission_fields": {"reason": "就医"},
+            "submit_nodes": [{"id": 22, "handle_uids": [863]}],
+            "idempotency_key": "confirmed-preview-key",
+        },
+        user={
+            "uid": "863",
+            "authorization": "Bearer test-token",
+            "erp_mode": "remote",
+        },
+    )
+
+    assert result["approval_id"] == "12345"
+    assert calls == [
+        (
+            "/api/approval/add",
+            {
+                "approval_set_id": 5911,
+                "node_list": [{"id": 22, "handle_uids": [863]}],
+                "form_data": {"reason": {"value": "就医"}},
+            },
+            {"Idempotency-Key": "confirmed-preview-key"},
+        )
+    ]
+
+
+def test_remote_write_requires_authenticated_identity():
+    client = ErpClient()
+    client.settings.erp_write_mode = "remote"
+
+    try:
+        client.submit_approval(
+            {"template_id": "5911", "submission_fields": {}, "submit_nodes": []},
+            user={"erp_mode": "remote"},
+        )
+    except RuntimeError as exc:
+        assert "UID" in str(exc)
+    else:
+        raise AssertionError("远程提交缺少身份时必须拒绝")
+
+
 def test_dynamic_form_contract_keeps_complex_erp_controls_for_frontend():
     fields = normalize_erp_fields(
         [
@@ -307,6 +362,50 @@ def test_submitter_choice_contract_preserves_raw_node_and_selection():
     assert flow[0]["requires_selection"] is True
     assert submitted[0]["handle_uids"] == [863]
     assert submitted[0]["handle"]["relate_user"][0]["name"] == "张三"
+
+
+def test_invalid_assignee_selection_is_rejected_against_erp_candidates():
+    flow = normalize_approval_nodes(
+        [
+            {
+                "id": 22,
+                "name": "办理",
+                "type": "conduct",
+                "handle": {
+                    "type": "submitter_choice",
+                    "is_single": 1,
+                    "relate_user": [{"uid": 863, "name": "张三"}],
+                },
+            }
+        ]
+    )
+
+    errors = invalid_assignee_nodes(flow, {"22": ["999", "863"]})
+
+    assert any("999" in item["message"] for item in errors)
+    assert any("只能选择一名" in item["message"] for item in errors)
+
+
+def test_normalized_constraints_are_exposed_for_frontend_and_workflow():
+    fields = normalize_erp_fields(
+        [
+            {
+                "field_key": "amount",
+                "field_name": "金额",
+                "field_type": "money",
+                "extend": {"min": 1, "max": 100, "scale": 2},
+            },
+            {
+                "field_key": "reason",
+                "field_name": "原因",
+                "field_type": "textarea",
+                "extend": {"maxLength": 20, "pattern": "^.+$"},
+            },
+        ]
+    )
+
+    assert fields[0]["validation"] == {"min": 1, "max": 100, "scale": 2}
+    assert fields[1]["validation"] == {"max_length": 20, "pattern": "^.+$"}
 
 
 def test_audit_sanitizer_removes_credentials_and_form_values():

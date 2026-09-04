@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
 from ai_erp_rag_assistant.app import api as api_module
-from ai_erp_rag_assistant.app.assistant_catalog import assistant_type_for_key
+from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY, assistant_type_for_key
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.graph.state import ErpRagState, initial_state
@@ -293,13 +293,32 @@ def chat(
     settings = get_settings()
     assistant_key = request.assistant_key.strip() or settings.assistant_key
     assistant_type = assistant_type_for_key(assistant_key)
-    persistent_session = session_repository.enabled and assistant_type == "rag"
     # 先用 ERP 身份确定可信租户，再按租户和 assistant_key 读取已发布配置。
     request, persistent_user, resolved_company, persistent_user_id = (
         api_module._persistent_identity(request, None, None)
     )
     request = request.model_copy(
         update={"company_id": resolved_company, "user_id": persistent_user_id}
+    )
+    approval_persistence = False
+    if session_repository.enabled and assistant_key == APPROVAL_ASSISTANT_KEY:
+        try:
+            approval_persistence = session_repository.assistant_available(
+                company_id=resolved_company,
+                assistant_key=assistant_key,
+            )
+        except Exception as exc:
+            # 审批系统行尚未配置时保留内存模式，不能因此阻断审批页面本身。
+            write_audit_event(
+                "session.persistence.approval_unavailable",
+                {
+                    "company_id": resolved_company,
+                    "assistant_key": assistant_key,
+                    "error": str(exc)[:300],
+                },
+            )
+    persistent_session = session_repository.enabled and (
+        assistant_type == "rag" or approval_persistence
     )
     # 工作流只使用服务端从 ERP 身份整理出的权限标签，不采信请求体权限字段。
     persistent_user = {

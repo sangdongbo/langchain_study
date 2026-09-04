@@ -929,6 +929,10 @@ class ErpClient:
                 "erp_mode": "mock",
                 "erp_write_mode": "mock",
             }
+        if not (user.get("uid") or self.settings.erp_uid) or not (
+            user.get("authorization") or self.settings.erp_authorization
+        ):
+            raise RuntimeError("ERP 真实提交需要当前登录用户的 UID 和 Authorization。")
         template_id = str(preview.get("template_id") or preview.get("template_code") or "")
         if not template_id.isdigit():
             raise RuntimeError("ERP 提交需要远程 approval_set_id，当前模板没有返回数字 ID。")

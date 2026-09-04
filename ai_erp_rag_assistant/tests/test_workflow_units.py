@@ -22,6 +22,7 @@ from ai_erp_rag_assistant.app.graph.workflow import (
     reject_out_of_scope,
     submit_if_confirmed,
     validate_and_preview,
+    create_workflow,
 )
 from ai_erp_rag_assistant.app.services.model_service import ModelService
 from ai_erp_rag_assistant.app.services.model_service import AgentPlan
@@ -31,6 +32,15 @@ from ai_erp_rag_assistant.app.rag_admin_repository import (
     RagRuntimeConfig,
 )
 from scripts.ingest_pdf import document_metadata, infer_title, split_text
+
+
+def test_root_workflow_composes_business_subgraphs():
+    graph = create_workflow(with_checkpointer=False)
+
+    nodes = set(graph.get_graph().nodes)
+
+    assert {"rag_retrieval", "erp_status", "approval", "answer_with_llm"} <= nodes
+    assert "validate_and_preview" not in nodes
 
 
 def test_langsmith_trace_anonymizer_redacts_credentials():
@@ -658,6 +668,62 @@ def test_validate_fields_checks_options_and_time_order():
     assert missing == []
     assert "请假类型必须是：事假、病假" in invalid
     assert "结束时间必须晚于开始时间" in invalid
+
+
+def test_validate_fields_checks_optional_erp_constraints():
+    missing, invalid = _validate_fields(
+        {
+            "fields": [{"name": "reason", "label": "原因", "required": True}],
+            "all_fields": [
+                {"name": "reason", "label": "原因", "required": True},
+                {
+                    "name": "amount",
+                    "label": "金额",
+                    "erp_field_type": "money",
+                    "validation": {"min": 1, "max": 100, "scale": 2},
+                },
+                {
+                    "name": "remark",
+                    "label": "备注",
+                    "type": "text",
+                    "validation": {"max_length": 4, "pattern": "^[A-Z]+$"},
+                },
+            ],
+        },
+        {"reason": "就医", "amount": "100.123", "remark": "abcde"},
+    )
+
+    assert missing == []
+    assert "金额最多保留2位小数" in invalid
+    assert "备注长度不能超过4个字符" in invalid
+    assert "备注格式不正确" in invalid
+
+
+def test_optional_fields_are_allowed_in_submission_preview(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_nodes",
+        lambda *args, **kwargs: [],
+    )
+    result = validate_and_preview(
+        {
+            "template": {
+                "template_id": "5911",
+                "title": "请假申请",
+                "fields": [{"name": "reason", "label": "原因", "required": True}],
+                "all_fields": [
+                    {"name": "reason", "label": "原因", "required": True},
+                    {"name": "remark", "label": "备注", "required": False},
+                ],
+            },
+            "fields": {"reason": "就医", "remark": "复诊后返回"},
+            "user_context": {},
+            "plan": {"decision": "continue"},
+            "tool_calls": [],
+        }
+    )
+
+    assert result["workflow_status"] == "preview_ready"
+    assert result["preview"]["submission_fields"] == {"reason": "就医", "remark": "复诊后返回"}
 
 
 def test_template_change_does_not_keep_old_fields(monkeypatch):

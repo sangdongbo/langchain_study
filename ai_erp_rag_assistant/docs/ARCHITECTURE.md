@@ -2,16 +2,34 @@
 
 ```mermaid
 flowchart LR
-    U[用户聊天] --> G[LangGraph 意图路由]
-    G --> R[RAG Tool]
-    G --> E[ERP Tool]
-    R --> K[公司内启用知识库]
+    U[用户聊天] --> G[Root Orchestrator\n输入校验与路由]
+    G --> I[ERP Identity]
+    I --> R[RAG Retrieval Subgraph]
+    I --> S[ERP Status Subgraph]
+    I --> A[Approval Subgraph]
+    R --> W1[只读检索 Workers]
+    W1 --> K[公司内启用知识库]
     K --> M1[(Milvus Collection 1)]
     K --> M2[(Milvus Collection N)]
-    E --> API[ERP / Mock ERP API]
-    G --> W[预览 / 确认 / 提交闸门]
-    W --> API
+    R --> L[统一回答节点]
+    S --> E[ERP Read Tool]
+    E --> L
+    A --> F[模板 / 字段 / 审批人校验]
+    F --> P[冻结预览]
+    P --> C{用户确认}
+    C -->|确认| T[幂等 ERP Submit]
+    C -->|取消或不完整| A
+    T --> API[ERP / Mock ERP API]
 ```
+
+## 工作流边界
+
+- Root Orchestrator 只负责身份前置、能力路由、统一回答和错误出口，不承载具体业务规则。
+- `rag_retrieval`、`erp_status`、`approval` 是独立子图；子图通过共享 `ErpRagState` 返回结果，HTTP 接口不变。
+- RAG 子图可以并行运行多个只读检索 Worker，Worker 只能返回证据，不能写 ERP 或 MySQL 业务表。
+- Approval 子图是确定性状态机：模板、字段、节点和审批人必须经过服务端校验，再生成带版本和哈希的冻结预览。
+- ERP 写入只能从冻结预览的确认分支进入，并携带幂等键；任何字段修订都必须生成新预览并重新确认。
+- 新的预算、余额或组织校验应作为审批子图中的只读 Worker 增加，不应让 LLM Worker 直接决定提交结果。
 
 ## 数据边界
 
