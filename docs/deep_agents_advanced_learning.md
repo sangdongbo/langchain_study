@@ -501,7 +501,8 @@ result = agent.invoke(
 5. [工具护栏与重试](./learn_agent_1/deep_agent2_tool_guardrails_and_retries.ipynb)
 6. [Streaming 与评测](./learn_agent_1/deep_agent3_streaming_and_evaluation.ipynb)
 7. [Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)
-8. 回到本文完成毕业项目。
+8. [Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)
+9. 回到本文完成毕业项目。
 
 外部文档以当前安装版本对应的官方文档为准：
 
@@ -509,3 +510,17 @@ result = agent.invoke(
 - [LangGraph Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
 - [LangChain Human-in-the-loop](https://docs.langchain.com/oss/python/langchain/human-in-the-loop)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
+
+## 16. 学完生产基线后继续研究什么？
+
+下一阶段应从“功能学习”转向“机制验证”，重点研究：
+
+- `create_deep_agent` 的 Harness 组装顺序和 Middleware 生命周期。
+- 自定义 Backend 的协议语义、能力检测与契约测试。
+- `isolated`、实验性 `fork`、Compiled 和 Async SubAgent 的状态传播差异。
+- Checkpoint 重放、HITL 恢复与外部写操作的幂等边界。
+- Summarization、历史卸载和 prompt caching 对任务质量的真实影响。
+- AsyncSubAgent 的远程任务状态机、并发一致性和取消语义。
+- 故障注入、安全对抗、Provider 兼容矩阵和版本升级门禁。
+
+完整的研究问题、实验方法和验收标准见：[Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)。

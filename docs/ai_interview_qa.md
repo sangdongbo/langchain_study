@@ -379,6 +379,7 @@ MCP 解决的是工具接入标准化。以前每个系统都要写一套私有 
 ## 十三、当前资料索引
 
 - [Deep Agents 进阶学习路线：从会调用工具到可上线](./deep_agents_advanced_learning.md)。
+- [Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)。
 - [Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)。
 - [Milvus 官方文档：Full Text Search](https://milvus.io/docs/full-text-search.md)、[Hybrid Search](https://milvus.io/docs/hybrid_search_with_milvus.md)、[Reranking](https://milvus.io/docs/reranking.md)。
 - [智谱 AI 文档：上下文增强技术报告](https://docs.bigmodel.cn/cn/guide/tools/knowledge/contextual)。

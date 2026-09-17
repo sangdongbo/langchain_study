@@ -1114,3 +1114,5 @@ pprint(inspect_agent_result(report_result, {"run_procurement_review"}), width=12
 完整路线与毕业项目见：[Deep Agents 进阶学习路线：从会调用工具到可上线](./deep_agents_advanced_learning.md)。
 
 更系统的工程思想见：[Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)。
+
+准备继续研究框架内部机制时，阅读：[Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)。
