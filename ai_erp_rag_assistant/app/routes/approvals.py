@@ -6,7 +6,8 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
-from ai_erp_rag_assistant.app import api as api_module
+# 统一 API 使用惰性代理，支持单独导入路由模块而不触发循环依赖。
+from ai_erp_rag_assistant.app.api_compat import api_module
 from ai_erp_rag_assistant.app.schemas import (
     ApprovalFieldOptionsRequest,
     ApprovalFormSchemaRequest,

@@ -303,6 +303,7 @@ from ai_erp_rag_assistant.app.routes import (
     approvals,
     assistants,
     chat as chat_routes,
+    executions,
     rag,
     rag_documents,
     sessions,
@@ -317,6 +318,7 @@ stateless_workflow = chat_routes.stateless_workflow
 router.include_router(rag_admin_router)
 router.include_router(assistants.router)
 router.include_router(chat_routes.router)
+router.include_router(executions.router)
 router.include_router(rag.router)
 router.include_router(rag_documents.router)
 router.include_router(sessions.router)
@@ -325,6 +327,7 @@ router.include_router(workbench.router)
 
 # 保留历史 ``app.api.<endpoint>`` 导入路径，兼容已有集成代码和测试。
 chat = chat_routes.chat
+execution_status = executions.execution_status
 rag_search = rag.rag_search
 rag_chat = rag.rag_chat
 rag_ingest_text = rag.rag_ingest_text
@@ -337,6 +340,8 @@ delete_rag_document = rag_documents.delete_rag_document
 update_rag_document_status = rag_documents.update_rag_document_status
 session_list = sessions.session_list
 session_messages = sessions.session_messages
+session_rename = sessions.session_rename
+session_delete = sessions.session_delete
 approval_templates = approvals.approval_templates
 approval_form_schema = approvals.approval_form_schema
 approval_field_options = approvals.approval_field_options

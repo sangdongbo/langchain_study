@@ -9,7 +9,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from ai_erp_rag_assistant.app import api as api_module
+# 统一 API 使用惰性代理，避免 `app.api` 注册阶段读取到半初始化模块。
+from ai_erp_rag_assistant.app.api_compat import api_module
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.routes import rag as rag_module
 from ai_erp_rag_assistant.app.schemas import (

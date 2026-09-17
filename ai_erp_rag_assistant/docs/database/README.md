@@ -1,6 +1,6 @@
 # 数据库设计
 
-当前按执行顺序提供三组 MySQL 8.0+ 建表草案，以及两组已建表环境补充 SQL：
+当前提供四组 MySQL 8.0+ 建表草案、两组旧表补充 SQL 和一组审批助手初始化 SQL：
 
 - `001_mysql8_assistant_config.sql`：公司级 Assistant、配置版本、Prompt、禁用词、知识库、文档和入库任务。
 - `002_mysql8_sessions.sql`：关联 Assistant 和配置版本的长期会话与消息历史。
@@ -8,12 +8,16 @@
 - `004_mysql8_rag_unified_search.sql`：旧版本已经创建 001 表时补充文件检索开关、向量版本和公司级检索范围字段。
 - `005_mysql8_assistant_retrieval_targets.sql`：已经创建 001 与 004 表时补充 Assistant 配置版本的指定知识库数组。
 - `006_approval_assistant_seed.sql`：为已有公司补充固定 `approval-assistant` 系统 Assistant 行；不新增表。
+- `007_mysql8_erp_agent_execution.sql`：ERP Agent 的运行、节点、检查点、租约和失败恢复记录。
 
-全新环境直接执行当前版本的 `001`、`002`、`003`；当前 `001` 已包含统一检索范围和
+全新环境直接执行当前版本的 `001`、`002`、`003`、`006`、`007`；当前 `001` 已包含统一检索范围和
 指定知识库数组字段，不要再重复执行 `004`、`005`。只有已经按旧版本建过表的环境，才按实际
 缺失字段选择执行 `004`、`005`，执行前必须由数据库管理员核对字段和约束是否存在。
 
 应用不会自动执行这些 SQL，也不会调用 `Base.metadata.create_all()`；具体环境是否已建表以人工执行结果为准。
+
+启用 ERP Durable Execution 时，在 `001` 和 `006` 已完成后，由数据库管理员审查并执行
+`007`。应用不会自动执行该文件。
 
 ## 关键约束
 
@@ -48,6 +52,12 @@
 2. `ai_erp_approval_previews` 保存不可变预览快照和版本哈希。
 3. `ai_erp_submission_attempts` 保存提交幂等、超时和核对结果。
 4. `ai_erp_tool_events` 保存脱敏后的 ERP/RAG/LLM 工具事件。
+
+ERP Agent Durable Execution 另外使用三张表：
+
+1. `ai_erp_agent_runs` 保存单次请求、租约、最后状态和最终响应。
+2. `ai_erp_agent_steps` 保存节点尝试次数、脱敏输入输出和失败摘要。
+3. `ai_erp_agent_checkpoints` 保存节点前后不可变状态快照。
 
 设置 `AI_ERP_SESSION_STORE=mysql` 后启用 RAG 会话。审批助手还要求每个公司按 `006` 配置
 `approval-assistant` 系统 Assistant 行，配置完成后同样写入上述会话表；未配置时审批仍可用，

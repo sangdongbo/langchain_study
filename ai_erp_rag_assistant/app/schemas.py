@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -14,6 +15,8 @@ class ChatRequest(BaseModel):
     session_id: str = Field(default="demo-session", min_length=1, max_length=128)
     request_id: str = Field(default="", max_length=64)
     assistant_key: str = Field(default="", max_length=64)
+    # 多个 ERP 模板时由前端明确提交模板 ID，不能依赖模型猜测。
+    selected_template_id: str = Field(default="", max_length=128)
     user_id: str = Field(default="U001", min_length=1, max_length=64)
     uid: str = ""
     authorization: str = ""
@@ -52,6 +55,14 @@ class ChatResponse(BaseModel):
     errors: list[str] = Field(default_factory=list)
     pending_question: str = ""
     workflow_status: str = "idle"
+    # ERP Durable Execution 字段；RAG 助手和未启用 MySQL 时保持空值。
+    run_id: str = ""
+    execution_status: str = ""
+    execution_retry_count: int = 0
+    execution_current_step: str = ""
+    # waiting_user 且该标志为 true 时，前端应展示模板选择器而不是表单。
+    template_selection_required: bool = False
+    template_candidates: list[dict[str, Any]] = Field(default_factory=list)
     erp_mode: str = ""
     erp_write_mode: str = ""
     evidence: list[dict[str, Any]] = Field(default_factory=list)
@@ -70,6 +81,32 @@ class ApprovalApiContext(BaseModel):
     authorization: str = ""
     company_id: str = ""
     department: str = ""
+
+
+class ExecutionStatusRequest(ApprovalApiContext):
+    """查询当前 ERP 用户拥有的一次 Durable Execution。"""
+
+    run_id: str = Field(min_length=32, max_length=32)
+
+
+class ExecutionStatusResponse(BaseModel):
+    """返回运行进度和错误摘要，不返回检查点中的业务字段。"""
+
+    run_id: str
+    request_id: str
+    session_id: str
+    status: Literal["running", "completed", "failed"]
+    current_step: str = ""
+    state_version: int = 0
+    retry_count: int = 0
+    last_error_code: str = ""
+    last_error_message: str = ""
+    recoverable: bool = False
+    lease_expires_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class ApprovalTemplatesRequest(ApprovalApiContext):
@@ -139,6 +176,26 @@ class SessionMessagesRequest(ApprovalApiContext):
     # 使用消息序号而非页码，避免新消息写入后产生重复或漏读。
     before_seq: int | None = Field(default=None, ge=1)
     page_size: int = Field(default=50, ge=1, le=200)
+
+
+class SessionRenameRequest(ApprovalApiContext):
+    """修改当前 ERP 用户拥有的会话标题。"""
+
+    session_id: str = Field(min_length=1, max_length=128)
+    title: str = Field(min_length=1, max_length=255)
+
+    @model_validator(mode="after")
+    def normalize_title(self) -> "SessionRenameRequest":
+        self.title = self.title.strip()
+        if not self.title:
+            raise ValueError("title 不能为空")
+        return self
+
+
+class SessionDeleteRequest(ApprovalApiContext):
+    """逻辑删除当前 ERP 用户拥有的会话。"""
+
+    session_id: str = Field(min_length=1, max_length=128)
 
 
 class RagSearchRequest(BaseModel):

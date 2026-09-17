@@ -1305,7 +1305,344 @@ parent_graph.invoke({"document": "这是一段很长很长的文档内容，用�
 4. 调用前把父图字段 `document` 转成子图字段 `text`。
 5. 调用后把子图字段 `summary` 转回父图字段 `child_summary`。
 
-## 二十一、函数式 API
+## 二十一、工程化设计：子图、模块化与协作工作流
+
+前面的章节解决了“LangGraph 能做什么”，这一节解决“项目变大以后怎样继续维护”。推荐把图当成一种模块边界：每个子图只负责一个职责，输入输出通过显式状态契约连接，父图负责组合和路由，测试可以在不调用真实 LLM、数据库或外部 API 的情况下独立完成。
+
+### 21.1 从开发生命周期看一张图
+
+![LangGraph 开发生命周期：结构、测试、Studio、部署、观测与优化](assets/langgraph-development-lifecycle.png)
+
+这张图适合作为开发检查清单，而不是 API 参考。一个可交付的 LangGraph 应用至少要经过以下闭环：
+
+1. **Structure**：先确定状态、节点职责、子图边界和配置注入方式。
+2. **Testing**：先用假模型、假工具和固定输入验证节点、路由、状态合并，再接入真实服务。
+3. **LangSmith Studio**：用 Studio 观察每次运行的节点、输入输出、工具调用和中断点。
+4. **Deployment**：把图入口、依赖和环境变量固定下来，再部署到 Server、Docker 或 Kubernetes。
+5. **Observability**：记录 trace、延迟、token、错误和业务结果，不能只记录最终文本。
+6. **Optimization & Security**：在有真实指标后再做缓存、异步、并行、限流和输入校验。
+
+### 21.2 模块化的边界：一个子图只做一件事
+
+一个可维护的子图通常满足这些约束：
+
+- **单一职责**：例如“检索证据”“审核预算”“生成摘要”分别是不同模块，不把所有逻辑堆进一个 Agent 节点。
+- **显式状态**：输入字段、输出字段和 reducer 写在 `TypedDict` 或 `BaseModel` 中，不依赖隐式全局变量。
+- **稳定接口**：父图只依赖子图的输入输出契约，不依赖子图内部节点名；内部节点可以重构。
+- **依赖注入**：模型、工具客户端、时间函数和随机数生成器从构造函数传入，便于替换成 fake 实现。
+- **无导入副作用**：导入模块时不要创建连接池、调用 LLM 或读取必须存在的密钥；把这些操作放到 `build_*_graph()` 或应用启动阶段。
+- **可观测但不泄漏**：子图返回结构化的状态和事件，日志中不要写入 API Key、完整隐私文本或内部 Prompt。
+
+一个适合中型项目的目录可以是：
+
+```text
+src/my_app/
+├─ contracts.py             # 子图输入、输出和领域对象
+├─ state.py                 # 父图状态、reducer
+├─ nodes/                   # 小而纯的节点函数
+├─ subgraphs/
+│  ├─ retrieval.py           # 可独立运行和测试的检索子图
+│  ├─ review.py              # 可独立运行和测试的审核子图
+│  └─ summarization.py      # 可复用的摘要子图
+├─ workflows/
+│  ├─ sequential.py         # 顺序流程
+│  ├─ parallel.py           # 并行检查与汇总
+│  └─ supervisor.py         # 主控、专家和协商
+└─ graph.py                 # 组合子图并导出最终 graph
+tests/
+├─ unit/                    # 节点和纯函数
+├─ subgraphs/               # 子图契约
+└─ workflows/               # 路由、合并和端到端图结构
+```
+
+### 21.3 用工厂函数创建可复用子图
+
+不要在模块导入时固定一个全局模型。使用工厂函数把依赖传入，既能在多个父图中复用，也能在测试中注入一个简单函数：
+
+```python
+from collections.abc import Callable
+from typing_extensions import TypedDict
+
+from langgraph.graph import END, START, StateGraph
+
+
+class SummaryState(TypedDict):
+    text: str
+    summary: str
+
+
+def build_summary_graph(summarize: Callable[[str], str]):
+    """构造一个只负责摘要的子图。summarize 可以是真实 LLM 链或 fake。"""
+
+    def summarize_node(state: SummaryState) -> dict[str, str]:
+        return {"summary": summarize(state["text"])}
+
+    builder = StateGraph(SummaryState)
+    builder.add_node("summarize", summarize_node)
+    builder.add_edge(START, "summarize")
+    builder.add_edge("summarize", END)
+    return builder.compile()
+
+
+# 生产环境：传入真正的 Prompt | model | parser 链。
+summary_graph = build_summary_graph(real_summarize_chain)
+
+# 测试环境：传入确定性的 fake，不需要网络或模型 Key。
+test_graph = build_summary_graph(lambda text: text[:20])
+```
+
+父图有两种接入方式：
+
+1. **共享状态字段**：父图和子图使用同一个状态结构时，直接 `parent_builder.add_node("summary", summary_graph)`。
+2. **适配器调用**：状态结构不同时，在父图节点中把 `document` 转成子图的 `text`，再把子图的 `summary` 转回父图字段。适配器虽然多几行代码，但边界最清晰，适合跨团队维护。
+
+不要让子图直接修改父图中与自己无关的字段。一个好的子图接口可以写成：
+
+```text
+输入：SummaryInput(text, language)
+输出：SummaryOutput(summary, source_count, warnings)
+副作用：无；需要外部服务时由构造函数注入
+失败：返回可识别的错误状态，或抛出带上下文的异常
+```
+
+### 21.4 四种常见编排方式：顺序、并行、主控专家与协商
+
+#### 顺序：有依赖就串行
+
+当后一步必须消费前一步的结果时，显式使用顺序边：
+
+```python
+builder.add_edge(START, "parse_request")
+builder.add_edge("parse_request", "retrieve_context")
+builder.add_edge("retrieve_context", "draft_answer")
+builder.add_edge("draft_answer", END)
+```
+
+顺序流程容易追踪、容易重试，适合“解析 → 检索 → 生成 → 校验”这类有明确依赖的任务。不要为了追求速度把有数据依赖的节点强行并行，否则会出现读到旧状态、重复调用或结果顺序不确定的问题。
+
+#### 并行：无依赖就扇出，汇总前配置 reducer
+
+例如一次申请需要同时做预算、库存和安全检查：
+
+```python
+from operator import add
+from typing import Annotated
+from typing_extensions import TypedDict
+
+
+class Finding(TypedDict):
+    check: str
+    result: str
+
+
+class ReviewState(TypedDict):
+    request: str
+    findings: Annotated[list[Finding], add]
+    final: str
+
+
+def budget_check(state: ReviewState) -> dict[str, list[Finding]]:
+    return {"findings": [{"check": "budget", "result": "预算充足"}]}
+
+
+def inventory_check(state: ReviewState) -> dict[str, list[Finding]]:
+    return {"findings": [{"check": "inventory", "result": "库存待确认"}]}
+
+
+def security_check(state: ReviewState) -> dict[str, list[Finding]]:
+    return {"findings": [{"check": "security", "result": "需要复核"}]}
+
+
+def merge_findings(state: ReviewState) -> dict[str, str]:
+    # 这里可以交给规则引擎或一个专门的汇总模型。
+    return {"final": "；".join(item["result"] for item in state["findings"])}
+
+
+builder.add_node("budget", budget_check)
+builder.add_node("inventory", inventory_check)
+builder.add_node("security", security_check)
+builder.add_node("merge", merge_findings)
+for check in ("budget", "inventory", "security"):
+    builder.add_edge(START, check)
+    builder.add_edge(check, "merge")
+builder.add_edge("merge", END)
+```
+
+并行节点同时写 `findings`，所以必须使用 `Annotated[list[Finding], add]`。没有 reducer 时，多个分支写同一个字段可能互相覆盖，或者在图编译时就被判定为冲突。并行只适合彼此独立的工作；如果某个检查依赖另一个检查的结果，应拆成两个阶段。
+
+#### 主控—专家：让主管控制路由，让专家专注执行
+
+主控（supervisor）不应该重复实现每个领域的业务逻辑，它只负责选择专家、限制可跳转范围和判断是否进入汇总：
+
+```python
+from typing import Literal
+from langgraph.types import Command
+
+
+def supervisor(
+    state: ReviewState,
+) -> Command[Literal["finance_expert", "security_expert", "negotiate"]]:
+    task = state["request"]
+
+    if "预算" in task:
+        next_node = "finance_expert"
+    elif "安全" in task:
+        next_node = "security_expert"
+    else:
+        next_node = "negotiate"
+
+    return Command(
+        goto=next_node,
+        update={"final": f"主控已路由到 {next_node}"},
+    )
+```
+
+生产项目中，主控可以用规则、结构化 LLM 输出或二者组合。建议先用规则限制候选集合，再让模型在有限集合内选择；不要让模型返回任意字符串作为节点名。每个专家最好是一个子图，并遵守统一的 `Proposal` 输出契约，这样主控可以替换专家而不改变父图。
+
+#### 协商结果：不要只返回一句“同意”
+
+当多个专家给出不同建议时，协商节点需要输出可审计的结果，而不是把最后一次模型回复当成结论：
+
+```python
+class Proposal(TypedDict):
+    expert: str
+    recommendation: str
+    evidence: list[str]
+    risks: list[str]
+    confidence: float
+
+
+class Decision(TypedDict):
+    recommendation: str
+    rationale: list[str]
+    unresolved_risks: list[str]
+    dissent: list[str]
+
+
+class NegotiationState(TypedDict):
+    task: str
+    proposals: Annotated[list[Proposal], add]
+    decision: Decision
+
+
+def negotiate(state: NegotiationState) -> dict[str, Decision]:
+    proposals = state["proposals"]
+    if not proposals:
+        return {
+            "decision": {
+                "recommendation": "暂不决策",
+                "rationale": ["没有收到专家提案"],
+                "unresolved_risks": ["缺少输入"],
+                "dissent": [],
+            }
+        }
+
+    # 示例只演示输出契约；生产环境还应按政策、证据质量和风险等级评估。
+    chosen = max(proposals, key=lambda item: item["confidence"])
+    dissent = [
+        item["recommendation"]
+        for item in proposals
+        if item["recommendation"] != chosen["recommendation"]
+    ]
+    return {
+        "decision": {
+            "recommendation": chosen["recommendation"],
+            "rationale": chosen["evidence"],
+            "unresolved_risks": chosen["risks"],
+            "dissent": dissent,
+        }
+    }
+```
+
+协商结果建议至少包含：最终建议、依据、未解决风险、不同意见、参与专家和时间戳。这样前端可以展示“为什么这样决定”，审计系统也能复盘。`confidence` 只能作为输入，不能代替权限、合规规则和人工审批；涉及付款、删除、对外发送等高风险动作时，协商完成后仍应经过 `interrupt()`。
+
+### 21.5 把四种方式组合成生产工作流
+
+实际应用通常不是四选一，而是组合：
+
+```text
+START
+  -> intake（顺序）
+  -> [finance_expert, inventory_expert, security_expert]（并行子图）
+  -> supervisor（主控决定是否补查或进入协商）
+  -> negotiate（统一结果契约）
+  -> human_review（高风险时 interrupt）
+  -> finalize
+  -> END
+```
+
+选择方式时可以参考：
+
+| 问题 | 推荐方式 | 关键约束 |
+| --- | --- | --- |
+| 后一步依赖前一步结果吗？ | 顺序 | 用显式边表达依赖 |
+| 分支之间完全独立吗？ | 并行 | 共享字段配置 reducer，汇总点统一收口 |
+| 专业领域多、路由需要集中控制吗？ | 主控—专家 | 用 `Literal` 限制跳转，专家遵守统一契约 |
+| 专家意见可能冲突、需要解释吗？ | 协商 | 保存所有提案、依据、风险和异议 |
+| 动作有现实副作用吗？ | 人工参与循环 | `interrupt + checkpointer + thread_id` |
+
+### 21.6 独立测试：先测模块，再测组合
+
+独立测试的目标不是“把真实 Agent 跑一遍”，而是验证每个边界都稳定。推荐分四层：
+
+| 层级 | 被测对象 | 是否调用真实 LLM/数据库 | 重点 |
+| --- | --- | --- | --- |
+| 节点单元测试 | 纯函数、路由、状态转换 | 否 | 输入边界、异常、返回字段 |
+| 子图契约测试 | `build_*_graph()` | 否，注入 fake | 输入输出、默认值、失败状态 |
+| 组合测试 | 父图 + 多个 fake 子图 | 否 | 顺序、并行汇总、主管路由和协商 |
+| 运行集成测试 | LangGraph Server、Studio、真实模型 | 可选 | 配置、流式、持久化、观测和权限 |
+
+上面摘要子图可以这样独立测试：
+
+```python
+def test_summary_subgraph_contract():
+    graph = build_summary_graph(lambda text: f"摘要：{text[:4]}")
+
+    result = graph.invoke({"text": "LangGraph 模块化", "summary": ""})
+
+    assert result["summary"] == "摘要：Lang"
+
+
+def test_supervisor_only_returns_allowed_route():
+    command = supervisor({"request": "检查预算", "findings": [], "final": ""})
+
+    assert command.goto in {"finance_expert", "security_expert", "negotiate"}
+```
+
+测试并行图时，不要断言分支完成的先后顺序；应该把结果视为集合，断言所有检查都出现，并验证 reducer 没有丢数据。测试协商时，固定多个 `Proposal`，断言最终建议、依据、风险和 `dissent` 都能追溯到输入提案。对重试、超时和异常路径也要单独写用例。
+
+独立测试还应检查图结构：
+
+```python
+def test_workflow_contains_explicit_merge_node():
+    graph = build_review_graph(
+        budget_check=lambda _: {"findings": []},
+        inventory_check=lambda _: {"findings": []},
+        security_check=lambda _: {"findings": []},
+    )
+
+    nodes = set(graph.get_graph().nodes)
+    assert {"budget", "inventory", "security", "merge"} <= nodes
+```
+
+如果项目使用 LangSmith，测试结果可以继续上传到数据集做回归评估；但本地单元测试仍应保持离线、快速和确定性。真实模型评估关注答案质量，单元测试关注代码契约，两者不能互相替代。
+
+### 21.7 生产级蓝图与落地顺序
+
+![生产级 LangGraph 应用蓝图：Structure、Testing、Studio、Deployment、Observability、Optimization & Security](assets/langgraph-production-blueprint.png)
+
+第二张图把前面的设计放进生产闭环。建议按下面顺序推进：
+
+1. 先写 `contracts.py` 和状态 reducer，确定每个子图的输入输出。
+2. 为每个子图提供 `build_*_graph()` 工厂，并用 fake 依赖完成独立测试。
+3. 用顺序边搭出最小可用流程，再把无依赖步骤改成并行。
+4. 引入主控和专家时，限制路由集合；需要冲突解决时再增加协商节点。
+5. 加上 checkpointer、`thread_id`、`interrupt` 和错误恢复，再接入 Studio 调试。
+6. 最后补 LangSmith trace、指标、缓存、限流、输入校验和部署配置。
+
+这条顺序能避免“先堆很多 Agent、最后才发现状态无法合并”的返工。图越大，越要把模块边界、结果契约和测试放在模型 Prompt 之前设计。
+
+## 二十二、函数式 API
 
 除了 `StateGraph`，LangGraph 也提供函数式 API。它更像写普通 Python 函数，但底层仍然能获得持久化、任务、恢复等能力。
 
@@ -1381,7 +1718,7 @@ durable_workflow.invoke("可持久化函数式工作流", config=config)
 
 这段代码的重点是：函数式 API 也可以使用 `thread_id` 和检查点能力，只是写法更接近普通函数。
 
-## 二十二、评估
+## 二十三、评估
 
 Agent 评估用于判断 Agent 的行为是否可靠，而不只是看“最终答案像不像”。
 
@@ -1485,7 +1822,7 @@ print(answer_contains_evaluator(output, "上海"))
 
 项目里可以把这些 evaluator 接到 LangSmith Evaluation，用真实数据集持续评估 Agent 质量。
 
-## 二十三、部署与 LangGraph Platform
+## 二十四、部署与 LangGraph Platform
 
 LangGraph 可以本地运行，也可以通过 LangGraph Platform 部署。平台相关能力包括：
 
@@ -1497,7 +1834,7 @@ LangGraph 可以本地运行，也可以通过 LangGraph Platform 部署。平�
 
 典型应用结构会包含图定义文件和配置文件，服务启动后可以通过 SDK 或 HTTP API 调用图。学习阶段优先在本地 Python 中直接调用；需要前端、多人调试或生产服务时，再考虑平台部署。
 
-## 二十四、UI 与生成式 UI
+## 二十五、UI 与生成式 UI
 
 LangGraph 的 UI 相关文档主要关注如何把 Agent 运行过程接到前端。
 
@@ -1516,7 +1853,7 @@ LangGraph 的 UI 相关文档主要关注如何把 Agent 运行过程接到前�
 - 把 `thread_id` 和用户会话绑定。
 - 不要把内部状态、密钥或系统提示词直接展示给用户。
 
-## 二十五、LangGraph 应用、工具与 Studio
+## 二十六、LangGraph 应用、工具与 Studio
 
 这一节偏工程化：把图、工具、配置和本地调试服务组织成一个可以用 Studio 查看和测试的 LangGraph 应用。
 
@@ -1791,7 +2128,7 @@ def set_username(runtime: ToolRuntime) -> Command:
 - 工具不被调用：检查工具描述是否清楚、模型是否支持 tool calling、参数 schema 是否合理。
 - 本地端口打不开：确认 `langgraph dev` 仍在运行；远程服务器需要端口转发。
 
-## 二十六、常见错误与排查
+## 二十七、常见错误与排查
 
 | 问题 | 常见原因 | 处理 |
 | --- | --- | --- |
@@ -1809,7 +2146,7 @@ def set_username(runtime: ToolRuntime) -> Command:
 | 工具调用本地模型失败 | 模型不支持 tool calling，或本地服务 tool-call parser 不匹配 | 检查模型能力、vLLM/SGLang parser、关闭不兼容的 thinking/streaming |
 | `configurable` 里塞了业务用户信息 | 混淆了运行配置和业务上下文 | 用户、租户、权限放 `context_schema/context`；`thread_id` 放 `configurable` |
 
-## 二十七、学习路线与小抄
+## 二十八、学习路线与小抄
 
 建议顺序：
 
@@ -1821,6 +2158,7 @@ def set_username(runtime: ToolRuntime) -> Command:
 6. 学习条件边、reducer、`Command`。
 7. 学习人工参与循环和时间旅行。
 8. 学习多代理、子图和部署。
+9. 用工厂函数拆分可复用子图，组合顺序/并行流程，并为主控、专家和协商结果补独立测试。
 
 可以按下面这些小练习补充巩固：
 
@@ -1892,7 +2230,7 @@ graph = builder.compile()
 - 多代理适合拆分复杂职责，但会增加系统复杂度。
 - 生产环境要重视工具安全、持久化、评估和可观测性。
 
-## 二十八、官方参考
+## 二十九、官方参考
 
 LangGraph 版本迭代较快，遇到 API 差异时优先查看官方文档：
 

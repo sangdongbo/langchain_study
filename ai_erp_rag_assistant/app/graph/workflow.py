@@ -24,6 +24,7 @@ from ai_erp_rag_assistant.app.services.approval_form_service import (
     normalize_approval_nodes,
 )
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
+from ai_erp_rag_assistant.app.services.execution_runtime import durable_node
 from ai_erp_rag_assistant.app.services.model_service import model_service
 from ai_erp_rag_assistant.app.tools.erp_tools import (
     get_current_user,
@@ -235,18 +236,50 @@ def _validation_contract(
 
 
 def _select_candidate_id(message: str, candidates: list[dict[str, Any]]) -> str:
+    """只解析用户明确给出的序号、ID 或不歧义的完整标题。"""
     cleaned = message.strip()
-    if cleaned.isdigit():
-        index = int(cleaned)
+    compact = _compact_match_text(cleaned)
+    index_match = re.fullmatch(r"(?:请)?(?:选择|选|使用)?第?\s*(\d+)\s*(?:个|项)?", cleaned)
+    if index_match:
+        index = int(index_match.group(1))
         if 1 <= index <= len(candidates):
             return str(candidates[index - 1].get("template_id") or "")
+
+    id_matches = []
     for item in candidates:
-        markers = (
-            str(item.get("template_id") or ""),
-            str(item.get("title") or ""),
+        template_id = _compact_match_text(item.get("template_id"))
+        if not template_id:
+            continue
+        explicit_id = compact == template_id or bool(
+            re.search(
+                rf"(?:模板|审批|编号|id|选择|选)[:：\s]*{re.escape(template_id)}$",
+                compact,
+                flags=re.IGNORECASE,
+            )
         )
-        if any(marker and marker in cleaned for marker in markers):
-            return str(item.get("template_id") or "")
+        if explicit_id:
+            id_matches.append(item)
+    if len(id_matches) == 1:
+        return str(id_matches[0].get("template_id") or "")
+
+    title_matches = []
+    normalized_titles = [
+        _compact_match_text(item.get("title"))
+        for item in candidates
+    ]
+    for index, item in enumerate(candidates):
+        title = normalized_titles[index]
+        if not title or title not in compact:
+            continue
+        # “请假审批”不能自动命中“请假审批0732”这类相似模板。
+        ambiguous_variant = any(
+            other != title and other.startswith(title)
+            for other in normalized_titles
+        )
+        if not ambiguous_variant:
+            title_matches.append(item)
+    if len(title_matches) == 1:
+        return str(title_matches[0].get("template_id") or "")
     return ""
 
 
@@ -646,6 +679,7 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     )
     existing_template = state.get("template", {})
     candidates = list(state.get("template_candidates", []))
+    requested_template_id = str(state.get("selected_template_id") or "").strip()
     existing_intent = str(existing_template.get("requested_approval_type") or existing_template.get("title") or "").strip()
     has_existing = bool(_template_fields(existing_template) and existing_template.get("template_id"))
     explicit_change = _explicit_template_change(state["user_message"])
@@ -655,13 +689,22 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
         or planner_type in existing_intent
         or existing_intent in planner_type
     )
+    if requested_template_id and str(existing_template.get("template_id") or "") != requested_template_id:
+        # 页面显式选择了新模板时，不能沿用当前草稿的旧模板。
+        same_intent = False
     if _template_fields(existing_template) and existing_template.get("template_id") and same_intent:
         template = dict(existing_template)
         reuse_template = True
     else:
+        if candidates and not requested_template_id and not _select_candidate_id(
+            state["user_message"], candidates
+        ):
+            # 候选列表只服务于当前选择动作；用户改说新的业务意图时必须重新检索。
+            candidates = []
         if not candidates:
+            # 显式 ID 选择时，即使进程重启也要从当前用户可用目录重新校验归属。
             candidates = list_approval_templates(
-                approval_query,
+                "" if requested_template_id else approval_query,
                 str(user.get("company_id", "")),
                 user=user,
             )
@@ -671,31 +714,35 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                 "template_candidates": [],
                 "template": {},
                 "fields": {},
+                "form_schema": {},
+                "preview": {},
+                "selected_assignees": {},
                 "pending_question": question,
                 "assistant_message": question,
                 "workflow_status": "waiting_user",
                 "tool_calls": _record(state, "erp.approval_list", query=approval_query, result_count=0),
             }
-        selected_id = _select_candidate_id(state["user_message"], candidates)
-        if not selected_id:
-            selected_id = model_service.select_template(
-                state["user_message"],
-                candidates,
-                conversation=state.get("conversation", []),
-            )
+        selected_id = requested_template_id or _select_candidate_id(state["user_message"], candidates)
+        if not selected_id and len(candidates) == 1:
+            # 唯一候选不需要打断用户；只有多候选才必须显式选择。
+            selected_id = str(candidates[0].get("template_id") or "")
         if not selected_id:
             labels = "、".join(
                 f"{index}. {item.get('title') or item.get('template_id')}"
                 for index, item in enumerate(candidates[:8], start=1)
             )
-            question = "找到多个可能的审批模板，请回复序号或模板名称：" + labels
+            question = "找到多个审批模板，请选择一个：" + labels
             return {
                 "template_candidates": candidates,
                 "template": {},
                 "fields": {},
+                "form_schema": {},
+                "preview": {},
+                "selected_assignees": {},
                 "pending_question": question,
                 "assistant_message": question,
                 "workflow_status": "waiting_user",
+                "template_selection_required": True,
                 "tool_calls": _record(
                     state,
                     "erp.approval_list",
@@ -704,7 +751,32 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
                     selection_required=True,
                 ),
             }
-        selected = next(item for item in candidates if str(item.get("template_id")) == selected_id)
+        selected = next(
+            (item for item in candidates if str(item.get("template_id")) == selected_id),
+            None,
+        )
+        if not selected:
+            question = "所选审批模板不存在或不在当前用户可用范围内，请重新选择。"
+            return {
+                "template_candidates": candidates,
+                "template": {},
+                "fields": {},
+                "form_schema": {},
+                "preview": {},
+                "selected_assignees": {},
+                "pending_question": question,
+                "assistant_message": question,
+                "workflow_status": "waiting_user",
+                "template_selection_required": True,
+                "errors": [question],
+                "tool_calls": _record(
+                    state,
+                    "erp.approval_template_selection",
+                    valid=False,
+                    selected_template_id=selected_id,
+                    result_count=len(candidates),
+                ),
+            }
         template = get_approval_template(
             selected_id,
             str(user.get("company_id", "")),
@@ -747,7 +819,8 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     fields.update(matched_duration_fields)
     extracted_fields: dict[str, Any] = {}
     extraction_error = ""
-    if state.get("plan", {}).get("decision") == "continue":
+    # 模板没有可填写字段时无需调用 LLM，直接进入后续校验和预览阶段。
+    if chat_fields and state.get("plan", {}).get("decision") == "continue":
         try:
             extracted_fields = model_service.extract_approval_fields(
                 state["user_message"],
@@ -770,6 +843,9 @@ def load_approval_template(state: ErpRagState) -> ErpRagState:
     form_schema = build_form_schema(template, fields)
     return {
         "template": template,
+        "template_candidates": [],
+        "template_selection_required": False,
+        "selected_assignees": {} if template_changed else state.get("selected_assignees", {}),
         "fields": fields,
         "draft_key": draft_key,
         "form_schema": form_schema,
@@ -1151,23 +1227,44 @@ def create_workflow(*, with_checkpointer: bool = True):
         create_rag_retrieval_subgraph,
     )
 
-    rag_retrieval_subgraph = create_rag_retrieval_subgraph(retrieve_rag)
-    erp_status_subgraph = create_erp_status_subgraph(query_erp_status_node)
+    rag_retrieval_subgraph = create_rag_retrieval_subgraph(
+        durable_node("rag.retrieve", retrieve_rag, pass_config=True)
+    )
+    erp_status_subgraph = create_erp_status_subgraph(
+        durable_node("erp.query_status", query_erp_status_node)
+    )
     approval_subgraph = create_approval_subgraph(
-        load_approval_template,
-        validate_and_preview,
-        submit_if_confirmed,
+        durable_node("approval.load_template", load_approval_template),
+        durable_node("approval.validate_preview", validate_and_preview),
+        # ERP 提交完成后必须复用持久化输出，不能在恢复时重复产生写入副作用。
+        durable_node("approval.submit", submit_if_confirmed),
     )
     builder = StateGraph(ErpRagState)
     # 根图只处理通用编排；业务子图内部可以独立演进和增加 Worker。
-    builder.add_node("agent_planner", agent_planner)
-    builder.add_node("reject_out_of_scope", reject_out_of_scope)
-    builder.add_node("accept_frozen_preview_confirmation", accept_frozen_preview_confirmation)
-    builder.add_node("load_erp_context", load_erp_context)
+    builder.add_node(
+        "agent_planner",
+        durable_node("planner", agent_planner, pass_config=True),
+    )
+    builder.add_node(
+        "reject_out_of_scope",
+        durable_node("scope.reject", reject_out_of_scope),
+    )
+    builder.add_node(
+        "accept_frozen_preview_confirmation",
+        durable_node("approval.accept_confirmation", accept_frozen_preview_confirmation),
+    )
+    builder.add_node(
+        "load_erp_context",
+        # 每次恢复都重新注入当前请求的认证身份，禁止复用检查点中的旧凭据。
+        durable_node("erp.load_context", load_erp_context, replay_completed=False),
+    )
     builder.add_node("rag_retrieval", rag_retrieval_subgraph)
     builder.add_node("erp_status", erp_status_subgraph)
     builder.add_node("approval", approval_subgraph)
-    builder.add_node("answer_with_llm", answer_with_llm)
+    builder.add_node(
+        "answer_with_llm",
+        durable_node("llm.answer", answer_with_llm, pass_config=True),
+    )
     # 已冻结预览的确认请求绕过 Planner，防止 LLM 改写用户将要提交的内容。
     builder.add_conditional_edges(
         START,

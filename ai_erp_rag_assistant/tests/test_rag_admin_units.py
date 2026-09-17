@@ -22,7 +22,13 @@ from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
 
 
 def test_rag_models_are_company_scoped_without_schema_side_effects():
-    assert len(Base.metadata.tables) == 11
+    # 11 个 RAG/会话基础表 + 3 个 Durable Execution 表；模型只映射表，不负责建表。
+    assert len(Base.metadata.tables) == 14
+    assert {
+        "ai_erp_agent_runs",
+        "ai_erp_agent_steps",
+        "ai_erp_agent_checkpoints",
+    }.issubset(Base.metadata.tables)
     for table in Base.metadata.tables.values():
         assert "company_id" in table.c
         assert table.c.company_id.nullable is False
@@ -466,3 +472,5 @@ def test_rag_admin_routes_are_in_openapi_without_opening_database():
     assert "/api/rag/documents/delete" in paths
     assert "/api/sessions/list" in paths
     assert "/api/sessions/messages" in paths
+    assert "/api/sessions/rename" in paths
+    assert "/api/sessions/delete" in paths

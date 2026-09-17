@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from ai_erp_rag_assistant.app import api as api_module
+# 统一 API 通过惰性代理解析，避免直接导入本模块时循环依赖。
+from ai_erp_rag_assistant.app.api_compat import api_module
 from ai_erp_rag_assistant.app.assistant_catalog import approval_assistant_item
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.rag_admin_repository import RagAdminRepository, row_dict

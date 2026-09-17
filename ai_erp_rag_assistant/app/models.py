@@ -1,4 +1,4 @@
-"""映射人工创建的 RAG 管理、文档和同步任务表，不负责建表。"""
+"""映射人工创建的 RAG、会话和 ERP 执行表，不负责建表。"""
 
 from __future__ import annotations
 
@@ -263,4 +263,71 @@ class DataSourceSyncJob(Base):
     error_message: Mapped[str | None] = mapped_column(Text)
     started_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
     completed_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    created_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))
+
+
+class AgentRun(Base):
+    """ERP Agent 单次可恢复运行及其租约、最终结果。"""
+
+    __tablename__ = "ai_erp_agent_runs"
+
+    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    company_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    assistant_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    run_key: Mapped[str] = mapped_column(CHAR(32), nullable=False)
+    session_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    request_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    request_hash: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, server_default="running")
+    current_step: Mapped[str] = mapped_column(String(64), nullable=False, server_default="")
+    state_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    result_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    state_version: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False, server_default="0")
+    retry_count: Mapped[int] = mapped_column(INTEGER(unsigned=True), nullable=False, server_default="0")
+    owner_token: Mapped[str | None] = mapped_column(CHAR(32))
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    last_error_code: Mapped[str] = mapped_column(String(64), nullable=False, server_default="")
+    last_error_message: Mapped[str] = mapped_column(String(1000), nullable=False, server_default="")
+    started_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    completed_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    created_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))
+    updated_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))
+
+
+class AgentStep(Base):
+    """ERP Agent 节点的尝试次数、输入、输出和错误。"""
+
+    __tablename__ = "ai_erp_agent_steps"
+
+    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    company_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    assistant_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    run_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    step_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, server_default="running")
+    attempt_count: Mapped[int] = mapped_column(INTEGER(unsigned=True), nullable=False, server_default="1")
+    replayable: Mapped[bool] = mapped_column(TINYINT(1), nullable=False, server_default="1")
+    input_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    output_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    error_message: Mapped[str] = mapped_column(String(1000), nullable=False, server_default="")
+    started_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    finished_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    created_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))
+    updated_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))
+
+
+class AgentCheckpoint(Base):
+    """节点执行前后不可变的脱敏状态快照。"""
+
+    __tablename__ = "ai_erp_agent_checkpoints"
+
+    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    company_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    assistant_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    run_id: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    checkpoint_seq: Mapped[int] = mapped_column(BIGINT(unsigned=True), nullable=False)
+    step_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    phase: Mapped[str] = mapped_column(String(24), nullable=False)
+    state_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), nullable=False, server_default=text("CURRENT_TIMESTAMP(6)"))

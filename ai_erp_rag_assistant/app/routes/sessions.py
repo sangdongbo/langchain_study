@@ -6,9 +6,15 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
-from ai_erp_rag_assistant.app import api as api_module
+# 统一 API 使用惰性代理，避免直接导入会话路由时触发循环依赖。
+from ai_erp_rag_assistant.app.api_compat import api_module
 from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
-from ai_erp_rag_assistant.app.schemas import SessionListRequest, SessionMessagesRequest
+from ai_erp_rag_assistant.app.schemas import (
+    SessionDeleteRequest,
+    SessionListRequest,
+    SessionMessagesRequest,
+    SessionRenameRequest,
+)
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
 from ai_erp_rag_assistant.app.services.session_repository import session_repository
 
@@ -152,3 +158,76 @@ def session_messages(
             },
         )
         raise HTTPException(status_code=503, detail=f"读取会话消息失败：{exc}") from exc
+
+
+@router.post("/sessions/rename")
+def session_rename(
+    request: SessionRenameRequest,
+    authorization: str | None = Header(default=None),
+    uid: str | None = Header(default=None, alias="UID"),
+) -> dict[str, Any]:
+    """修改当前 ERP 用户拥有的会话标题。"""
+    request, _, company_id, user_id = api_module._persistent_identity(
+        request, authorization, uid
+    )
+    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
+    if not api_module.session_repository.enabled:
+        raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
+    try:
+        updated = api_module.session_repository.rename_session(
+            company_id=company_id,
+            assistant_key=assistant_key,
+            user_id=user_id,
+            session_key=request.session_id,
+            title=request.title,
+        )
+    except Exception as exc:
+        api_module.write_audit_event(
+            "session.rename.error",
+            {
+                "company_id": company_id,
+                "assistant_key": assistant_key,
+                "session_id": request.session_id,
+                "error": str(exc)[:300],
+            },
+        )
+        raise HTTPException(status_code=503, detail=f"修改会话名称失败：{exc}") from exc
+    if not updated:
+        raise HTTPException(status_code=404, detail="会话不存在或已删除")
+    return {"success": True, "session_id": request.session_id, "title": request.title}
+
+
+@router.post("/sessions/delete")
+def session_delete(
+    request: SessionDeleteRequest,
+    authorization: str | None = Header(default=None),
+    uid: str | None = Header(default=None, alias="UID"),
+) -> dict[str, Any]:
+    """逻辑删除当前 ERP 用户拥有的会话。"""
+    request, _, company_id, user_id = api_module._persistent_identity(
+        request, authorization, uid
+    )
+    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
+    if not api_module.session_repository.enabled:
+        raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
+    try:
+        deleted = api_module.session_repository.delete_session(
+            company_id=company_id,
+            assistant_key=assistant_key,
+            user_id=user_id,
+            session_key=request.session_id,
+        )
+    except Exception as exc:
+        api_module.write_audit_event(
+            "session.delete.error",
+            {
+                "company_id": company_id,
+                "assistant_key": assistant_key,
+                "session_id": request.session_id,
+                "error": str(exc)[:300],
+            },
+        )
+        raise HTTPException(status_code=503, detail=f"删除会话失败：{exc}") from exc
+    if not deleted:
+        raise HTTPException(status_code=404, detail="会话不存在或已删除")
+    return {"success": True, "session_id": request.session_id, "status": "deleted"}

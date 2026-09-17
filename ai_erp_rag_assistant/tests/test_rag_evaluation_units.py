@@ -155,3 +155,81 @@ def test_load_jsonl_skips_comments_and_blank_lines(tmp_path: Path):
 
     assert len(cases) == 1
     assert cases[0].case_id == "unknown"
+
+
+def test_citation_parser_accepts_knowledge_base_and_version_prefixes():
+    case = _case(
+        expected_citations=[{"source": "handbook.pdf", "page": 9}],
+    )
+    report = RagEvaluationService().evaluate(
+        [case],
+        retriever=lambda case, count: [
+            {"chunk_id": "chunk-2", "source": "handbook.pdf", "page": 9}
+        ],
+        answerer=lambda case, evidence: "答案\n\n依据：[1] [员工制度]《handbook.pdf》版本 2026 第 9 页",
+    )
+
+    assert report.citation_precision == 1.0
+    assert report.expected_citation_recall == 1.0
+    assert report.passed_cases == 1
+
+
+def test_load_jsonl_rejects_duplicate_case_ids(tmp_path: Path):
+    path = tmp_path / "duplicate.jsonl"
+    path.write_text(
+        '{"id":"same","query":"问题一","company_id":"C001","expected_sources":["a.pdf"]}\n'
+        '{"id":"same","query":"问题二","company_id":"C001","expected_sources":["b.pdf"]}\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RagEvaluationCaseError, match="id 不能重复"):
+        RagEvaluationService.load_jsonl(path)
+
+
+def test_external_errors_count_as_zero_in_metric_denominators():
+    answerable = _case(id="answerable-error")
+    no_answer = _case(
+        id="no-answer-error",
+        should_answer=False,
+        expected_chunk_ids=[],
+        expected_citations=[],
+    )
+
+    report = RagEvaluationService().evaluate(
+        [answerable, no_answer],
+        retriever=lambda case, count: (_ for _ in ()).throw(RuntimeError("Milvus 503")),
+        answerer=lambda case, evidence: "不会执行",
+    )
+
+    assert report.answerable_cases == 1
+    assert report.no_answer_cases == 1
+    assert report.error_cases == 2
+    assert report.recall_at_k == 0.0
+    assert report.no_answer_rejection_rate == 0.0
+    assert report.no_answer_abstention_rate == 0.0
+    assert report.citation_precision == 0.0
+    assert report.expected_citation_recall == 0.0
+
+
+def test_candidate_count_never_reduces_case_top_k():
+    requested = []
+    case = _case(top_k=5)
+
+    RagEvaluationService().evaluate(
+        [case],
+        retriever=lambda case, count: requested.append(count) or [],
+        candidate_count=2,
+    )
+
+    assert requested == [5]
+
+
+def test_invalid_candidate_count_is_reported_as_case_error():
+    report = RagEvaluationService().evaluate(
+        [_case()],
+        retriever=lambda case, count: [],
+        candidate_count=0,
+    )
+
+    assert report.error_cases == 1
+    assert "candidate_count" in report.results[0].error

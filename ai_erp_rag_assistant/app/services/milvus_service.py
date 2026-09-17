@@ -200,8 +200,12 @@ class MilvusService:
         min_score: float | None = None,
         document_filters: Sequence[tuple[str, str]] | None = None,
         restrict_to_documents: bool = False,
+        query_vector: Sequence[float] | None = None,
     ) -> list[dict[str, Any]]:
-        """按公司、知识库、启用文档、部门和 ACL 执行向量检索。"""
+        """按公司、知识库、启用文档、部门和 ACL 执行向量检索。
+
+        ``query_vector`` 仅供跨库检索复用同一次 Embedding，普通调用仍由本方法生成向量。
+        """
         client = self._client()
         company_id = company_id.strip()
         if not company_id:
@@ -217,25 +221,43 @@ class MilvusService:
         if not exists:
             raise RuntimeError(f"Milvus collection 不存在：{collection_name}。请先执行知识库入库。")
         self._validate_collection_dimension(client, collection_name)
-        # 查询向量与文档向量必须来自同一进程级模型和维度配置。
-        vector = embedding_service.embed_query(query)
+        # 查询向量与文档向量必须来自同一进程级模型和维度配置；跨库查询只生成一次。
+        vector = (
+            list(query_vector)
+            if query_vector is not None
+            else embedding_service.embed_query(query)
+        )
         filters = _visibility_filters(company_id, department, permission_tags)
         if restrict_to_documents:
             # MySQL 已配置时只允许 published + search_enabled 文档的 source/version 命中。
             filters.append(_active_document_filter(document_filters or []))
         # 先多取候选，再在应用层做最低分、去重和精确 top_k 截断。
+        search_kwargs = {
+            "collection_name": collection_name,
+            "data": [vector],
+            "anns_field": "dense",
+            "filter": " and ".join(filters),
+            "limit": max(top_k * 3, top_k),
+            "output_fields": OUTPUT_FIELDS,
+            "search_params": {"metric_type": "COSINE", "params": {}},
+        }
         try:
-            results = client.search(
-                collection_name=collection_name,
-                data=[vector],
-                anns_field="dense",
-                filter=" and ".join(filters),
-                limit=max(top_k * 3, top_k),
-                output_fields=OUTPUT_FIELDS,
-                search_params={"metric_type": "COSINE", "params": {}},
-            )
+            results = client.search(**search_kwargs)
         except Exception as exc:
-            raise RuntimeError(f"Milvus 向量检索失败：{exc}") from exc
+            if not _is_transient_channel_error(exc):
+                raise RuntimeError(f"Milvus 向量检索失败：{exc}") from exc
+            try:
+                # QueryNode 分配短暂失效时，用新连接重新加载并只重试一次。
+                # 该恢复不删除、释放或重建 Collection，不影响已有向量数据。
+                client = self._client()
+                load_collection = getattr(client, "load_collection", None)
+                if callable(load_collection):
+                    load_collection(collection_name=collection_name)
+                results = client.search(**search_kwargs)
+            except Exception as retry_exc:
+                raise RuntimeError(
+                    f"Milvus 向量检索失败（自动恢复后仍不可用）：{retry_exc}"
+                ) from retry_exc
         hits = results[0] if results else []
         evidence: list[dict[str, Any]] = []
         seen_chunk_ids: set[str] = set()
@@ -273,11 +295,15 @@ class MilvusService:
         """跨公司内多个启用知识库检索，并按统一得分合并候选结果。"""
         merged: list[dict[str, Any]] = []
         seen_chunk_ids: set[str] = set()
+        query_vector: list[float] | None = None
         for target in targets:
             key = str(target.get("knowledge_base_key") or "").strip()
             collection = str(target.get("collection") or "").strip()
             if not collection:
                 continue
+            if query_vector is None:
+                # 所有知识库使用相同 Embedding 配置，同一个问题无需按 Collection 重复计费。
+                query_vector = embedding_service.embed_query(query)
             try:
                 rows = self.search(
                     query,
@@ -294,6 +320,7 @@ class MilvusService:
                     ),
                     document_filters=target.get("active_documents") or (),
                     restrict_to_documents=bool(target.get("document_scope_loaded")),
+                    query_vector=query_vector,
                 )
             except RuntimeError as exc:
                 # 公司下新建但尚未导入文件的知识库没有 Collection，不应阻断其他知识库。
@@ -515,6 +542,15 @@ class MilvusService:
 
 def _escape(value: str) -> str:
     return value.replace('\\', '\\\\').replace('"', '\\"')
+
+
+def _is_transient_channel_error(error: Exception) -> bool:
+    """只识别 Milvus QueryNode/Channel 临时不可服务错误，其他错误立即返回。"""
+    message = str(error).casefold()
+    return "code=503" in message and (
+        "channel distribution is not serviceable" in message
+        or "channel not available" in message
+    )
 
 
 def _visibility_filters(

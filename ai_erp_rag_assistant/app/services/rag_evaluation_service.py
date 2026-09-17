@@ -202,7 +202,11 @@ Reranker = Callable[[RagEvaluationCase, Sequence[Mapping[str, Any]], int], Seque
 Answerer = Callable[[RagEvaluationCase, Sequence[Mapping[str, Any]]], str | Mapping[str, Any]]
 
 _CITATION_PATTERN = re.compile(
-    r"\[\s*(?P<id>\d+)\s*\]\s*《(?P<source>[^》]+)》"
+    # 兼容线上引用的知识库前缀和版本文本，例如：
+    # [1] [员工制度]《员工手册.pdf》版本 2026 第 9 页。
+    r"\[\s*(?P<id>\d+)\s*\]\s*"
+    r"(?:\[[^\]\r\n]{1,256}\]\s*)?《(?P<source>[^》]{1,1000})》"
+    r"(?:\s*版本\s*[^第\r\n]{1,128})?\s*"
     r"(?:第\s*(?P<page>\d+)\s*页|页码未知)"
 )
 
@@ -239,6 +243,18 @@ class RagEvaluationService:
                 cases.append(RagEvaluationCase.from_dict(value, line_number=line_number))
         if not cases:
             raise RagEvaluationCaseError("评测集不能为空")
+        seen_ids: set[str] = set()
+        duplicate_ids: set[str] = set()
+        for case in cases:
+            # 用一次扫描校验唯一 ID，评测集扩大后不会因重复计数产生平方级开销。
+            if case.case_id in seen_ids:
+                duplicate_ids.add(case.case_id)
+            seen_ids.add(case.case_id)
+        duplicates = sorted(duplicate_ids)
+        if duplicates:
+            raise RagEvaluationCaseError(
+                "评测集 id 不能重复：" + "、".join(duplicates)
+            )
         return cases
 
     def evaluate(
@@ -262,21 +278,24 @@ class RagEvaluationService:
                     candidate_count=candidate_count,
                 )
             )
-        answerable = [item for item in results if item.should_answer and not item.error]
-        no_answer = [item for item in results if not item.should_answer and not item.error]
-        with_citation_precision = [
-            item.citation_precision for item in answerable if item.citation_precision is not None
-        ]
+        # 外部服务错误也是线上质量的一部分，必须以 0 分进入分母，不能让失败使指标虚高。
+        answerable = [item for item in results if item.should_answer]
+        no_answer = [item for item in results if not item.should_answer]
+        with_citation_precision = (
+            [item.citation_precision or 0.0 for item in answerable]
+            if answerer is not None
+            else []
+        )
         with_expected_citations = [
-            item.expected_citation_recall
-            for item in answerable
-            if item.expected_citation_recall is not None
+            result.expected_citation_recall or 0.0
+            for case, result in zip(cases, results, strict=True)
+            if case.should_answer and case.expected_citations
         ]
-        with_abstention = [
-            bool(item.no_answer_abstention_pass)
-            for item in no_answer
-            if item.no_answer_abstention_pass is not None
-        ]
+        with_abstention = (
+            [bool(item.no_answer_abstention_pass) for item in no_answer]
+            if answerer is not None
+            else []
+        )
         errors = [item for item in results if item.error]
         return RagEvaluationReport(
             total_cases=len(results),
@@ -317,9 +336,10 @@ class RagEvaluationService:
     ) -> RagCaseResult:
         """执行一条样例，确保失败被记录而不是伪装成无答案。"""
         try:
-            requested_count = candidate_count or case.top_k
-            if not 1 <= requested_count <= 50:
+            if candidate_count is not None and not 1 <= candidate_count <= 50:
                 raise RagEvaluationCaseError("candidate_count 必须是 1..50")
+            # 与线上检索保持一致：Rerank 候选数不能小于最终 top_k。
+            requested_count = max(case.top_k, candidate_count or case.top_k)
             raw_evidence = retriever(case, requested_count)
             evidence = [dict(item) for item in (raw_evidence or []) if isinstance(item, Mapping)]
             ranked = (
@@ -460,7 +480,12 @@ def _citations_from_payload(value: Any) -> list[tuple[str, int | None]]:
         if not isinstance(item, Mapping) or not isinstance(item.get("source"), str):
             continue
         page = item.get("page")
-        result.append((item["source"].strip(), page if isinstance(page, int) else None))
+        result.append(
+            (
+                item["source"].strip(),
+                page if isinstance(page, int) and not isinstance(page, bool) and page >= 1 else None,
+            )
+        )
     return result
 
 

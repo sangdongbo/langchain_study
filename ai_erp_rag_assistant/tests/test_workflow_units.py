@@ -479,6 +479,13 @@ def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
         "enabled",
         property(lambda self: True),
     )
+    # 该单元测试只验证审批助手不加载 RAG；显式模拟系统 Assistant 未配置，
+    # 避免依赖本机 MySQL 状态或测试执行顺序。
+    monkeypatch.setattr(
+        type(chat_routes.session_repository),
+        "assistant_available",
+        lambda self, **kwargs: False,
+    )
 
     class FakeWorkflow:
         @staticmethod
@@ -776,6 +783,170 @@ def test_unique_relevant_template_is_selected_without_llm_call(monkeypatch):
     )
 
     assert selected == "5911"
+
+
+def test_multiple_templates_wait_for_explicit_selection(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.list_approval_templates",
+        lambda query, company_id, user: [
+            {"template_id": "101", "title": "请假审批0732"},
+            {"template_id": "102", "title": "zh-请假"},
+        ],
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_template",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("多模板时不应加载表单")),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.model_service.select_template",
+        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("多模板时不应由模型选择")),
+    )
+
+    result = load_approval_template(
+        {
+            "user_message": "我要发起请假审批",
+            "user_context": {"company_id": "C001"},
+            "plan": {"approval_type": "请假", "fields": {}, "decision": "continue"},
+            "template": {},
+            "template_candidates": [],
+            "selected_template_id": "",
+            "fields": {},
+            "tool_calls": [],
+        }
+    )
+
+    assert result["workflow_status"] == "waiting_user"
+    assert result["template_selection_required"] is True
+    assert [item["template_id"] for item in result["template_candidates"]] == ["101", "102"]
+
+
+def test_explicit_template_id_loads_selected_candidate(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.list_approval_templates",
+        lambda query, company_id, user: [
+            {"template_id": "101", "title": "请假审批0732"},
+            {"template_id": "102", "title": "zh-请假"},
+        ],
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_template",
+        lambda template_id, company_id, title, user: {
+            "template_id": template_id,
+            "title": title,
+            "fields": [{"name": "reason", "label": "原因", "required": True}],
+            "erp_mode": "mock",
+        },
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.model_service.extract_approval_fields",
+        lambda *args, **kwargs: {},
+    )
+
+    result = load_approval_template(
+        {
+            "user_message": "选择审批模板",
+            "user_context": {"company_id": "C001"},
+            "plan": {"approval_type": "", "fields": {}, "decision": "continue"},
+            "template": {},
+            "template_candidates": [
+                {"template_id": "101", "title": "请假审批0732"},
+                {"template_id": "102", "title": "zh-请假"},
+            ],
+            "selected_template_id": "102",
+            "fields": {},
+            "tool_calls": [],
+        }
+    )
+
+    assert result["template"]["template_id"] == "102"
+    assert result["template_selection_required"] is False
+    assert result["template_candidates"] == []
+
+
+def test_explicit_template_id_overrides_existing_template(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.list_approval_templates",
+        lambda query, company_id, user: [
+            {"template_id": "101", "title": "请假审批0732"},
+            {"template_id": "102", "title": "zh-请假"},
+        ],
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_template",
+        lambda template_id, company_id, title, user: {
+            "template_id": template_id,
+            "title": title,
+            "fields": [],
+            "erp_mode": "mock",
+        },
+    )
+
+    result = load_approval_template(
+        {
+            "user_message": "选择审批模板",
+            "user_context": {"company_id": "C001"},
+            "plan": {"approval_type": "", "fields": {}, "decision": "continue"},
+            "template": {
+                "template_id": "101",
+                "requested_approval_type": "请假审批0732",
+                "fields": [],
+            },
+            "template_candidates": [
+                {"template_id": "101", "title": "请假审批0732"},
+                {"template_id": "102", "title": "zh-请假"},
+            ],
+            "selected_template_id": "102",
+            "fields": {},
+            "tool_calls": [],
+        }
+    )
+
+    assert result["template"]["template_id"] == "102"
+
+
+def test_new_approval_intent_does_not_reuse_stale_template_candidates(monkeypatch):
+    queries = []
+
+    def list_templates(query, company_id, user):
+        queries.append(query)
+        return [{"template_id": "201", "title": "费用报销"}]
+
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.list_approval_templates",
+        list_templates,
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.get_approval_template",
+        lambda template_id, company_id, title, user: {
+            "template_id": template_id,
+            "title": title,
+            "fields": [{"name": "amount", "label": "金额", "required": True}],
+            "erp_mode": "mock",
+        },
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.model_service.extract_approval_fields",
+        lambda *args, **kwargs: {},
+    )
+
+    result = load_approval_template(
+        {
+            "user_message": "我要发起费用报销审批",
+            "user_context": {"company_id": "C001"},
+            "plan": {"approval_type": "报销", "fields": {}, "decision": "continue"},
+            "template": {},
+            "template_candidates": [
+                {"template_id": "101", "title": "请假审批0732"},
+                {"template_id": "102", "title": "zh-请假"},
+            ],
+            "selected_template_id": "",
+            "fields": {},
+            "tool_calls": [],
+        }
+    )
+
+    assert queries == ["报销"]
+    assert result["template"]["template_id"] == "201"
 
 
 def test_dynamic_leave_option_binds_to_real_erp_field_key():

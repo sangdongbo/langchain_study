@@ -3,8 +3,18 @@ from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 
-from ai_erp_rag_assistant.app.api import session_list, session_messages
-from ai_erp_rag_assistant.app.schemas import SessionListRequest, SessionMessagesRequest
+from ai_erp_rag_assistant.app.api import (
+    session_delete,
+    session_list,
+    session_messages,
+    session_rename,
+)
+from ai_erp_rag_assistant.app.schemas import (
+    SessionDeleteRequest,
+    SessionListRequest,
+    SessionMessagesRequest,
+    SessionRenameRequest,
+)
 from ai_erp_rag_assistant.app.services.session_repository import (
     SessionRepository,
     resumable_state,
@@ -140,6 +150,44 @@ class _ReadConnection:
         pass
 
 
+class _MutationCursor:
+    def __init__(self):
+        self.queries: list[tuple[str, tuple | None]] = []
+        self.rowcount = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def execute(self, sql, params=None):
+        compact = " ".join(sql.split())
+        if params is not None:
+            assert compact.count("%s") == len(params)
+        self.queries.append((compact, params))
+        self.rowcount = 1
+
+
+class _MutationConnection:
+    def __init__(self):
+        self.cursor_instance = _MutationCursor()
+        self.committed = False
+        self.rolled_back = False
+
+    def cursor(self):
+        return self.cursor_instance
+
+    def commit(self):
+        self.committed = True
+
+    def rollback(self):
+        self.rolled_back = True
+
+    def close(self):
+        pass
+
+
 def test_save_exchange_persists_session_approval_and_audit_without_real_database(monkeypatch):
     connection = _Connection()
     monkeypatch.setattr(
@@ -256,6 +304,45 @@ def test_session_repository_scopes_and_pages_reads_without_real_database(monkeyp
     )
 
 
+def test_session_repository_renames_and_soft_deletes_with_owner_scope(monkeypatch):
+    rename_connection = _MutationConnection()
+    delete_connection = _MutationConnection()
+    connections = iter([rename_connection, delete_connection])
+    monkeypatch.setattr(
+        SessionRepository,
+        "_connect",
+        staticmethod(lambda: next(connections)),
+    )
+    repository = SessionRepository()
+
+    assert repository.rename_session(
+        company_id="16",
+        assistant_key="erp-rag",
+        user_id="863",
+        session_key="session-1",
+        title="员工病假制度",
+    ) is True
+
+    assert repository.delete_session(
+        company_id="16",
+        assistant_key="erp-rag",
+        user_id="863",
+        session_key="session-1",
+    ) is True
+
+    rename_sql, rename_params = rename_connection.cursor_instance.queries[0]
+    delete_sql, delete_params = delete_connection.cursor_instance.queries[0]
+    assert rename_connection.committed is True
+    assert "s.company_id = %s" in rename_sql
+    assert "s.user_id = %s" in rename_sql
+    assert rename_params == ("员工病假制度", "16", "erp-rag", "863", "session-1")
+    assert delete_connection.committed is True
+    assert "s.status = 'deleted'" in delete_sql
+    assert "s.state_json = JSON_OBJECT()" in delete_sql
+    assert delete_params == ("16", "erp-rag", "863", "session-1")
+
+
+
 def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
     calls = {}
 
@@ -271,6 +358,16 @@ def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
         def list_messages(**kwargs):
             calls["messages"] = kwargs
             return [{"message_seq": 7, "role": "assistant", "content": "已生成预览"}], True
+
+        @staticmethod
+        def rename_session(**kwargs):
+            calls["rename"] = kwargs
+            return True
+
+        @staticmethod
+        def delete_session(**kwargs):
+            calls["delete"] = kwargs
+            return True
 
     monkeypatch.setattr("ai_erp_rag_assistant.app.api.session_repository", Repository())
     monkeypatch.setattr(
@@ -294,6 +391,27 @@ def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
         "Bearer token",
         "863",
     )
+    renamed = session_rename(
+        SessionRenameRequest(
+            user_id="untrusted",
+            company_id="16",
+            assistant_key="erp-rag",
+            session_id="session-1",
+            title="  员工病假制度  ",
+        ),
+        "Bearer token",
+        "863",
+    )
+    deleted = session_delete(
+        SessionDeleteRequest(
+            user_id="untrusted",
+            company_id="16",
+            assistant_key="erp-rag",
+            session_id="session-1",
+        ),
+        "Bearer token",
+        "863",
+    )
 
     assert sessions["items"][0]["session_id"] == "session-1"
     assert calls["sessions"]["user_id"] == "verified-863"
@@ -301,12 +419,21 @@ def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
     assert messages["next_before_seq"] == 7
     assert calls["messages"]["user_id"] == "verified-863"
     assert calls["messages"]["session_key"] == "session-1"
+    assert renamed["title"] == "员工病假制度"
+    assert calls["rename"]["user_id"] == "verified-863"
+    assert calls["rename"]["session_key"] == "session-1"
+    assert deleted["status"] == "deleted"
+    assert calls["delete"]["user_id"] == "verified-863"
 
 
 def test_session_read_api_reports_when_long_term_store_is_disabled(monkeypatch):
     monkeypatch.setattr(
         "ai_erp_rag_assistant.app.api.session_repository",
         SimpleNamespace(enabled=False),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api._persistent_identity",
+        lambda request, authorization, uid: (request, {}, "16", "863"),
     )
 
     with pytest.raises(HTTPException) as error:

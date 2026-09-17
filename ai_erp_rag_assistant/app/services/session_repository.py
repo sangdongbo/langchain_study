@@ -23,8 +23,10 @@ _STATE_KEYS = {
     "preview",
     "route",
     "selected_assignees",
+    "selected_template_id",
     "template",
     "template_candidates",
+    "template_selection_required",
     "workflow_status",
 }
 _SECRET_KEYS = {
@@ -163,6 +165,78 @@ class SessionRepository:
                 has_more = len(rows) > page_size
                 # SQL 倒序取最近一页，返回前恢复为聊天界面需要的时间正序。
                 return list(reversed(rows[:page_size])), has_more
+        finally:
+            connection.close()
+
+    def rename_session(
+        self,
+        *,
+        company_id: str,
+        assistant_key: str,
+        user_id: str,
+        session_key: str,
+        title: str,
+    ) -> bool:
+        """修改当前所有者的非删除会话标题。"""
+
+        connection = self._connect()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE ai_erp_sessions AS s
+                    INNER JOIN ai_erp_assistants AS a
+                        ON a.company_id = s.company_id AND a.id = s.assistant_id
+                    SET s.title = %s
+                    WHERE s.company_id = %s AND a.assistant_key = %s
+                      AND s.user_id = %s AND s.session_key = %s
+                      AND s.status != 'deleted'
+                    """,
+                    (title, company_id, assistant_key, user_id, session_key),
+                )
+                updated = cursor.rowcount > 0
+            connection.commit()
+            return updated
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def delete_session(
+        self,
+        *,
+        company_id: str,
+        assistant_key: str,
+        user_id: str,
+        session_key: str,
+    ) -> bool:
+        """逻辑删除会话并清除可恢复状态，历史消息仍保留用于审计。"""
+
+        connection = self._connect()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE ai_erp_sessions AS s
+                    INNER JOIN ai_erp_assistants AS a
+                        ON a.company_id = s.company_id AND a.id = s.assistant_id
+                    SET s.status = 'deleted', s.active_approval = 0,
+                        s.state_version = s.state_version + 1,
+                        s.state_json = JSON_OBJECT(),
+                        s.deleted_at = CURRENT_TIMESTAMP(6)
+                    WHERE s.company_id = %s AND a.assistant_key = %s
+                      AND s.user_id = %s AND s.session_key = %s
+                      AND s.status != 'deleted'
+                    """,
+                    (company_id, assistant_key, user_id, session_key),
+                )
+                updated = cursor.rowcount > 0
+            connection.commit()
+            return updated
+        except Exception:
+            connection.rollback()
+            raise
         finally:
             connection.close()
 

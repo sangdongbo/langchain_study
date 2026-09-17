@@ -44,6 +44,8 @@ D:\PythonProject\LearnOne\docker\milvus-embed\volumes\milvus
 不要删除或清空上述目录。项目配置默认连接现有 Milvus，不会自动重建、删除或清空 collection。
 写入和检索前会校验已有 Collection 的 `dense` 向量维度；当前 Embedding 为 2048 维时，
 如果 Collection 使用其他维度，接口会直接返回配置不匹配错误。
+检索遇到 QueryNode Channel 临时 503 时，会使用新连接重新加载 Collection 并重试一次；
+Schema、权限和查询表达式错误不会重试。
 
 ## 三层边界
 
@@ -75,6 +77,7 @@ HTTP 接口按功能拆分在 `app/routes/` 下，公共身份校验、租户隔
 | `app/routes/assistants.py` | `/api/assistants/list` 固定审批助手与 RAG 助手目录 |
 | `app/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
 | `app/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
+| `app/routes/executions.py` | `/api/executions/status` ERP Agent 运行状态 |
 | `app/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
 | `app/routes/workbench.py` | `/api/workbench/summary` 个人工作台只读聚合 |
 | `app/rag_admin_api.py` | `/api/rag/admin/*` Assistant、Prompt、知识库和数据源管理 |
@@ -91,6 +94,10 @@ uv run uvicorn ai_erp_rag_assistant.app.main:app --app-dir .. --reload --port 80
 `LLM_*`/`EMBEDDING_*` 为空时自动使用外层配置中的 DashScope 或 DeepSeek 变量。
 DashScope 工作空间 Key 会复用 `DASHSCOPE_BASE_URL` 作为 Embedding 端点；如需单独端点，
 直接填写 `EMBEDDING_BASE_URL`。
+`LLM_MAX_RETRIES` 控制 LangChain Runnable 对临时网络/限流错误的额外重试次数；
+`LLM_STRUCTURED_OUTPUT_METHOD` 默认是兼容 OpenAI 供应商的 `json_mode`，原生支持 JSON Schema
+的模型可改为 `json_schema`。`EMBEDDING_TIMEOUT` 和 `EMBEDDING_MAX_RETRIES` 分别控制向量请求
+超时与重试；同一进程会复用 Embedding 客户端连接池，并在写入 Milvus 前校验向量数量和维度。
 
 联调时可在 `.env` 中启用 LangSmith：
 
@@ -282,7 +289,7 @@ ERP 接入有读写两个独立边界：
 
 接口契约与 `ai_approval_assistant` 一致：模板列表使用 `POST /api/approval/list` 和 `{"keyword": ...}`；字段使用 `POST /api/field/formFields` 和 `{"field_form": "approval_type_{id}"}`；节点使用 `POST /api/approval/getNodes` 和 `approval_set_id/form_value`；只有写入开启时才调用 `POST /api/approval/add`。
 
-聊天响应中会返回 `workflow_status`、`plan`、`tool_calls`、`evidence`、`form_schema`、`preview`、`pending_question` 和 `erp_mode`。审批状态包括 `waiting_user`、`collecting_fields`、`waiting_assignee`、`waiting_erp`、`preview_ready`、`submitted`、`cancelled`、`blocked` 和 `failed`。
+聊天响应中会返回 `workflow_status`、`plan`、`tool_calls`、`evidence`、`form_schema`、`preview`、`pending_question`、`template_selection_required`、`template_candidates` 和 `erp_mode`。审批状态包括 `waiting_user`、`collecting_fields`、`waiting_assignee`、`waiting_erp`、`preview_ready`、`submitted`、`cancelled`、`blocked` 和 `failed`。当 `template_selection_required=true` 时，`template_candidates` 是前端模板选择器的数据源；确认模板后服务端才返回对应的动态表单。
 
 页面审批接口：
 
@@ -310,14 +317,20 @@ ERP 接入有读写两个独立边界：
 }
 ```
 
-生产长期会话使用 `AI_ERP_SESSION_STORE=mysql`。启用前必须人工审查并执行 `docs/database/001`、`002`、`003`，同时为每家公司建立对应的 RAG Assistant。启用后 RAG 助手的会话和消息写入 MySQL；固定审批助手不依赖 Assistant 表，只保留服务进程内的多轮状态，重启后清空。
+生产长期会话使用 `AI_ERP_SESSION_STORE=mysql`。启用前必须人工审查并执行 `docs/database/001`、`002`、`003`，同时为每家公司建立对应的 RAG Assistant。审批助手还需要按 `docs/database/006_approval_assistant_seed.sql` 配置系统 Assistant 行，并审查执行 `docs/database/007_mysql8_erp_agent_execution.sql`。配置后审批请求同时写入会话历史和 `Run -> Step -> Checkpoint`；未配置系统 Assistant 时只保留服务进程内的多轮状态。
+
+ERP Agent 启用 Durable Execution 后，`/api/chat` 的 `request_id` 必填。响应返回 `run_id`、
+`execution_status`、`execution_retry_count` 和 `execution_current_step`。失败或进程中断后，前端按
+原业务参数和相同 `request_id` 重发即可恢复；`POST /api/executions/status` 可只读查询运行状态。
 
 前端长期会话接口：
 
 - `POST /api/sessions/list`：按当前 ERP 用户分页读取会话，参数为 `status`、`page`、`page_size`。
 - `POST /api/sessions/messages`：读取一个会话的消息，参数为 `session_id`、`before_seq`、`page_size`。
+- `POST /api/sessions/rename`：修改当前用户拥有的会话标题，参数为 `session_id`、`title`。
+- `POST /api/sessions/delete`：逻辑删除当前用户拥有的会话，参数为 `session_id`。
 
-两个接口都会先通过 ERP `UID`、`Authorization` 确认用户和公司，再按
+这些接口都会先通过 ERP `UID`、`Authorization` 确认用户和公司，再按
 `company_id + assistant_key + ERP用户ID` 查询。请求体中的 `user_id` 不能用于读取其他用户的会话。
 
 ## LangGraph Studio

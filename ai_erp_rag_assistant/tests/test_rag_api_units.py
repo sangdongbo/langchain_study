@@ -249,6 +249,37 @@ def test_milvus_search_many_merges_sources_from_enabled_knowledge_bases(monkeypa
     assert results[0]["knowledge_base_name"] == "考勤制度"
 
 
+def test_milvus_search_many_reuses_one_query_embedding(monkeypatch):
+    service = MilvusService()
+    embedded_queries = []
+
+    class FakeClient:
+        @staticmethod
+        def has_collection(name):
+            return True
+
+        @staticmethod
+        def search(**kwargs):
+            return [[]]
+
+    monkeypatch.setattr(service, "_client", lambda: FakeClient())
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.milvus_service.embedding_service.embed_query",
+        lambda query: embedded_queries.append(query) or [0.1, 0.2],
+    )
+
+    service.search_many(
+        "病假材料",
+        company_id="C001",
+        targets=[
+            {"knowledge_base_key": "hr", "collection": "c001_hr"},
+            {"knowledge_base_key": "attendance", "collection": "c001_attendance"},
+        ],
+    )
+
+    assert embedded_queries == ["病假材料"]
+
+
 def test_milvus_search_many_skips_empty_collection(monkeypatch):
     service = MilvusService()
 
@@ -562,6 +593,45 @@ def test_search_without_verified_department_is_limited_to_public_documents(monke
 
     assert 'department == ""' in calls["filter"]
     assert 'department == "公共制度"' in calls["filter"]
+
+
+def test_search_recovers_once_from_transient_querynode_channel_error(monkeypatch):
+    service = MilvusService()
+    events = []
+
+    class FirstClient:
+        @staticmethod
+        def has_collection(name):
+            return True
+
+        @staticmethod
+        def search(**kwargs):
+            raise RuntimeError(
+                "code=503, channel distribution is not serviceable: channel not available"
+            )
+
+    class RecoveryClient:
+        @staticmethod
+        def load_collection(**kwargs):
+            events.append(("load", kwargs["collection_name"]))
+
+        @staticmethod
+        def search(**kwargs):
+            events.append(("search", kwargs["collection_name"]))
+            return [[]]
+
+    clients = iter([FirstClient(), RecoveryClient()])
+    monkeypatch.setattr(service, "_client", lambda: next(clients))
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.milvus_service.embedding_service.embed_query",
+        lambda query: [0.1, 0.2],
+    )
+
+    assert service.search("制度", company_id="C001") == []
+    assert events == [
+        ("load", service.settings.milvus_collection),
+        ("search", service.settings.milvus_collection),
+    ]
 
 
 def test_document_list_groups_chunks_by_source_and_version(monkeypatch):

@@ -1,7 +1,7 @@
 # RAG 检索效果评测
 
 评测模块用于回答“检索是否找对、Rerank 是否改善排序、无答案是否拒答、引用是否落在证据上”。
-它是离线工具，不会创建数据库连接、写入 MySQL、修改 Milvus 数据或改变线上接口行为。
+它是离线工具：真实运行时只读取 Embedding/Milvus 检索结果，不写入 MySQL 或 Milvus，也不会改变线上接口行为。
 
 ## 快速开始
 
@@ -21,6 +21,7 @@ uv run python scripts/evaluate_rag.py --cases .\evals\rag_cases.jsonl --with-llm
 
 `--with-llm` 会产生模型调用费用；`--no-rerank` 可以作为向量原始排序的对照组。
 评测失败时脚本返回退出码 `1`，可用于 CI 门禁。
+Rerank 候选数始终至少等于每条样例的 `top_k`，避免配置较小候选数时低估 Recall@K。
 
 ## JSONL 样例格式
 
@@ -45,6 +46,8 @@ uv run python scripts/evaluate_rag.py --cases .\evals\rag_cases.jsonl --with-llm
 `expected_chunk_ids` 优先用于计算 Recall；没有 Chunk ID 时才使用 `expected_sources`。
 可回答样例必须配置其中一个。无答案样例设置 `should_answer=false`，并且不能配置期望文档。
 `company_id`、部门和权限标签会逐条传入检索器，评测集不能用一条身份覆盖所有租户。
+每条样例的 `id` 必须唯一；引用解析兼容服务端返回的知识库前缀和版本，例如
+`[1] [员工制度]《员工手册.pdf》版本 2026 第 9 页`。
 
 ## 指标口径
 
@@ -60,7 +63,8 @@ uv run python scripts/evaluate_rag.py --cases .\evals\rag_cases.jsonl --with-llm
 | `expected_citation_recall` | 配置 `expected_citations` 时，期望来源/页码被答案引用的比例 |
 
 单条样例只有在可回答样例 Recall=1、无答案样例结果为空，并且（启用 `--with-llm` 时）所有引用都能在证据中找到，才算通过。
-报告中的 `error_cases` 与 `failed_cases` 会区分外部服务错误和质量未达标。
+报告中的 `error_cases` 与 `failed_cases` 会区分外部服务错误和质量未达标；外部服务错误仍按
+0 分计入对应指标分母，避免 Embedding、Milvus 或 LLM 故障时质量指标反而虚高。
 
 ## 建议的评测集
 

@@ -33,6 +33,11 @@ def health() -> dict[str, str]:
             settings.session_store != "mysql"
             or bool(settings.mysql_database and settings.mysql_user)
         ).lower(),
+        # 这里只报告配置条件；运行表是否已由 DBA 创建通过实际请求或状态接口验证。
+        "erp_durable_execution_configured": str(
+            settings.session_store == "mysql"
+            and bool(settings.mysql_database and settings.mysql_user)
+        ).lower(),
         "llm_configured": str(bool(settings.llm_api_key)).lower(),
         "embedding_configured": str(bool(settings.embedding_api_key)).lower(),
         "mysql_configured": str(mysql_configured(settings)).lower(),

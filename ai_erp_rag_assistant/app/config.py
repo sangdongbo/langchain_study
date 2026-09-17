@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field
@@ -55,6 +56,8 @@ SUPPORTED_ENV_KEYS = frozenset(
         "LLM_BASE_URL",
         "LLM_MODEL",
         "LLM_TIMEOUT",
+        "LLM_MAX_RETRIES",
+        "LLM_STRUCTURED_OUTPUT_METHOD",
         "DASHSCOPE_API_KEY",
         "DASHSCOPE_BASE_URL",
         "DASHSCOPE_OPENAI_MODEL",
@@ -70,6 +73,8 @@ SUPPORTED_ENV_KEYS = frozenset(
         "EMBEDDING_API_KEY",
         "EMBEDDING_MODEL",
         "EMBEDDING_DIMENSIONS",
+        "EMBEDDING_TIMEOUT",
+        "EMBEDDING_MAX_RETRIES",
         "LANGSMITH_TRACING",
         "LANGSMITH_API_KEY",
         "LANGSMITH_PROJECT",
@@ -139,6 +144,10 @@ class Settings(BaseModel):
     llm_base_url: str = ""
     llm_model: str = ""
     llm_timeout: float = 60.0
+    llm_max_retries: int = Field(default=1, ge=0, le=4)
+    llm_structured_output_method: Literal[
+        "json_mode", "json_schema", "function_calling"
+    ] = "json_mode"
     langsmith_tracing: bool = False
     langsmith_api_key: str = ""
     langsmith_project: str = "ai-erp-rag-assistant"
@@ -155,6 +164,8 @@ class Settings(BaseModel):
     embedding_api_key: str = ""
     embedding_model: str = ""
     embedding_dimensions: int = Field(default=2048, ge=1)
+    embedding_timeout: float = Field(default=60.0, gt=0, le=300)
+    embedding_max_retries: int = Field(default=2, ge=0, le=5)
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -259,6 +270,10 @@ class Settings(BaseModel):
             llm_base_url=llm_base_url,
             llm_model=llm_model,
             llm_timeout=float(values.get("LLM_TIMEOUT") or 60),
+            llm_max_retries=int(values.get("LLM_MAX_RETRIES") or 1),
+            llm_structured_output_method=(
+                values.get("LLM_STRUCTURED_OUTPUT_METHOD") or "json_mode"
+            ).lower(),
             langsmith_tracing=_bool_from_env(values.get("LANGSMITH_TRACING")),
             langsmith_api_key=values.get("LANGSMITH_API_KEY") or "",
             langsmith_project=values.get("LANGSMITH_PROJECT") or "ai-erp-rag-assistant",
@@ -275,6 +290,8 @@ class Settings(BaseModel):
             embedding_api_key=embedding_api_key,
             embedding_model=embedding_model,
             embedding_dimensions=int(values.get("DASHSCOPE_EMBEDDING_DIMENSIONS") or values.get("EMBEDDING_DIMENSIONS") or 2048),
+            embedding_timeout=float(values.get("EMBEDDING_TIMEOUT") or 60),
+            embedding_max_retries=int(values.get("EMBEDDING_MAX_RETRIES") or 2),
         )
 
 

@@ -20,6 +20,9 @@ flowchart LR
     C -->|确认| T[幂等 ERP Submit]
     C -->|取消或不完整| A
     T --> API[ERP / Mock ERP API]
+    G -. ERP Agent .-> D[(Agent Run / Step / Checkpoint)]
+    F -. before / after .-> D
+    T -. 提交前检查点与结果 .-> D
 ```
 
 ## 工作流边界
@@ -29,6 +32,10 @@ flowchart LR
 - RAG 子图可以并行运行多个只读检索 Worker，Worker 只能返回证据，不能写 ERP 或 MySQL 业务表。
 - Approval 子图是确定性状态机：模板、字段、节点和审批人必须经过服务端校验，再生成带版本和哈希的冻结预览。
 - ERP 写入只能从冻结预览的确认分支进入，并携带幂等键；任何字段修订都必须生成新预览并重新确认。
+- `thread_id` 负责会话身份，`run_id` 负责单次请求执行生命周期；ERP Agent 节点通过
+  `Run -> Step -> Checkpoint` 保存脱敏状态，失败或租约过期后由相同 `request_id` 恢复。
+- ERP 写入采用“提交前检查点 + 稳定 Idempotency-Key + 提交结果检查点”。这提供至少一次调用和
+  业务幂等语义；ERP 服务端必须真正实现 `Idempotency-Key`，才能覆盖网络超时后的未知结果窗口。
 - 新的预算、余额或组织校验应作为审批子图中的只读 Worker 增加，不应让 LLM Worker 直接决定提交结果。
 
 ## 数据边界
@@ -44,6 +51,8 @@ flowchart LR
 - KnowledgeDocument：`status=published` 且 `search_enabled=1` 的文件才进入公司级检索。
 - ERP：用户、审批模板、实时审批状态和最终业务写入。
 - LangGraph：跨 RAG 与 ERP Tool 的状态、路由和人工确认。
+- MySQL Durable Execution：保存 ERP Agent 的运行租约、步骤结果和不可变检查点；不保存
+  Authorization、Cookie、API Key 或刷新令牌。
 
 ## 安全边界
 

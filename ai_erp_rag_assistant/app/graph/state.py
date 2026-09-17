@@ -10,6 +10,12 @@ class ErpRagState(TypedDict, total=False):
 
     session_id: str
     assistant_type: str
+    # thread_id 表示会话，execution_run_id 表示当前一次可恢复的 ERP 执行。
+    execution_run_id: str
+    execution_status: str
+    execution_retry_count: int
+    execution_current_step: str
+    selected_template_id: str
     user_id: str
     user_message: str
     uid: str
@@ -22,6 +28,7 @@ class ErpRagState(TypedDict, total=False):
     user_context: dict[str, Any]
     template: dict[str, Any]
     template_candidates: list[dict[str, Any]]
+    template_selection_required: bool
     conversation: list[dict[str, str]]
     fields: dict[str, Any]
     form_schema: dict[str, Any]
@@ -57,6 +64,7 @@ def initial_state(
     confirm_preview_id: str = "",
     confirm_preview_version: int | None = None,
     confirm_preview_hash: str = "",
+    selected_template_id: str = "",
     form_values: dict[str, Any] | None = None,
     selected_assignees: dict[str, list[str]] | None = None,
     prior: ErpRagState | None = None,
@@ -67,6 +75,12 @@ def initial_state(
     return {
         "session_id": session_id,
         "assistant_type": assistant_type or str(prior.get("assistant_type", "")),
+        "execution_run_id": str(prior.get("execution_run_id", "")),
+        "execution_status": str(prior.get("execution_status", "")),
+        "execution_retry_count": int(prior.get("execution_retry_count", 0) or 0),
+        "execution_current_step": str(prior.get("execution_current_step", "")),
+        # 只保留本轮明确选择；模板成功加载后不再依赖这个临时值。
+        "selected_template_id": str(selected_template_id or "").strip(),
         "user_id": user_id,
         "user_message": message,
         "uid": uid or prior.get("uid", ""),
@@ -82,6 +96,7 @@ def initial_state(
         "user_context": {},
         "template": dict(prior.get("template", {})),
         "template_candidates": list(prior.get("template_candidates", [])),
+        "template_selection_required": bool(prior.get("template_selection_required", False)),
         "conversation": [
             *list(prior.get("conversation", [])),
             *([{"role": "assistant", "content": str(prior["pending_question"])}] if prior.get("pending_question") else []),

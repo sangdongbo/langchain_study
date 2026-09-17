@@ -1122,6 +1122,132 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 并提示切换助手，不会调用越界工具。响应中的 `assistant_type` 是服务端根据
 `assistant_key` 推导的最终类型，可用于前端校验当前选择。
 
+#### 多模板选择
+
+当审批意图对应多个 ERP 模板时，服务端不会让模型替用户选择，也不会提前返回某个模板的
+`form_schema`。响应会使用 `workflow_status: "waiting_user"`，同时返回
+`template_selection_required: true` 和 `template_candidates`：
+
+```json
+{
+  "message": "找到多个审批模板，请选择一个：1. 请假审批0732、2. zh-请假",
+  "route": "approval_workflow",
+  "assistant_type": "approval",
+  "workflow_status": "waiting_user",
+  "template_selection_required": true,
+  "template_candidates": [
+    {
+      "template_id": "101",
+      "title": "请假审批0732",
+      "group_name": "自动化测试分组",
+      "description": "",
+      "category": "自动化测试分组",
+      "template_type": "请假",
+      "company_id": "16"
+    },
+    {
+      "template_id": "102",
+      "title": "zh-请假",
+      "group_name": "zh-测试",
+      "description": "",
+      "category": "zh-测试",
+      "template_type": "请假",
+      "company_id": "16"
+    }
+  ],
+  "form_schema": null,
+  "preview": null
+}
+```
+
+页面点击模板后，在同一个 `session_id` 中提交明确的 `selected_template_id`：
+
+```json
+{
+  "message": "选择审批模板",
+  "session_id": "approval-001",
+  "request_id": "request-002",
+  "assistant_key": "approval-assistant",
+  "selected_template_id": "102",
+  "form_values": {},
+  "selected_assignees": {}
+}
+```
+
+服务端会校验该 ID 属于当前用户刚刚获取的候选模板，成功后才进入
+`collecting_fields` 并返回对应的 `form_schema`。`ChatResponse` 顶层新增的稳定字段为：
+
+- `template_selection_required`：是否必须先选模板；
+- `template_candidates`：可展示给用户的模板摘要数组。
+
+只有查询结果唯一时才会自动加载模板；模板名称相似或重复时必须展示选择器。
+
+### ERP Durable Execution
+
+当 `AI_ERP_SESSION_STORE=mysql` 且公司已配置 `approval-assistant` 系统 Assistant 后，
+审批助手会为每次 `/api/chat` 请求创建可恢复的 Run。此模式下 `request_id` 必填，并且前端重试时
+必须保持原 `request_id` 和业务参数不变；相同 `request_id` 改传其他消息或表单值会返回 `409`。
+
+审批助手响应增加以下字段，RAG 助手保持空值：
+
+```json
+{
+  "run_id": "f47ac10b58cc4372a5670e02b2c3d479",
+  "execution_status": "completed",
+  "execution_retry_count": 0,
+  "execution_current_step": "approval.validate_preview"
+}
+```
+
+`execution_status=completed` 表示本次 HTTP/Agent Run 已完整落库，不等于审批单已经提交；审批业务
+仍以 `workflow_status`（例如 `preview_ready`、`submitted`）为准。
+
+运行会在 Planner、ERP 身份、模板、校验预览、状态查询、LLM 回答和 ERP 提交等节点前后写入
+脱敏检查点。`approval.submit` 调用 ERP 前先写 `before_step`；完成后保存节点输出。若进程在 ERP
+调用期间退出，前端使用完全相同的请求重新调用 `/api/chat`，服务端领取原 Run 并沿用预览中的
+`Idempotency-Key`。已经保存成功的提交步骤直接复用输出，不会主动再次调用 ERP。
+
+同一 Run 租约尚未过期时并发重复提交返回 `409`。Run 完成后，相同请求直接返回持久化的
+`ChatResponse`；Run 失败或租约过期后，相同请求会自动恢复并增加 `execution_retry_count`。
+
+查询运行状态：`POST /api/executions/status`
+
+```json
+{
+  "user_id": "863",
+  "assistant_key": "approval-assistant",
+  "run_id": "f47ac10b58cc4372a5670e02b2c3d479"
+}
+```
+
+身份仍通过 `Authorization` 和 `UID` Header 传递。响应不返回检查点中的表单数据：
+
+```json
+{
+  "run_id": "f47ac10b58cc4372a5670e02b2c3d479",
+  "request_id": "request-001",
+  "session_id": "approval-001",
+  "status": "failed",
+  "current_step": "approval.submit",
+  "state_version": 8,
+  "retry_count": 0,
+  "last_error_code": "step_failed",
+  "last_error_message": "ERP 服务暂时不可用",
+  "recoverable": true,
+  "lease_expires_at": null,
+  "started_at": "2026-09-08T10:00:00",
+  "completed_at": null,
+  "created_at": "2026-09-08T10:00:00",
+  "updated_at": "2026-09-08T10:00:05"
+}
+```
+
+`recoverable=true` 时，前端可显示“重试”并重新发送原 `/api/chat` 请求。运行中的 Run 需要等
+`lease_expires_at` 到期后才会变为可恢复，避免两个服务实例同时执行同一 ERP 操作。
+
+首次启用前需由数据库管理员审查并执行
+`docs/database/007_mysql8_erp_agent_execution.sql`。应用不会自动建表或迁移。
+
 ### 流式聊天
 
 `POST /api/chat` 默认继续返回完整 JSON。请求体增加 `stream: true` 后，响应类型改为
@@ -1142,7 +1268,7 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 
 | 事件 | 数据 | 说明 |
 |---|---|---|
-| `metadata` | `assistant_key`、`session_id`、`cached` | 本次流的基本信息 |
+| `metadata` | `assistant_key`、`session_id`、`run_id`、`cached` | 本次流的基本信息 |
 | `token` | `content` | 最终回答节点产生的文本片段，可出现多次 |
 | `error` | `message`、`errors` | 流建立后发生的执行或持久化错误 |
 | `final` | 完整 `ChatResponse` | 最终权威结果，包含引用、工具调用、表单和预览 |
@@ -1197,9 +1323,10 @@ while (true) {
 
 ## 11. 会话接口（可选）
 
-只有 `AI_ERP_SESSION_STORE=mysql` 启用后，RAG 助手才会使用下面两个长期会话接口；默认内存模式
-下会返回 `503`。固定审批助手只保留当前服务进程中的多轮状态，不保存历史会话，这两个接口
-对它返回空列表。RAG 会话始终按 `company_id + assistant_key + ERP 用户` 隔离。
+只有 `AI_ERP_SESSION_STORE=mysql` 启用后，下面的长期会话接口才可用；默认内存模式下会返回
+`503`。审批助手还需要当前公司已经配置 `approval-assistant` 系统 Assistant 行；未配置时列表和
+消息接口返回空数据及 `persistence_status=not_configured`。所有会话读取和修改都按
+`company_id + assistant_key + ERP 用户` 隔离。
 
 ### 会话列表
 
@@ -1258,6 +1385,57 @@ while (true) {
 写库前脱敏，不包含 Authorization、Token、Cookie、密码或刷新令牌。向上翻页时，把响应中的
 `next_before_seq` 作为下一次请求的 `before_seq`。
 
+### 修改会话名称
+
+`POST /api/sessions/rename`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "assistant_key": "employee-rag",
+  "session_id": "rag-session-001",
+  "title": "员工病假制度"
+}
+```
+
+`title` 会去除首尾空白，长度为 `1..255`。响应：
+
+```json
+{
+  "success": true,
+  "session_id": "rag-session-001",
+  "title": "员工病假制度"
+}
+```
+
+### 删除会话
+
+`POST /api/sessions/delete`
+
+```json
+{
+  "company_id": "16",
+  "user_id": "863",
+  "assistant_key": "employee-rag",
+  "session_id": "rag-session-001"
+}
+```
+
+响应：
+
+```json
+{
+  "success": true,
+  "session_id": "rag-session-001",
+  "status": "deleted"
+}
+```
+
+删除是逻辑删除：会话从默认列表隐藏且不能继续恢复工作流，历史消息仍保留用于审计。重命名和
+删除都只能操作当前 ERP 用户拥有且尚未删除的会话；会话不存在、无权访问或已经删除时统一返回
+`404`，避免泄露其他用户的会话是否存在。
+
 ## 12. 错误处理
 
 统一错误响应通常为字符串；可重试导入失败时 `detail` 为上一节所示对象：
@@ -1275,9 +1453,9 @@ while (true) {
 | `401` | ERP 身份校验失败 | 重新获取登录凭据 |
 | `403` | 公司、部门或权限标签不满足知识库策略，或请求的知识库不在 Assistant 已配置范围 | 禁止继续提交，检查登录态、范围选择和管理员配置 |
 | `404` | Assistant、知识库或 Prompt 配置不存在 | 提示管理员完成配置 |
-| `409` | 业务标识或版本重复 | 刷新列表，避免重复提交 |
+| `409` | 业务标识或版本重复；相同 request_id 正在执行或业务输入不一致 | 不要并发提交；恢复时保持原 request_id 和参数 |
 | `415` | PDF 请求未使用 `application/pdf` | 修正上传 Content-Type |
-| `422` | 参数、文件格式或 Chunk 配置错误；selected 模式未选择知识库；检索范围与 Key 冲突 | 展示 `detail` 并要求补选知识库或修正范围 |
+| `422` | 参数、文件格式或 Chunk 配置错误；selected 模式未选择知识库；ERP Durable Execution 缺少 request_id | 展示 `detail` 并要求补全或修正参数 |
 | `503` | MySQL、Embedding、Milvus、Collection 或 LLM 当前不可用 | 展示稍后重试，不要自动无限重试 |
 
 ## 13. 前端状态建议
