@@ -1,0 +1,7 @@
+# Keep this separate: langchain-opensandbox 0.1.0 requires deepagents < 0.7.
+deepagents>=0.6.12,<0.7
+langchain-opensandbox==0.1.0
+langchain-openai>=1.0,<2
+langsmith>=0.4,<1
+opensandbox>=0.1.15
+python-dotenv>=1.0,<2

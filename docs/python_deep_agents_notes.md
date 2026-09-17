@@ -816,7 +816,32 @@ backend_agent = create_deep_agent(
 
 ### 12.4 基于 State 的动态 Skills
 
-`skills=[...]` 配置的是**技能目录路径**，`SkillsMiddleware` 会从 backend 中读取每个技能的 `SKILL.md`，先把名称、描述和路径放进系统提示词，真正需要时再由 Agent 读取完整内容。这就是 progressive disclosure。
+`skills=[...]` 配置的是**要扫描的 backend 目录路径**，不是 Skill 工具列表。固定目录 Skill 和基于 State 的 Skill 都使用 progressive disclosure：`SkillsMiddleware` 先扫描每个 `SKILL.md` 的 frontmatter，把名称、描述和路径放进系统提示词；模型判断匹配后，再通过 `read_file` 读取完整正文。
+
+因此，“静态 Skill 把全部正文塞入 prompt，动态 Skill 才按需加载”并不符合当前实现。两者的差别是 Skill 文件来自哪里，而不是正文加载策略：
+
+| 维度 | 固定目录 Skill | 基于 `StateBackend` 的动态 Skill |
+| --- | --- | --- |
+| source 配置 | Graph 构建时配置路径 | Graph 构建时同样配置路径 |
+| 文件来源 | 文件系统、Store 或其他 backend | 当前 thread 的 `state["files"]` |
+| 进入 prompt 的内容 | metadata 索引 | metadata 索引 |
+| 完整正文 | 模型需要时调用 `read_file` | 模型需要时调用 `read_file` |
+| 动态点 | 部署方维护 backend 内容 | 调用方为每个新 thread 注入不同文件集合 |
+
+真实执行链路是：
+
+```text
+invoke(files=...)
+  -> StateBackend 暴露 files channel
+  -> SkillsMiddleware.before_agent 扫描 source
+  -> 解析 frontmatter 并写入私有 skills_metadata
+  -> wrap_model_call 把 metadata 索引追加到 system prompt
+  -> 模型匹配 Skill
+  -> read_file 读取完整 SKILL.md
+  -> 模型按正文调用业务工具
+```
+
+Middleware 扫描阶段为了提取 frontmatter 会从 backend 读取文件，但这不等于完整正文已经进入模型上下文。正文只有在 `read_file` 的工具结果进入消息后才消耗相应的模型上下文。
 
 使用 `StateBackend` 时，可以在每次新会话开始时把不同的 Skill 文件放进输入 state，从而根据用户、租户或任务动态提供技能：
 
@@ -856,7 +881,14 @@ dynamic_skill_result = dynamic_skill_agent.invoke(
 )
 ```
 
-动态点在于 `files` 的内容由应用在调用前决定，而不是让模型任意加载所有 Skills。例如可以先根据 `tenant_id` 和用户角色在服务层选择允许的 Skill，再组装输入 state。
+动态点在于 `files` 的内容由应用在调用前决定，而不是让模型任意加载所有 Skills。例如可以先根据 `tenant_id` 和用户角色在服务层选择允许的 Skill，再组装输入 state。身份和角色必须来自认证后的 Context 或服务端会话，不能相信用户文本或模型生成的 State 字段。
+
+这里实际有两次选择：
+
+1. 服务端用确定性策略计算“角色允许集合 ∩ 当前任务需要集合”，只把结果注入 State。这一层负责授权和租户隔离。
+2. 模型在已经允许暴露的 metadata 中判断哪个 Skill 与当前任务匹配。这一层只是语义路由，不是授权。
+
+Skill 也不会自动增加或移除工具。frontmatter 中的实验性 `allowed-tools` 当前只显示在 Skill 索引里，不是强制 ACL。文件权限、高风险审批和代码隔离仍应分别由 `FilesystemPermission`、`interrupt_on` 和真正的 Sandbox backend 实施。
 
 需要区分三个概念：
 
@@ -868,7 +900,11 @@ dynamic_skill_result = dynamic_skill_agent.invoke(
 
 `SkillsMiddleware` 会把解析后的元数据缓存在 `state["skills_metadata"]`，同一 checkpointed session 后续轮次如果已经存在该字段，就跳过重新扫描。因此在同一 thread 中修改 `files` 并不会自动刷新技能目录。最稳妥的做法是：Skill 集合变化时开启新 thread；只有确实需要逐轮热切换时才编写自定义 middleware。
 
+这会带来几个容易忽略的结果：新增 Skill 后模型无法发现它；修改 `name` 或 `description` 后仍使用旧索引；删除 Skill 后旧路径仍可能出现在索引中，但 `read_file` 会失败。一个 thread 的能力集合应保持稳定，并在 trace metadata 中记录 Skill bundle 版本。
+
 多个 `skills` source 会按顺序加载，同名 Skill 由后面的 source 覆盖前面的 source，适合实现“内置默认 -> 用户 -> 项目”的分层覆盖。所有 backend 路径都使用 POSIX 风格 `/`。
+
+可启动示例、State 字段表、可信路由代码、LangSmith 观察点和排错表见：[基于 State 的动态 Skills：机制、路由与安全边界](../deep_agent_examples/DYNAMIC_SKILLS.md)。
 
 
 ### 12.5 云沙箱、OpenSandbox 与本地执行
@@ -1116,3 +1152,5 @@ pprint(inspect_agent_result(report_result, {"run_procurement_review"}), width=12
 更系统的工程思想见：[Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)。
 
 准备继续研究框架内部机制时，阅读：[Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)。
+
+想直接在 LangGraph Studio 启动并通过 LangSmith 观察轨迹，使用：[Deep Agents 可运行示例](../deep_agent_examples/README.md)。

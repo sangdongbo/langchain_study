@@ -140,6 +140,38 @@ class LifecycleProbe(AgentMiddleware):
 
 如果生产系统同时支持 `invoke()` 和 `ainvoke()`，就要实现并测试两套 wrapper；只实现同步版本不能自动保证异步路径可用。
 
+### 4.1 `SkillsMiddleware` 的发现、缓存和按需读取
+
+`SkillsMiddleware` 的“加载”分两层，源码研究时不要混为一谈：
+
+```text
+before_agent
+  -> backend.ls(source)
+  -> download <skill>/SKILL.md
+  -> 解析 frontmatter
+  -> state["skills_metadata"]
+
+wrap_model_call
+  -> system prompt 中追加 name / description / path
+
+模型选中 Skill
+  -> read_file(path)
+  -> 完整正文进入消息上下文
+```
+
+第一层会读取 backend 文件以解析 metadata，但不会把完整正文直接注入模型；第二层才是 progressive disclosure。`skills_metadata` 是私有 Middleware State，并以字段是否已经存在作为缓存命中条件，所以空结果也会缓存。同一 checkpointed thread 修改 `files` 后不会自动重扫。
+
+研究时至少验证：
+
+- 固定目录 Skill 与 `StateBackend.files` Skill 的 prompt 形态是否相同。
+- 新 thread 是否按预期得到不同 Skill 集合。
+- 同一 thread 新增、修改、删除 Skill 后是否出现陈旧 metadata。
+- 多 source 同名 Skill是否由后加载的 source 覆盖。
+- `allowed-tools` 是否只是提示 metadata，而非强制工具权限。
+- 子 Agent 是否因为 `skills_metadata` 的私有属性而重新建立自己的 Skill 索引。
+
+完整实验说明和可运行入口见：[基于 State 的动态 Skills](../deep_agent_examples/DYNAMIC_SKILLS.md)。
+
 ## 5. BackendProtocol 契约研究
 
 `BackendProtocol` 统一的是文件语义，不代表所有 backend 都能执行命令。当前协议分两层：
@@ -483,6 +515,7 @@ print(signature(create_deep_agent))
 
 ## 18. 继续阅读
 
+- [Deep Agents 可运行示例：Studio、LangSmith 与 Sandbox](../deep_agent_examples/README.md)
 - [Deep Agents 进阶学习路线](./deep_agents_advanced_learning.md)
 - [Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)
 - [LangChain Deep Agents](https://docs.langchain.com/oss/python/deepagents/overview)

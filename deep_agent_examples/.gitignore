@@ -1,0 +1,8 @@
+.env
+.venv/
+.langgraph_api/
+__pycache__/
+*.py[cod]
+
+workspace/artifacts/*
+!workspace/artifacts/.gitkeep

@@ -1,0 +1,17 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "tool_agent": "deep_agent_examples.graphs:tool_agent",
+    "lifecycle_agent": "deep_agent_examples.graphs:lifecycle_agent",
+    "subagent_lifecycle_agent": "deep_agent_examples.graphs:subagent_lifecycle_agent",
+    "subagent_agent": "deep_agent_examples.graphs:subagent_agent",
+    "compiled_subagent_agent": "deep_agent_examples.graphs:compiled_subagent_agent",
+    "remote_research_agent": "deep_agent_examples.graphs:remote_research_agent",
+    "async_subagent_agent": "deep_agent_examples.graphs:async_subagent_agent",
+    "backend_agent": "deep_agent_examples.graphs:backend_agent",
+    "dynamic_skill_agent": "deep_agent_examples.graphs:dynamic_skill_agent",
+    "hitl_harness_agent": "deep_agent_examples.graphs:hitl_harness_agent",
+    "local_shell_agent": "deep_agent_examples.graphs:local_shell_agent"
+  },
+  "env": ".env"
+}

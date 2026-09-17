@@ -1,0 +1,29 @@
+[project]
+name = "deep-agent-examples"
+version = "0.1.0"
+description = "Runnable Deep Agents examples with LangGraph Studio and LangSmith tracing"
+requires-python = ">=3.11"
+dependencies = [
+    "colorama>=0.4.6; sys_platform == 'win32'",
+    "deepagents>=0.7.13,<0.8",
+    "langchain>=1.3.18,<2",
+    "langchain-openai>=1.5.0,<2",
+    "langgraph>=1.2.11,<2",
+    "langsmith[sandbox]>=0.12.1,<0.13",
+    "python-dotenv>=1.2.2,<2",
+]
+
+[project.scripts]
+deep-agent-example = "deep_agent_examples.cli:main"
+
+[dependency-groups]
+dev = [
+    "langgraph-cli[inmem]>=0.4.31,<0.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["deep_agent_examples"]
