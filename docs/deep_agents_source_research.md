@@ -172,6 +172,12 @@ wrap_model_call
 
 完整实验说明和可运行入口见：[基于 State 的动态 Skills](../deep_agent_examples/DYNAMIC_SKILLS.md)。
 
+SubAgent 研究也应拆开验证，不要把同步嵌套 runnable 和远程任务状态机混为一谈：
+
+- [声明式 SubAgent：isolated、fork 与 State 传播](../deep_agent_examples/DECLARATIVE_SUBAGENT.md)
+- [CompiledSubAgent：复用现成 Agent 与 StateGraph](../deep_agent_examples/COMPILED_SUBAGENT.md)
+- [AsyncSubAgent：远程 thread、run 与后台任务状态机](../deep_agent_examples/ASYNC_SUBAGENT.md)
+
 ## 5. BackendProtocol 契约研究
 
 `BackendProtocol` 统一的是文件语义，不代表所有 backend 都能执行命令。当前协议分两层：

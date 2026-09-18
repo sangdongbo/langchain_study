@@ -630,6 +630,8 @@ subagent_result = subagent_review_agent.invoke({"messages": [{"role": "user", "c
 print(subagent_result["messages"][-1].content)
 ```
 
+声明式 SubAgent 的 isolated/fork、State 传播、权限继承、生命周期、LangSmith 观察点和无 Key 测试见：[声明式 SubAgent 独立专题](../deep_agent_examples/DECLARATIVE_SUBAGENT.md)。
+
 
 ### 12.1 `CompiledSubAgent`：复用已经构建好的 Agent 或 LangGraph
 
@@ -696,6 +698,8 @@ print(compiled_subagent_result["messages"][-1].content)
 
 因此，只有在确实需要复用现成图或自定义状态时才使用 `CompiledSubAgent`；普通角色分工继续使用上一节的声明式写法即可。
 
+可直接运行的真实示例、确定性测试、State schema、输出契约、HITL 和 checkpointer 边界见：[CompiledSubAgent 独立专题](../deep_agent_examples/COMPILED_SUBAGENT.md)。
+
 
 ### 12.2 `AsyncSubAgent`：把长任务放到远程后台执行
 
@@ -749,6 +753,8 @@ print(async_result["messages"][-1].content)
 - `AsyncSubAgent` 不继承主 Agent 的本地 middleware、skills、state schema 或 HITL 配置；这些能力要配置在远程 graph 内。
 - LangGraph Platform / LangSmith Deployment 的认证通常读取环境变量；自托管服务使用 `headers`。
 - 不要让模型高频轮询任务。启动后继续做其他工作，只在用户需要结果时检查。
+
+远程 thread/run 状态机、五个管理工具、父远程两侧 LangSmith 关联方式，以及无服务器 Fake Agent Protocol 测试见：[AsyncSubAgent 独立专题](../deep_agent_examples/ASYNC_SUBAGENT.md)。
 
 
 ### 12.3 Backends 工具箱：文件存在哪里，命令在哪里执行
@@ -905,6 +911,18 @@ Skill 也不会自动增加或移除工具。frontmatter 中的实验性 `allowe
 多个 `skills` source 会按顺序加载，同名 Skill 由后面的 source 覆盖前面的 source，适合实现“内置默认 -> 用户 -> 项目”的分层覆盖。所有 backend 路径都使用 POSIX 风格 `/`。
 
 可启动示例、State 字段表、可信路由代码、LangSmith 观察点和排错表见：[基于 State 的动态 Skills：机制、路由与安全边界](../deep_agent_examples/DYNAMIC_SKILLS.md)。
+
+仓库中的代码不是伪代码，可以直接运行：
+
+```powershell
+cd deep_agent_examples
+
+# 真实模型；配置 LANGSMITH_TRACING=true 后上传 trace
+uv run python examples/dynamic_skills.py
+
+# Fake Model 确定性测试；不需要模型或 LangSmith Key
+uv run python examples/test_dynamic_skills.py
+```
 
 
 ### 12.5 云沙箱、OpenSandbox 与本地执行

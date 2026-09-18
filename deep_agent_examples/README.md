@@ -30,6 +30,12 @@
 
 固定目录 Skill、基于 `StateBackend.files` 的动态 Skill、metadata 缓存、可信路由和权限边界见 [DYNAMIC_SKILLS.md](DYNAMIC_SKILLS.md)。
 
+三种子 Agent 已分成独立专题和独立代码：
+
+- [声明式 SubAgent：isolated、fork 与 State 传播](DECLARATIVE_SUBAGENT.md)
+- [CompiledSubAgent：复用现成 Agent 与 StateGraph](COMPILED_SUBAGENT.md)
+- [AsyncSubAgent：远程 thread、run 与后台任务状态机](ASYNC_SUBAGENT.md)
+
 ## 2. 安装和配置
 
 ```powershell
@@ -106,6 +112,17 @@ uv run langgraph dev --host 127.0.0.1 --port 2024
 
 同一 checkpointed thread 会缓存 `skills_metadata`，即使首次结果为空也不会自动重扫。更换 Skill 集合时新建 thread。Skill 只是说明书；`allowed-tools` 也不是强制 ACL，实际权限必须由工具、Middleware、HITL 和 Sandbox 实施。完整机制与排错表见 [DYNAMIC_SKILLS.md](DYNAMIC_SKILLS.md)。
 
+对应的可执行 Python 文件：
+
+```powershell
+# 真实模型；LANGSMITH_TRACING=true 时上传 trace
+uv run python examples/dynamic_skills.py
+uv run python examples/dynamic_skills.py --role risk-reviewer --task-type supplier-risk
+
+# Fake Model 确定性测试；不需要 Key，也不上传 trace
+uv run python examples/test_dynamic_skills.py
+```
+
 ### AsyncSubAgent 输入
 
 先保持同一个 `langgraph dev` 服务运行，确认 `.env` 中：
@@ -154,6 +171,40 @@ uv run deep-agent-example async --thread-id async-001
 
 每次 CLI 调用都会添加 `deep-agent-example` 和示例名 tag，并写入 example metadata，便于在 LangSmith 过滤。
 
+生命周期也提供独立 Python 文件和无 Key 测试：
+
+```powershell
+# 真实模型；LANGSMITH_TRACING=true 时上传 trace
+uv run python examples/agent_lifecycle.py --kind agent
+uv run python examples/agent_lifecycle.py --kind subagent
+
+# Fake Model；同时验证 invoke 与 ainvoke
+uv run python examples/test_lifecycle.py
+```
+
+三种子 Agent 分开运行：
+
+```powershell
+# 声明式 SubAgent：真实模型与 LangSmith
+uv run python examples/declarative_subagent.py --mode isolated
+uv run python examples/declarative_subagent.py --mode fork
+
+# CompiledSubAgent：真实模型与 LangSmith
+uv run python examples/compiled_subagent.py
+
+# AsyncSubAgent：先启动 langgraph dev，再运行
+uv run python examples/async_subagent.py
+uv run python examples/async_subagent.py --check-after 5
+```
+
+对应的无 Key、无网络确定性测试：
+
+```powershell
+uv run python examples/test_declarative_subagent.py
+uv run python examples/test_compiled_subagent.py
+uv run python examples/test_async_subagent.py
+```
+
 ## 5. 本地 shell 不是沙箱
 
 `local_shell_agent` 使用 `LocalShellBackend`，只用于展示 `execute` 和 HITL。它具有当前用户的主机权限：
@@ -199,6 +250,11 @@ py -3.12 -m venv .venv
 
 ```powershell
 uv run python scripts_smoke.py
+uv run python examples/test_dynamic_skills.py
+uv run python examples/test_lifecycle.py
+uv run python examples/test_declarative_subagent.py
+uv run python examples/test_compiled_subagent.py
+uv run python examples/test_async_subagent.py
 ```
 
-它验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。
+第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、声明式、Compiled 和 Async SubAgent，不调用真实模型或 LangSmith。

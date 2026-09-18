@@ -9,6 +9,12 @@ Deep Agents 没有单独的“生命周期管理器”。生命周期由 LangGra
 
 已有的 `compiled_subagent_agent`、`async_subagent_agent` 和 `remote_research_agent` 分别覆盖预编译子图与远程后台任务。
 
+每种子 Agent 的详细机制已经拆分：
+
+- [声明式 SubAgent](DECLARATIVE_SUBAGENT.md)
+- [CompiledSubAgent](COMPILED_SUBAGENT.md)
+- [AsyncSubAgent](ASYNC_SUBAGENT.md)
+
 ## 1. 普通 Agent 生命周期
 
 Graph 在 Python 模块加载时构建并编译；每次用户输入触发一次 run。一次正常、有工具调用的 run 大致如下：
@@ -52,6 +58,13 @@ before_model → wrap_model_call → 模型 → after_model
 
 ```powershell
 uv run deep-agent-example lifecycle --thread-id lifecycle-001
+uv run python examples/agent_lifecycle.py --kind agent
+```
+
+不需要 API Key 的同步/异步确定性测试：
+
+```powershell
+uv run python examples/test_lifecycle.py
 ```
 
 典型的 `lifecycle_events` 是：
@@ -105,6 +118,7 @@ uv run deep-agent-example lifecycle --thread-id lifecycle-001
 
 ```powershell
 uv run deep-agent-example subagent-lifecycle --thread-id subagent-lifecycle-001
+uv run python examples/agent_lifecycle.py --kind subagent
 ```
 
 Studio State 中分别查看：

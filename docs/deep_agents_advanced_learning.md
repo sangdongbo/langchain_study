@@ -258,6 +258,8 @@ agent = create_deep_agent(
 
 还要区分“文件来源动态”和“每轮自动换能力”：`StateBackend` 允许应用为每个新 thread 注入不同的 Skill 文件，但内置 `SkillsMiddleware` 会在首次扫描后缓存 `skills_metadata`。固定目录 Skill 与 State Skill 都只把 metadata 索引放进 system prompt，完整正文仍由模型按需 `read_file`；它们都不会自动挂载工具或实施权限。完整执行链路、缓存失效和可运行示例见：[基于 State 的动态 Skills](../deep_agent_examples/DYNAMIC_SKILLS.md)。
 
+三种子 Agent 不要只用一张对比表学习，分别运行：[声明式 SubAgent](../deep_agent_examples/DECLARATIVE_SUBAGENT.md)、[CompiledSubAgent](../deep_agent_examples/COMPILED_SUBAGENT.md) 和 [AsyncSubAgent](../deep_agent_examples/ASYNC_SUBAGENT.md)。三份专题各自包含真实 LangSmith 示例与无 Key 确定性测试。
+
 ## 7. Structured Output 与模型兼容性
 
 自然语言回答适合人看，结构化输出适合程序继续处理：

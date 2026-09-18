@@ -286,6 +286,23 @@ uv run langgraph dev --host 127.0.0.1 --port 2024
 uv run deep-agent-example skill --thread-id skill-001
 ```
 
+对应的独立 `.py` 文件可以直接运行，并记录 `skill_bundle` trace metadata：
+
+```powershell
+uv run python examples/dynamic_skills.py --thread-id skill-py-001
+uv run python examples/dynamic_skills.py --role risk-reviewer --task-type supplier-risk
+```
+
+脚本中的 `--role` 只是在本地模拟已经认证的服务端 Context；生产 API 不能把客户端传入的 role 直接当成授权事实。脚本实际计算角色允许集合与任务需要集合的交集，没有匹配项时会在调用模型前抛出 `PermissionError`。
+
+不开模型、不上传 trace 的确定性测试：
+
+```powershell
+uv run python examples/test_dynamic_skills.py
+```
+
+测试使用脚本化 Fake Model，强制产生一次 `read_file` 工具调用，并断言：首次模型请求只有 metadata、读取后完整 `SKILL.md` 才进入消息、同一 thread 新增 Skill 文件不会刷新已经缓存的 metadata。
+
 在 Studio 选择 `dynamic_skill_agent`，输入 README 中带 `files` 的 JSON。观察顺序：
 
 1. 输入 State 中存在 `/skills/session/procurement-review/SKILL.md`。
