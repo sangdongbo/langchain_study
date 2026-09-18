@@ -6,6 +6,7 @@ docker/
 
 .venv/
 .jupyter_runtime/
+.ipynb_checkpoints/
 __pycache__/
 *.py[cod]
 

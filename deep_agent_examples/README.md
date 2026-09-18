@@ -9,6 +9,19 @@
 
 ## 1. 示例清单
 
+专题示例按功能归档，每个目录都把说明、运行入口和无网络测试放在一起：
+
+```text
+examples/
+|-- async_subagent/       # README.md + run.py + test.py
+|-- compiled_subagent/    # README.md + run.py + test.py
+|-- declarative_subagent/ # README.md + run.py + test.py
+|-- dynamic_skills/       # README.md + run.py + test.py
+`-- lifecycle/            # README.md + run.py + test.py
+```
+
+项目级 Agent 实现在 `deep_agent_examples/`，固定 Skill 在 `skills/`，独立依赖的 OpenSandbox 示例在 `optional_opensandbox/`。根目录只保留项目配置、总览和全局 smoke 检查。
+
 | Graph / CLI 名称 | 展示内容 | 启动条件 |
 | --- | --- | --- |
 | `tool_agent` / `tool` | 多工具调用轨迹 | 模型 Key |
@@ -26,15 +39,15 @@
 
 `OpenSandbox` 在 `optional_opensandbox/` 中单独运行，因为目前唯一的 `langchain-opensandbox 0.1.0` 明确要求 `deepagents >=0.6.12,<0.7`，不能装进本项目的 `deepagents 0.7.x` 环境。
 
-普通 Agent、同步子 Agent、`CompiledSubAgent` 与 `AsyncSubAgent` 的创建、执行、checkpoint、interrupt 和结束语义见 [LIFECYCLE.md](LIFECYCLE.md)。
+普通 Agent、同步子 Agent、`CompiledSubAgent` 与 `AsyncSubAgent` 的创建、执行、checkpoint、interrupt 和结束语义见 [生命周期专题](examples/lifecycle/README.md)。
 
-固定目录 Skill、基于 `StateBackend.files` 的动态 Skill、metadata 缓存、可信路由和权限边界见 [DYNAMIC_SKILLS.md](DYNAMIC_SKILLS.md)。
+固定目录 Skill、基于 `StateBackend.files` 的动态 Skill、metadata 缓存、可信路由和权限边界见 [动态 Skills 专题](examples/dynamic_skills/README.md)。
 
 三种子 Agent 已分成独立专题和独立代码：
 
-- [声明式 SubAgent：isolated、fork 与 State 传播](DECLARATIVE_SUBAGENT.md)
-- [CompiledSubAgent：复用现成 Agent 与 StateGraph](COMPILED_SUBAGENT.md)
-- [AsyncSubAgent：远程 thread、run 与后台任务状态机](ASYNC_SUBAGENT.md)
+- [声明式 SubAgent：isolated、fork 与 State 传播](examples/declarative_subagent/README.md)
+- [CompiledSubAgent：复用现成 Agent 与 StateGraph](examples/compiled_subagent/README.md)
+- [AsyncSubAgent：远程 thread、run 与后台任务状态机](examples/async_subagent/README.md)
 
 ## 2. 安装和配置
 
@@ -110,17 +123,17 @@ uv run langgraph dev --host 127.0.0.1 --port 2024
 
 真实执行顺序是：`files` 进入 State → `SkillsMiddleware.before_agent` 扫描 frontmatter → metadata 进入 system prompt → 模型调用 `read_file` 读取完整正文 → 按 Skill 调用业务工具。固定目录 Skill 和 State Skill 都使用这种 progressive disclosure，不会默认把全部正文塞进 prompt。
 
-同一 checkpointed thread 会缓存 `skills_metadata`，即使首次结果为空也不会自动重扫。更换 Skill 集合时新建 thread。Skill 只是说明书；`allowed-tools` 也不是强制 ACL，实际权限必须由工具、Middleware、HITL 和 Sandbox 实施。完整机制与排错表见 [DYNAMIC_SKILLS.md](DYNAMIC_SKILLS.md)。
+同一 checkpointed thread 会缓存 `skills_metadata`，即使首次结果为空也不会自动重扫。更换 Skill 集合时新建 thread。Skill 只是说明书；`allowed-tools` 也不是强制 ACL，实际权限必须由工具、Middleware、HITL 和 Sandbox 实施。完整机制与排错表见 [动态 Skills 专题](examples/dynamic_skills/README.md)。
 
 对应的可执行 Python 文件：
 
 ```powershell
 # 真实模型；LANGSMITH_TRACING=true 时上传 trace
-uv run python examples/dynamic_skills.py
-uv run python examples/dynamic_skills.py --role risk-reviewer --task-type supplier-risk
+uv run python examples/dynamic_skills/run.py
+uv run python examples/dynamic_skills/run.py --role risk-reviewer --task-type supplier-risk
 
 # Fake Model 确定性测试；不需要 Key，也不上传 trace
-uv run python examples/test_dynamic_skills.py
+uv run python examples/dynamic_skills/test.py
 ```
 
 ### AsyncSubAgent 输入
@@ -175,34 +188,34 @@ uv run deep-agent-example async --thread-id async-001
 
 ```powershell
 # 真实模型；LANGSMITH_TRACING=true 时上传 trace
-uv run python examples/agent_lifecycle.py --kind agent
-uv run python examples/agent_lifecycle.py --kind subagent
+uv run python examples/lifecycle/run.py --kind agent
+uv run python examples/lifecycle/run.py --kind subagent
 
 # Fake Model；同时验证 invoke 与 ainvoke
-uv run python examples/test_lifecycle.py
+uv run python examples/lifecycle/test.py
 ```
 
 三种子 Agent 分开运行：
 
 ```powershell
 # 声明式 SubAgent：真实模型与 LangSmith
-uv run python examples/declarative_subagent.py --mode isolated
-uv run python examples/declarative_subagent.py --mode fork
+uv run python examples/declarative_subagent/run.py --mode isolated
+uv run python examples/declarative_subagent/run.py --mode fork
 
 # CompiledSubAgent：真实模型与 LangSmith
-uv run python examples/compiled_subagent.py
+uv run python examples/compiled_subagent/run.py
 
 # AsyncSubAgent：先启动 langgraph dev，再运行
-uv run python examples/async_subagent.py
-uv run python examples/async_subagent.py --check-after 5
+uv run python examples/async_subagent/run.py
+uv run python examples/async_subagent/run.py --check-after 5
 ```
 
 对应的无 Key、无网络确定性测试：
 
 ```powershell
-uv run python examples/test_declarative_subagent.py
-uv run python examples/test_compiled_subagent.py
-uv run python examples/test_async_subagent.py
+uv run python examples/declarative_subagent/test.py
+uv run python examples/compiled_subagent/test.py
+uv run python examples/async_subagent/test.py
 ```
 
 ## 5. 本地 shell 不是沙箱
@@ -250,11 +263,11 @@ py -3.12 -m venv .venv
 
 ```powershell
 uv run python scripts_smoke.py
-uv run python examples/test_dynamic_skills.py
-uv run python examples/test_lifecycle.py
-uv run python examples/test_declarative_subagent.py
-uv run python examples/test_compiled_subagent.py
-uv run python examples/test_async_subagent.py
+uv run python examples/dynamic_skills/test.py
+uv run python examples/lifecycle/test.py
+uv run python examples/declarative_subagent/test.py
+uv run python examples/compiled_subagent/test.py
+uv run python examples/async_subagent/test.py
 ```
 
 第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、声明式、Compiled 和 Async SubAgent，不调用真实模型或 LangSmith。

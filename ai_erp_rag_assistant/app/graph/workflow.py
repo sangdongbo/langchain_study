@@ -34,6 +34,10 @@ from ai_erp_rag_assistant.app.tools.erp_tools import (
     query_approval_status,
     submit_approval,
 )
+from ai_erp_rag_assistant.app.tools.erp.state_tools import (
+    query_approval_status_from_state,
+)
+from ai_erp_rag_assistant.app.tools.rag.retrieve import retrieve_from_state
 from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
 
 
@@ -603,34 +607,19 @@ def retrieve_rag(
     state: ErpRagState, config: RunnableConfig
 ) -> ErpRagState:
     """按已验证的租户、部门和权限检索知识库证据。"""
-    user = state["user_context"]
     # HTTP 聊天接口会把已发布 Assistant 配置放入本次运行参数，不写入会话状态。
     runtime = cast(
         RagRuntimeConfig | None,
         config.get("configurable", {}).get("rag_runtime"),
     )
-    # ERP 可能把 ACL 放在 permissions、permission_tags 或 roles，统一合并后再过滤。
-    permissions = {
-        str(item).strip()
-        for item in user.get("rag_access_tags", [])
-        if str(item).strip()
-    }
-    if not permissions:
-        # 独立运行 Graph 时没有 HTTP 身份预处理，兼容常见的字符串和列表权限结构。
-        for key in ("permissions", "permission_tags", "roles"):
-            raw = user.get(key) or []
-            values = [raw] if isinstance(raw, str) else raw
-            if isinstance(values, (list, tuple, set)):
-                permissions.update(
-                    str(item).strip() for item in values if str(item).strip()
-                )
-    evidence = search_knowledge(
-        state.get("plan", {}).get("query") or state["user_message"],
-        company_id=str(user.get("company_id", "")),
-        department=str(user.get("department", "")),
-        permission_tags=sorted(permissions),
-        top_k=(runtime.top_k or 5) if runtime else 5,
+    evidence = retrieve_from_state(
+        state,
         runtime=runtime,
+        # DeepAgent RAG 子代理会把结合历史改写后的 task.description 写入 query；
+        # 原 LangGraph 路径没有 query 时仍按 plan.query/user_message 回退。
+        query=str(state.get("query") or ""),
+        # 保留 workflow.search_knowledge 兼容注入点，已有调用方和测试无需修改。
+        search_fn=search_knowledge,
     )
     # 审计信息记录本次实际尝试的 Collection，无命中时也能定位检索目标。
     collections = sorted(
@@ -661,7 +650,11 @@ def retrieve_rag(
 
 def query_erp_status_node(state: ErpRagState) -> ErpRagState:
     """查询当前用户的实时 ERP 审批状态。"""
-    data = query_approval_status(state["user_id"], user=state.get("user_context", {}))
+    data = query_approval_status_from_state(
+        state,
+        # 保留 workflow.query_approval_status 兼容注入点。
+        query_fn=query_approval_status,
+    )
     return {
         "erp_data": data,
         "tool_calls": _record(state, "erp.approval_status", mode=data.get("erp_mode"), result_keys=list(data.keys())),

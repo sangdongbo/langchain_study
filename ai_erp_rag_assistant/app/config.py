@@ -18,6 +18,7 @@ SUPPORTED_ENV_KEYS = frozenset(
     {
         "AI_ERP_RAG_HOST",
         "AI_ERP_RAG_PORT",
+        "AI_ERP_ORCHESTRATOR",
         "MILVUS_URI",
         "MILVUS_TOKEN",
         "MILVUS_COLLECTION",
@@ -107,6 +108,7 @@ class Settings(BaseModel):
 
     host: str = "127.0.0.1"
     port: int = 8021
+    orchestrator: Literal["langgraph", "deepagent"] = "langgraph"
     milvus_uri: str = "http://127.0.0.1:19530"
     milvus_token: str = ""
     milvus_collection: str = "erp_knowledge_chunks"
@@ -222,6 +224,7 @@ class Settings(BaseModel):
         return cls(
             host=values.get("AI_ERP_RAG_HOST") or "127.0.0.1",
             port=int(values.get("AI_ERP_RAG_PORT") or 8021),
+            orchestrator=(values.get("AI_ERP_ORCHESTRATOR") or "langgraph").lower(),
             milvus_uri=values.get("MILVUS_URI") or "http://127.0.0.1:19530",
             milvus_token=values.get("MILVUS_TOKEN") or "",
             milvus_collection=values.get("MILVUS_COLLECTION") or "erp_knowledge_chunks",

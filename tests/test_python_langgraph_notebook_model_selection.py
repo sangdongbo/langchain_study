@@ -9,7 +9,7 @@ import dotenv
 import pytest
 
 
-NOTEBOOK_PATH = Path(__file__).parents[1] / "docs" / "python_langgraph_notes.ipynb"
+NOTEBOOK_PATH = Path(__file__).parents[1] / "docs" / "notes" / "python_langgraph_notes.ipynb"
 
 
 class FakeChatOpenAI:

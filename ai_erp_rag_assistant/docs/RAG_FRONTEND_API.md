@@ -1269,10 +1269,20 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 | 事件 | 数据 | 说明 |
 |---|---|---|
 | `metadata` | `assistant_key`、`session_id`、`run_id`、`cached` | 本次流的基本信息 |
-| `token` | `content` | 最终回答节点产生的文本片段，可出现多次 |
+| `token` | `content` | 最终用户可见回答的文本片段，可出现多次 |
 | `error` | `message`、`errors` | 流建立后发生的执行或持久化错误 |
 | `final` | 完整 `ChatResponse` | 最终权威结果，包含引用、工具调用、表单和预览 |
 | `done` | `{}` | 事件流结束 |
+
+部署使用 `AI_ERP_ORCHESTRATOR=deepagent` 时，也会发送 `token` 事件。服务端会先确认最后一轮
+父 Agent 输出不是工具规划，再释放该轮真实消息 Chunk；审批场景始终使用确定性子图生成的提示，
+不会转发父 Agent 的改写文本。缓存命中或空回答仍可能没有 `token`，前端必须始终以 `final`
+作为权威结果。
+
+DeepAgent 长期会话会从服务端脱敏状态恢复最近 16 条 `user/assistant` 消息，并限制总正文长度；
+原始 Authorization、ERP 用户信息和工具结果不会作为历史消息恢复。相同 `session_id` 可继续
+“那年假呢？”一类追问；父 Agent 会先生成可独立理解的完整检索问题，再交给受租户 ACL
+约束的 RAG 子代理。`reset=true` 会开始新的上下文。
 
 前端必须使用 `fetch` 读取 POST 响应流；原生 `EventSource` 不能提交 JSON，也不能设置当前接口
 需要的认证头：

@@ -2,7 +2,15 @@
 
 ```mermaid
 flowchart LR
-    U[用户聊天] --> G[Root Orchestrator\n输入校验与路由]
+    U[用户聊天] --> O{AI_ERP_ORCHESTRATOR}
+    O -->|langgraph 默认| G[Root Orchestrator\n输入校验与路由]
+    O -->|deepagent 灰度| H[DeepAgent Harness\n理解、委派、汇总]
+    H --> CR[RAG CompiledSubAgent]
+    H --> CS[ERP Status CompiledSubAgent]
+    H --> CA[Approval CompiledSubAgent]
+    CR --> R
+    CS --> S
+    CA --> A
     G --> I[ERP Identity]
     I --> R[RAG Retrieval Subgraph]
     I --> S[ERP Status Subgraph]
@@ -28,7 +36,24 @@ flowchart LR
 ## 工作流边界
 
 - Root Orchestrator 只负责身份前置、能力路由、统一回答和错误出口，不承载具体业务规则。
-- `rag_retrieval`、`erp_status`、`approval` 是独立子图；子图通过共享 `ErpRagState` 返回结果，HTTP 接口不变。
+- `rag_retrieval`、`erp_status`、`approval` 是独立子图；现有 HTTP 根图继续通过共享
+  `ErpRagState` 调用它们，接口契约不变。
+- 工具适配层分别使用 `RagState`、`ErpStatusState` 和 `ApprovalState`。RAG 与 ERP 状态节点已经
+  接入 State 工具；旧 `rag_tools.py`、`erp_tools.py` 入口继续保留，兼容既有路由和测试。
+- 三个业务子图同时封装为 `rag-retrieval`、`erp-status`、`approval-workflow`
+  `CompiledSubAgent`。子代理只返回有界证据或业务结果，不向父 Agent 返回认证上下文。
+- `create_erp_agent_harness()` 提供 DeepAgent 装配入口。Harness 只做任务理解、领域委派和结果汇总，
+  文件系统能力被拒绝；`/api/chat` 默认使用原 LangGraph Supervisor，配置
+  `AI_ERP_ORCHESTRATOR=deepagent` 后按助手类型启用受限 Harness。
+- DeepAgents 新版可通过 `general_purpose_subagent` 参数关闭通用子代理；当前锁定的
+  `deepagents==0.7.x` 尚未暴露该参数，因此按模型注册 `HarnessProfile` 达到相同效果。
+  SDK 仍会装配 `read_file` 工具，但 `/**` 的读写权限均为拒绝，不能用于读取业务文件；
+  `task` 工具只显示当前助手允许的领域 `CompiledSubAgent`。
+- DeepAgent 模式复用原有内存或 MySQL 会话来源以及 Durable Execution。内存会话由
+  Checkpointer 恢复消息，MySQL 会话从脱敏 `conversation` 恢复有界的 `user/assistant` 历史，
+  避免重复注入。RAG 父 Agent 会把省略主语的追问改写为完整 `task.description`，RAG
+  `CompiledSubAgent` 只将其作为检索 query，租户与 ACL 仍来自已验证 State。SSE 只释放已确认的最后一轮父 Agent 回答 Chunk；父 Agent 工具规划、Planner
+  和子代理内部消息不会进入前端 Token 流，审批提示仍由确定性子图提供。
 - RAG 子图可以并行运行多个只读检索 Worker，Worker 只能返回证据，不能写 ERP 或 MySQL 业务表。
 - Approval 子图是确定性状态机：模板、字段、节点和审批人必须经过服务端校验，再生成带版本和哈希的冻结预览。
 - ERP 写入只能从冻结预览的确认分支进入，并携带幂等键；任何字段修订都必须生成新预览并重新确认。
@@ -59,3 +84,7 @@ flowchart LR
 RAG 检索只按已验证的 `company_id`、`department`、知识库状态、文件状态和 `is_active` 做数据边界过滤。
 请求体中的 `permission_tags` 不会直接作为权限依据，避免用户自行伪造标签造成越权；
 待 ERP 返回已验证权限后，再将权限映射为 Milvus 过滤条件。ERP 提交携带幂等键，并通过应用日志和 `tool_calls` 保留审计证据。
+
+State 工具只从服务端写入的 `user_context` 读取公司、部门和权限。审批提交工具只接受 State 中带
+`preview_id`、版本、哈希和幂等键的冻结预览；模型不能通过工具参数覆盖公司、用户、Authorization
+或提交载荷。DeepAgent Harness 中的原始 `authorization` 标记为私有 State，不会传给子代理。

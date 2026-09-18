@@ -161,6 +161,14 @@ class ModelService:
         self._model_cache[cache_key] = model
         return model
 
+    def chat_model(self, model_overrides: dict[str, Any] | None = None):
+        """返回供 LangChain/DeepAgent 编排使用的共享聊天模型。
+
+        对外只暴露已经过白名单过滤的生成参数；API Key、Base URL 和重试策略仍
+        由服务端配置控制，调用方不能通过 Assistant 配置覆盖连接凭据。
+        """
+        return self._model(model_overrides)
+
     def plan(
         self,
         message: str,
@@ -549,6 +557,15 @@ items 必须按与 question 的语义相关度从高到低排列，只能使用 
     ) -> Any:
         """优先使用 LangChain 结构化输出，供应商不支持时回退到兼容 JSON 解析。"""
         from langchain_core.messages import HumanMessage, SystemMessage
+
+        # 允许调用方在实例上注入离线/测试 invoker；显式注入时不能再创建真实
+        # LLM Runnable，否则会绕过替身并在单元测试或离线评估中触发外部请求。
+        if "_invoke" in self.__dict__ and "_model" not in self.__dict__:
+            return self._invoke(
+                system,
+                payload,
+                model_overrides=model_overrides,
+            )
 
         messages = [
             SystemMessage(content=system),

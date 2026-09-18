@@ -92,6 +92,8 @@ uv run uvicorn ai_erp_rag_assistant.app.main:app --app-dir .. --reload --port 80
 
 配置加载顺序为：系统环境变量 > 项目目录 `ai_erp_rag_assistant/.env` > 仓库根目录 `.env`，
 `LLM_*`/`EMBEDDING_*` 为空时自动使用外层配置中的 DashScope 或 DeepSeek 变量。
+`AI_ERP_ORCHESTRATOR` 默认为 `langgraph`；需要灰度验证 DeepAgent Harness 时设为
+`deepagent`，无需修改前端 `/api/chat` 请求或响应结构。
 DashScope 工作空间 Key 会复用 `DASHSCOPE_BASE_URL` 作为 Embedding 端点；如需单独端点，
 直接填写 `EMBEDDING_BASE_URL`。
 `LLM_MAX_RETRIES` 控制 LangChain Runnable 对临时网络/限流错误的额外重试次数；
@@ -358,8 +360,19 @@ Invoke-RestMethod -Method Post http://127.0.0.1:8021/api/chat `
 ```
 
 `/api/chat` 请求体可增加 `"stream": true`，此时返回 `text/event-stream`，依次发送
-`metadata`、多个 `token`、`final` 和 `done` 事件；未传或为 `false` 时保持上述 JSON 响应。
+`metadata`、可选的多个 `token`、`final` 和 `done` 事件。DeepAgent 模式只释放经过确认的
+最终父 Agent 回答 Chunk，工具规划、Planner 和子代理内部消息不会进入 Token 流；审批提示仍以
+确定性子图结果为准。未传或为 `false` 时保持上述 JSON 响应。
 浏览器端使用 `fetch + ReadableStream`，完整事件定义见 `docs/RAG_FRONTEND_API.md`。
+
+DeepAgent 使用 MySQL 长期会话时，会从脱敏 `conversation` 恢复最近 16 条对话；内存会话继续由
+LangGraph Checkpointer 恢复，二者不会重复注入历史消息。RAG 追问会由父 Agent 改写为完整检索
+query 后再调用受租户权限约束的子代理。
+
+DeepAgent 上线前按以下顺序回归：同一 `session_id` 连续询问制度问题和省略主语的追问；分别用
+`stream=false/true` 核对最终回答与引用一致；在 `ERP_WRITE_MODE=mock` 下完成审批预览、确认和
+相同 `request_id` 重试；最后运行 `uv run python scripts/evaluate_rag.py --json` 检查真实 Milvus
+评测集。真实 ERP 写入只在单独授权的测试环境启用，不能作为默认自动回归步骤。
 
 多轮审批示例：第一轮填写业务目标，第二轮补充 Graph 追问的必填字段，第三轮发送 `确认提交`（或请求体传 `confirm=true`）。只有确认节点才会调用 ERP 提交工具。确认冻结预览时，页面建议同时回传响应中的 `preview_id`、`preview_version` 和 `preview_hash`：
 

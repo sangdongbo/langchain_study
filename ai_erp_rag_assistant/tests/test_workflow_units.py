@@ -72,6 +72,29 @@ def test_initial_state_preserves_active_approval_context():
     assert state["active_approval"] is True
 
 
+def test_initial_state_does_not_duplicate_persisted_pending_question():
+    """DeepAgent 已保存助手轮次时，下一轮只追加新的用户消息。"""
+    state = initial_state(
+        "session",
+        "user",
+        "确认提交",
+        prior={
+            "pending_question": "请确认提交。",
+            "conversation": [
+                {"role": "user", "content": "请假一天"},
+                {"role": "assistant", "content": "请确认提交。"},
+            ],
+            "active_approval": True,
+        },
+    )
+
+    assert state["conversation"] == [
+        {"role": "user", "content": "请假一天"},
+        {"role": "assistant", "content": "请确认提交。"},
+        {"role": "user", "content": "确认提交"},
+    ]
+
+
 def test_prevalidated_erp_identity_is_reused_without_second_userinfo_call(monkeypatch):
     monkeypatch.setattr(
         "ai_erp_rag_assistant.app.graph.workflow.get_current_user",
@@ -322,6 +345,7 @@ def test_retrieve_rag_uses_assistant_runtime_instead_of_default_collection(monke
     )
 
     assert calls["runtime"] is runtime
+    assert calls["query"] == "病假天数"
     assert calls["top_k"] == 7
     assert calls["permission_tags"] == ["employee"]
     assert result["evidence"][0]["collection"] == "company_16_hr"

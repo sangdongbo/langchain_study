@@ -114,3 +114,18 @@ def test_env_example_covers_supported_settings_keys():
     missing = config_module.SUPPORTED_ENV_KEYS - example_keys
 
     assert not missing, f".env.example 缺少配置项: {sorted(missing)}"
+
+
+def test_orchestrator_defaults_to_langgraph(monkeypatch):
+    """未配置时保持旧工作流，避免升级后直接切换生产请求。"""
+    monkeypatch.delenv("AI_ERP_ORCHESTRATOR", raising=False)
+    monkeypatch.setattr(config_module, "dotenv_values", lambda _path: {})
+
+    assert config_module.Settings.from_env().orchestrator == "langgraph"
+
+
+def test_orchestrator_accepts_deepagent(monkeypatch):
+    monkeypatch.setenv("AI_ERP_ORCHESTRATOR", "deepagent")
+    monkeypatch.setattr(config_module, "dotenv_values", lambda _path: {})
+
+    assert config_module.Settings.from_env().orchestrator == "deepagent"

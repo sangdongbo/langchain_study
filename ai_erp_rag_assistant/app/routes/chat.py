@@ -6,7 +6,7 @@ import json
 from collections.abc import Iterator
 from functools import lru_cache
 from hashlib import sha256
-from typing import Annotated, Any, cast
+from typing import Annotated, Any, Literal, cast
 
 import langsmith.anonymizer as langsmith_anonymizer
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -17,6 +17,10 @@ from starlette.responses import StreamingResponse
 
 # 统一 API 使用惰性代理，避免直接导入聊天路由时循环依赖。
 from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.agents.workflow_adapter import (
+    create_deepagent_workflow,
+    model_overrides_key,
+)
 from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY, assistant_type_for_key
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import get_optional_db_session
@@ -83,6 +87,50 @@ def _langsmith_client() -> Client | None:
     return Client(api_key=settings.langsmith_api_key, anonymizer=_anonymize_trace)
 
 
+@lru_cache(maxsize=8)
+def _deepagent_workflow(
+    assistant_type: str,
+    with_checkpointer: bool,
+    model_overrides_json: str = "{}",
+    system_context: str = "",
+) -> Any:
+    """按助手类型惰性创建 Harness，未启用时不会初始化额外模型。"""
+    if assistant_type not in {"rag", "approval"}:
+        raise ValueError(f"不支持的助手类型：{assistant_type}")
+    return create_deepagent_workflow(
+        cast(Literal["rag", "approval"], assistant_type),
+        model_overrides=json.loads(model_overrides_json),
+        system_context=system_context,
+        with_checkpointer=with_checkpointer,
+    )
+
+
+def _selected_workflows(
+    orchestrator: str,
+    assistant_type: str,
+    *,
+    model_overrides: dict[str, Any] | None = None,
+    system_context: str = "",
+) -> tuple[Any, Any]:
+    """返回内存会话与持久化会话各自使用的工作流。"""
+    if orchestrator == "deepagent":
+        return (
+            _deepagent_workflow(
+                assistant_type,
+                True,
+                model_overrides_key(model_overrides),
+                system_context,
+            ),
+            _deepagent_workflow(
+                assistant_type,
+                False,
+                model_overrides_key(model_overrides),
+                system_context,
+            ),
+        )
+    return workflow, stateless_workflow
+
+
 def _thread_id(request: ChatRequest, assistant_key: str) -> str:
     """按租户、用户、助手和前端会话生成隔离的工作流线程 ID。"""
     tenant = request.company_id.strip() or "default"
@@ -107,7 +155,8 @@ def _chat_response(result: ErpRagState) -> ChatResponse:
         plan=result.get("plan", {}),
         tool_calls=result.get("tool_calls", []),
         evidence=result.get("evidence", []),
-        citations=api_module.model_service.build_citations(result.get("evidence", [])),
+        citations=result.get("citations")
+        or api_module.model_service.build_citations(result.get("evidence", [])),
         erp_data=erp_data,
         form_schema=result.get("form_schema") or None,
         preview=result.get("preview") or None,
@@ -531,6 +580,15 @@ def chat(
         cached_exchange = _cached_exchange_response(request, assistant_key)
         if cached_exchange is not None:
             return cached_exchange
+    # RAG Assistant 的已发布 Prompt/模型配置要在创建 DeepAgent 前注入；
+    # LangGraph 模式仍通过 RunnableConfig 使用同一份 runtime。缓存命中已经提前返回，
+    # 因此无效请求不会因为初始化模型失败而遮蔽可直接返回的历史结果。
+    memory_workflow, persistent_workflow = _selected_workflows(
+        settings.orchestrator,
+        assistant_type,
+        model_overrides=rag_runtime.model_overrides if rag_runtime else None,
+        system_context=rag_runtime.system_context if rag_runtime else "",
+    )
     thread_id = _thread_id(request, assistant_key)
     config: RunnableConfig = {
         # 运行时对象仅在本次 Graph 调用中传递，避免把 Prompt 和模型参数写入会话存储。
@@ -582,7 +640,7 @@ def chat(
                 )
                 raise HTTPException(status_code=503, detail=f"会话持久化不可用：{exc}") from exc
         else:
-            snapshot = workflow.get_state(config)
+            snapshot = memory_workflow.get_state(config)
             if snapshot and snapshot.values:
                 prior = cast(ErpRagState, dict(snapshot.values))
     if execution_checkpoint:
@@ -619,7 +677,7 @@ def chat(
             }
         )
     # 长期会话使用无 Checkpointer Graph；其他助手继续使用进程内会话状态。
-    runtime_workflow = stateless_workflow if persistent_session else workflow
+    runtime_workflow = persistent_workflow if persistent_session else memory_workflow
     if request.stream:
         return StreamingResponse(
             _stream_workflow(
