@@ -14,6 +14,7 @@ import os
 from typing import Any
 from unittest.mock import patch
 
+# 离线测试必须关闭 tracing，保证不会把 Fake Model 轨迹发送到外部服务。
 os.environ["LANGSMITH_TRACING"] = "false"
 
 from deepagents import AsyncSubAgent, create_deep_agent  # noqa: E402
@@ -26,6 +27,8 @@ from deep_agent_examples.testing import (  # noqa: E402
 )
 
 
+# 下面三个 Fake 类只实现 AsyncSubAgent Middleware 实际调用的协议方法。
+# 它们用固定 ID 和结果代替真实 LangGraph Agent Server。
 class FakeThreads:
     async def create(self) -> dict[str, str]:
         return {"thread_id": "remote-thread-1"}
@@ -60,6 +63,7 @@ class FakeAgentProtocolClient:
 
 
 def _tool_call(name: str, args: dict[str, Any], call_id: str) -> AIMessage:
+    # Fake Model 通过预制 tool_calls 驱动父 Agent 依次执行四个管理工具。
     return AIMessage(
         content="",
         tool_calls=[{"name": name, "args": args, "id": call_id}],
@@ -67,6 +71,7 @@ def _tool_call(name: str, args: dict[str, Any], call_id: str) -> AIMessage:
 
 
 async def run_test() -> None:
+    # 每个管理动作需要两次模型响应：先请求工具，再给出工具执行后的回复。
     model = ToolCapableFakeModel(
         responses=[
             _tool_call(
@@ -110,6 +115,7 @@ async def run_test() -> None:
     client = FakeAgentProtocolClient()
     config = {"configurable": {"thread_id": "parent-thread-1"}}
 
+    # 替换 SDK client 后，整个测试只在内存中执行，不会访问 fake URL。
     with patch(
         "deepagents.middleware.async_subagents.get_client",
         return_value=client,
@@ -120,6 +126,8 @@ async def run_test() -> None:
             checkpointer=InMemorySaver(),
             name="async-parent-test",
         )
+
+        # start：创建远程 thread/run，并在父 State 中记录 running 任务。
         started = await agent.ainvoke(
             {"messages": [{"role": "user", "content": "Start research."}]},
             config=config,
@@ -129,12 +137,14 @@ async def run_test() -> None:
         assert task["run_id"] == "remote-run-1"
         assert task["status"] == "running"
 
+        # check：读取远程 run 状态和 thread 结果，刷新父侧缓存。
         checked = await agent.ainvoke(
             {"messages": [{"role": "user", "content": "Check it."}]},
             config=config,
         )
         assert checked["async_tasks"]["remote-thread-1"]["status"] == "success"
 
+        # update：复用原 thread，新建 run，并以 interrupt 策略替换旧 run。
         updated = await agent.ainvoke(
             {"messages": [{"role": "user", "content": "Update it."}]},
             config=config,
@@ -145,6 +155,7 @@ async def run_test() -> None:
         assert updated_task["status"] == "running"
         assert client.runs.create_calls[1]["multitask_strategy"] == "interrupt"
 
+        # cancel：必须取消 update 后的当前 run，而不是已经被替换的旧 run。
         cancelled = await agent.ainvoke(
             {"messages": [{"role": "user", "content": "Cancel it."}]},
             config=config,

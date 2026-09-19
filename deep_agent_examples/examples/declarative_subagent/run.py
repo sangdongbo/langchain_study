@@ -49,6 +49,8 @@ def main() -> None:
     args = parser.parse_args()
 
     model = build_model()
+    # 子 Agent 只拥有库存和供应商工具；mode 决定它是否继承父对话：
+    # isolated 只接收委派描述，fork 会看到父 Agent 当前的有效消息。
     risk_reviewer: SubAgent = {
         "name": "risk-reviewer",
         "description": "Checks inventory, supplier, and delivery risk.",
@@ -59,6 +61,7 @@ def main() -> None:
             "Use both tools and return only evidence, risks, and mitigations in Chinese."
         ),
     }
+    # 父 Agent 保留金额和预算职责，并通过 task 工具把风险审查委派给子 Agent。
     agent = create_deep_agent(
         model=model,
         tools=[calculate_total, check_budget],
@@ -69,6 +72,7 @@ def main() -> None:
             "exactly once to risk-reviewer, then merge the conclusions in Chinese."
         ),
     )
+    # 把运行模式写入 metadata，便于在 LangSmith 中比较 isolated/fork 轨迹。
     config = invoke_config(f"declarative-subagent-{args.mode}", args.thread_id)
     config["metadata"].update(
         {
@@ -85,6 +89,7 @@ def main() -> None:
         tags=["deep-agent-example", "subagent", "declarative", args.mode],
         metadata=config["metadata"],
     ):
+        # 同一采购输入分别以两种 mode 运行，才能直观看到上下文传播差异。
         result = agent.invoke(
             {
                 "messages": [

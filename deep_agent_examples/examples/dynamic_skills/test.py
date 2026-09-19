@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
+# 强制关闭外部 tracing，确保测试完全离线。
 os.environ["LANGSMITH_TRACING"] = "false"
 
 from deepagents import create_deep_agent  # noqa: E402
@@ -26,6 +27,7 @@ from deep_agent_examples.testing import (  # noqa: E402
 )
 
 
+# 两份最小 Skill 内容分别用于首次扫描和同 thread 覆盖场景。
 PROCUREMENT_SKILL = """---
 name: procurement-review
 description: Review purchases using deterministic evidence
@@ -50,6 +52,7 @@ Check supplier delivery evidence.
 
 
 def _read_skill_call(call_id: str) -> AIMessage:
+    # 模拟模型按需读取完整 Skill 正文，而不是让正文默认进入 system prompt。
     return AIMessage(
         content="",
         tool_calls=[
@@ -75,6 +78,8 @@ def _system_text(messages: list[Any]) -> str:
 
 def main() -> None:
     configure_utf8_output()
+
+    # 先验证确定性权限路由：risk-reviewer 可以调查供应商，buyer 不可以。
     routed = skill_files_for(
         TrustedIdentity(tenant_id="tenant-a", role="risk-reviewer"),
         "supplier-risk",
@@ -90,6 +95,7 @@ def main() -> None:
     else:
         raise AssertionError("buyer must not receive supplier-research")
 
+    # 两轮都尝试 read_file；用于同时检查渐进式披露和 metadata 缓存。
     model = ToolCapableFakeModel(
         responses=[
             _read_skill_call("read-skill-1"),
@@ -107,6 +113,7 @@ def main() -> None:
     )
     config = {"configurable": {"thread_id": "dynamic-skills-test"}}
 
+    # 首次调用扫描采购 Skill：system prompt 只有 metadata，正文由 read_file 返回。
     first = agent.invoke(
         {
             "messages": [{"role": "user", "content": "Review this purchase."}],
@@ -131,6 +138,8 @@ def main() -> None:
         for message in model.seen_messages[1]
     )
 
+    # 同一 thread 再注入供应商 Skill 文件，文件会进入 State，但首次扫描的
+    # skills_metadata 仍被缓存，不会自动切换能力集合。
     second = agent.invoke(
         {
             "messages": [{"role": "user", "content": "Now research the supplier."}],

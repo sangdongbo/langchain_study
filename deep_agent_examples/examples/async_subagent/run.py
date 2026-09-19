@@ -40,15 +40,21 @@ from deep_agent_examples.tools import calculate_total, check_budget
 
 async def run(check_after: float | None, thread_id: str) -> None:
     load_environment()
+
+    # 这里只登记远程 Graph 的连接信息。远程 Agent 自己的模型、工具和状态
+    # 都由 Agent Server 管理，不会继承下面父 Agent 的配置。
     spec: AsyncSubAgent = {
         "name": "remote-procurement-researcher",
         "description": "Researches supplier and inventory risk in the background.",
         "graph_id": "remote_research_agent",
         "url": os.getenv("AGENT_SERVER_URL") or "http://127.0.0.1:2024",
     }
+    # 自托管服务需要认证时，通过 header 传 token；本地开发默认不需要。
     if token := os.getenv("AGENT_SERVER_TOKEN"):
         spec["headers"] = {"Authorization": f"Bearer {token}"}
 
+    # 父 Agent 负责金额/预算和任务调度。InMemorySaver 让同一进程中的第二轮
+    # 调用仍能找到 async_tasks；进程退出后这些父侧跟踪信息会消失。
     agent = create_deep_agent(
         model=build_model(),
         tools=[calculate_total, check_budget],
@@ -60,6 +66,7 @@ async def run(check_after: float | None, thread_id: str) -> None:
             "once and return its exact task_id. Never poll unless explicitly asked."
         ),
     )
+    # thread_id 标识父会话；metadata 只用于 LangSmith 过滤和关联父/远程轨迹。
     config = invoke_config("async-subagent-py", thread_id)
     config["metadata"].update(
         {
@@ -77,6 +84,8 @@ async def run(check_after: float | None, thread_id: str) -> None:
         tags=["deep-agent-example", "subagent", "async"],
         metadata=config["metadata"],
     ):
+        # 第一次调用要求模型只启动后台任务。start_async_task 会在远端创建
+        # thread/run，并把定位它们所需的 ID 写入父 State 的 async_tasks。
         result = await agent.ainvoke(
             {
                 "messages": [
@@ -91,6 +100,8 @@ async def run(check_after: float | None, thread_id: str) -> None:
             },
             config=config,
         )
+        # 模型如果没有调用 start_async_task，就不会生成任何跟踪记录；
+        # 立即报错比继续打印一个不存在的 task_id 更容易定位提示词问题。
         tasks = result.get("async_tasks") or {}
         if not tasks:
             raise RuntimeError("The model did not call start_async_task; inspect the trace.")
@@ -102,7 +113,9 @@ async def run(check_after: float | None, thread_id: str) -> None:
         print(f"cached status: {tasks[task_id]['status']}")
 
         if check_after is not None:
+            # 这里只等待并检查一次，避免示例演变成无限轮询。
             await asyncio.sleep(check_after)
+            # 复用相同父 thread_id，内置工具才能从 async_tasks 找到远程任务。
             checked = await agent.ainvoke(
                 {
                     "messages": [
@@ -129,6 +142,7 @@ async def run(check_after: float | None, thread_id: str) -> None:
 
 
 def main() -> None:
+    # --check-after 省略时只演示“启动后立即返回”；提供秒数时额外查询一次。
     parser = argparse.ArgumentParser(description="Run an AsyncSubAgent example.")
     parser.add_argument(
         "--check-after",

@@ -43,11 +43,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # graphs 模块分别导出普通 Agent 和带父/子探针的同步 SubAgent Graph。
     from deep_agent_examples.graphs import (
         lifecycle_agent,
         subagent_lifecycle_agent,
     )
 
+    # 两类 Graph 的事件字段不同，但都使用同一个 thread 配置和输入方式。
     graph = lifecycle_agent if args.kind == "agent" else subagent_lifecycle_agent
     config = invoke_config(f"{args.kind}-lifecycle-py", args.thread_id)
     config["metadata"]["entrypoint"] = "examples/lifecycle/run.py"
@@ -59,6 +61,7 @@ def main() -> None:
         tags=["deep-agent-example", "lifecycle", args.kind, "python-file"],
         metadata=config["metadata"],
     ):
+        # LifecycleProbeMiddleware 会把每个 hook 按实际发生顺序追加到 State。
         result = graph.invoke(
             {
                 "messages": [
@@ -69,6 +72,7 @@ def main() -> None:
         )
 
     print(result["messages"][-1].content)
+    # 普通 Agent 只有一条事件流；SubAgent 示例分别打印父、子两条事件流。
     fields = (
         ["lifecycle_events"]
         if args.kind == "agent"

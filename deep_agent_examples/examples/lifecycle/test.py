@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import os
 
+# 使用 Fake Model 时关闭 LangSmith，保证同步和异步结果不受网络影响。
 os.environ["LANGSMITH_TRACING"] = "false"
 
 from deepagents import create_deep_agent  # noqa: E402
@@ -28,6 +29,7 @@ from deep_agent_examples.testing import (  # noqa: E402
 )
 
 
+# 一次“模型请求工具 -> 工具执行 -> 模型总结”应产生的完整 hook 顺序。
 EXPECTED = [
     "01 agent.before_agent",
     "02 agent.before_model",
@@ -39,6 +41,7 @@ EXPECTED = [
 
 
 def build_agent():
+    # 两条脚本响应分别代表首次工具调用和工具执行后的最终回答。
     model = ToolCapableFakeModel(
         responses=[
             AIMessage(
@@ -64,6 +67,7 @@ def build_agent():
 
 
 async def _run_async() -> dict:
+    # 每次重新构建 Agent，避免同步调用消耗掉异步调用需要的脚本响应。
     return await build_agent().ainvoke(
         {"messages": [{"role": "user", "content": "Calculate the total."}]}
     )
@@ -76,6 +80,7 @@ def main() -> None:
     )
     async_result = asyncio.run(_run_async())
 
+    # invoke 与 ainvoke 必须记录完全一致的生命周期事件和最终消息。
     assert sync_result["lifecycle_events"] == EXPECTED
     assert async_result["lifecycle_events"] == EXPECTED
     assert sync_result["messages"][-1].content == "total checked"

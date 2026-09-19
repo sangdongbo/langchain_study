@@ -40,11 +40,13 @@ TASK_PROMPTS = {
     "supplier-risk": "调查北辰智能硬件供应商和 AI 推理服务器库存风险。",
 }
 
+# 身份能使用哪些 Skill，由服务端可信角色决定。
 ROLE_SKILLS = {
     "buyer": {"procurement-review"},
     "risk-reviewer": {"procurement-review", "supplier-research"},
 }
 
+# 当前业务任务允许哪些 Skill，防止角色权限被用于无关场景。
 TASK_SKILLS = {
     "purchase": {"procurement-review"},
     "supplier-risk": {"supplier-research"},
@@ -59,11 +61,14 @@ class TrustedIdentity:
 
 def skill_files_for(identity: TrustedIdentity, task_type: str) -> dict:
     """Return only Skills allowed by both the trusted role and task policy."""
+    # 必须同时满足角色权限和任务策略；客户端文本不能直接指定任意 Skill。
     selected = ROLE_SKILLS.get(identity.role, set()) & TASK_SKILLS.get(task_type, set())
     if not selected:
         raise PermissionError(
             f"Role {identity.role!r} cannot use a Skill for task {task_type!r}."
         )
+    # StateBackend 使用虚拟绝对路径保存文件。Middleware 先扫描 frontmatter，
+    # 模型真正需要正文时再调用 read_file，实现渐进式披露。
     return {
         f"/skills/session/{name}/SKILL.md": {
             "content": (PROJECT_DIR / "skills" / name / "SKILL.md").read_text(
@@ -98,16 +103,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # In production, construct this only from authenticated server Context.
-    # Never authorize a role copied directly from user text or model State.
+    # 生产环境只能从已认证的服务端 Context 构造身份，不能信任用户文本
+    # 或模型 State 中自行声明的 role。
     identity = TrustedIdentity(tenant_id="tenant-a", role=args.role)
     skill_files = skill_files_for(identity, args.task_type)
     selected_skills = [path.split("/")[-2] for path in skill_files]
 
-    # Construct the configured real model only after the deterministic policy
-    # accepts the request, so denied routes never reach model initialization.
+    # 确定性策略通过后才导入并构建真实模型，让无权限请求止步于模型调用之前。
     from deep_agent_examples.graphs import dynamic_skill_agent
 
+    # 把可信身份、任务类型和最终 Skill 集合写入 trace，方便审计路由结果。
     config = invoke_config("dynamic-skills-py", args.thread_id)
     config["metadata"].update(
         {
@@ -126,6 +131,8 @@ def main() -> None:
         tags=["deep-agent-example", "dynamic-skills", "python-file"],
         metadata=config["metadata"],
     ):
+        # files 随本次 thread 注入 State；同一 thread 的 skills_metadata
+        # 会缓存首次扫描结果，切换 Skill 集合时应使用新的 thread_id。
         result = dynamic_skill_agent.invoke(
             {
                 "messages": [

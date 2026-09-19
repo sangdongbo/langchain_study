@@ -13,6 +13,7 @@ import json
 import os
 from typing import Any, NotRequired
 
+# 禁止测试产生外部 LangSmith 请求。
 os.environ["LANGSMITH_TRACING"] = "false"
 
 from deepagents import CompiledSubAgent, create_deep_agent  # noqa: E402
@@ -27,15 +28,18 @@ from deep_agent_examples.testing import (  # noqa: E402
 )
 
 
+# 父 State 特意多一个 request_id，用来验证未声明字段不会泄漏给子图。
 class ParentState(DeepAgentState):
     request_id: NotRequired[str]
 
 
 class StructuredChildState(MessagesState):
+    # CompiledSubAgent 会优先把 structured_response 作为 task 工具结果。
     structured_response: NotRequired[dict[str, Any]]
 
 
 def _task_call(name: str, call_id: str) -> AIMessage:
+    # 生成父模型调用内置 task 工具所需的标准 tool_call。
     return AIMessage(
         content="",
         tool_calls=[
@@ -62,11 +66,13 @@ def main() -> None:
             "structured_response": {"decision": "reject", "gap": 4000},
         }
 
+    # 子图一同时返回文本和结构化结果，用来验证结构化结果优先。
     structured_builder = StateGraph(StructuredChildState)
     structured_builder.add_node("review", structured_node)
     structured_builder.add_edge(START, "review")
     structured_builder.add_edge("review", END)
 
+    # 子图二没有 structured_response，应回退到最后一条非空 AIMessage。
     message_builder = StateGraph(MessagesState)
     message_builder.add_node(
         "review",
@@ -75,6 +81,7 @@ def main() -> None:
     message_builder.add_edge(START, "review")
     message_builder.add_edge("review", END)
 
+    # CompiledSubAgent 直接接收已经 compile 的 Runnable，不再重复创建 Agent。
     subagents: list[CompiledSubAgent] = [
         {
             "name": "structured-reviewer",
@@ -87,6 +94,7 @@ def main() -> None:
             "runnable": message_builder.compile(),
         },
     ]
+    # 父模型依次委派两个子图，最后再合并两个 task 结果。
     parent_model = ToolCapableFakeModel(
         responses=[
             _task_call("structured-reviewer", "structured-task"),
@@ -106,6 +114,7 @@ def main() -> None:
             "request_id": "parent-only-field",
         }
     )
+    # 同时验证结果选择规则和 State schema 边界。
     task_messages = [
         message for message in result["messages"] if isinstance(message, ToolMessage)
     ]
@@ -114,6 +123,7 @@ def main() -> None:
     assert "request_id" not in observed_child_keys[0]
     assert result["messages"][-1].content == "parent merged both results"
 
+    # 错误案例：Runnable 没有返回 messages 时必须尽早给出诊断异常。
     broken_parent = create_deep_agent(
         model=ToolCapableFakeModel(
             responses=[_task_call("broken-reviewer", "broken-task")]

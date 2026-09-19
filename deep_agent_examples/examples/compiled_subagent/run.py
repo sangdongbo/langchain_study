@@ -32,8 +32,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # graphs 模块会按环境配置创建真实模型，延迟导入可先完成命令行参数解析。
     from deep_agent_examples.graphs import compiled_subagent_agent
 
+    # CompiledSubAgent 已在 graphs.py 中把可复用的财务 Graph 注册给父 Agent。
+    # 这里仅为本次调用补充 thread、标签和可观测性元数据。
     config = invoke_config("compiled-subagent-py", args.thread_id)
     config["metadata"].update(
         {
@@ -48,6 +51,7 @@ def main() -> None:
         tags=["deep-agent-example", "subagent", "compiled"],
         metadata=config["metadata"],
     ):
+        # 父 Agent 检查库存/供应商，再通过 task 工具调用预编译财务 Graph。
         result = compiled_subagent_agent.invoke(
             {
                 "messages": [

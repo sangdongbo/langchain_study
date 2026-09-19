@@ -16,8 +16,13 @@ examples/
 |-- async_subagent/       # README.md + run.py + test.py
 |-- compiled_subagent/    # README.md + run.py + test.py
 |-- declarative_subagent/ # README.md + run.py + test.py
+|-- durable_resume/       # Checkpoint 中断、Graph 重建与 thread 恢复
 |-- dynamic_skills/       # README.md + run.py + test.py
-`-- lifecycle/            # README.md + run.py + test.py
+|-- hitl_decisions/       # approve、edit、reject 三种人工决策
+|-- lifecycle/            # README.md + run.py + test.py
+|-- parallel_review/      # 同一轮并行委派三个审查子 Agent
+|-- skill_versioning/     # Skill 版本、metadata 缓存与 thread 隔离
+`-- tool_failure_recovery/ # 工具重试、耗尽和降级 ToolMessage
 ```
 
 项目级 Agent 实现在 `deep_agent_examples/`，固定 Skill 在 `skills/`，独立依赖的 OpenSandbox 示例在 `optional_opensandbox/`。根目录只保留项目配置、总览和全局 smoke 检查。
@@ -48,6 +53,14 @@ examples/
 - [声明式 SubAgent：isolated、fork 与 State 传播](examples/declarative_subagent/README.md)
 - [CompiledSubAgent：复用现成 Agent 与 StateGraph](examples/compiled_subagent/README.md)
 - [AsyncSubAgent：远程 thread、run 与后台任务状态机](examples/async_subagent/README.md)
+
+生产可靠性相关机制也各自保持为可独立运行的小示例：
+
+- [Checkpoint 中断与恢复](examples/durable_resume/README.md)
+- [并行采购审查](examples/parallel_review/README.md)
+- [工具失败恢复](examples/tool_failure_recovery/README.md)
+- [Skill 版本管理](examples/skill_versioning/README.md)
+- [HITL 多种审核决策](examples/hitl_decisions/README.md)
 
 ## 2. 安装和配置
 
@@ -218,6 +231,22 @@ uv run python examples/compiled_subagent/test.py
 uv run python examples/async_subagent/test.py
 ```
 
+高级可靠性示例同样提供真实模型入口和离线测试：
+
+```powershell
+uv run python examples/durable_resume/run.py --decision approve
+uv run python examples/parallel_review/run.py
+uv run python examples/tool_failure_recovery/run.py --failures 2
+uv run python examples/skill_versioning/run.py --version v2
+uv run python examples/hitl_decisions/run.py --decision edit
+
+uv run python examples/durable_resume/test.py
+uv run python examples/parallel_review/test.py
+uv run python examples/tool_failure_recovery/test.py
+uv run python examples/skill_versioning/test.py
+uv run python examples/hitl_decisions/test.py
+```
+
 ## 5. 本地 shell 不是沙箱
 
 `local_shell_agent` 使用 `LocalShellBackend`，只用于展示 `execute` 和 HITL。它具有当前用户的主机权限：
@@ -268,6 +297,11 @@ uv run python examples/lifecycle/test.py
 uv run python examples/declarative_subagent/test.py
 uv run python examples/compiled_subagent/test.py
 uv run python examples/async_subagent/test.py
+uv run python examples/durable_resume/test.py
+uv run python examples/parallel_review/test.py
+uv run python examples/tool_failure_recovery/test.py
+uv run python examples/skill_versioning/test.py
+uv run python examples/hitl_decisions/test.py
 ```
 
-第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、声明式、Compiled 和 Async SubAgent，不调用真实模型或 LangSmith。
+第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、三种 SubAgent、Checkpoint 恢复、并行委派、工具重试、Skill 版本缓存和 HITL 决策；全部不调用真实模型或 LangSmith。
