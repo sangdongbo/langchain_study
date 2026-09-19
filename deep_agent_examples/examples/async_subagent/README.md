@@ -173,32 +173,256 @@ running
 
 这些必须在 `remote_research_agent` 自己的构建和部署中配置。父 Agent 的文件权限不能保护远程 Graph；反过来也一样。
 
-## 8. 真实本地运行
+## 8. 从零跑通真实流程
 
-终端一启动 Agent Server：
+真实示例需要两个同时运行的进程：
+
+```text
+终端一：LangGraph Agent Server（127.0.0.1:2024）
+                         ↑
+终端二：run.py 创建父 Agent，并通过 HTTP 启动远程任务
+```
+
+### 第一步：进入正确目录
+
+在 PowerShell 中执行：
 
 ```powershell
-cd deep_agent_examples
+cd D:\PythonProject\LearnOne\deep_agent_examples
+```
+
+如果提示符前面是其他项目的环境，例如 `(ai-erp-rag-assistant)`，先退出：
+
+```powershell
+deactivate
+```
+
+`uv run` 即使发现环境不匹配也会改用当前项目的 `.venv`，但退出旧环境可以避免反复出现 `VIRTUAL_ENV ... does not match` 警告。
+
+### 第二步：安装依赖并确认模型配置
+
+```powershell
+uv sync
+```
+
+模型环境变量按以下顺序加载：
+
+1. `deep_agent_examples/.env`。
+2. 仓库根目录 `LearnOne/.env` 作为回退。
+
+配置按供应商成套选择，不会把 DeepSeek Key 与 `OPENAI_BASE_URL` 混用。使用 DeepSeek 时至少需要：
+
+```text
+DEEPSEEK_API_KEY=真实的 API Key
+```
+
+未配置 `DEEPSEEK_BASE_URL` 和 `DEEPSEEK_MODEL` 时，项目自动使用：
+
+```text
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+不要把真实 Key 写进 Python、README 或提交到 Git。修改环境配置后必须重启 Agent Server。
+
+### 第三步：终端一启动 Agent Server
+
+Windows 必须在 Python 启动前启用 UTF-8。只把这两个变量写进 `.env` 不能解决 Python 启动阶段的 GBK 解码问题：
+
+```powershell
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
 uv run langgraph dev --host 127.0.0.1 --port 2024
 ```
 
-终端二只启动任务：
+成功时会看到：
 
-```powershell
-uv run python examples/async_subagent/run.py
+```text
+API: http://127.0.0.1:2024
+Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+API Docs: http://127.0.0.1:2024/docs
 ```
 
-显式等待 5 秒并做一次检查：
+显示地址后继续观察几秒。没有出现 worker traceback，并且进程保持运行，才表示服务真正启动成功。这个终端不要关闭，也不要按 `Ctrl+C`。
+
+### 第四步：终端二运行真实示例
+
+在 IDE 中新建第二个终端：
 
 ```powershell
-uv run python examples/async_subagent/run.py --check-after 5
+cd D:\PythonProject\LearnOne\deep_agent_examples
+deactivate
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+uv run python examples\async_subagent\run.py --check-after 5
 ```
 
-示例故意没有实现无限轮询。`--check-after` 只执行一次检查，并且同一个 Python 进程保留 `InMemorySaver`，所以父 State 中仍有 task tracking metadata。
+如果 `deactivate` 不存在，忽略这一行即可。
 
-如果进程退出，示例的内存 checkpoint 也消失。生产系统应使用持久化 checkpointer 或直接通过 LangGraph Server 的同一父 thread 继续对话。
+正常输出类似：
 
-## 9. LangSmith 中怎样关联父远程两侧
+```text
+task_id: <远程 thread ID>
+remote run_id: <远程 run ID>
+cached status: running
+checked status: running 或 success
+parent thread_id: <父 Agent thread ID>
+```
+
+`task_id` 可能出现两次：一次来自模型回复，一次由示例脚本明确打印，这是正常现象。
+
+`--check-after 5` 表示等待 5 秒后只检查一次，不会持续轮询。如果结果仍是 `running`，说明后台任务已经成功创建但尚未完成，不是报错。脚本进程退出后，父 Agent 的 `InMemorySaver` 也会消失；生产系统应改用持久化 checkpointer。
+
+### 第五步：验证远程任务状态和结果
+
+从上一步复制 `task_id` 和 `remote run_id`，在新的 PowerShell 中设置：
+
+```powershell
+$taskId = "替换为 task_id"
+$runId = "替换为 remote run_id"
+```
+
+查询 run 状态：
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:2024/threads/$taskId/runs/$runId" |
+    Select-Object run_id, status
+```
+
+任务完成时 `status` 应为 `success`。如果仍是 `running`，等待十几秒后手动再查一次，不要写无限轮询。
+
+状态变为 `success` 后读取远程 thread 的最终消息：
+
+```powershell
+$state = Invoke-RestMethod "http://127.0.0.1:2024/threads/$taskId/state"
+$state.values.messages[-1].content
+```
+
+预期得到北辰智能硬件供应商风险和 AI 推理服务器库存的中文调查结果。开发服务器使用内存存储，重启终端一后，旧 thread/run 可能不再存在。
+
+## 9. 在 Studio 中验证
+
+1. 保持终端一的 Agent Server 运行。
+2. 打开启动日志中的 Studio UI。
+3. 确认右上角显示绿色 `Connected`。
+4. 在顶部选择 `async_subagent_agent`，不要选 `dynamic_skill_agent`。
+5. 点击 `New Thread`。
+6. 在 Input 中提交：
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "请在后台调查北辰智能硬件和 AI 推理服务器库存，先返回 task_id。"
+    }
+  ]
+}
+```
+
+第一次调用应返回 `task_id`，State 的 `async_tasks` 中应出现对应的 `thread_id`、`run_id` 和 `status`。
+
+等待一段时间后，在同一个 Studio thread 中继续提交：
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "列出后台任务，并检查刚才任务的当前状态和结果。"
+    }
+  ]
+}
+```
+
+必须复用同一个父 thread，因为内置 `check_async_task` 会先从父 State 的 `async_tasks` 查找任务。点击 `New Thread` 会创建新的父 State，不能直接管理旧任务。
+
+## 10. 本次实际遇到的问题
+
+### `VIRTUAL_ENV ... does not match`
+
+原因：终端自动激活了其他项目的虚拟环境。
+
+处理：
+
+```powershell
+deactivate
+cd D:\PythonProject\LearnOne\deep_agent_examples
+```
+
+这是警告，不是导致任务失败的异常。`uv` 提示 `will be ignored` 时已经切换到当前项目环境。
+
+### `UnicodeDecodeError: 'gbk' codec can't decode ...`
+
+原因：Windows 用 GBK 读取 LangGraph 包中的 UTF-8 OpenAPI 文件。错误发生在 Python 启动阶段，项目代码尚未加载 `.env`。
+
+处理：在启动 Agent Server 的同一终端先执行：
+
+```powershell
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+```
+
+然后重新运行 `uv run langgraph dev ...`。
+
+### `httpx.ConnectError` 或连接 `127.0.0.1:2024` 失败
+
+原因：Agent Server 没有启动、启动后 worker 已崩溃，或者 `AGENT_SERVER_URL` 指向了错误地址。
+
+处理：
+
+1. 确认终端一仍在运行且没有 traceback。
+2. 浏览器访问 `http://127.0.0.1:2024/docs`。
+3. 确认 `AGENT_SERVER_URL=http://127.0.0.1:2024`。
+
+### `OpenAIConnectionError: Connection error`，任务名为 `model`
+
+原因：Agent Server 已连接，但模型 API 无法访问。此前配置还可能把 `DEEPSEEK_API_KEY` 与另一组 `OPENAI_BASE_URL/OPENAI_MODEL` 拼在一起。
+
+当前配置已经改为同一供应商变量成套使用：优先 `LLM_*`，其次 `DEEPSEEK_*`，最后 `OPENAI_*`。检查网络：
+
+```powershell
+Test-NetConnection api.deepseek.com -Port 443
+```
+
+修改 Key、Base URL 或模型名后，停止并重启 Agent Server。不要把真实 Key 写死到源码。
+
+### `checked status: running`
+
+这不是错误。`--check-after 5` 只在 5 秒后查询一次，远程模型和工具可能需要更长时间。使用第 8 节的 API 命令稍后查询。
+
+### `LangSmith tracing disabled`
+
+这不是错误，只表示没有上传 trace。需要观察 LangSmith 轨迹时配置：
+
+```text
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=真实的 LangSmith Key
+LANGSMITH_PROJECT=deep-agent-examples
+```
+
+修改后重启 Agent Server。
+
+## 11. 不启动服务器的离线测试
+
+如果只想确认 AsyncSubAgent 的状态逻辑是否正确，不需要模型 Key、Agent Server、LangSmith 或网络：
+
+```powershell
+cd D:\PythonProject\LearnOne\deep_agent_examples
+uv run python examples\async_subagent\test.py
+```
+
+成功时输出：
+
+```text
+AsyncSubAgent 离线测试通过
+- 启动任务会创建远程 thread/run 并保存跟踪信息
+- 查询任务会刷新缓存状态并读取远程结果
+- 更新任务会保留 task_id/thread_id 并替换 run_id
+- 取消任务会终止当前远程 run 并记录最终状态
+```
+
+## 12. LangSmith 中怎样关联父远程两侧
 
 同步 SubAgent 往往显示为父 trace 下的嵌套 run；AsyncSubAgent 的远程执行拥有独立 thread/run，不应假设它一定成为父 trace 的同步子节点。
 
@@ -223,7 +447,7 @@ agent_server_url=...
 entrypoint=examples/async_subagent/run.py
 ```
 
-## 10. 认证与数据安全
+## 13. 认证与数据安全
 
 - 托管 LangGraph/LangSmith Deployment 通常通过 SDK 环境变量认证。
 - 自托管服务可在 spec `headers` 中提供认证 header，但不要把 token 写进代码或 trace。
@@ -231,22 +455,7 @@ entrypoint=examples/async_subagent/run.py
 - `task_id` 不是授权凭证。能猜到 ID 不应等于能读取任务。
 - 跨租户部署必须隔离 checkpoint、Store、Sandbox、日志和 trace。
 
-## 11. 不启动服务器的测试
-
-```powershell
-uv run python examples/async_subagent/test.py
-```
-
-测试用假的 Agent Protocol client 真实执行 Middleware 工具，验证：
-
-- start 创建 remote thread/run 并写父 tracking State。
-- check 读取远程 result 并把缓存状态更新为 success。
-- update 保持 task/thread ID，创建新 run，并使用 interrupt 策略。
-- cancel 精确取消当前新 run，并记录 terminal status。
-
-测试不需要模型 Key、Agent Server、LangSmith 或网络。
-
-## 12. 选择建议
+## 14. 选择建议
 
 使用 AsyncSubAgent，当：
 

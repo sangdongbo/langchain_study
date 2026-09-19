@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 
 os.environ.setdefault("LLM_API_KEY", "static-smoke-key")
@@ -12,11 +13,28 @@ os.environ.setdefault("LANGSMITH_TRACING", "false")
 PROJECT_DIR = Path(__file__).resolve().parent
 
 from deep_agent_examples import graphs  # noqa: E402
+from deep_agent_examples.config import model_settings  # noqa: E402
 from deep_agent_examples.lifecycle import merge_lifecycle_events  # noqa: E402
 from deep_agent_examples.tools import check_budget, check_inventory  # noqa: E402
 
 
 def main() -> None:
+    with (
+        patch("deep_agent_examples.config.load_environment"),
+        patch.dict(
+            os.environ,
+            {
+                "DEEPSEEK_API_KEY": "deepseek-test-key",
+                "OPENAI_BASE_URL": "https://wrong-provider.example/v1",
+                "OPENAI_MODEL": "wrong-provider-model",
+            },
+            clear=True,
+        ),
+    ):
+        settings = model_settings()
+        assert settings.base_url == "https://api.deepseek.com/v1"
+        assert settings.model == "deepseek-chat"
+
     config = json.loads((PROJECT_DIR / "langgraph.json").read_text(encoding="utf-8"))
     expected = set(config["graphs"])
     exported = {
