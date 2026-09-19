@@ -40,16 +40,24 @@ def reserve_budget(department: str, amount: float) -> str:
 def build_agent(model, checkpointer):
     """使用同一个 Checkpointer 创建可中断、可恢复的 Agent Graph。"""
     return create_deep_agent(
+        # model：中断前规划工具调用，恢复后读取工具/拒绝结果并生成结论。
         model=model,
+        # tools：向模型开放的工具；reserve_budget 是本例唯一副作用动作。
         tools=[reserve_budget],
+        # interrupt_on：命中指定工具时先暂停，未经决定不会真正执行工具。
         interrupt_on={
             "reserve_budget": {
+                # allowed_decisions：调用方恢复时允许提交的人工决定类型。
                 "allowed_decisions": ["approve", "reject"],
+                # description：展示给审核人的风险说明，不是模型系统提示词。
                 "description": "预算锁定会产生外部副作用，请确认是否执行。",
             }
         },
+        # checkpointer：保存暂停位置和 State；恢复还必须使用相同 thread_id。
         checkpointer=checkpointer,
+        # Graph/Trace 中的稳定名称。
         name="durable-resume-agent",
+        # system_prompt：告诉模型恢复后的业务处理规则，不负责强制中断。
         system_prompt=(
             "先计算采购申请中的总额，然后调用 reserve_budget 一次。"
             "工具恢复后，根据执行或拒绝结果给出中文结论。"
@@ -70,8 +78,11 @@ def main() -> None:
     agent = build_agent(model, checkpointer)
 
     with tracing_context(
+        # enabled：是否记录 LangSmith Trace，不影响 Checkpoint 的保存与恢复。
         enabled=tracing_enabled(),
+        # project_name：Trace 在 LangSmith 中所属项目。
         project_name=tracing_project(),
+        # tags/metadata：检索运行所用，不会进入模型对话。
         tags=["deep-agent-example", "durable-resume"],
         metadata=config["metadata"],
     ):
@@ -101,7 +112,9 @@ def main() -> None:
             else {"type": "reject", "message": "预算需要重新核算"}
         )
         result = agent.invoke(
+            # resume.decisions 按中断动作顺序提供决定；这里仅有一个动作。
             Command(resume={"decisions": [decision]}),
+            # 复用原 config，尤其是相同 thread_id，才能定位暂停的 Checkpoint。
             config=config,
         )
 

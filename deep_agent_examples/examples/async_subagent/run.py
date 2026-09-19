@@ -44,23 +44,34 @@ async def run(check_after: float | None, thread_id: str) -> None:
     # 这里只登记远程 Graph 的连接信息。远程 Agent 自己的模型、工具和状态
     # 都由 Agent Server 管理，不会继承下面父 Agent 的配置。
     spec: AsyncSubAgent = {
+        # name：父模型调用后台任务工具时使用的子 Agent 路由名。
         "name": "remote-procurement-researcher",
+        # description：展示给父模型的能力说明，影响它是否选择该子 Agent。
         "description": "Researches supplier and inventory risk in the background.",
+        # graph_id：Agent Server 注册的 Graph ID，必须与 langgraph.json 一致。
         "graph_id": "remote_research_agent",
+        # url：Agent Protocol 服务根地址；本地 langgraph dev 默认是 2024 端口。
         "url": os.getenv("AGENT_SERVER_URL") or "http://127.0.0.1:2024",
     }
     # 自托管服务需要认证时，通过 header 传 token；本地开发默认不需要。
     if token := os.getenv("AGENT_SERVER_TOKEN"):
+        # headers：父侧访问远程服务时附带的 HTTP 请求头，本地服务通常不需要。
         spec["headers"] = {"Authorization": f"Bearer {token}"}
 
     # 父 Agent 负责金额/预算和任务调度。InMemorySaver 让同一进程中的第二轮
     # 调用仍能找到 async_tasks；进程退出后这些父侧跟踪信息会消失。
     agent = create_deep_agent(
+        # 父 Agent 的模型只负责调度和本地金额/预算推理。
         model=build_model(),
+        # 父 Agent 自己可用的工具，不会传给远程 Graph。
         tools=[calculate_total, check_budget],
+        # 注册 AsyncSubAgent 后，框架会提供后台任务的启动和查询工具。
         subagents=[spec],
+        # 保存父侧 async_tasks；查询任务时还必须复用同一个 thread_id。
         checkpointer=InMemorySaver(),
+        # 父 Graph 在 Trace 中显示的稳定名称。
         name="async-subagent-parent-example",
+        # 约束父模型启动后立即返回，远程 Graph 有自己的 system_prompt。
         system_prompt=(
             "When asked to start background research, call start_async_task exactly "
             "once and return its exact task_id. Never poll unless explicitly asked."
@@ -79,14 +90,19 @@ async def run(check_after: float | None, thread_id: str) -> None:
 
     trace_on = tracing_enabled()
     with tracing_context(
+        # enabled：只控制是否上传本次 Trace，不改变 Agent 的执行逻辑。
         enabled=trace_on,
+        # project_name：Trace 在 LangSmith 中归属的项目。
         project_name=tracing_project(),
+        # tags：可检索标签，不会发送给模型。
         tags=["deep-agent-example", "subagent", "async"],
+        # metadata：附加到 Trace 的结构化信息，也不会进入模型上下文。
         metadata=config["metadata"],
     ):
         # 第一次调用要求模型只启动后台任务。start_async_task 会在远端创建
         # thread/run，并把定位它们所需的 ID 写入父 State 的 async_tasks。
         result = await agent.ainvoke(
+            # 第一个参数是 Graph 输入 State；messages 会成为本轮对话输入。
             {
                 "messages": [
                     {
@@ -98,6 +114,7 @@ async def run(check_after: float | None, thread_id: str) -> None:
                     }
                 ]
             },
+            # config 携带 thread_id、Trace 标签等运行配置，不是模型消息。
             config=config,
         )
         # 模型如果没有调用 start_async_task，就不会生成任何跟踪记录；
@@ -128,6 +145,7 @@ async def run(check_after: float | None, thread_id: str) -> None:
                         }
                     ]
                 },
+                # 必须复用原 config，才能从同一父 thread 的 async_tasks 中查询。
                 config=config,
             )
             current = checked["async_tasks"][task_id]

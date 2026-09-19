@@ -54,9 +54,11 @@ def run_case(case: str, decision: dict) -> dict:
     model = ToolCapableFakeModel(
         responses=[
             AIMessage(
+                # 空 content 表示这一轮只产生待审核的工具调用。
                 content="",
                 tool_calls=[
                     {
+                        # name 选择副作用工具，args 是原始参数，id 关联审核结果。
                         "name": "publish_decision",
                         "args": ORIGINAL_ARGS,
                         "id": f"publish-{case}",
@@ -68,15 +70,22 @@ def run_case(case: str, decision: dict) -> dict:
     )
     checkpointer = InMemorySaver()
     agent = create_deep_agent(
+        # model：预制工具调用和恢复后的最终回答。
         model=model,
+        # tools：注册需要人工审核的 publish_decision。
         tools=[publish_decision],
+        # interrupt_on：在工具执行前暂停，并声明审核端允许的决定类型。
         interrupt_on={
             "publish_decision": {
+                # allowed_decisions：决定了 review_configs 暴露的可选操作。
                 "allowed_decisions": ["approve", "edit", "reject"],
+                # description：展示给审核人的动作说明。
                 "description": "Review publication.",
             }
         },
+        # checkpointer：保存每个 case 的中断现场。
         checkpointer=checkpointer,
+        # 测试 Graph 的名称，不影响审核行为。
         name=f"hitl-{case}-test-agent",
     )
     config = {"configurable": {"thread_id": f"hitl-{case}"}}
@@ -95,7 +104,9 @@ def run_case(case: str, decision: dict) -> dict:
     ]
     # 使用相同 Graph、Checkpointer 和 thread_id 把人工决定送回暂停点。
     return agent.invoke(
+        # resume.decisions 与 action_requests 顺序一一对应。
         Command(resume={"decisions": [decision]}),
+        # 相同 config/thread_id 让调用从暂停点继续。
         config=config,
     )
 

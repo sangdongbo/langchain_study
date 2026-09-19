@@ -43,14 +43,19 @@ class ChildNoteMiddleware(AgentMiddleware):
 def _task_call(mode: str) -> AIMessage:
     # 父 Fake Model 首轮固定委派给 risk-reviewer。
     return AIMessage(
+        # 空文本表示本轮只请求 task 工具，不直接输出最终回答。
         content="",
         tool_calls=[
             {
+                # task 是 create_deep_agent 为 subagents 自动注册的委派工具。
                 "name": "task",
                 "args": {
+                    # description 是子 Agent 在 isolated 模式下收到的任务文本。
                     "description": "Inspect delegated inventory risk only.",
+                    # subagent_type 必须等于子配置中的 name。
                     "subagent_type": "risk-reviewer",
                 },
+                # id 把返回的 ToolMessage 与本次委派关联起来。
                 "id": f"task-{mode}",
             }
         ],
@@ -66,18 +71,29 @@ def run_case(mode: str) -> tuple[dict, ToolCapableFakeModel]:
         responses=[_task_call(mode), AIMessage(content=f"{mode} parent report")]
     )
     child: SubAgent = {
+        # name：父模型通过 task.subagent_type 使用的路由名。
         "name": "risk-reviewer",
+        # description：给父模型看的能力说明；Fake Model 场景仍保持真实结构。
         "description": "Deterministic child for propagation tests.",
+        # model：只运行子 Agent 的脚本化模型。
         "model": child_model,
+        # tools：空列表表示子 Agent 不允许调用任何业务工具。
         "tools": [],
+        # middleware：子 Agent 结束时把 child_note 写回共享 State。
         "middleware": [ChildNoteMiddleware()],
+        # mode：isolated 隔离父消息，fork 复制父对话；公开 State 都可传播。
         "mode": mode,
+        # system_prompt：子 Agent 自己的系统提示，不影响父模型。
         "system_prompt": "Return the delegated result.",
     }
     parent = create_deep_agent(
+        # model：先生成 task 调用，再消费子结果给出最终回复。
         model=parent_model,
+        # subagents：注册 child 后框架自动提供 task 工具。
         subagents=[child],
+        # state_schema：声明 request_id/child_note 可以在父子 State 中合并。
         state_schema=SharedState,
+        # 父测试 Graph 的名称。
         name=f"{mode}-parent-test",
     )
     result = parent.invoke(

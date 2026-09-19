@@ -38,16 +38,24 @@ def publish_decision(title: str, decision: str, summary: str) -> str:
 def build_agent(model, checkpointer):
     # interrupt_on 把副作用工具变成人工审核点，并限制允许的三种决定。
     return create_deep_agent(
+        # model：生成待审核工具参数，并在恢复后解释最终结果。
         model=model,
+        # tools：本例只开放发布动作，便于观察三种 HITL 决策。
         tools=[publish_decision],
+        # interrupt_on：在工具真正执行前暂停 Graph 并返回 action_requests。
         interrupt_on={
             "publish_decision": {
+                # allowed_decisions：审核端可提交 approve、edit 或 reject。
                 "allowed_decisions": ["approve", "edit", "reject"],
+                # description：展示给人工审核界面的风险说明。
                 "description": "发布采购决定前，请审核标题、决定和摘要。",
             }
         },
+        # checkpointer：持久化中断现场；恢复调用必须复用同一个 thread_id。
         checkpointer=checkpointer,
+        # Graph/Trace 中的稳定名称。
         name="hitl-decisions-agent",
+        # system_prompt：约束模型如何处理审核结果，不替代强制中断配置。
         system_prompt=(
             "根据用户请求调用 publish_decision 一次。人工可能批准、修改或拒绝；"
             "恢复后说明实际执行结果，拒绝时不要重试。"
@@ -67,8 +75,11 @@ def main() -> None:
     config = invoke_config("hitl-decisions", args.thread_id)
 
     with tracing_context(
+        # enabled：是否上传 Trace，关闭时 HITL 仍正常工作。
         enabled=tracing_enabled(),
+        # project_name：Trace 在 LangSmith 中所属项目。
         project_name=tracing_project(),
+        # tags/metadata：只用于检索本次审核类型和示例。
         tags=["deep-agent-example", "hitl-decisions", args.decision],
         metadata=config["metadata"],
     ):
@@ -107,7 +118,9 @@ def main() -> None:
 
         # Command 将人工决定送回原暂停点，而不是重新开始一轮模型调用。
         result = agent.invoke(
+            # decisions 列表与待审核 action_requests 顺序一一对应。
             Command(resume={"decisions": [decision]}),
+            # 复用原 config/thread_id，从原暂停点继续而不是新开一次执行。
             config=config,
         )
 

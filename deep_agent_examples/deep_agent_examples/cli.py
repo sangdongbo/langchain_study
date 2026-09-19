@@ -116,6 +116,7 @@ def _payload(name: str, prompt: str) -> dict:
 
 async def _ainvoke(graph, payload: dict, config: dict) -> dict:
     """为必须运行在异步事件循环中的 Graph 提供统一调用包装。"""
+    # payload 是 Graph 输入 State；config 是 thread_id/Trace 等运行配置。
     return await graph.ainvoke(payload, config=config)
 
 
@@ -146,9 +147,13 @@ def main() -> None:
 
     # 给当前示例添加统一追踪元数据，便于在 LangSmith 中按示例筛选调用链。
     with tracing_context(
+        # enabled：只控制是否上传 LangSmith Trace，不影响 Graph 执行。
         enabled=tracing_enabled(),
+        # project_name：Trace 在 LangSmith 中归属的项目。
         project_name=tracing_project(),
+        # tags：检索标签，不会作为消息发送给模型。
         tags=["deep-agent-example", args.example],
+        # metadata：结构化追踪信息，不会自动合并进 Graph State。
         metadata={"example": args.example, "entrypoint": "cli"},
     ):
         # 远程异步子 Agent 示例必须使用 ainvoke，其余示例直接同步执行。
@@ -168,12 +173,14 @@ def main() -> None:
                 raise RuntimeError("Stopped after 5 approval rounds to avoid an approval loop.")
             result = graph.invoke(
                 Command(
+                    # resume：把与 action_requests 一一对应的人工决定送回暂停点。
                     resume={
                         "decisions": [
                             {"type": "approve"} for _ in range(decision_count)
                         ]
                     }
                 ),
+                # 复用同一个 config/thread_id，Checkpointer 才能找到原中断状态。
                 config=config,
             )
             print(f"\nresumed after approval round {approval_round}:")

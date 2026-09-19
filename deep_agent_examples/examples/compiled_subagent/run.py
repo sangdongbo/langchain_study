@@ -46,9 +46,13 @@ def main() -> None:
     )
     trace_on = tracing_enabled()
     with tracing_context(
+        # enabled：只控制是否上传 LangSmith Trace，不影响 Graph 执行。
         enabled=trace_on,
+        # project_name：Trace 在 LangSmith 中归属的项目。
         project_name=tracing_project(),
+        # tags：便于筛选本示例，不会进入模型上下文。
         tags=["deep-agent-example", "subagent", "compiled"],
+        # metadata：随 Trace 保存的结构化信息，不是 Graph 输入 State。
         metadata=config["metadata"],
     ):
         # 父 Agent 检查库存/供应商，再通过 task 工具调用预编译财务 Graph。
@@ -64,6 +68,7 @@ def main() -> None:
                     }
                 ]
             },
+            # config 提供 thread_id、run_name 和追踪信息，与 messages 输入分开。
             config=config,
         )
 

@@ -46,21 +46,34 @@ def main() -> None:
     # max_retries=2 表示首次调用失败后最多再试两次，总调用次数最多为 3。
     # 只重试 TimeoutError；耗尽后 on_failure 把异常转换为可供模型处理的消息。
     retry = ToolRetryMiddleware(
+        # max_retries：首次失败后最多额外执行两次，不含第一次调用。
         max_retries=2,
+        # tools：只对列表中的工具应用本重试策略，其他工具不受影响。
         tools=[query_delivery_risk],
+        # retry_on：只有这些异常类型会重试，业务校验错误会直接返回。
         retry_on=(TimeoutError,),
+        # initial_delay：第一次重试前等待 0.2 秒。
         initial_delay=0.2,
+        # backoff_factor：后续等待时间按 2 倍指数增长。
         backoff_factor=2.0,
+        # max_delay：单次退避最多等待 1 秒。
         max_delay=1.0,
+        # jitter=False：不增加随机抖动，方便示例复现固定时序。
         jitter=False,
+        # on_failure：重试耗尽后把异常变成 ToolMessage 内容，交给模型降级回答。
         on_failure=lambda error: f"供应商服务暂不可用：{error}",
     )
     # Middleware 包裹工具执行，模型只发起一次工具调用，不负责手工重试。
     agent = create_deep_agent(
+        # model：只看到最终成功结果或 on_failure 生成的错误消息。
         model=build_model(),
+        # tools：向模型注册可调用的供应商查询工具。
         tools=[query_delivery_risk],
+        # middleware：在工具节点外包一层自动重试逻辑。
         middleware=[retry],
+        # Graph/Trace 中的名称。
         name="tool-failure-recovery-agent",
+        # 约束模型只发起一次工具调用，重试由 Middleware 内部完成。
         system_prompt=(
             "调用 query_delivery_risk 一次检查北辰智能硬件。"
             "工具内部可能自动重试；根据最终成功数据或错误消息给出中文结论。"
@@ -68,8 +81,11 @@ def main() -> None:
     )
 
     with tracing_context(
+        # enabled：是否上传 LangSmith Trace，不影响重试行为。
         enabled=tracing_enabled(),
+        # project_name：Trace 所属项目。
         project_name=tracing_project(),
+        # tags/metadata：用于筛选重试示例及其模拟失败次数。
         tags=["deep-agent-example", "tool-retry"],
         metadata={"failures_before_success": args.failures},
     ):

@@ -77,20 +77,30 @@ def main() -> None:
     # skills_metadata；同一个 thread 不应用来切换 Skill 版本。
     checkpointer = InMemorySaver()
     agent = create_deep_agent(
+        # model：发现 Skill、读取正文并执行步骤的聊天模型。
         model=build_model(),
+        # tools：Skill 可以指导模型使用哪些已注册业务工具，但不能自行新增权限。
         tools=PROCUREMENT_TOOLS,
+        # backend：把 Skill 文件保存到 Graph State 的 files 虚拟文件系统。
         backend=StateBackend(),
+        # skills：Middleware 扫描的虚拟根目录，不是某个具体 SKILL.md 路径。
         skills=["/skills/session/"],
+        # checkpointer：按 thread_id 保存文件和首次扫描出的 skills_metadata。
         checkpointer=checkpointer,
+        # Graph/Trace 中显示的稳定名称。
         name="skill-versioning-agent",
+        # 提醒模型先读 Skill；具体版本由当前 thread 注入的文件决定。
         system_prompt="先读取当前 thread 提供的采购 Skill，再严格按其版本执行。",
     )
     config = invoke_config("skill-versioning", thread_id)
     config["metadata"]["skill_version"] = args.version
 
     with tracing_context(
+        # enabled：是否上传本次运行的 Trace。
         enabled=tracing_enabled(),
+        # project_name：Trace 所属的 LangSmith 项目。
         project_name=tracing_project(),
+        # tags/metadata：用于按版本筛选，不参与模型推理。
         tags=["deep-agent-example", "skill-versioning", args.version],
         metadata=config["metadata"],
     ):
@@ -108,6 +118,7 @@ def main() -> None:
                 ],
                 "files": skill_files(args.version),
             },
+            # config 携带 thread_id；换版本时必须使用新的 thread_id。
             config=config,
         )
 

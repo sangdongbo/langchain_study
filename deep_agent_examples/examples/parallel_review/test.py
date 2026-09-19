@@ -29,11 +29,14 @@ REVIEWERS = ("finance-reviewer", "inventory-reviewer", "supplier-reviewer")
 def _task_calls() -> AIMessage:
     """让同一轮模型响应生成三个 task 调用，ToolNode 才有并行机会。"""
     return AIMessage(
+        # 空 content 表示同一轮只发出工具调用，不提前输出最终回答。
         content="",
         tool_calls=[
             {
+                # task 是内置委派工具；subagent_type 必须匹配子 Agent name。
                 "name": "task",
                 "args": {"description": f"Run {name}.", "subagent_type": name},
+                # 每个调用使用独立 id，返回的 ToolMessage 才能分别关联。
                 "id": f"task-{name}",
             }
             for name in REVIEWERS
@@ -57,8 +60,11 @@ def main() -> None:
     # RunnableLambda 让三个子 Agent 的工作确定、快速且无需真实模型。
     subagents: list[CompiledSubAgent] = [
         {
+            # name：父模型 task.subagent_type 使用的唯一目标名。
             "name": name,
+            # description：给父模型看的路由说明；测试模型本身不做语义判断。
             "description": f"Deterministic {name}.",
+            # runnable：真正并行执行的已编译工作单元，这里由普通函数包装而成。
             "runnable": RunnableLambda(reviewer(name)),
         }
         for name in REVIEWERS
@@ -68,8 +74,11 @@ def main() -> None:
         responses=[_task_calls(), AIMessage(content="三项审查已合并")]
     )
     agent = create_deep_agent(
+        # model：首轮一次生成三个 task，次轮汇总三份 ToolMessage。
         model=model,
+        # subagents：注册三个 Runnable 为可委派目标。
         subagents=subagents,
+        # 测试 Graph 的名称。
         name="parallel-review-test-agent",
     )
     result = agent.invoke(

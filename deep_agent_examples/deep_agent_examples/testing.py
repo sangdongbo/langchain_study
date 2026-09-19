@@ -34,10 +34,19 @@ class ToolCapableFakeModel(FakeMessagesListChatModel):
         tool_choice: str | None = None,
         **kwargs: Any,
     ) -> ToolCapableFakeModel:
-        """接受框架的工具绑定请求，但继续返回当前假模型实例。"""
+        """接受框架的工具绑定请求，但继续返回当前假模型实例。
+
+        ``tools`` 是框架规范化后的工具/Schema 列表；``tool_choice`` 可要求模型
+        固定选择某个工具；``kwargs`` 承接供应商特有选项。假模型的响应已经由
+        ``responses`` 写死，因此这里仅满足绑定协议，不使用这些参数。
+        """
         return self
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
-        """调用父类生成预设响应前，先记录本轮模型看到的完整消息。"""
+        """调用父类生成预设响应前，先记录本轮模型看到的完整消息。
+
+        ``messages`` 是本轮完整上下文；``stop`` 是停止词；``run_manager`` 负责
+        回调/追踪；``kwargs`` 是额外模型参数。它们原样交给父类读取预设响应。
+        """
         self.seen_messages.append(list(messages))
         return super()._generate(messages, stop, run_manager, **kwargs)

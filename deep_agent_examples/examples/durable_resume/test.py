@@ -37,10 +37,15 @@ def reserve_budget(department: str, amount: float) -> str:
 def build_agent(model, checkpointer):
     # interrupt_on=True 让工具在执行前暂停；Checkpointer 保存恢复所需状态。
     return create_deep_agent(
+        # model：中断前生成工具调用，恢复后生成最终回答。
         model=model,
+        # tools：注册需要保护的副作用工具。
         tools=[reserve_budget],
+        # interrupt_on=True：每次调用该工具都在执行前暂停，默认允许审核决定。
         interrupt_on={"reserve_budget": True},
+        # checkpointer：保存暂停点；恢复还必须复用同一个 thread_id。
         checkpointer=checkpointer,
+        # 测试 Graph 的名称。
         name="durable-resume-test-agent",
     )
 
@@ -55,9 +60,11 @@ def main() -> None:
     first_model = ToolCapableFakeModel(
         responses=[
             AIMessage(
+                # content 为空表示模型只请求执行工具，不直接回答用户。
                 content="",
                 tool_calls=[
                     {
+                        # name 选择工具，args 是待审核参数，id 关联恢复后的 ToolMessage。
                         "name": "reserve_budget",
                         "args": {"department": "研发平台部", "amount": 272000},
                         "id": "reserve-1",
@@ -81,7 +88,9 @@ def main() -> None:
         responses=[AIMessage(content="预算已经锁定")]
     )
     result = build_agent(resumed_model, checkpointer).invoke(
+        # decisions 与待审核动作按顺序对应；approve 让原工具参数继续执行。
         Command(resume={"decisions": [{"type": "approve"}]}),
+        # 相同 thread_id 使新 Graph 对象找到原 Checkpoint。
         config=config,
     )
 

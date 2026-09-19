@@ -45,9 +45,11 @@ def build_agent():
     model = ToolCapableFakeModel(
         responses=[
             AIMessage(
+                # 空 content 表示第一轮只请求工具调用。
                 content="",
                 tool_calls=[
                     {
+                        # name 选择已注册工具，args 是工具实参，id 关联 ToolMessage。
                         "name": "calculate_total",
                         "args": {"unit_price": 68000, "quantity": 4},
                         "id": "calculate-total",
@@ -58,10 +60,15 @@ def build_agent():
         ]
     )
     return create_deep_agent(
+        # model：固定产生一次工具调用和一次最终回答。
         model=model,
+        # tools：向 Agent 注册 calculate_total，模型才能请求执行它。
         tools=[calculate_total],
+        # middleware：在每个 Agent/model/tool 阶段记录生命周期事件。
         middleware=[LifecycleProbeMiddleware("agent")],
+        # state_schema：声明 lifecycle_events 字段及其合并 reducer。
         state_schema=LifecycleState,
+        # 测试 Graph 的名称。
         name="lifecycle-test-agent",
     )
 

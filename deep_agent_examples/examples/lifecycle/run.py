@@ -56,9 +56,13 @@ def main() -> None:
 
     trace_on = tracing_enabled()
     with tracing_context(
+        # enabled：是否上传 Trace；生命周期事件本身始终写入 Graph State。
         enabled=trace_on,
+        # project_name：Trace 在 LangSmith 中归属的项目。
         project_name=tracing_project(),
+        # tags：用于按 Graph 类型筛选，不会进入模型上下文。
         tags=["deep-agent-example", "lifecycle", args.kind, "python-file"],
+        # metadata：附加到 Trace 的运行信息，不是 Agent State。
         metadata=config["metadata"],
     ):
         # LifecycleProbeMiddleware 会把每个 hook 按实际发生顺序追加到 State。
@@ -68,6 +72,7 @@ def main() -> None:
                     {"role": "user", "content": args.prompt or PROMPTS[args.kind]}
                 ]
             },
+            # config 携带 thread_id 和追踪信息；messages 才是模型看到的输入。
             config=config,
         )
 

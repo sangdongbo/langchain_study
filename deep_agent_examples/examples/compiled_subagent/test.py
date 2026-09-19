@@ -41,14 +41,19 @@ class StructuredChildState(MessagesState):
 def _task_call(name: str, call_id: str) -> AIMessage:
     # 生成父模型调用内置 task 工具所需的标准 tool_call。
     return AIMessage(
+        # 空 content 表示这一轮只发 task 工具调用，不输出最终文本。
         content="",
         tool_calls=[
             {
+                # name 固定为内置 task；真正的子 Agent 由 subagent_type 选择。
                 "name": "task",
                 "args": {
+                    # description 是传给子图的具体任务文字。
                     "description": f"Run {name}.",
+                    # subagent_type 必须匹配 CompiledSubAgent 的 name。
                     "subagent_type": name,
                 },
+                # id 用于把子图返回的 ToolMessage 关联到本次 task 调用。
                 "id": call_id,
             }
         ],
@@ -67,8 +72,11 @@ def main() -> None:
         }
 
     # 子图一同时返回文本和结构化结果，用来验证结构化结果优先。
+    # StateGraph 参数声明该子图允许接收和返回的 State schema。
     structured_builder = StateGraph(StructuredChildState)
+    # add_node 的名称用于图内定位，第二个参数是实际执行函数。
     structured_builder.add_node("review", structured_node)
+    # START/END 两条边定义该最小子图只有一个 review 节点。
     structured_builder.add_edge(START, "review")
     structured_builder.add_edge("review", END)
 
@@ -84,8 +92,11 @@ def main() -> None:
     # CompiledSubAgent 直接接收已经 compile 的 Runnable，不再重复创建 Agent。
     subagents: list[CompiledSubAgent] = [
         {
+            # name：父模型 task 调用使用的唯一目标名。
             "name": "structured-reviewer",
+            # description：父模型用来判断何时委派的能力说明。
             "description": "Returns a structured finance decision.",
+            # runnable：compile 后可直接 invoke 的子图，执行结果必须含 messages。
             "runnable": structured_builder.compile(),
         },
         {
@@ -103,9 +114,13 @@ def main() -> None:
         ]
     )
     parent = create_deep_agent(
+        # model：脚本化父模型，负责两次委派和最终汇总。
         model=parent_model,
+        # subagents：把两个已编译 Runnable 注册为 task 目标。
         subagents=subagents,
+        # state_schema：父图额外接受 request_id；未声明字段不会传给子图。
         state_schema=ParentState,
+        # 父测试 Graph 的运行名称。
         name="compiled-parent-test",
     )
     result = parent.invoke(
@@ -125,13 +140,16 @@ def main() -> None:
 
     # 错误案例：Runnable 没有返回 messages 时必须尽早给出诊断异常。
     broken_parent = create_deep_agent(
+        # 只生成一次指向 broken-reviewer 的 task 调用。
         model=ToolCapableFakeModel(
             responses=[_task_call("broken-reviewer", "broken-task")]
         ),
         subagents=[
             {
+                # 三个字段仍分别是路由名、路由说明和实际执行 Runnable。
                 "name": "broken-reviewer",
                 "description": "Returns an invalid state without messages.",
+                # RunnableLambda 把普通函数包装成 Runnable；这里故意漏掉 messages。
                 "runnable": RunnableLambda(lambda state: {"answer": "missing messages"}),
             }
         ],

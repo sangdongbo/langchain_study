@@ -65,7 +65,9 @@ class FakeAgentProtocolClient:
 def _tool_call(name: str, args: dict[str, Any], call_id: str) -> AIMessage:
     # Fake Model 通过预制 tool_calls 驱动父 Agent 依次执行四个管理工具。
     return AIMessage(
+        # content 留空表示这一轮不直接回答用户，只请求调用工具。
         content="",
+        # tool_calls 中 name 选工具，args 是参数，id 用于关联返回的 ToolMessage。
         tool_calls=[{"name": name, "args": args, "id": call_id}],
     )
 
@@ -107,9 +109,13 @@ async def run_test() -> None:
         ]
     )
     spec: AsyncSubAgent = {
+        # name：Fake 父模型通过 subagent_type 选择的远程目标名。
         "name": "remote-researcher",
+        # description：父模型可见的路由说明；Fake Model 不推理但结构仍必填。
         "description": "Fake remote researcher.",
+        # graph_id：传给远程 runs.create 的 Graph ID。
         "graph_id": "remote_graph",
+        # url：原本用于创建 SDK Client；测试通过 patch 替换所以不会访问它。
         "url": "http://fake-agent-server",
     }
     client = FakeAgentProtocolClient()
@@ -121,15 +127,21 @@ async def run_test() -> None:
         return_value=client,
     ):
         agent = create_deep_agent(
+            # model：预制四轮工具调用及对应最终回复的 Fake Model。
             model=model,
+            # subagents：注册后生成 start/check/update/cancel 管理工具。
             subagents=[spec],
+            # checkpointer：跨四次 ainvoke 保存同一父 thread 的 async_tasks。
             checkpointer=InMemorySaver(),
+            # 测试 Graph 的名称，仅用于运行标识。
             name="async-parent-test",
         )
 
         # start：创建远程 thread/run，并在父 State 中记录 running 任务。
         started = await agent.ainvoke(
+            # messages 是本轮 Graph 输入；Fake Model 的响应已固定，不解析文本。
             {"messages": [{"role": "user", "content": "Start research."}]},
+            # config 中的 thread_id 让四次调用共享同一个 Checkpoint State。
             config=config,
         )
         task = started["async_tasks"]["remote-thread-1"]

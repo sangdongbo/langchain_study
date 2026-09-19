@@ -37,10 +37,15 @@ def load_environment() -> None:
 class ModelSettings:
     """创建聊天模型所需的不可变配置快照。"""
 
+    # api_key：发送给 OpenAI 兼容接口的凭据，不应写入日志或 Trace。
     api_key: str
+    # base_url：模型服务根地址；None 表示使用 OpenAI SDK 默认官方地址。
     base_url: str | None
+    # model：供应商侧模型标识，例如 deepseek-chat。
     model: str
+    # temperature：采样随机度；0 更适合可重复的工具调用示例。
     temperature: float
+    # timeout：单次模型 HTTP 请求的超时秒数。
     timeout: float
 
 
@@ -92,11 +97,17 @@ def build_model() -> ChatOpenAI:
     """
     settings = model_settings()
     return ChatOpenAI(
+        # model：传给供应商 API 的模型名称。
         model=settings.model,
+        # api_key：请求鉴权凭据；ChatOpenAI 会放入 HTTP 鉴权头。
         api_key=settings.api_key,
+        # base_url：把同一 OpenAI 兼容客户端指向 DeepSeek 或其他供应商。
         base_url=settings.base_url,
+        # temperature：控制模型输出随机性，不影响工具本身的确定性。
         temperature=settings.temperature,
+        # timeout：每次模型网络请求最多等待的秒数。
         timeout=settings.timeout,
+        # max_retries：SDK 遇到可重试的网络/限流错误时最多额外尝试两次。
         max_retries=2,
     )
 
@@ -125,11 +136,15 @@ def invoke_config(example: str, thread_id: str) -> dict:
     LangSmith 检索，``run_name`` 则让单次运行在追踪页面中容易辨认。
     """
     return {
+        # configurable.thread_id：Checkpointer 查找会话 State 的主键。
         "configurable": {"thread_id": thread_id},
+        # tags：LangSmith 中可筛选的一组标签，不参与 Agent 推理。
         "tags": ["deep-agent-example", example],
+        # metadata：随 Trace 保存的结构化检索信息，不会自动进入模型上下文。
         "metadata": {
             "example": example,
             "project_kind": "deep-agent-learning",
         },
+        # run_name：当前顶层运行在 LangSmith 时间线中的显示名称。
         "run_name": f"deep-agent-example:{example}",
     }

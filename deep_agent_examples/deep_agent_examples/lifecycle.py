@@ -101,6 +101,7 @@ class LifecycleProbeMiddleware(AgentMiddleware):
         request: ModelRequest,
         handler: Callable[[ModelRequest], ModelResponse],
     ) -> ModelResponse:
+        # request 是当前模型请求快照；handler 才是真正执行下一层模型调用的函数。
         return handler(request)
 
     async def awrap_model_call(
@@ -108,6 +109,7 @@ class LifecycleProbeMiddleware(AgentMiddleware):
         request: ModelRequest,
         handler: Callable[[ModelRequest], Awaitable[ModelResponse]],
     ) -> ModelResponse:
+        # 异步版本参数含义相同，但 handler 返回 Awaitable，必须 await。
         return await handler(request)
 
     def wrap_tool_call(
@@ -115,6 +117,7 @@ class LifecycleProbeMiddleware(AgentMiddleware):
         request: ToolCallRequest,
         handler: Callable[[ToolCallRequest], Any],
     ) -> Any:
+        # request 包含工具名/参数；handler 执行真正工具或下一层 Middleware。
         return handler(request)
 
     async def awrap_tool_call(
@@ -122,4 +125,5 @@ class LifecycleProbeMiddleware(AgentMiddleware):
         request: ToolCallRequest,
         handler: Callable[[ToolCallRequest], Awaitable[Any]],
     ) -> Any:
+        # 异步工具包装器必须 await handler，才能保留正确的执行与追踪层级。
         return await handler(request)

@@ -45,7 +45,9 @@ def unavailable_supplier(supplier: str) -> str:
 def _tool_call(name: str, args: dict, call_id: str) -> AIMessage:
     # 构造 Fake Model 请求工具执行的标准消息。
     return AIMessage(
+        # 空 content 表示本轮只请求工具执行。
         content="",
+        # name/args 指定工具和参数，id 用于关联返回的 ToolMessage。
         tool_calls=[{"name": name, "args": args, "id": call_id}],
     )
 
@@ -62,12 +64,18 @@ def main() -> None:
         ]
     )
     success_agent = create_deep_agent(
+        # model：预制工具调用和成功后的最终回复。
         model=success_model,
+        # tools：向模型注册 flaky_inventory。
         tools=[flaky_inventory],
+        # middleware：只在工具执行阶段处理异常和重试。
         middleware=[
             ToolRetryMiddleware(
+                # 首次失败后最多额外重试两次，总调用上限为三次。
                 max_retries=2,
+                # 只有 TimeoutError 才会触发重试。
                 retry_on=(TimeoutError,),
+                # 测试把延迟、退避和随机抖动全部关闭，保证立即且可重复。
                 initial_delay=0,
                 backoff_factor=0,
                 jitter=False,
@@ -97,15 +105,21 @@ def main() -> None:
         ]
     )
     failure_agent = create_deep_agent(
+        # model：读取重试耗尽后的 error ToolMessage 并输出降级结论。
         model=failure_model,
+        # tools：注册始终失败的供应商查询工具。
         tools=[unavailable_supplier],
+        # middleware：对 ConnectionError 重试一次，再执行 on_failure。
         middleware=[
             ToolRetryMiddleware(
+                # 首次失败后仅额外调用一次，因此实际总调用次数为两次。
                 max_retries=1,
+                # 仅连接错误参与本策略。
                 retry_on=(ConnectionError,),
                 initial_delay=0,
                 backoff_factor=0,
                 jitter=False,
+                # 重试耗尽时把异常转成错误工具消息，而不是抛出终止 Graph。
                 on_failure=lambda error: f"已降级：{error}",
             )
         ],

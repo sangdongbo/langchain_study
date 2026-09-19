@@ -54,14 +54,19 @@ Check supplier delivery evidence.
 def _read_skill_call(call_id: str) -> AIMessage:
     # 模拟模型按需读取完整 Skill 正文，而不是让正文默认进入 system prompt。
     return AIMessage(
+        # 空 content 表示本轮只调用 read_file，不输出最终文本。
         content="",
         tool_calls=[
             {
+                # SkillsMiddleware 通过 Backend 自动提供 read_file 工具。
                 "name": "read_file",
                 "args": {
+                    # file_path 是 StateBackend 中的虚拟路径，不是本机文件路径。
                     "file_path": "/skills/session/procurement-review/SKILL.md",
+                    # limit：本次最多读取 1000 行，用于大文件分页和控制上下文大小。
                     "limit": 1000,
                 },
+                # id 用于关联 read_file 返回的 ToolMessage。
                 "id": call_id,
             }
         ],
@@ -105,10 +110,15 @@ def main() -> None:
         ]
     )
     agent = create_deep_agent(
+        # model：预制两轮 read_file 调用，测试不访问真实模型。
         model=model,
+        # backend：让 Skill 文件存在 Graph State 的 files 字段中。
         backend=StateBackend(),
+        # skills：扫描虚拟目录下的 */SKILL.md，并先注入其 metadata。
         skills=["/skills/session/"],
+        # checkpointer：按 thread_id 缓存首次扫描的 skills_metadata。
         checkpointer=InMemorySaver(),
+        # 测试 Graph 的名称。
         name="dynamic-skills-test-agent",
     )
     config = {"configurable": {"thread_id": "dynamic-skills-test"}}

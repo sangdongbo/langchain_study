@@ -126,9 +126,13 @@ def main() -> None:
 
     trace_on = tracing_enabled()
     with tracing_context(
+        # enabled：只开关 LangSmith 追踪，不影响 Skill 选择和读取。
         enabled=trace_on,
+        # project_name：Trace 在 LangSmith 中归属的项目。
         project_name=tracing_project(),
+        # tags：用于筛选动态 Skill 示例，不传给模型。
         tags=["deep-agent-example", "dynamic-skills", "python-file"],
+        # metadata：记录可信身份和路由结果，便于审计，但不进入模型上下文。
         metadata=config["metadata"],
     ):
         # files 随本次 thread 注入 State；同一 thread 的 skills_metadata
@@ -143,6 +147,7 @@ def main() -> None:
                 ],
                 "files": skill_files,
             },
+            # config 中的 thread_id 决定 Skills metadata 缓存属于哪个会话。
             config=config,
         )
 

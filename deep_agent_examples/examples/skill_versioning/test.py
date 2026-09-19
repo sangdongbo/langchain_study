@@ -63,10 +63,15 @@ def main() -> None:
     )
     checkpointer = InMemorySaver()
     agent = create_deep_agent(
+        # model：记录每个 thread 实际收到的 Skill metadata。
         model=model,
+        # backend：把不同版本的 SKILL.md 放入 State 虚拟文件系统。
         backend=StateBackend(),
+        # skills：Middleware 扫描的虚拟根目录。
         skills=["/skills/session/"],
+        # checkpointer：按 thread_id 保存首次扫描的 skills_metadata。
         checkpointer=checkpointer,
+        # 测试 Graph 的名称。
         name="skill-versioning-test-agent",
     )
     v1_config = {"configurable": {"thread_id": "skill-version-v1"}}
@@ -78,6 +83,7 @@ def main() -> None:
             "messages": [{"role": "user", "content": "first request"}],
             "files": skill_files("v1"),
         },
+        # v1_config 的 thread_id 决定这份 metadata 缓存归属 v1 会话。
         config=v1_config,
     )
     v1_metadata = agent.get_state(v1_config).values["skills_metadata"]
@@ -90,6 +96,7 @@ def main() -> None:
             "messages": [{"role": "user", "content": "replace with v2"}],
             "files": skill_files("v2"),
         },
+        # 仍用 v1_config，所以新文件不会触发重新扫描 metadata。
         config=v1_config,
     )
     cached_metadata = agent.get_state(v1_config).values["skills_metadata"]
@@ -102,6 +109,7 @@ def main() -> None:
             "messages": [{"role": "user", "content": "new v2 thread"}],
             "files": skill_files("v2"),
         },
+        # 新 thread_id 没有缓存，会首次扫描 files 中的 v2。
         config=v2_config,
     )
     v2_metadata = agent.get_state(v2_config).values["skills_metadata"]
