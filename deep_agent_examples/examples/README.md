@@ -6,13 +6,18 @@
 - `run.py`：连接真实模型的演示入口。
 - `test.py`：不需要 API Key 的离线测试。
 
-| 目录 | 示例内容 | 真实演示命令 |
-| --- | --- | --- |
-| [async_subagent](async_subagent/README.md) | 通过 Agent Protocol 运行后台子 Agent | `uv run python examples/async_subagent/run.py` |
-| [compiled_subagent](compiled_subagent/README.md) | 把预编译 Graph 作为子 Agent | `uv run python examples/compiled_subagent/run.py` |
-| [declarative_subagent](declarative_subagent/README.md) | 声明式子 Agent 的 isolated/fork 模式 | `uv run python examples/declarative_subagent/run.py --mode isolated` |
-| [dynamic_skills](dynamic_skills/README.md) | 根据身份和任务动态注入 Skill | `uv run python examples/dynamic_skills/run.py` |
-| [lifecycle](lifecycle/README.md) | 观察普通 Agent 和子 Agent 生命周期 | `uv run python examples/lifecycle/run.py --kind agent` |
+| 目录 | 示例内容 | 真实演示命令 | 离线测试命令 |
+| --- | --- | --- | --- |
+| [async_subagent](async_subagent/README.md) | 通过 Agent Protocol 运行后台子 Agent | `uv run python examples/async_subagent/run.py` | `uv run python examples/async_subagent/test.py` |
+| [compiled_subagent](compiled_subagent/README.md) | 把预编译 Graph 作为子 Agent | `uv run python examples/compiled_subagent/run.py` | `uv run python examples/compiled_subagent/test.py` |
+| [declarative_subagent](declarative_subagent/README.md) | 声明式子 Agent 的 isolated/fork 模式 | `uv run python examples/declarative_subagent/run.py --mode isolated` | `uv run python examples/declarative_subagent/test.py` |
+| [durable_resume](durable_resume/README.md) | 使用 Checkpoint 中断并恢复 Agent | `uv run python examples/durable_resume/run.py --decision approve` | `uv run python examples/durable_resume/test.py` |
+| [dynamic_skills](dynamic_skills/README.md) | 根据身份和任务动态注入 Skill | `uv run python examples/dynamic_skills/run.py` | `uv run python examples/dynamic_skills/test.py` |
+| [hitl_decisions](hitl_decisions/README.md) | 演示人工审核的 approve、edit、reject | `uv run python examples/hitl_decisions/run.py --decision edit` | `uv run python examples/hitl_decisions/test.py` |
+| [lifecycle](lifecycle/README.md) | 观察普通 Agent 和子 Agent 生命周期 | `uv run python examples/lifecycle/run.py --kind agent` | `uv run python examples/lifecycle/test.py` |
+| [parallel_review](parallel_review/README.md) | 并行委派三个独立采购审查任务 | `uv run python examples/parallel_review/run.py` | `uv run python examples/parallel_review/test.py` |
+| [skill_versioning](skill_versioning/README.md) | 按 thread 隔离和切换 Skill 版本 | `uv run python examples/skill_versioning/run.py --version v2` | `uv run python examples/skill_versioning/test.py` |
+| [tool_failure_recovery](tool_failure_recovery/README.md) | 工具失败后的自动重试和降级 | `uv run python examples/tool_failure_recovery/run.py --failures 2` | `uv run python examples/tool_failure_recovery/test.py` |
 
 ## 怎么启动
 
@@ -23,7 +28,7 @@ cd D:\PythonProject\LearnOne\deep_agent_examples
 uv sync
 ```
 
-真实演示需要先在 `.env` 中配置模型 API Key。只想确认代码是否正常时，运行各目录的 `test.py`，例如：
+真实演示需要先在 `.env` 中配置模型 API Key。只想确认代码是否正常时，直接运行表格中的离线测试命令；这些测试不调用真实模型，例如：
 
 ```powershell
 uv run python examples/lifecycle/test.py
