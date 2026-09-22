@@ -8,10 +8,9 @@ from functools import lru_cache
 from hashlib import sha256
 from typing import Annotated, Any, Literal, cast
 
-import langsmith.anonymizer as langsmith_anonymizer
 from fastapi import APIRouter, Depends, Header, HTTPException
 from langchain_core.runnables import RunnableConfig
-from langsmith import Client, tracing_context
+from langsmith import tracing_context
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
@@ -41,50 +40,10 @@ router = APIRouter(tags=["Chat"])
 workflow = create_workflow()
 stateless_workflow = create_workflow(with_checkpointer=False)
 
-_SENSITIVE_TRACE_FIELDS = {
-    "api_key",
-    "authorization",
-    "cookie",
-    "password",
-    "refresh_token",
-    "secret",
-    "token",
-}
 
-
-def _identity_anonymizer(data: Any) -> Any:
-    return data
-
-
-# 旧版 LangSmith 可能没有 create_secret_anonymizer，但两种版本都启用字段级脱敏。
-_secret_anonymizer_factory: Any = getattr(
-    langsmith_anonymizer, "create_secret_anonymizer", None
-)
-_secret_anonymizer = (
-    _secret_anonymizer_factory()
-    if callable(_secret_anonymizer_factory)
-    else _identity_anonymizer
-)
-_field_anonymizer = langsmith_anonymizer.create_anonymizer(
-    lambda value, path: (
-        "[REDACTED]"
-        if path and str(path[-1]).lower() in _SENSITIVE_TRACE_FIELDS
-        else value
-    ),
-    max_depth=24,
-)
-
-
-def _anonymize_trace(data: Any) -> Any:
-    return _field_anonymizer(_secret_anonymizer(data))
-
-
-@lru_cache(maxsize=1)
-def _langsmith_client() -> Client | None:
-    settings = get_settings()
-    if not settings.langsmith_tracing or not settings.langsmith_api_key:
-        return None
-    return Client(api_key=settings.langsmith_api_key, anonymizer=_anonymize_trace)
+def _langsmith_client() -> Any:
+    """复用 API 根模块的 Client，保证脱敏和部署参数只有一份实现。"""
+    return api_module._langsmith_client()
 
 
 @lru_cache(maxsize=8)

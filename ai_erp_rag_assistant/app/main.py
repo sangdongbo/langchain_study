@@ -44,4 +44,8 @@ def health() -> dict[str, str]:
         "langsmith_tracing": str(settings.langsmith_tracing).lower(),
         "langsmith_configured": str(bool(settings.langsmith_api_key)).lower(),
         "langsmith_project": settings.langsmith_project,
+        "langsmith_endpoint_configured": str(bool(settings.langsmith_endpoint)).lower(),
+        "langsmith_workspace_configured": str(
+            bool(settings.langsmith_workspace_id)
+        ).lower(),
     }

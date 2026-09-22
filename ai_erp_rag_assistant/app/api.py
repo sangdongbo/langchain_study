@@ -84,10 +84,16 @@ def _anonymize_trace(data: Any) -> Any:
 
 @lru_cache(maxsize=1)
 def _langsmith_client() -> Client | None:
+    """创建统一的脱敏 Trace 客户端，兼容 SaaS、多工作区和私有部署。"""
     settings = get_settings()
     if not settings.langsmith_tracing or not settings.langsmith_api_key:
         return None
-    return Client(api_key=settings.langsmith_api_key, anonymizer=_anonymize_trace)
+    return Client(
+        api_url=settings.langsmith_endpoint or None,
+        api_key=settings.langsmith_api_key,
+        workspace_id=settings.langsmith_workspace_id or None,
+        anonymizer=_anonymize_trace,
+    )
 
 
 def _thread_id(request: Any) -> str:

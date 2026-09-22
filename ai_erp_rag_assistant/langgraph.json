@@ -1,7 +1,18 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "erp_rag_assistant": "ai_erp_rag_assistant.app.graph.studio:graph"
+    "erp_rag_assistant": {
+      "path": "ai_erp_rag_assistant.app.graph.studio:graph",
+      "description": "原始 LangGraph ERP/RAG 根工作流"
+    },
+    "rag_deepagent": {
+      "path": "ai_erp_rag_assistant.app.graph.studio:create_rag_deepagent_graph",
+      "description": "只允许 RAG 检索子代理的 DeepAgent Harness"
+    },
+    "approval_deepagent": {
+      "path": "ai_erp_rag_assistant.app.graph.studio:create_approval_deepagent_graph",
+      "description": "只允许 ERP 状态与审批子代理的 DeepAgent Harness"
+    }
   },
   "env": ".env"
 }

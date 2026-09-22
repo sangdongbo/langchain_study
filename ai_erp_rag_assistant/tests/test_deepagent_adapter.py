@@ -1,5 +1,7 @@
 """DeepAgent 聊天适配器的纯单元测试。"""
 
+import json
+
 from types import SimpleNamespace
 
 from langchain_core.messages import AIMessage, ToolMessage
@@ -8,6 +10,7 @@ from ai_erp_rag_assistant.app.agents.workflow_adapter import (
     DeepAgentWorkflowAdapter,
     model_overrides_key,
 )
+from ai_erp_rag_assistant.app.config import PROJECT_ROOT
 
 
 class _FakeAgent:
@@ -408,3 +411,27 @@ def test_model_overrides_key_is_stable_for_cache():
     assert model_overrides_key({"temperature": 0.2, "model": "qwen"}) == model_overrides_key(
         {"model": "qwen", "temperature": 0.2}
     )
+
+
+def test_studio_exposes_separate_rag_and_approval_deepagents(monkeypatch):
+    """Studio 工厂必须按助手能力创建 Harness，不能混用子代理范围。"""
+    from ai_erp_rag_assistant.app.graph import studio
+
+    assistant_types = []
+    fake_graph = object()
+    monkeypatch.setattr(
+        studio,
+        "create_erp_agent_harness",
+        lambda *, assistant_type: assistant_types.append(assistant_type) or fake_graph,
+    )
+
+    assert studio.create_rag_deepagent_graph() is fake_graph
+    assert studio.create_approval_deepagent_graph() is fake_graph
+    assert assistant_types == ["rag", "approval"]
+
+    config = json.loads((PROJECT_ROOT / "langgraph.json").read_text(encoding="utf-8"))
+    assert set(config["graphs"]) == {
+        "erp_rag_assistant",
+        "rag_deepagent",
+        "approval_deepagent",
+    }

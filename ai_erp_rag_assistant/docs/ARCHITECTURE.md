@@ -45,6 +45,9 @@ flowchart LR
 - `create_erp_agent_harness()` 提供 DeepAgent 装配入口。Harness 只做任务理解、领域委派和结果汇总，
   文件系统能力被拒绝；`/api/chat` 默认使用原 LangGraph Supervisor，配置
   `AI_ERP_ORCHESTRATOR=deepagent` 后按助手类型启用受限 Harness。
+- LangGraph Studio 同时暴露 `erp_rag_assistant`、`rag_deepagent` 和
+  `approval_deepagent`，便于分别检查原始根图、RAG Harness 与审批 Harness；Studio 工厂不附加
+  进程内 Checkpointer，线程状态由本地 LangGraph API 管理。
 - DeepAgents 新版可通过 `general_purpose_subagent` 参数关闭通用子代理；当前锁定的
   `deepagents==0.7.x` 尚未暴露该参数，因此按模型注册 `HarnessProfile` 达到相同效果。
   SDK 仍会装配 `read_file` 工具，但 `/**` 的读写权限均为拒绝，不能用于读取业务文件；

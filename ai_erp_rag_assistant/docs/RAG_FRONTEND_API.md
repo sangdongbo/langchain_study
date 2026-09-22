@@ -121,7 +121,11 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
   "llm_configured": "true",
   "embedding_configured": "true",
   "mysql_configured": "false",
-  "langsmith_tracing": "false"
+  "langsmith_tracing": "false",
+  "langsmith_configured": "false",
+  "langsmith_project": "ai-erp-rag-assistant",
+  "langsmith_endpoint_configured": "false",
+  "langsmith_workspace_configured": "false"
 }
 ```
 

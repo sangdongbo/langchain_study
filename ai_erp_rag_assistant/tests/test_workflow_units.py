@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
 
+import ai_erp_rag_assistant.app.api as api_module
 from ai_erp_rag_assistant.app.api import _anonymize_trace
 from ai_erp_rag_assistant.app.graph.state import initial_state
 from ai_erp_rag_assistant.app.graph.workflow import (
@@ -52,6 +53,38 @@ def test_langsmith_trace_anonymizer_redacts_credentials():
     assert sanitized["authorization"] == "[REDACTED]"
     assert sanitized["nested"]["api_key"] == "[REDACTED]"
     assert sanitized["nested"]["message"] == "keep me"
+
+
+def test_langsmith_client_forwards_endpoint_and_workspace_without_network(monkeypatch):
+    """Client 构造只验证参数透传，不向 LangSmith 发起网络请求。"""
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(
+        api_module,
+        "get_settings",
+        lambda: SimpleNamespace(
+            langsmith_tracing=True,
+            langsmith_api_key="test-key",
+            langsmith_endpoint="https://langsmith.internal/api",
+            langsmith_workspace_id="workspace-1",
+        ),
+    )
+    monkeypatch.setattr(api_module, "Client", FakeClient)
+    api_module._langsmith_client.cache_clear()
+    try:
+        client = api_module._langsmith_client()
+    finally:
+        api_module._langsmith_client.cache_clear()
+
+    assert isinstance(client, FakeClient)
+    assert captured["api_url"] == "https://langsmith.internal/api"
+    assert captured["workspace_id"] == "workspace-1"
+    assert captured["api_key"] == "test-key"
+    assert callable(captured["anonymizer"])
 
 
 def test_initial_state_preserves_active_approval_context():

@@ -108,6 +108,35 @@ def test_process_environment_overrides_dotenv(monkeypatch):
     assert settings.erp_base_url == "https://process.example"
 
 
+def test_langsmith_private_endpoint_and_workspace_are_loaded(monkeypatch):
+    """私有部署地址和工作区 ID 必须进入统一 Settings，不能只依赖 SDK 隐式读取。"""
+    for key in (
+        "LANGSMITH_TRACING",
+        "LANGSMITH_API_KEY",
+        "LANGSMITH_PROJECT",
+        "LANGSMITH_ENDPOINT",
+        "LANGSMITH_WORKSPACE_ID",
+    ):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setattr(
+        config_module,
+        "dotenv_values",
+        lambda _path: {
+            "LANGSMITH_TRACING": "true",
+            "LANGSMITH_API_KEY": "test-key",
+            "LANGSMITH_PROJECT": "erp-test",
+            "LANGSMITH_ENDPOINT": "https://langsmith.internal/api",
+            "LANGSMITH_WORKSPACE_ID": "workspace-1",
+        },
+    )
+
+    settings = config_module.Settings.from_env()
+
+    assert settings.langsmith_tracing is True
+    assert settings.langsmith_endpoint == "https://langsmith.internal/api"
+    assert settings.langsmith_workspace_id == "workspace-1"
+
+
 def test_env_example_covers_supported_settings_keys():
     """确保仓库中的示例配置与 Settings.from_env() 保持一致。"""
     example_keys = set(config_module.dotenv_values(config_module.PROJECT_ROOT / ".env.example"))

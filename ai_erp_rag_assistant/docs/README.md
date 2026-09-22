@@ -107,12 +107,15 @@ DashScope 工作空间 Key 会复用 `DASHSCOPE_BASE_URL` 作为 Embedding 端�
 LANGSMITH_TRACING=true
 LANGSMITH_API_KEY=lsv2_pt_xxx
 LANGSMITH_PROJECT=ai-erp-rag-assistant
+# SaaS 单工作区可省略以下两项；私有部署或多工作区按需填写。
+LANGSMITH_ENDPOINT=
+LANGSMITH_WORKSPACE_ID=
 ```
 
 重启服务后，`/api/chat` 的 LangGraph 节点、LLM 调用、耗时和异常会归入该项目，
 并带有哈希后的 `thread_id` 便于串联多轮请求。ERP Authorization、token、API key
 等字段会在客户端上传前脱敏；业务对话和 Graph 状态仍属于 trace 内容，联调环境应按
-企业数据策略使用。`GET /health` 可检查 tracing、API key 和项目名是否已加载。
+企业数据策略使用。`GET /health` 可检查 tracing、API key、项目名、私有端点和工作区是否已加载。
 
 默认脚本只生成可审查 JSONL；只有显式追加 `--write-milvus` 才会调用 Embedding 并 upsert 到本项目的 `erp_knowledge_chunks` collection。该命令不会删除或重建任何 collection。
 
@@ -338,7 +341,7 @@ ERP Agent 启用 Durable Execution 后，`/api/chat` 的 `request_id` 必填。�
 ## LangGraph Studio
 
 双击 `start_studio.bat` 即可同步开发依赖、启动本地 LangGraph API，并自动打开
-LangSmith Studio。Studio API 默认使用 `http://127.0.0.1:2024`，与普通 FastAPI
+LangGraph Studio。Studio API 默认使用 `http://127.0.0.1:2024`，与普通 FastAPI
 服务的 `http://127.0.0.1:8021` 相互独立。
 
 也可以从 PowerShell 启动：
@@ -347,9 +350,18 @@ LangSmith Studio。Studio API 默认使用 `http://127.0.0.1:2024`，与普通 F
 .\start_studio.ps1
 ```
 
-Studio 会从 `langgraph.json` 加载 `erp_rag_assistant`。在 Studio 中实际运行节点时，
-仍会使用 `.env` 中配置的 LLM、Milvus 和 ERP 环境；真实 ERP 写入继续受
-`ERP_WRITE_MODE` 控制。普通 API 演示不依赖 Studio CLI。
+Studio 会从 `langgraph.json` 加载三个可切换的 Graph：
+
+- `erp_rag_assistant`：原始 LangGraph ERP/RAG 根工作流。
+- `rag_deepagent`：只开放 `rag-retrieval` 子代理的 DeepAgent Harness。
+- `approval_deepagent`：只开放 `erp-status`、`approval-workflow` 子代理的 DeepAgent Harness。
+
+在 Studio 中实际运行节点时，仍会使用 `.env` 中配置的 LLM、Milvus 和 ERP 环境；真实 ERP
+写入继续受 `ERP_WRITE_MODE` 控制。Studio 直接运行不会经过 HTTP 登录态校验，仅适合使用测试
+身份和测试环境调试；完整身份链路仍通过 `/api/chat` 验证。普通 API 演示不依赖 Studio CLI。
+
+启动脚本只检查 LangSmith Trace 是否已配置，不会显示 API Key。仅打开 Studio 不会生成 Trace；
+运行任一 Graph 或调用 `/api/chat` 后，记录才会出现在 `LANGSMITH_PROJECT` 对应的项目中。
 
 ## 示例请求
 

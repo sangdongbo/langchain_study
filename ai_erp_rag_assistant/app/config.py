@@ -79,6 +79,8 @@ SUPPORTED_ENV_KEYS = frozenset(
         "LANGSMITH_TRACING",
         "LANGSMITH_API_KEY",
         "LANGSMITH_PROJECT",
+        "LANGSMITH_ENDPOINT",
+        "LANGSMITH_WORKSPACE_ID",
         "AI_ERP_AUDIT_LOG_PATH",
         "AI_ERP_ASSISTANT_KEY",
         "AI_ERP_SESSION_STORE",
@@ -153,6 +155,8 @@ class Settings(BaseModel):
     langsmith_tracing: bool = False
     langsmith_api_key: str = ""
     langsmith_project: str = "ai-erp-rag-assistant"
+    langsmith_endpoint: str = ""
+    langsmith_workspace_id: str = ""
     audit_log_path: str = "logs/ai_erp_audit.jsonl"
     assistant_key: str = "erp-rag"
     session_store: str = "memory"
@@ -280,6 +284,8 @@ class Settings(BaseModel):
             langsmith_tracing=_bool_from_env(values.get("LANGSMITH_TRACING")),
             langsmith_api_key=values.get("LANGSMITH_API_KEY") or "",
             langsmith_project=values.get("LANGSMITH_PROJECT") or "ai-erp-rag-assistant",
+            langsmith_endpoint=values.get("LANGSMITH_ENDPOINT") or "",
+            langsmith_workspace_id=values.get("LANGSMITH_WORKSPACE_ID") or "",
             audit_log_path=values.get("AI_ERP_AUDIT_LOG_PATH") or "logs/ai_erp_audit.jsonl",
             assistant_key=values.get("AI_ERP_ASSISTANT_KEY") or "erp-rag",
             session_store=(values.get("AI_ERP_SESSION_STORE") or "memory").lower(),

@@ -31,6 +31,25 @@ if (-not (Test-Path $langgraph)) {
     throw "Missing LangGraph CLI. Run uv sync --group dev from ai_erp_rag_assistant."
 }
 
+# 只检查是否配置，不输出 API Key；Trace 仍由 .env 中的显式开关控制。
+$projectEnv = Join-Path $ProjectRoot ".env"
+$envLines = @(Get-Content $projectEnv -ErrorAction SilentlyContinue)
+$tracingEnabled = (
+    $env:LANGSMITH_TRACING -match '^(1|true|yes|on)$' -or
+    [bool]($envLines | Where-Object {
+        $_ -match '^\s*LANGSMITH_TRACING\s*=\s*(1|true|yes|on)\s*$'
+    })
+)
+$apiKeyConfigured = (
+    -not [string]::IsNullOrWhiteSpace($env:LANGSMITH_API_KEY) -or
+    [bool]($envLines | Where-Object {
+        $_ -match '^\s*LANGSMITH_API_KEY\s*=\s*\S+'
+    })
+)
+if (-not $tracingEnabled -or -not $apiKeyConfigured) {
+    Write-Warning "LangSmith Trace is not fully configured; Studio can open, but runs may not appear in the LangSmith project."
+}
+
 $args = @(
     "dev",
     "--config", (Join-Path $ProjectRoot "langgraph.json"),
@@ -40,5 +59,6 @@ $args = @(
 if ($NoReload) { $args += "--no-reload" }
 if ($NoBrowser) { $args += "--no-browser" }
 
+Write-Host "Available graphs: erp_rag_assistant, rag_deepagent, approval_deepagent" -ForegroundColor Cyan
 Write-Host "Starting LangGraph Studio API at http://${BindHost}:$Port" -ForegroundColor Green
 & $langgraph @args
