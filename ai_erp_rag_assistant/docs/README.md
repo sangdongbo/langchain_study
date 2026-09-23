@@ -68,19 +68,24 @@ Recall@K、Rerank Top-1、无答案拒答率和引用落地准确率，不写数
 
 ### API 目录结构
 
-HTTP 接口按功能拆分在 `app/routes/` 下，公共身份校验、租户隔离和运行时配置保留在
-`app/api.py`，`app/api.py` 只负责注册路由并兼容旧导入：
+HTTP 层统一收口在 `app/api/`：`router.py` 只组装业务路由，`dependencies.py`
+负责身份校验、租户隔离和 RAG 运行配置，`schemas.py` 与 `admin_schemas.py`
+保存请求/响应契约，具体接口按功能拆分在 `app/api/routes/`：
 
 | 模块 | 负责接口 |
 |---|---|
-| `app/routes/chat.py` | `/api/chat` 对话工作流 |
-| `app/routes/assistants.py` | `/api/assistants/list` 固定审批助手与 RAG 助手目录 |
-| `app/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
-| `app/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
-| `app/routes/executions.py` | `/api/executions/status` ERP Agent 运行状态 |
-| `app/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
-| `app/routes/workbench.py` | `/api/workbench/summary` 个人工作台只读聚合 |
-| `app/rag_admin_api.py` | `/api/rag/admin/*` Assistant、Prompt、知识库和数据源管理 |
+| `app/api/router.py` | `/api` 根路由注册，不承载业务逻辑 |
+| `app/api/routes/chat.py` | `/api/chat` 对话工作流 |
+| `app/api/routes/assistants.py` | `/api/assistants/list` 固定审批助手与 RAG 助手目录 |
+| `app/api/routes/rag.py` | `/api/rag/*` 检索、问答和文档导入 |
+| `app/api/routes/sessions.py` | `/api/sessions/*` 长期会话读取 |
+| `app/api/routes/executions.py` | `/api/executions/status` ERP Agent 运行状态 |
+| `app/api/routes/approvals.py` | `/api/approval/*` ERP 审批模板和动态表单 |
+| `app/api/routes/workbench.py` | `/api/workbench/summary` 个人工作台只读聚合 |
+| `app/api/routes/rag_admin.py` | `/api/rag/admin/*` Assistant、Prompt、知识库和数据源管理 |
+| `app/repositories/rag_admin.py` | RAG 管理配置与运行时检索范围的持久化查询 |
+| `app/services/chat_execution_service.py` | 聊天响应、Durable 完成/失败和会话落库编排 |
+| `app/services/rag_ingest_service.py` | 文档解析、切分、Embedding、Milvus 写入和任务阶段编排 |
 
 ```powershell
 Copy-Item .env.example .env
@@ -115,7 +120,8 @@ LANGSMITH_WORKSPACE_ID=
 重启服务后，`/api/chat` 的 LangGraph 节点、LLM 调用、耗时和异常会归入该项目，
 并带有哈希后的 `thread_id` 便于串联多轮请求。ERP Authorization、token、API key
 等字段会在客户端上传前脱敏；业务对话和 Graph 状态仍属于 trace 内容，联调环境应按
-企业数据策略使用。`GET /health` 可检查 tracing、API key、项目名、私有端点和工作区是否已加载。
+企业数据策略使用。`GET /health` 只报告 tracing、API key、私有端点和工作区是否已配置，
+不会暴露项目名、内网地址或资源名称。
 
 默认脚本只生成可审查 JSONL；只有显式追加 `--write-milvus` 才会调用 Embedding 并 upsert 到本项目的 `erp_knowledge_chunks` collection。该命令不会删除或重建任何 collection。
 

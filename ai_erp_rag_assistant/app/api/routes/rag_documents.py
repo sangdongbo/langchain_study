@@ -9,11 +9,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-# 统一 API 使用惰性代理，避免 `app.api` 注册阶段读取到半初始化模块。
-from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.api.dependencies import rag_identity, rag_runtime_config
 from ai_erp_rag_assistant.app.database import get_optional_db_session
-from ai_erp_rag_assistant.app.routes import rag as rag_module
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.api.routes import rag as rag_module
+from ai_erp_rag_assistant.app.api.schemas import (
     RagDocumentDeleteRequest,
     RagDocumentDeleteResponse,
     RagDocumentListRequest,
@@ -21,7 +20,8 @@ from ai_erp_rag_assistant.app.schemas import (
     RagDocumentStatusRequest,
     RagDocumentStatusResponse,
 )
-from ai_erp_rag_assistant.app.rag_admin_repository import RagAdminRepository
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagAdminRepository
+from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 
 
 router = APIRouter(tags=["RAG Documents"])
@@ -36,10 +36,10 @@ async def list_rag_documents(
 ) -> RagDocumentListResponse:
     """在当前用户可见范围内聚合并分页返回知识库文档。"""
     # 文档管理复用检索 ACL，普通用户无法通过列表观察不可见文档。
-    request, company_id, department, access_tags = api_module._rag_identity(
+    request, company_id, department, access_tags = rag_identity(
         request, authorization, uid
     )
-    runtime = api_module._rag_runtime_config(
+    runtime = rag_runtime_config(
         db,
         company_id=company_id,
         knowledge_base_key=request.knowledge_base_key.strip(),
@@ -72,7 +72,7 @@ async def list_rag_documents(
                 raise PermissionError("当前用户无权访问可用知识库")
             # 多知识库列表统一分页，并保留每个文件所属知识库。
             items, total = await run_in_threadpool(
-                api_module.milvus_service.list_documents_many,
+                milvus_service.list_documents_many,
                 company_id=company_id,
                 department=department,
                 permission_tags=access_tags,
@@ -87,7 +87,7 @@ async def list_rag_documents(
             )
             # Milvus 查询为阻塞操作；服务层按 source + version 聚合后再分页。
             items, total = await run_in_threadpool(
-                api_module.milvus_service.list_documents,
+                milvus_service.list_documents,
                 company_id=company_id,
                 department=department,
                 permission_tags=access_tags,
@@ -136,10 +136,10 @@ async def delete_rag_document(
 ) -> RagDocumentDeleteResponse:
     """按租户、可见范围、来源和版本精确删除文档 Chunk。"""
     # 先解析可信 ACL，再把同一过滤条件同时用于存在性检查和删除。
-    request, company_id, department, access_tags = api_module._rag_identity(
+    request, company_id, department, access_tags = rag_identity(
         request, authorization, uid
     )
-    runtime = api_module._rag_runtime_config(
+    runtime = rag_runtime_config(
         db,
         company_id=company_id,
         knowledge_base_key=request.knowledge_base_key.strip(),
@@ -151,7 +151,7 @@ async def delete_rag_document(
         )
         # 必须携带精确 source + version，服务层不会执行模糊或批量删除。
         deleted = await run_in_threadpool(
-            api_module.milvus_service.delete_document,
+            milvus_service.delete_document,
             company_id=company_id,
             source=request.source,
             version=request.version,
@@ -186,13 +186,13 @@ def update_rag_document_status(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> RagDocumentStatusResponse:
     """启用或停用文件检索；停用只影响召回，不删除文件和向量。"""
-    request, company_id, department, access_tags = api_module._rag_identity(
+    request, company_id, department, access_tags = rag_identity(
         request, authorization, uid
     )
     if db is None:
         raise HTTPException(status_code=503, detail="未配置 MySQL，无法修改文件检索状态")
     knowledge_key = request.knowledge_base_key.strip()
-    runtime = api_module._rag_runtime_config(
+    runtime = rag_runtime_config(
         db,
         company_id=company_id,
         knowledge_base_key=knowledge_key,

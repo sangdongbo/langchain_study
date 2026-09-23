@@ -6,14 +6,19 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
-# 统一 API 使用惰性代理，支持单独导入路由模块而不触发循环依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.api.dependencies import erp_user, with_header_identity
+from ai_erp_rag_assistant.app.api.schemas import (
     ApprovalFieldOptionsRequest,
     ApprovalFormSchemaRequest,
     ApprovalTemplatesRequest,
 )
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
+from ai_erp_rag_assistant.app.services.approval_form_service import build_form_schema
+from ai_erp_rag_assistant.app.tools.erp_tools import (
+    get_approval_field_options,
+    get_approval_template,
+    list_approval_templates,
+)
 
 
 router = APIRouter(tags=["ERP Approvals"])
@@ -26,10 +31,10 @@ def approval_templates(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """返回当前 ERP 用户可用的审批模板列表。"""
-    request = api_module._with_header_identity(request, authorization, uid)
+    request = with_header_identity(request, authorization, uid)
     try:
-        user = api_module._erp_user(request)
-        items = api_module.list_approval_templates(
+        user = erp_user(request)
+        items = list_approval_templates(
             request.query,
             str(user.get("company_id") or request.company_id),
             user=user,
@@ -55,16 +60,16 @@ def approval_form_schema(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """将指定 ERP 审批模板转换为前端动态表单结构。"""
-    request = api_module._with_header_identity(request, authorization, uid)
+    request = with_header_identity(request, authorization, uid)
     try:
-        user = api_module._erp_user(request)
-        template = api_module.get_approval_template(
+        user = erp_user(request)
+        template = get_approval_template(
             request.template_id,
             str(user.get("company_id") or request.company_id),
             title=request.title,
             user=user,
         )
-        return api_module.build_form_schema(template, request.values)
+        return build_form_schema(template, request.values)
     except Exception as exc:
         write_audit_event(
             "approval.form_schema.error",
@@ -85,11 +90,11 @@ def approval_field_options(
 ) -> dict[str, Any]:
     """分页返回一个动态审批字段的真实 ERP 候选项。"""
     # HTTP 头中的身份信息优先，避免前端 JSON 中的旧凭据覆盖当前登录态。
-    request = api_module._with_header_identity(request, authorization, uid)
+    request = with_header_identity(request, authorization, uid)
     try:
         # 字段选项依赖真实公司与用户，人员、假期和关联数据不能跨租户查询。
-        user = api_module._erp_user(request)
-        return api_module.get_approval_field_options(
+        user = erp_user(request)
+        return get_approval_field_options(
             request.template_id,
             request.field_key,
             str(user.get("company_id") or request.company_id),

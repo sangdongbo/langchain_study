@@ -5,12 +5,14 @@ import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-from ai_erp_rag_assistant.app.api import _rag_runtime_config
+import ai_erp_rag_assistant.app.api.routes.rag_admin as rag_admin_routes
+from ai_erp_rag_assistant.app.api.dependencies import rag_runtime_config as _rag_runtime_config
 from ai_erp_rag_assistant.app.main import app
 from ai_erp_rag_assistant.app.models import Base
-from ai_erp_rag_assistant.app.rag_admin_api import _knowledge_embedding_config
-from ai_erp_rag_assistant.app.rag_admin_repository import RagAdminRepository
-from ai_erp_rag_assistant.app.rag_admin_schemas import (
+from ai_erp_rag_assistant.app.api.routes.rag_admin import _knowledge_embedding_config
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagAdminRepository
+from ai_erp_rag_assistant.app.api.admin_schemas import (
+    AdminContext,
     AssistantConfigCreateRequest,
     AssistantUpdateRequest,
     DataSourceCreateRequest,
@@ -19,6 +21,28 @@ from ai_erp_rag_assistant.app.rag_admin_schemas import (
     KnowledgeBaseUpdateRequest,
 )
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
+
+
+def test_admin_identity_requires_permission_from_verified_erp_user(monkeypatch):
+    """同公司登录态不等于管理权限，且请求体不能自行补充权限。"""
+    user = {"company_id": "C001", "uid": "863", "permissions": ["employee"]}
+    monkeypatch.setattr(rag_admin_routes, "get_current_user", lambda *args, **kwargs: user)
+    monkeypatch.setattr(
+        rag_admin_routes,
+        "get_settings",
+        lambda: SimpleNamespace(rag_admin_permission_tags=["knowledge:admin"]),
+    )
+    request = AdminContext(company_id="C001", user_id="863")
+
+    with pytest.raises(HTTPException) as error:
+        rag_admin_routes._identity(request, "Bearer test", "863")
+    assert error.value.status_code == 403
+
+    user["permissions"] = ["knowledge:admin"]
+    assert rag_admin_routes._identity(request, "Bearer test", "863") == (
+        "C001",
+        "863",
+    )
 
 
 def test_rag_models_are_company_scoped_without_schema_side_effects():
@@ -48,6 +72,15 @@ def test_admin_config_rejects_inline_credentials():
             name="ERP 数据库",
             source_type="database",
             config={"host": "db.internal", "auth": {"database_password": "secret"}},
+        )
+
+    with pytest.raises(ValidationError, match="accessToken"):
+        DataSourceCreateRequest(
+            company_id="C001",
+            source_key="erp-api",
+            name="ERP API",
+            source_type="api",
+            config={"endpoint": "https://erp.internal", "accessToken": "secret"},
         )
 
 

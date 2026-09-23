@@ -2,21 +2,21 @@
 
 from __future__ import annotations
 
-from hashlib import sha256
-from io import BytesIO
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from starlette.concurrency import run_in_threadpool
 
-# 统一 API 使用惰性代理，避免本模块被单独导入时循环依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.api.dependencies import (
+    rag_identity,
+    rag_runtime_config,
+    verified_access_tags,
+)
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import get_optional_db_session
-from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagRuntimeConfig
+from ai_erp_rag_assistant.app.api.schemas import (
     RagChatRequest,
     RagChatResponse,
     RagEvidenceResponse,
@@ -28,15 +28,16 @@ from ai_erp_rag_assistant.app.schemas import (
 )
 from ai_erp_rag_assistant.app.services.document_ingest_service import (
     DocumentParseError,
-    build_chunk_rows,
 )
 from ai_erp_rag_assistant.app.services.ingest_job_service import (
     IngestJobTracker,
     ingest_job_status,
     record_ingest_failure,
 )
+from ai_erp_rag_assistant.app.services.model_service import model_service
+from ai_erp_rag_assistant.app.services.rag_ingest_service import run_ingest_pipeline
+from ai_erp_rag_assistant.app.tools.erp_tools import get_current_user
 from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
-from ai_erp_rag_assistant.scripts.ingest_pdf import infer_title, split_text
 
 
 router = APIRouter(tags=["RAG"])
@@ -129,99 +130,6 @@ def _failure_detail(
     }
 
 
-def _rag_rows_from_text(request: RagTextIngestRequest) -> list[dict[str, Any]]:
-    """为文本导入构造带租户边界的 Chunk 行。"""
-    # 在切分前完成边界参数校验，避免无效请求触发 Embedding 外部调用。
-    company_id = request.company_id.strip()
-    source = request.source.strip()
-    # 该辅助函数也被测试和重试流程直接调用，因此在这里保留进程默认值兜底。
-    chunk_size = request.chunk_size or get_settings().rag_chunk_size
-    chunk_overlap = (
-        request.chunk_overlap
-        if request.chunk_overlap is not None
-        else get_settings().rag_chunk_overlap
-    )
-    if not company_id:
-        raise HTTPException(status_code=422, detail="company_id 不能为空")
-    if not source:
-        raise HTTPException(status_code=422, detail="source 不能为空")
-    if chunk_overlap >= chunk_size:
-        raise HTTPException(status_code=422, detail="chunk_overlap 必须小于 chunk_size")
-    chunks = split_text(request.content, chunk_size, chunk_overlap)
-    if not chunks:
-        raise HTTPException(status_code=422, detail="content 不能只包含空白字符")
-    title = request.title.strip() or source.rsplit("/", 1)[-1]
-    # Chunk ID 同时包含租户、知识库和内容哈希，相同内容重试保持幂等。
-    return [
-        {
-            "chunk_id": f"{company_id}:{request.knowledge_base_key.strip() or 'default'}:{sha256(f'{source}:{request.version}:{index}:{chunk}'.encode()).hexdigest()[:32]}",
-            "text": chunk,
-            "source": source,
-            "page": 1,
-            "title": title,
-            "company_id": company_id,
-            "department": request.department,
-            "version": request.version,
-            "effective_date": request.effective_date,
-            "is_active": True,
-            "permission_tags": request.permission_tags,
-        }
-        for index, chunk in enumerate(chunks, start=1)
-    ]
-
-
-def _rag_rows_from_pdf(
-    content: bytes,
-    *,
-    company_id: str,
-    source: str,
-    knowledge_base_key: str,
-    department: str,
-    version: str,
-    effective_date: str,
-    permission_tags: list[str] | None = None,
-    chunk_size: int,
-    chunk_overlap: int,
-) -> tuple[list[dict[str, Any]], list[int]]:
-    """提取 PDF 页面，同时保留页码和租户元数据。"""
-    # 延迟导入便于解析测试替换 PdfReader，也避免普通接口启动时加载解析器。
-    from pypdf import PdfReader
-
-    try:
-        reader = PdfReader(BytesIO(content))
-    except Exception as exc:
-        raise ValueError(f"PDF 文件无法读取：{exc}") from exc
-    rows: list[dict[str, Any]] = []
-    empty_pages: list[int] = []
-    # PDF 按真实页码切分，空页单独报告，保证引用页码可以回溯原文。
-    for page_number, page in enumerate(reader.pages, start=1):
-        try:
-            page_text = page.extract_text() or ""
-        except Exception as exc:
-            raise ValueError(f"PDF 第 {page_number} 页文本提取失败：{exc}") from exc
-        if not page_text.strip():
-            empty_pages.append(page_number)
-            continue
-        chunks = split_text(page_text, chunk_size, chunk_overlap)
-        for chunk_number, chunk in enumerate(chunks, start=1):
-            rows.append(
-                {
-                    "chunk_id": f"{company_id}:{knowledge_base_key or 'default'}:{sha256(f'{source}:{version}:{page_number}:{chunk_number}:{chunk}'.encode()).hexdigest()[:32]}",
-                    "text": chunk,
-                    "source": source,
-                    "page": page_number,
-                    "title": infer_title(chunk, source.rsplit("/", 1)[-1]),
-                    "company_id": company_id,
-                    "department": department,
-                    "version": version,
-                    "effective_date": effective_date,
-                    "is_active": True,
-                    "permission_tags": list(permission_tags or []),
-                }
-            )
-    return rows, empty_pages
-
-
 @router.post("/rag/search", response_model=RagEvidenceResponse)
 def rag_search(
     request: RagSearchRequest,
@@ -232,13 +140,13 @@ def rag_search(
     """按可信 ERP 身份检索知识库证据，不调用 LLM。"""
     try:
         # 身份校验同时给出可信公司、部门和 ACL 标签，不能使用请求体伪造权限。
-        request, company_id, department, access_tags = api_module._rag_identity(
+        request, company_id, department, access_tags = rag_identity(
             request, authorization, uid
         )
         if not company_id or not request.query.strip():
             raise ValueError("company_id 和 query 不能为空")
         knowledge_base_key = request.knowledge_base_key.strip()
-        runtime = api_module._rag_runtime_config(
+        runtime = rag_runtime_config(
             db,
             company_id=company_id,
             knowledge_base_key=knowledge_base_key,
@@ -270,7 +178,7 @@ def rag_search(
         )
         return RagEvidenceResponse(
             evidence=evidence,
-            citations=api_module.model_service.build_citations(evidence),
+            citations=model_service.build_citations(evidence),
             count=len(evidence),
             company_id=company_id,
             knowledge_base_key=response_key,
@@ -297,13 +205,13 @@ def rag_chat(
     """检索可信知识证据并使用租户 Prompt 调用 LLM 回答。"""
     try:
         # 问答与纯检索共用相同身份和 ACL 过滤，LLM 无法绕过可见范围。
-        request, company_id, department, access_tags = api_module._rag_identity(
+        request, company_id, department, access_tags = rag_identity(
             request, authorization, uid
         )
         if not company_id or not request.query.strip():
             raise ValueError("company_id 和 query 不能为空")
         knowledge_base_key = request.knowledge_base_key.strip()
-        runtime = api_module._rag_runtime_config(
+        runtime = rag_runtime_config(
             db,
             company_id=company_id,
             knowledge_base_key=knowledge_base_key,
@@ -320,15 +228,12 @@ def rag_chat(
             top_k=request.top_k or runtime.top_k or 5,
             knowledge_base_key=knowledge_base_key,
         )
-        # 已发布平台 Prompt 在前，请求级上下文只作为附加约束参与生成。
-        system_context = "\n\n".join(
-            value for value in (runtime.system_context, request.system_context.strip()) if value
-        )
-        answer = api_module.model_service.answer(
+        answer = model_service.answer(
             request.query,
             route="knowledge",
             evidence=evidence,
-            system_context=system_context,
+            # System Message 只能来自后台发布配置，普通问答请求不能提升自身指令权限。
+            system_context=runtime.system_context,
             model_overrides=runtime.model_overrides,
         )
         (
@@ -346,7 +251,7 @@ def rag_chat(
         return RagChatResponse(
             message=answer,
             evidence=evidence,
-            citations=api_module.model_service.build_citations(evidence),
+            citations=model_service.build_citations(evidence),
             count=len(evidence),
             company_id=company_id,
             knowledge_base_key=response_key,
@@ -364,7 +269,7 @@ def rag_chat(
 
 
 @router.post("/rag/ingest/text", response_model=RagIngestResponse)
-def rag_ingest_text(
+async def rag_ingest_text(
     request: RagTextIngestRequest,
     db: Annotated[Session | None, Depends(get_optional_db_session)] = None,
     authorization: str | None = Header(default=None),
@@ -436,32 +341,12 @@ def rag_ingest_text(
         metadata=metadata,
     )
     try:
-        if tracker:
-            tracker.stage("parsing")
-        rows = _rag_rows_from_text(request)
-        if tracker:
-            tracker.stage(
-                "embedding", total_pages=1, parsed_pages=1, chunk_count=len(rows)
-            )
-        # replace_existing 仅替换同 company_id + source + version 的旧 Chunk。
-        inserted = api_module.milvus_service.upsert_chunks(
-            rows,
-            company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
+        result = await run_ingest_pipeline(
+            request.content.encode(),
+            metadata=metadata,
             collection_name=runtime.collection,
-            replace_existing=True,
+            tracker=tracker,
         )
-        if tracker:
-            tracker.stage(
-                "completed",
-                total_pages=1,
-                parsed_pages=1,
-                chunk_count=len(rows),
-                inserted_chunk_count=inserted,
-            )
-    except HTTPException as exc:
-        record_ingest_failure(tracker, "parse_failed", exc)
-        raise
     except ValueError as exc:
         record_ingest_failure(tracker, "ingest_validation_failed", exc)
         raise HTTPException(
@@ -474,8 +359,9 @@ def rag_ingest_text(
         ) from exc
     return RagIngestResponse(
         source=request.source,
-        chunk_count=len(rows),
-        inserted_count=inserted,
+        chunk_count=result.chunk_count,
+        inserted_count=result.inserted_count,
+        empty_pages=result.empty_pages,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
         collection=runtime.collection,
@@ -491,7 +377,7 @@ def _resolve_ingest_identity(
     uid: str | None,
 ) -> tuple[str, str, list[str]]:
     try:
-        user = api_module.get_current_user(
+        user = get_current_user(
             user_id,
             uid=uid or "",
             authorization=authorization or "",
@@ -507,7 +393,7 @@ def _resolve_ingest_identity(
     ):
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
     # 请求参数中的权限标签不参与授权，只使用 ERP 身份返回的权限和角色。
-    access_tags = api_module._verified_access_tags(user)
+    access_tags = verified_access_tags(user)
     return (
         resolved_company,
         # ERP 未返回部门时保持为空；后续 Milvus 只允许公共文档，不能信任请求体部门。
@@ -555,7 +441,7 @@ def _ingest_runtime(
         # 公司级自动检索可以不选库；导入必须明确归属，避免文件落到错误的 Collection。
         raise HTTPException(status_code=422, detail="导入文件必须指定 knowledge_base_key")
     # 单次 Query 参数优先，其次知识库配置，最后回退到进程默认值。
-    runtime = api_module._rag_runtime_config(
+    runtime = rag_runtime_config(
         db,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
@@ -660,53 +546,21 @@ async def rag_ingest_pdf(
         metadata=metadata,
     )
     try:
-        if tracker:
-            tracker.stage("parsing")
-        # PDF 解析为阻塞 CPU/文件操作，在线程池中运行但请求仍同步等待。
-        rows, empty_pages = await run_in_threadpool(
-            _rag_rows_from_pdf,
+        # 服务层只把阻塞步骤放入线程池，接口仍等待整条流水线完成。
+        result = await run_ingest_pipeline(
             content,
-            company_id=company_id,
-            source=source,
-            knowledge_base_key=knowledge_base_key,
-            department=department,
-            version=version,
-            effective_date=effective_date,
-            permission_tags=document_permission_tags,
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-        )
-        if not rows:
-            raise ValueError("PDF 没有可提取文本；扫描件请先生成文字层")
-        if tracker:
-            tracker.stage(
-                "embedding",
-                total_pages=len({row["page"] for row in rows}) + len(empty_pages),
-                parsed_pages=len({row["page"] for row in rows}),
-                chunk_count=len(rows),
-            )
-        # Embedding 和 Milvus 都是阻塞网络调用，移出事件循环但仍保持同步业务语义。
-        inserted = await run_in_threadpool(
-            api_module.milvus_service.upsert_chunks,
-            rows,
-            company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
+            metadata=metadata,
             collection_name=runtime.collection,
-            replace_existing=True,
+            tracker=tracker,
         )
-        if tracker:
-            tracker.stage(
-                "completed",
-                total_pages=len({row["page"] for row in rows}) + len(empty_pages),
-                parsed_pages=len({row["page"] for row in rows}),
-                chunk_count=len(rows),
-                inserted_chunk_count=inserted,
-            )
     except ValueError as exc:
         record_ingest_failure(tracker, "pdf_parse_failed", exc)
+        message = str(exc)
+        if not message.startswith("PDF "):
+            message = f"PDF 解析失败：{message}"
         raise HTTPException(
             status_code=422,
-            detail=_failure_detail(f"PDF 解析失败：{exc}", tracker),
+            detail=_failure_detail(message, tracker),
         ) from exc
     except (RuntimeError, SQLAlchemyError) as exc:
         record_ingest_failure(tracker, "embedding_or_milvus_failed", exc)
@@ -715,9 +569,9 @@ async def rag_ingest_pdf(
         ) from exc
     return RagIngestResponse(
         source=source,
-        chunk_count=len(rows),
-        inserted_count=inserted,
-        empty_pages=empty_pages,
+        chunk_count=result.chunk_count,
+        inserted_count=result.inserted_count,
+        empty_pages=result.empty_pages,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
         collection=runtime.collection,
@@ -800,48 +654,13 @@ async def rag_ingest_document(
         metadata=metadata,
     )
     try:
-        if tracker:
-            tracker.stage("parsing")
-        # 解析属于阻塞操作，但接口仍等待整条流水线完成后一次性返回结果。
-        rows, empty_pages = await run_in_threadpool(
-            api_module.build_chunk_rows,
+        # 服务层统一编排解析、Embedding、Milvus 写入和任务阶段。
+        result = await run_ingest_pipeline(
             content,
-            company_id=company_id,
-            source=source,
-            knowledge_base_key=knowledge_base_key,
-            department=department,
-            version=version,
-            effective_date=effective_date,
-            permission_tags=document_permission_tags,
-            title=title,
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-        )
-        if tracker:
-            pages = {int(row.get("page") or 0) for row in rows if row.get("page")}
-            tracker.stage(
-                "embedding",
-                total_pages=len(pages) + len(empty_pages),
-                parsed_pages=len(pages),
-                chunk_count=len(rows),
-            )
-        # Embedding 和 Milvus 写入属于阻塞网络调用，移出事件循环但保持同步业务语义。
-        inserted = await run_in_threadpool(
-            api_module.milvus_service.upsert_chunks,
-            rows,
-            company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
+            metadata=metadata,
             collection_name=runtime.collection,
-            replace_existing=True,
+            tracker=tracker,
         )
-        if tracker:
-            tracker.stage(
-                "completed",
-                total_pages=len(pages) + len(empty_pages),
-                parsed_pages=len(pages),
-                chunk_count=len(rows),
-                inserted_chunk_count=inserted,
-            )
     except DocumentParseError as exc:
         record_ingest_failure(tracker, "document_parse_failed", exc)
         raise HTTPException(
@@ -859,9 +678,9 @@ async def rag_ingest_document(
         ) from exc
     return RagIngestResponse(
         source=source,
-        chunk_count=len(rows),
-        inserted_count=inserted,
-        empty_pages=empty_pages,
+        chunk_count=result.chunk_count,
+        inserted_count=result.inserted_count,
+        empty_pages=result.empty_pages,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
         collection=runtime.collection,
@@ -887,7 +706,7 @@ def rag_ingest_job_status(
     if db is None:
         raise HTTPException(status_code=503, detail="未配置 MySQL，无法查询导入任务")
     knowledge_base_key = request.knowledge_base_key.strip()
-    runtime = api_module._rag_runtime_config(
+    runtime = rag_runtime_config(
         db,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
@@ -968,80 +787,21 @@ async def rag_retry_ingest_job(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     source = str(metadata.get("source") or "").strip()
-    chunk_size = int(metadata.get("chunk_size") or get_settings().rag_chunk_size)
-    chunk_overlap = int(metadata.get("chunk_overlap") or get_settings().rag_chunk_overlap)
-    empty_pages: list[int] = []
+    metadata["company_id"] = company_id
+    metadata["knowledge_base_key"] = knowledge_base_key
+    metadata["department"] = str(metadata.get("department") or department)
+    metadata["chunk_size"] = int(
+        metadata.get("chunk_size") or get_settings().rag_chunk_size
+    )
+    metadata["chunk_overlap"] = int(
+        metadata.get("chunk_overlap") or get_settings().rag_chunk_overlap
+    )
     try:
-        tracker.stage("parsing")
-        kind = str(metadata.get("kind") or "")
-        if kind == "text":
-            rows = _rag_rows_from_text(
-                RagTextIngestRequest(
-                    content=content.decode("utf-8"),
-                    company_id=company_id,
-                    source=source,
-                    title=str(metadata.get("title") or ""),
-                    knowledge_base_key=knowledge_base_key,
-                    department=str(metadata.get("department") or department),
-                    version=str(metadata.get("version") or ""),
-                    effective_date=str(metadata.get("effective_date") or ""),
-                    permission_tags=list(metadata.get("permission_tags") or []),
-                    chunk_size=chunk_size,
-                    chunk_overlap=chunk_overlap,
-                )
-            )
-        elif kind == "pdf":
-            rows, empty_pages = await run_in_threadpool(
-                _rag_rows_from_pdf,
-                content,
-                company_id=company_id,
-                source=source,
-                knowledge_base_key=knowledge_base_key,
-                department=str(metadata.get("department") or department),
-                version=str(metadata.get("version") or ""),
-                effective_date=str(metadata.get("effective_date") or ""),
-                permission_tags=list(metadata.get("permission_tags") or []),
-                chunk_size=chunk_size,
-                chunk_overlap=chunk_overlap,
-            )
-        elif kind == "document":
-            rows, empty_pages = await run_in_threadpool(
-                build_chunk_rows,
-                content,
-                company_id=company_id,
-                source=source,
-                knowledge_base_key=knowledge_base_key,
-                department=str(metadata.get("department") or department),
-                version=str(metadata.get("version") or ""),
-                effective_date=str(metadata.get("effective_date") or ""),
-                permission_tags=list(metadata.get("permission_tags") or []),
-                title=str(metadata.get("title") or ""),
-                chunk_size=chunk_size,
-                chunk_overlap=chunk_overlap,
-            )
-        else:
-            raise ValueError("导入任务的 parser 类型无法识别")
-        pages = {int(row.get("page") or 0) for row in rows if row.get("page")}
-        tracker.stage(
-            "embedding",
-            total_pages=len(pages) + len(empty_pages),
-            parsed_pages=len(pages),
-            chunk_count=len(rows),
-        )
-        inserted = await run_in_threadpool(
-            api_module.milvus_service.upsert_chunks,
-            rows,
-            company_id=company_id,
-            knowledge_base_key=knowledge_base_key,
+        result = await run_ingest_pipeline(
+            content,
+            metadata=metadata,
             collection_name=runtime.collection,
-            replace_existing=True,
-        )
-        tracker.stage(
-            "completed",
-            total_pages=len(pages) + len(empty_pages),
-            parsed_pages=len(pages),
-            chunk_count=len(rows),
-            inserted_chunk_count=inserted,
+            tracker=tracker,
         )
     except (DocumentParseError, UnicodeError, ValueError) as exc:
         record_ingest_failure(tracker, "retry_parse_failed", exc)
@@ -1055,9 +815,9 @@ async def rag_retry_ingest_job(
         ) from exc
     return RagIngestResponse(
         source=source,
-        chunk_count=len(rows),
-        inserted_count=inserted,
-        empty_pages=empty_pages,
+        chunk_count=result.chunk_count,
+        inserted_count=result.inserted_count,
+        empty_pages=result.empty_pages,
         company_id=company_id,
         knowledge_base_key=knowledge_base_key,
         collection=runtime.collection,

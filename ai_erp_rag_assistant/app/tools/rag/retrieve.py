@@ -6,7 +6,7 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from ai_erp_rag_assistant.app.graph.state import ErpRagState, RagState
-from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagRuntimeConfig
 from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
 from ai_erp_rag_assistant.app.tools.state_context import (
     verified_permission_tags,

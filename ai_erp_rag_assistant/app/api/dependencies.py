@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ai_erp_rag_assistant.app.config import get_settings
-from ai_erp_rag_assistant.app.rag_admin_repository import (
+from ai_erp_rag_assistant.app.repositories.rag_admin import (
     AdminNotFoundError,
     RagAdminRepository,
     RagKnowledgeBaseTarget,
@@ -41,6 +41,43 @@ def erp_user(request: Any) -> dict[str, Any]:
     )
 
 
+def verified_access_tags(user: dict[str, Any]) -> list[str]:
+    """把 ERP 返回的权限和角色规范为可信的 RAG 访问标签。"""
+    tags: set[str] = set()
+
+    def add(raw: Any) -> None:
+        if isinstance(raw, str):
+            tags.update(item.strip() for item in raw.split(",") if item.strip())
+        elif isinstance(raw, dict):
+            # 兼容 {"hr": true} 和 {"code": "hr", "enabled": true} 两类结构。
+            if raw and all(isinstance(enabled, bool) for enabled in raw.values()):
+                tags.update(
+                    str(key).strip()
+                    for key, enabled in raw.items()
+                    if enabled and str(key).strip()
+                )
+            elif raw.get("enabled") is not False:
+                value = (
+                    raw.get("code")
+                    or raw.get("permission")
+                    or raw.get("role")
+                    or raw.get("name")
+                    or raw.get("value")
+                )
+                if value not in (None, ""):
+                    add(value)
+        elif isinstance(raw, (list, tuple, set)):
+            for item in raw:
+                add(item)
+        elif raw not in (None, ""):
+            tags.add(str(raw).strip())
+
+    # 请求体权限不可信，这里只读取 ERP 身份接口的返回值。
+    for key in ("permissions", "permission_tags", "roles", "role"):
+        add(user.get(key))
+    return sorted(tag for tag in tags if tag)
+
+
 def persistent_identity(
     request: Any,
     authorization: str | None,
@@ -68,8 +105,8 @@ def rag_identity(
     request: Any,
     authorization: str | None,
     uid: str | None,
-) -> tuple[Any, str, str]:
-    """在任何 RAG 读写前验证租户归属。"""
+) -> tuple[Any, str, str, list[str]]:
+    """验证 RAG 请求的租户归属，并返回可信部门和访问标签。"""
     request = with_header_identity(request, authorization, uid)
     try:
         user = erp_user(request)
@@ -83,7 +120,12 @@ def rag_identity(
     if requested_company and requested_company != company_id:
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
     # ERP 没有部门信息时返回空值，由 Milvus 仅开放公共文档，不能回退到请求体部门。
-    return request, company_id, str(user.get("department") or "").strip()
+    return (
+        request,
+        company_id,
+        str(user.get("department") or "").strip(),
+        verified_access_tags(user),
+    )
 
 
 def rag_runtime_config(

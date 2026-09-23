@@ -541,7 +541,11 @@ class ErpClient:
                 "company_id": company_id or self.settings.erp_demo_company_id or "lanjing",
                 "department": department or self.settings.erp_demo_department or "研发部",
                 "roles": ["employee"],
-                "permissions": ["approval:create", "knowledge:employee_handbook"],
+                "permissions": [
+                    "approval:create",
+                    "knowledge:employee_handbook",
+                    "knowledge:admin",
+                ],
                 "erp_mode": "mock",
                 "erp_write_mode": self.write_mode,
             })

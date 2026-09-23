@@ -14,36 +14,44 @@ from langsmith import tracing_context
 from sqlalchemy.orm import Session
 from starlette.responses import StreamingResponse
 
-# 统一 API 使用惰性代理，避免直接导入聊天路由时循环依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
 from ai_erp_rag_assistant.app.agents.workflow_adapter import (
     create_deepagent_workflow,
     model_overrides_key,
+)
+from ai_erp_rag_assistant.app.api.dependencies import (
+    persistent_identity,
+    rag_runtime_config,
+    verified_access_tags,
+    with_header_identity,
 )
 from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY, assistant_type_for_key
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.graph.state import ErpRagState, initial_state
 from ai_erp_rag_assistant.app.graph.workflow import create_workflow
-from ai_erp_rag_assistant.app.schemas import ChatRequest, ChatResponse
+from ai_erp_rag_assistant.app.api.schemas import ChatRequest, ChatResponse
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
+from ai_erp_rag_assistant.app.services.chat_execution_service import (
+    ChatPersistenceError,
+    build_chat_response as _chat_response,
+    finalize_chat_execution,
+    load_cached_chat_response,
+    save_chat_exchange,
+    workflow_failure_state,
+)
 from ai_erp_rag_assistant.app.services.execution_repository import (
     ExecutionConflictError,
     execution_request_hash,
     execution_repository,
 )
 from ai_erp_rag_assistant.app.services.execution_runtime import DurableExecutionContext
+from ai_erp_rag_assistant.app.services.langsmith_trace import langsmith_client
 from ai_erp_rag_assistant.app.services.session_repository import session_repository
 
 
 router = APIRouter(tags=["Chat"])
 workflow = create_workflow()
 stateless_workflow = create_workflow(with_checkpointer=False)
-
-
-def _langsmith_client() -> Any:
-    """复用 API 根模块的 Client，保证脱敏和部署参数只有一份实现。"""
-    return api_module._langsmith_client()
 
 
 @lru_cache(maxsize=8)
@@ -101,50 +109,6 @@ def _thread_id(request: ChatRequest, assistant_key: str) -> str:
     return f"erp-rag:{digest}"
 
 
-def _chat_response(result: ErpRagState) -> ChatResponse:
-    """把内部工作流状态转换为稳定的前端响应。"""
-    erp_data = result.get("erp_data", {})
-    assistant_type = result.get("assistant_type", "rag")
-    if assistant_type not in {"approval", "rag"}:
-        assistant_type = "rag"
-    return ChatResponse(
-        message=result.get("assistant_message", ""),
-        route=result.get("route", "unknown"),
-        assistant_type=assistant_type,
-        plan=result.get("plan", {}),
-        tool_calls=result.get("tool_calls", []),
-        evidence=result.get("evidence", []),
-        citations=result.get("citations")
-        or api_module.model_service.build_citations(result.get("evidence", [])),
-        erp_data=erp_data,
-        form_schema=result.get("form_schema") or None,
-        preview=result.get("preview") or None,
-        errors=result.get("errors", []),
-        pending_question=result.get("pending_question", ""),
-        workflow_status=str(result.get("workflow_status") or "idle"),
-        run_id=str(result.get("execution_run_id") or ""),
-        execution_status=str(result.get("execution_status") or ""),
-        execution_retry_count=int(result.get("execution_retry_count") or 0),
-        execution_current_step=str(result.get("execution_current_step") or ""),
-        template_selection_required=bool(
-            result.get("template_selection_required")
-            or (
-                result.get("template_candidates")
-                and not (result.get("template") or {}).get("template_id")
-            )
-        ),
-        template_candidates=result.get("template_candidates", []),
-        erp_mode=str(
-            erp_data.get("erp_mode")
-            or result.get("user_context", {}).get("erp_mode")
-            or get_settings().erp_mode
-        ),
-        erp_write_mode=str(
-            erp_data.get("erp_write_mode") or get_settings().erp_write_mode
-        ),
-    )
-
-
 def _save_exchange(
     request: ChatRequest,
     assistant_key: str,
@@ -153,33 +117,18 @@ def _save_exchange(
     *,
     enabled: bool,
 ) -> None:
-    """在完整回答生成后保存一轮会话；流式 Token 不单独入库。"""
-    if not enabled:
-        return
+    """保存会话，并把应用层错误映射为 HTTP 503。"""
     try:
-        session_repository.save_exchange(
-            company_id=request.company_id,
-            assistant_key=assistant_key,
-            session_key=request.session_id,
-            user_id=request.user_id,
-            erp_uid=request.uid,
-            request_id=request.request_id,
-            user_message=request.message,
-            state=dict(result),
-            response=response.model_dump(),
+        save_chat_exchange(
+            request,
+            assistant_key,
+            result,
+            response,
+            session_repository,
+            enabled=enabled,
         )
-    except Exception as exc:
-        write_audit_event(
-            "session.persistence.error",
-            {
-                "company_id": request.company_id,
-                "assistant_key": assistant_key,
-                "session_id": request.session_id,
-                "request_id": request.request_id,
-                "error": str(exc)[:300],
-            },
-        )
-        raise HTTPException(status_code=503, detail=f"会话持久化失败：{exc}") from exc
+    except ChatPersistenceError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 def _sse(event: str, data: Any) -> str:
@@ -228,29 +177,15 @@ def _cached_exchange_response(
 ) -> ChatResponse | StreamingResponse | None:
     """读取完成响应，并按原请求的 JSON 或 SSE 传输方式返回。"""
     try:
-        cached = session_repository.cached_response(
-            company_id=request.company_id,
-            assistant_key=assistant_key,
-            user_id=request.user_id,
-            session_key=request.session_id,
-            request_id=request.request_id,
+        response = load_cached_chat_response(
+            request,
+            assistant_key,
+            session_repository,
         )
-    except Exception as exc:
-        write_audit_event(
-            "session.persistence.read_error",
-            {
-                "company_id": request.company_id,
-                "assistant_key": assistant_key,
-                "session_id": request.session_id,
-                "request_id": request.request_id,
-                "operation": "cached_response",
-                "error": str(exc)[:300],
-            },
-        )
-        raise HTTPException(status_code=503, detail=f"会话持久化不可用：{exc}") from exc
-    if not cached:
+    except ChatPersistenceError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if response is None:
         return None
-    response = ChatResponse.model_validate(cached)
     if not request.stream:
         return response
     return StreamingResponse(
@@ -262,44 +197,6 @@ def _cached_exchange_response(
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
-
-
-def _execution_fields(
-    state: ErpRagState,
-    context: DurableExecutionContext | None,
-    status: str,
-) -> ErpRagState:
-    """把运行标识写入稳定响应字段，但不把仓储对象写入业务状态。"""
-    if context is None:
-        return state
-    return {
-        **state,
-        "execution_run_id": context.run_key,
-        "execution_status": status,
-        "execution_retry_count": context.retry_count,
-        "execution_current_step": context.current_step,
-    }
-
-
-def _fail_execution(
-    context: DurableExecutionContext | None,
-    state: ErpRagState,
-    error: Exception,
-) -> None:
-    """尽力记录运行失败；记录失败不能覆盖原始业务错误。"""
-    if context is None:
-        return
-    try:
-        context.fail(dict(state), error)
-    except Exception as persistence_error:
-        write_audit_event(
-            "execution.persistence.error",
-            {
-                "run_id": context.run_key,
-                "operation": "fail_run",
-                "error": str(persistence_error)[:300],
-            },
-        )
 
 
 def _stream_workflow(
@@ -327,7 +224,7 @@ def _stream_workflow(
     result: ErpRagState = state
     execution_error: Exception | None = None
     try:
-        client = _langsmith_client()
+        client = langsmith_client()
         with tracing_context(
             enabled=client is not None,
             client=client,
@@ -351,32 +248,12 @@ def _stream_workflow(
                     result = cast(ErpRagState, value)
     except Exception as exc:
         execution_error = exc
-        result = {
-            **state,
-            "assistant_message": f"执行失败：{exc}",
-            "errors": [str(exc)],
-            "tool_calls": [{"tool": "system.error", "error": str(exc)}],
-        }
+        result = workflow_failure_state(state, exc)
 
-    if execution_error is not None:
-        result = _execution_fields(result, durable_execution, "failed")
-        _fail_execution(durable_execution, result, execution_error)
-    else:
-        result = _execution_fields(result, durable_execution, "completed")
-    response = _chat_response(result)
-    if durable_execution is not None and execution_error is None:
-        try:
-            # Run 结果先于聊天消息落库；消息保存失败时可直接复用结果补写。
-            durable_execution.complete(dict(result), response.model_dump(mode="json"))
-        except Exception as exc:
-            execution_error = exc
-            result = {
-                **_execution_fields(result, durable_execution, "failed"),
-                "assistant_message": f"执行结果持久化失败，请使用相同 request_id 重试：{exc}",
-                "errors": [*result.get("errors", []), str(exc)],
-            }
-            _fail_execution(durable_execution, result, exc)
-            response = _chat_response(result)
+    finalized = finalize_chat_execution(result, durable_execution, execution_error)
+    result = finalized.state
+    response = finalized.response
+    execution_error = finalized.error
     try:
         # 必须先完成持久化再发 final，避免前端把未落库回答当作成功结果。
         _save_exchange(
@@ -419,13 +296,13 @@ def chat(
 ) -> ChatResponse | StreamingResponse:
     """执行一轮对话，并按配置选择是否持久化状态。"""
     # 认证头优先来自 HTTP 传输层；请求体仅用于兼容非浏览器调用方。
-    request = api_module._with_header_identity(request, authorization, uid)
+    request = with_header_identity(request, authorization, uid)
     settings = get_settings()
     assistant_key = request.assistant_key.strip() or settings.assistant_key
     assistant_type = assistant_type_for_key(assistant_key)
     # 先用 ERP 身份确定可信租户，再按租户和 assistant_key 读取已发布配置。
     request, persistent_user, resolved_company, persistent_user_id = (
-        api_module._persistent_identity(request, None, None)
+        persistent_identity(request, None, None)
     )
     request = request.model_copy(
         update={"company_id": resolved_company, "user_id": persistent_user_id}
@@ -517,12 +394,12 @@ def chat(
     # 工作流只使用服务端从 ERP 身份整理出的权限标签，不采信请求体权限字段。
     persistent_user = {
         **persistent_user,
-        "rag_access_tags": api_module._verified_access_tags(persistent_user),
+        "rag_access_tags": verified_access_tags(persistent_user),
     }
     rag_runtime = None
     if assistant_type == "rag":
         try:
-            rag_runtime = api_module._rag_runtime_config(
+            rag_runtime = rag_runtime_config(
                 db,
                 company_id=resolved_company,
                 knowledge_base_key="",
@@ -658,7 +535,7 @@ def chat(
 
     execution_error: Exception | None = None
     try:
-        client = _langsmith_client()
+        client = langsmith_client()
         with tracing_context(
             enabled=client is not None,
             client=client,
@@ -668,41 +545,19 @@ def chat(
     except Exception as exc:
         execution_error = exc
         # 将失败明确返回给调用方，不能用看似正常的伪造答案掩盖异常。
-        result = {
-            **state,
-            "assistant_message": f"执行失败：{exc}",
-            "errors": [str(exc)],
-            "tool_calls": [{"tool": "system.error", "error": str(exc)}],
-        }
+        result = workflow_failure_state(state, exc)
 
-    typed_result = cast(ErpRagState, result)
-    if execution_error is not None:
-        typed_result = _execution_fields(typed_result, durable_execution, "failed")
-        _fail_execution(durable_execution, typed_result, execution_error)
-    else:
-        typed_result = _execution_fields(typed_result, durable_execution, "completed")
-    response = _chat_response(typed_result)
-    if durable_execution is not None and execution_error is None:
-        try:
-            durable_execution.complete(
-                dict(typed_result),
-                response.model_dump(mode="json"),
-            )
-        except Exception as exc:
-            execution_error = exc
-            typed_result = {
-                **_execution_fields(typed_result, durable_execution, "failed"),
-                "assistant_message": f"执行结果持久化失败，请使用相同 request_id 重试：{exc}",
-                "errors": [*typed_result.get("errors", []), str(exc)],
-            }
-            _fail_execution(durable_execution, typed_result, exc)
-            response = _chat_response(typed_result)
+    finalized = finalize_chat_execution(
+        cast(ErpRagState, result),
+        durable_execution,
+        execution_error,
+    )
     _save_exchange(
         request,
         assistant_key,
-        typed_result,
-        response,
+        finalized.state,
+        finalized.response,
         enabled=persistent_session
-        and (durable_execution is None or execution_error is None),
+        and (durable_execution is None or finalized.error is None),
     )
-    return response
+    return finalized.response

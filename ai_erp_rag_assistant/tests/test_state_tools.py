@@ -2,7 +2,7 @@
 
 import pytest
 
-from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagRuntimeConfig
 from ai_erp_rag_assistant.app.tools.approval import state_tools as approval_state_tools
 from ai_erp_rag_assistant.app.tools.erp import state_tools as erp_state_tools
 from ai_erp_rag_assistant.app.tools.rag import retrieve as rag_retrieve
@@ -148,4 +148,3 @@ def test_approval_submit_rejects_stale_confirmation(monkeypatch):
                 "user_context": {"uid": "863", "company_id": "16"},
             }
         )
-

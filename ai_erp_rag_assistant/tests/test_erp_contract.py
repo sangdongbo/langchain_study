@@ -413,13 +413,21 @@ def test_audit_sanitizer_removes_credentials_and_form_values():
         {
             "authorization": "Bearer secret",
             "form_data": {"reason": "private", "amount": 10},
-            "nested": {"token": "private-token"},
+            "nested": {
+                "token": "private-token",
+                "access_token": "private-access-token",
+                "database_password": "private-password",
+                "max_tokens": 2048,
+            },
         }
     )
 
     assert sanitized["authorization"] == "[REDACTED]"
     assert sanitized["form_data"] == {"field_keys": ["reason", "amount"], "field_count": 2}
     assert sanitized["nested"]["token"] == "[REDACTED]"
+    assert sanitized["nested"]["access_token"] == "[REDACTED]"
+    assert sanitized["nested"]["database_password"] == "[REDACTED]"
+    assert sanitized["nested"]["max_tokens"] == 2048
 
 
 def test_workbench_summary_keeps_other_modules_when_one_fails(monkeypatch):

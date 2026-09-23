@@ -33,6 +33,7 @@ SUPPORTED_ENV_KEYS = frozenset(
         "RAG_COMPANY_ID",
         "RAG_DEPARTMENT",
         "RAG_PERMISSION_TAGS",
+        "RAG_ADMIN_PERMISSION_TAGS",
         "ERP_MODE",
         "ERP_READ_MODE",
         "ERP_WRITE_MODE",
@@ -125,6 +126,8 @@ class Settings(BaseModel):
     rag_company_id: str = "lanjing"
     rag_department: str = "公共制度"
     rag_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:employee_handbook"])
+    # 管理接口要求命中任一标签；标签只从 ERP 已验证身份读取。
+    rag_admin_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:admin"])
     erp_mode: str = "remote"
     erp_read_mode: str = "remote"
     erp_write_mode: str = "disabled"
@@ -247,6 +250,11 @@ class Settings(BaseModel):
                 for item in (values.get("RAG_PERMISSION_TAGS") or "knowledge:employee_handbook").split(",")
                 if item.strip()
             ],
+            rag_admin_permission_tags=[
+                item.strip()
+                for item in (values.get("RAG_ADMIN_PERMISSION_TAGS") or "knowledge:admin").split(",")
+                if item.strip()
+            ],
             erp_mode=values.get("ERP_MODE") or "remote",
             erp_read_mode=values.get("ERP_READ_MODE") or values.get("ERP_MODE") or "remote",
             erp_write_mode=values.get("ERP_WRITE_MODE") or (
@@ -298,7 +306,8 @@ class Settings(BaseModel):
             embedding_base_url=embedding_base_url,
             embedding_api_key=embedding_api_key,
             embedding_model=embedding_model,
-            embedding_dimensions=int(values.get("DASHSCOPE_EMBEDDING_DIMENSIONS") or values.get("EMBEDDING_DIMENSIONS") or 2048),
+            # 显式通用配置优先，供应商兼容变量仅作为回退。
+            embedding_dimensions=int(values.get("EMBEDDING_DIMENSIONS") or values.get("DASHSCOPE_EMBEDDING_DIMENSIONS") or 2048),
             embedding_timeout=float(values.get("EMBEDDING_TIMEOUT") or 60),
             embedding_max_retries=int(values.get("EMBEDDING_MAX_RETRIES") or 2),
         )

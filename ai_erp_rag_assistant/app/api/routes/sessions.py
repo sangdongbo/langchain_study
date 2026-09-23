@@ -6,10 +6,10 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
-# 统一 API 使用惰性代理，避免直接导入会话路由时触发循环依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.api.dependencies import persistent_identity
 from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.api.schemas import (
     SessionDeleteRequest,
     SessionListRequest,
     SessionMessagesRequest,
@@ -29,17 +29,17 @@ def session_list(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """返回按已验证 ERP 用户和公司隔离的会话列表。"""
-    request, _, company_id, user_id = api_module._persistent_identity(
+    request, _, company_id, user_id = persistent_identity(
         request, authorization, uid
     )
-    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
+    assistant_key = request.assistant_key.strip() or get_settings().assistant_key
     # 审批助手的系统 Assistant 行由 DBA 按 docs/database/006_approval_assistant_seed.sql 配置。
     # 未配置时保留空列表，聊天接口仍可用内存模式完成当前审批。
     if assistant_key == APPROVAL_ASSISTANT_KEY:
         persistence_status = "disabled"
-        if api_module.session_repository.enabled:
+        if session_repository.enabled:
             try:
-                configured = api_module.session_repository.assistant_available(
+                configured = session_repository.assistant_available(
                     company_id=company_id,
                     assistant_key=assistant_key,
                 )
@@ -60,11 +60,11 @@ def session_list(
                 "persistence_status": persistence_status,
             }
     # 会话接口没有内存降级，避免前端误以为临时状态是长期数据。
-    if not api_module.session_repository.enabled:
+    if not session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
     try:
         # Repository 查询同时包含 company_id、assistant_key 和 ERP 用户 ID。
-        items, has_more = api_module.session_repository.list_sessions(
+        items, has_more = session_repository.list_sessions(
             company_id=company_id,
             assistant_key=assistant_key,
             user_id=user_id,
@@ -80,7 +80,7 @@ def session_list(
             "has_more": has_more,
         }
     except Exception as exc:
-        api_module.write_audit_event(
+        write_audit_event(
             "session.list.error",
             {"company_id": company_id, "assistant_key": assistant_key, "error": str(exc)[:300]},
         )
@@ -94,15 +94,15 @@ def session_messages(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """使用游标分页返回当前用户拥有的一个会话消息。"""
-    request, _, company_id, user_id = api_module._persistent_identity(
+    request, _, company_id, user_id = persistent_identity(
         request, authorization, uid
     )
-    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
+    assistant_key = request.assistant_key.strip() or get_settings().assistant_key
     if assistant_key == APPROVAL_ASSISTANT_KEY:
         persistence_status = "disabled"
-        if api_module.session_repository.enabled:
+        if session_repository.enabled:
             try:
-                configured = api_module.session_repository.assistant_available(
+                configured = session_repository.assistant_available(
                     company_id=company_id,
                     assistant_key=assistant_key,
                 )
@@ -128,11 +128,11 @@ def session_messages(
                 "persistence_status": persistence_status,
             }
     # 与列表接口保持相同的持久化开关和身份边界。
-    if not api_module.session_repository.enabled:
+    if not session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
     try:
         # before_seq 使用稳定消息序号向历史翻页，不受新消息插入影响。
-        items, has_more = api_module.session_repository.list_messages(
+        items, has_more = session_repository.list_messages(
             company_id=company_id,
             assistant_key=assistant_key,
             user_id=user_id,
@@ -148,7 +148,7 @@ def session_messages(
             "next_before_seq": items[0]["message_seq"] if has_more and items else None,
         }
     except Exception as exc:
-        api_module.write_audit_event(
+        write_audit_event(
             "session.messages.error",
             {
                 "company_id": company_id,
@@ -167,14 +167,14 @@ def session_rename(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """修改当前 ERP 用户拥有的会话标题。"""
-    request, _, company_id, user_id = api_module._persistent_identity(
+    request, _, company_id, user_id = persistent_identity(
         request, authorization, uid
     )
-    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
-    if not api_module.session_repository.enabled:
+    assistant_key = request.assistant_key.strip() or get_settings().assistant_key
+    if not session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
     try:
-        updated = api_module.session_repository.rename_session(
+        updated = session_repository.rename_session(
             company_id=company_id,
             assistant_key=assistant_key,
             user_id=user_id,
@@ -182,7 +182,7 @@ def session_rename(
             title=request.title,
         )
     except Exception as exc:
-        api_module.write_audit_event(
+        write_audit_event(
             "session.rename.error",
             {
                 "company_id": company_id,
@@ -204,21 +204,21 @@ def session_delete(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> dict[str, Any]:
     """逻辑删除当前 ERP 用户拥有的会话。"""
-    request, _, company_id, user_id = api_module._persistent_identity(
+    request, _, company_id, user_id = persistent_identity(
         request, authorization, uid
     )
-    assistant_key = request.assistant_key.strip() or api_module.get_settings().assistant_key
-    if not api_module.session_repository.enabled:
+    assistant_key = request.assistant_key.strip() or get_settings().assistant_key
+    if not session_repository.enabled:
         raise HTTPException(status_code=503, detail="长期会话未启用，请配置 AI_ERP_SESSION_STORE=mysql")
     try:
-        deleted = api_module.session_repository.delete_session(
+        deleted = session_repository.delete_session(
             company_id=company_id,
             assistant_key=assistant_key,
             user_id=user_id,
             session_key=request.session_id,
         )
     except Exception as exc:
-        api_module.write_audit_event(
+        write_audit_event(
             "session.delete.error",
             {
                 "company_id": company_id,

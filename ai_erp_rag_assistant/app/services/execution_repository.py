@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.services.sensitive_data import is_sensitive_field_name
 from ai_erp_rag_assistant.app.services.session_repository import resumable_state
 
 
@@ -48,20 +49,11 @@ class RunClaim:
 
 def _strip_secrets(value: Any) -> Any:
     """递归移除认证字段，防止 Token 随检查点写入数据库。"""
-    secret_keys = {
-        "api_key",
-        "authorization",
-        "cookie",
-        "password",
-        "refresh_token",
-        "secret",
-        "token",
-    }
     if isinstance(value, dict):
         return {
             str(key): _strip_secrets(item)
             for key, item in value.items()
-            if str(key).lower() not in secret_keys
+            if not is_sensitive_field_name(key)
             and str(key).lower() != "raw_userinfo"
         }
     if isinstance(value, list):

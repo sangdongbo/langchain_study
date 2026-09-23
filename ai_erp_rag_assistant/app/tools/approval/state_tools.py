@@ -7,6 +7,7 @@ from copy import deepcopy
 from typing import Any
 
 from ai_erp_rag_assistant.app.graph.state import ApprovalState, ErpRagState
+from ai_erp_rag_assistant.app.services.approval_form_service import validate_approval_fields
 from ai_erp_rag_assistant.app.tools.erp_tools import (
     get_approval_template,
     list_approval_templates,
@@ -76,8 +77,7 @@ def validate_fields_from_state(
 ) -> dict[str, Any]:
     """校验 State 中当前模板和字段，并返回结构化结果。
 
-    现阶段复用工作流已有的纯校验函数，避免复制一份日期、枚举和金额规则；
-    下一阶段抽出独立 approval service 后，适配器只需替换这一处导入。
+    校验逻辑属于审批领域服务，Graph 和 Tool 共用同一个实现。
     """
     template = state.get("template")
     if not isinstance(template, Mapping) or not template:
@@ -85,10 +85,7 @@ def validate_fields_from_state(
     fields = state.get("fields")
     if not isinstance(fields, Mapping):
         fields = {}
-    # 延迟导入可避免 workflow -> tools -> workflow 的模块循环依赖。
-    from ai_erp_rag_assistant.app.graph.workflow import _validate_fields
-
-    missing, invalid = _validate_fields(dict(template), dict(fields))
+    missing, invalid = validate_approval_fields(dict(template), dict(fields))
     return {
         "valid": not missing and not invalid,
         "missing": missing,

@@ -67,8 +67,14 @@ examples/
 ```powershell
 cd deep_agent_examples
 Copy-Item .env.example .env
+if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
 uv sync
+.\.venv\Scripts\Activate.ps1
 ```
+
+如果终端原来显示 `(ai-erp-rag-assistant)` 等其他项目环境，上面的
+`deactivate` 会先退出旧环境，再激活当前项目的 `deep-agent-examples` 环境，
+避免 `VIRTUAL_ENV ... does not match the project environment path` 警告。
 
 编辑 `.env`，至少配置模型：
 
@@ -87,6 +93,9 @@ LANGSMITH_PROJECT=deep-agent-examples
 PYTHONUTF8=1
 PYTHONIOENCODING=utf-8
 ```
+
+默认 `LANGSMITH_TRACING=false`。只有配置了有效 `LANGSMITH_API_KEY` 后才改为
+`true`；如果没有 Key，项目会自动保持关闭，避免 LangSmith `401 Unauthorized`。
 
 不要提交真实 `.env`。
 

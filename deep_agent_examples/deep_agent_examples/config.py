@@ -21,6 +21,7 @@ REPOSITORY_DIR = PROJECT_DIR.parent
 # 只有配置了 DEEPSEEK_API_KEY、但没有显式指定地址或模型时才使用这两个默认值。
 DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+TRUE_VALUES = {"1", "true", "yes", "on"}
 
 
 def load_environment() -> None:
@@ -31,6 +32,15 @@ def load_environment() -> None:
     """
     load_dotenv(PROJECT_DIR / ".env", override=False)
     load_dotenv(REPOSITORY_DIR / ".env", override=False)
+
+    # LangSmith 云端追踪没有 API Key 时一定会返回 401。这里自动关闭追踪，
+    # 使模型和 Agent 继续正常运行；配置有效 Key 后再显式设为 true 即可。
+    tracing_requested = (
+        os.getenv("LANGSMITH_TRACING", "false").strip().lower() in TRUE_VALUES
+    )
+    tracing_api_key = os.getenv("LANGSMITH_API_KEY") or os.getenv("LANGCHAIN_API_KEY")
+    if tracing_requested and not tracing_api_key:
+        os.environ["LANGSMITH_TRACING"] = "false"
 
 
 @dataclass(frozen=True)
@@ -113,14 +123,9 @@ def build_model() -> ChatOpenAI:
 
 
 def tracing_enabled() -> bool:
-    """判断是否启用 LangSmith 链路追踪，兼容常见的真值写法。"""
+    """仅在明确开启且存在 API Key 时启用 LangSmith 链路追踪。"""
     load_environment()
-    return os.getenv("LANGSMITH_TRACING", "false").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    return os.getenv("LANGSMITH_TRACING", "false").strip().lower() in TRUE_VALUES
 
 
 def tracing_project() -> str:

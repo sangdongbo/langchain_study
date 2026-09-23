@@ -2,8 +2,8 @@ from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
 
-import ai_erp_rag_assistant.app.api as api_module
-from ai_erp_rag_assistant.app.api import _anonymize_trace
+import ai_erp_rag_assistant.app.services.langsmith_trace as api_module
+from ai_erp_rag_assistant.app.services.langsmith_trace import anonymize_trace as _anonymize_trace
 from ai_erp_rag_assistant.app.graph.state import initial_state
 from ai_erp_rag_assistant.app.graph.workflow import (
     _extract_dynamic_duration_fields,
@@ -13,7 +13,6 @@ from ai_erp_rag_assistant.app.graph.workflow import (
     _route_after_erp_context,
     _route_after_planner,
     _submission_fields,
-    _validate_fields,
     accept_frozen_preview_confirmation,
     agent_planner,
     answer_with_llm,
@@ -25,10 +24,11 @@ from ai_erp_rag_assistant.app.graph.workflow import (
     validate_and_preview,
     create_workflow,
 )
+from ai_erp_rag_assistant.app.services.approval_form_service import validate_approval_fields
 from ai_erp_rag_assistant.app.services.model_service import ModelService
 from ai_erp_rag_assistant.app.services.model_service import AgentPlan
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
-from ai_erp_rag_assistant.app.rag_admin_repository import (
+from ai_erp_rag_assistant.app.repositories.rag_admin import (
     RagKnowledgeBaseTarget,
     RagRuntimeConfig,
 )
@@ -47,11 +47,18 @@ def test_root_workflow_composes_business_subgraphs():
 def test_langsmith_trace_anonymizer_redacts_credentials():
     sanitized = _anonymize_trace({
         "authorization": "opaque-erp-token",
-        "nested": {"api_key": "private-key", "message": "keep me"},
+        "nested": {
+            "api_key": "private-key",
+            "clientSecret": "private-secret",
+            "max_tokens": 2048,
+            "message": "keep me",
+        },
     })
 
     assert sanitized["authorization"] == "[REDACTED]"
     assert sanitized["nested"]["api_key"] == "[REDACTED]"
+    assert sanitized["nested"]["clientSecret"] == "[REDACTED]"
+    assert sanitized["nested"]["max_tokens"] == 2048
     assert sanitized["nested"]["message"] == "keep me"
 
 
@@ -74,11 +81,11 @@ def test_langsmith_client_forwards_endpoint_and_workspace_without_network(monkey
         ),
     )
     monkeypatch.setattr(api_module, "Client", FakeClient)
-    api_module._langsmith_client.cache_clear()
+    api_module.langsmith_client.cache_clear()
     try:
-        client = api_module._langsmith_client()
+        client = api_module.langsmith_client()
     finally:
-        api_module._langsmith_client.cache_clear()
+        api_module.langsmith_client.cache_clear()
 
     assert isinstance(client, FakeClient)
     assert captured["api_url"] == "https://langsmith.internal/api"
@@ -168,7 +175,7 @@ def test_initial_state_does_not_reactivate_closed_preview():
 def test_chat_endpoint_passes_selected_assistant_runtime_to_workflow(monkeypatch):
     from ai_erp_rag_assistant.app.database import get_optional_db_session
     from ai_erp_rag_assistant.app.main import app
-    from ai_erp_rag_assistant.app.routes import chat as chat_routes
+    from ai_erp_rag_assistant.app.api.routes import chat as chat_routes
 
     runtime = RagRuntimeConfig(
         collection="",
@@ -185,7 +192,7 @@ def test_chat_endpoint_passes_selected_assistant_runtime_to_workflow(monkeypatch
     calls = {}
 
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.chat.persistent_identity",
         lambda request, authorization, uid: (
             request,
             {"company_id": "16", "uid": "863", "erp_mode": "remote"},
@@ -199,7 +206,7 @@ def test_chat_endpoint_passes_selected_assistant_runtime_to_workflow(monkeypatch
         return runtime
 
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._rag_runtime_config", fake_runtime
+        "ai_erp_rag_assistant.app.api.routes.chat.rag_runtime_config", fake_runtime
     )
     monkeypatch.setattr(
         type(chat_routes.session_repository),
@@ -221,7 +228,12 @@ def test_chat_endpoint_passes_selected_assistant_runtime_to_workflow(monkeypatch
                 "assistant_message": "你好",
             }
 
-    monkeypatch.setattr(chat_routes, "workflow", FakeWorkflow())
+    fake_workflow = FakeWorkflow()
+    monkeypatch.setattr(
+        chat_routes,
+        "_selected_workflows",
+        lambda *args, **kwargs: (fake_workflow, fake_workflow),
+    )
     app.dependency_overrides[get_optional_db_session] = lambda: None
     try:
         response = TestClient(app).post(
@@ -250,11 +262,11 @@ def test_chat_endpoint_passes_selected_assistant_runtime_to_workflow(monkeypatch
 def test_chat_endpoint_streams_only_answer_tokens_and_final_response(monkeypatch):
     from ai_erp_rag_assistant.app.database import get_optional_db_session
     from ai_erp_rag_assistant.app.main import app
-    from ai_erp_rag_assistant.app.routes import chat as chat_routes
+    from ai_erp_rag_assistant.app.api.routes import chat as chat_routes
 
     runtime = RagRuntimeConfig(collection="company_16_hr")
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.chat.persistent_identity",
         lambda request, authorization, uid: (
             request,
             {"company_id": "16", "uid": "863", "erp_mode": "remote"},
@@ -263,7 +275,7 @@ def test_chat_endpoint_streams_only_answer_tokens_and_final_response(monkeypatch
         ),
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._rag_runtime_config",
+        "ai_erp_rag_assistant.app.api.routes.chat.rag_runtime_config",
         lambda db, **kwargs: runtime,
     )
     monkeypatch.setattr(
@@ -302,7 +314,12 @@ def test_chat_endpoint_streams_only_answer_tokens_and_final_response(monkeypatch
                 },
             )
 
-    monkeypatch.setattr(chat_routes, "workflow", FakeWorkflow())
+    fake_workflow = FakeWorkflow()
+    monkeypatch.setattr(
+        chat_routes,
+        "_selected_workflows",
+        lambda *args, **kwargs: (fake_workflow, fake_workflow),
+    )
     app.dependency_overrides[get_optional_db_session] = lambda: None
     try:
         with TestClient(app).stream(
@@ -328,6 +345,28 @@ def test_chat_endpoint_streams_only_answer_tokens_and_final_response(monkeypatch
     assert "内部计划" not in body
     assert 'event: final\ndata: {"message":"你好"' in body
     assert body.rstrip().endswith("event: done\ndata: {}")
+
+
+def test_chat_response_hides_internal_execution_error():
+    from ai_erp_rag_assistant.app.api.routes.chat import _chat_response
+
+    response = _chat_response(
+        {
+            "assistant_message": "执行失败：Milvus channel=private-channel",
+            "route": "unknown",
+            "workflow_status": "failed",
+            "errors": ["Milvus channel=private-channel"],
+            "tool_calls": [
+                {"tool": "system.error", "error": "Milvus channel=private-channel"}
+            ],
+        }
+    )
+
+    payload = response.model_dump()
+    assert payload["message"] == "执行失败，请稍后重试"
+    assert payload["errors"] == ["执行失败，请稍后重试"]
+    assert payload["tool_calls"][0]["error"] == "执行失败，请稍后重试"
+    assert "private-channel" not in str(payload)
 
 
 def test_retrieve_rag_uses_assistant_runtime_instead_of_default_collection(monkeypatch):
@@ -513,11 +552,11 @@ def test_approval_assistant_keeps_draft_when_knowledge_route_is_blocked(monkeypa
 def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
     from ai_erp_rag_assistant.app.database import get_optional_db_session
     from ai_erp_rag_assistant.app.main import app
-    from ai_erp_rag_assistant.app.routes import chat as chat_routes
+    from ai_erp_rag_assistant.app.api.routes import chat as chat_routes
 
     calls = {}
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.chat.persistent_identity",
         lambda request, authorization, uid: (
             request,
             {"company_id": "16", "uid": "863", "erp_mode": "remote"},
@@ -526,7 +565,7 @@ def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._rag_runtime_config",
+        "ai_erp_rag_assistant.app.api.routes.chat.rag_runtime_config",
         lambda *args, **kwargs: (_ for _ in ()).throw(
             AssertionError("固定审批助手不应加载 RAG 配置")
         ),
@@ -555,7 +594,12 @@ def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
             calls["state"] = state
             return {**state, "route": "general_chat", "assistant_message": "你好"}
 
-    monkeypatch.setattr(chat_routes, "workflow", FakeWorkflow())
+    fake_workflow = FakeWorkflow()
+    monkeypatch.setattr(
+        chat_routes,
+        "_selected_workflows",
+        lambda *args, **kwargs: (fake_workflow, fake_workflow),
+    )
     app.dependency_overrides[get_optional_db_session] = lambda: None
     try:
         response = TestClient(app).post(
@@ -720,7 +764,7 @@ def test_validate_fields_checks_options_and_time_order():
         ]
     }
 
-    missing, invalid = _validate_fields(
+    missing, invalid = validate_approval_fields(
         template,
         {
             "leave_type": "年假",
@@ -735,7 +779,7 @@ def test_validate_fields_checks_options_and_time_order():
 
 
 def test_validate_fields_checks_optional_erp_constraints():
-    missing, invalid = _validate_fields(
+    missing, invalid = validate_approval_fields(
         {
             "fields": [{"name": "reason", "label": "原因", "required": True}],
             "all_fields": [

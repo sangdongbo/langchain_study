@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import re
 from copy import deepcopy
+from datetime import date, datetime, time
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 
@@ -12,6 +15,219 @@ _DETAIL_TYPES = {"detail", "detail_table", "table"}
 _USER_TYPES = {"user", "employee", "member", "person", "checkbox_user"}
 _DEPARTMENT_TYPES = {"department", "dept", "checkbox_department"}
 _ATTACHMENT_TYPES = {"attachment", "attachments", "file", "files", "upload", "image"}
+
+
+def has_field_value(value: Any) -> bool:
+    """判断审批字段是否包含可提交值，保留数字零和布尔值。"""
+    return value not in (None, "", [], {})
+
+
+def template_fields(template: dict[str, Any]) -> list[dict[str, Any]]:
+    """返回完整 ERP 字段；旧 Mock 模板仍可只提供 fields。"""
+    fields = template.get("all_fields") or template.get("fields") or []
+    return [field for field in fields if isinstance(field, dict)]
+
+
+def validate_approval_fields(
+    template: dict[str, Any], fields: dict[str, Any]
+) -> tuple[list[str], list[str]]:
+    """按 ERP 字段元数据校验必填、枚举、长度、范围、精度和时间范围。"""
+    missing: list[str] = []
+    invalid: list[str] = []
+    for field in template_fields(template):
+        name = str(field.get("name") or "")
+        label = str(field.get("label") or name)
+        value = fields.get(name)
+        if field.get("required") and not has_field_value(value):
+            missing.append(label)
+            continue
+        if not has_field_value(value):
+            continue
+        # ERP 选择器可能提交 {label, value} 包装，校验时必须比较真实 value。
+        actual_value = _actual_value(value)
+        options = [str(option) for option in field.get("options", []) if option is not None]
+        option_values = [
+            str(option.get("value"))
+            for option in field.get("option_values", [])
+            if isinstance(option, dict) and option.get("value") is not None
+        ]
+        submitted_values = actual_value if isinstance(actual_value, list) else [actual_value]
+        submitted_values = [_actual_value(item) for item in submitted_values]
+        allowed_values = {*options, *option_values}
+        if allowed_values and any(str(item) not in allowed_values for item in submitted_values):
+            display_options = options or option_values
+            invalid.append(f"{label}必须是：{'、'.join(display_options)}")
+            continue
+        # 字段名和 ERP 类型共同判断日期语义，兼容历史模板。
+        field_type = str(field.get("erp_field_type") or field.get("type") or "").lower()
+        semantic_type = (
+            f"{name.lower()} {field_type} "
+            f"{str(field.get('erp_field_type') or '').lower()} "
+            f"{str(field.get('value_type') or '').lower()}"
+        )
+        if any(
+            token in semantic_type
+            for token in ("datetime", "date_time", "start_time", "end_time")
+        ):
+            if not isinstance(_parse_temporal(value), datetime):
+                invalid.append(f"{label}必须是完整日期时间")
+        elif "date" in semantic_type:
+            if not isinstance(_parse_temporal(value), (date, datetime)):
+                invalid.append(f"{label}必须是有效日期")
+        elif "time" in semantic_type:
+            if not isinstance(_parse_temporal(value), (time, datetime)):
+                invalid.append(f"{label}必须是有效时间")
+        elif any(
+            token in semantic_type
+            for token in ("number", "integer", "float", "decimal", "money", "duration")
+        ):
+            try:
+                numeric_value = Decimal(str(actual_value))
+            except (InvalidOperation, TypeError, ValueError):
+                invalid.append(f"{label}必须是数字")
+                continue
+            minimum = _validation_constraint(field, "min", "minimum", "min_value", "minValue")
+            maximum = _validation_constraint(field, "max", "maximum", "max_value", "maxValue")
+            try:
+                if minimum not in (None, "") and numeric_value < Decimal(str(minimum)):
+                    invalid.append(f"{label}不能小于{minimum}")
+                if maximum not in (None, "") and numeric_value > Decimal(str(maximum)):
+                    invalid.append(f"{label}不能大于{maximum}")
+            except (InvalidOperation, TypeError, ValueError):
+                # ERP 约束配置异常时保留基础数字校验，不阻断用户。
+                pass
+            if "integer" in semantic_type and numeric_value != numeric_value.to_integral_value():
+                invalid.append(f"{label}必须是整数")
+            scale = _validation_constraint(field, "scale", "decimal_places", "precision_scale")
+            if scale not in (None, ""):
+                try:
+                    decimal_places = max(0, -numeric_value.as_tuple().exponent)
+                    if decimal_places > int(scale):
+                        invalid.append(f"{label}最多保留{int(scale)}位小数")
+                except (TypeError, ValueError):
+                    pass
+        elif field_type in {"attachment", "attachments", "file", "files", "upload", "image"}:
+            if not isinstance(actual_value, list) or any(
+                not isinstance(item, dict) for item in actual_value
+            ):
+                invalid.append(f"{label}必须使用 ERP 文件引用，不能提交本地文件名")
+        elif field_type in {"detail", "detail_table", "table", "array"}:
+            if not isinstance(actual_value, list) or any(
+                not isinstance(item, dict) for item in actual_value
+            ):
+                invalid.append(f"{label}必须是明细行数组")
+
+        if isinstance(actual_value, str):
+            min_length = _validation_constraint(field, "min_length", "minLength", "min_len")
+            max_length = _validation_constraint(field, "max_length", "maxLength", "max_len")
+            try:
+                if min_length not in (None, "") and len(actual_value) < int(min_length):
+                    invalid.append(f"{label}长度不能少于{int(min_length)}个字符")
+                if max_length not in (None, "") and len(actual_value) > int(max_length):
+                    invalid.append(f"{label}长度不能超过{int(max_length)}个字符")
+            except (TypeError, ValueError):
+                pass
+            pattern = _validation_constraint(field, "pattern", "regex")
+            if pattern not in (None, ""):
+                try:
+                    if re.fullmatch(str(pattern), actual_value) is None:
+                        invalid.append(f"{label}格式不正确")
+                except re.error:
+                    pass
+        if isinstance(actual_value, list):
+            min_items = _validation_constraint(
+                field, "min_items", "minItems", "min_length", "minLength"
+            )
+            max_items = _validation_constraint(
+                field, "max_items", "maxItems", "max_length", "maxLength"
+            )
+            try:
+                if min_items not in (None, "") and len(actual_value) < int(min_items):
+                    invalid.append(f"{label}至少选择{int(min_items)}项")
+                if max_items not in (None, "") and len(actual_value) > int(max_items):
+                    invalid.append(f"{label}最多选择{int(max_items)}项")
+            except (TypeError, ValueError):
+                pass
+
+    # 单字段合法后再做跨字段顺序检查，避免结束时间早于开始时间。
+    start_keys = [
+        key for key in fields if any(token in key.lower() for token in ("start", "begin"))
+    ]
+    end_keys = [
+        key for key in fields if any(token in key.lower() for token in ("end", "finish"))
+    ]
+    if start_keys and end_keys:
+        start_value = _parse_temporal(fields[start_keys[0]])
+        end_value = _parse_temporal(fields[end_keys[0]])
+        if start_value is not None and end_value is not None:
+            try:
+                if start_value >= end_value:
+                    invalid.append("结束时间必须晚于开始时间")
+            except TypeError:
+                invalid.append("开始时间与结束时间格式必须一致")
+    return missing, invalid
+
+
+def validation_contract(
+    template: dict[str, Any],
+    fields: dict[str, Any],
+    invalid_messages: list[str],
+) -> tuple[list[str], list[dict[str, str]]]:
+    """将内部校验消息转换为前端表单需要的字段级错误。"""
+    missing_keys: list[str] = []
+    invalid_fields: list[dict[str, str]] = []
+    for field in template_fields(template):
+        key = str(field.get("name") or "")
+        label = str(field.get("label") or key)
+        if field.get("required") and not has_field_value(fields.get(key)):
+            missing_keys.append(key)
+        for message in invalid_messages:
+            if (
+                message.startswith(label)
+                or (
+                    "开始时间" in message
+                    and any(marker in key.lower() for marker in ("start", "begin"))
+                )
+                or (
+                    "结束时间" in message
+                    and any(marker in key.lower() for marker in ("end", "finish"))
+                )
+            ):
+                item = {"field_key": key, "message": message}
+                if item not in invalid_fields:
+                    invalid_fields.append(item)
+    return missing_keys, invalid_fields
+
+
+def _actual_value(value: Any) -> Any:
+    if isinstance(value, dict) and "value" in value:
+        return value.get("value")
+    return value
+
+
+def _parse_temporal(value: Any) -> date | datetime | time | None:
+    value = _actual_value(value)
+    if isinstance(value, (date, datetime, time)):
+        return value
+    text = str(value).strip().replace("Z", "+00:00")
+    for parser in (datetime.fromisoformat, date.fromisoformat, time.fromisoformat):
+        try:
+            return parser(text)
+        except ValueError:
+            continue
+    return None
+
+
+def _validation_constraint(field: dict[str, Any], *keys: str) -> Any:
+    validation = field.get("validation")
+    sources = [validation] if isinstance(validation, dict) else []
+    sources.append(field)
+    for source in sources:
+        for key in keys:
+            value = source.get(key)
+            if value not in (None, ""):
+                return value
+    return None
 
 
 def normalize_erp_fields(data: Any) -> list[dict[str, Any]]:

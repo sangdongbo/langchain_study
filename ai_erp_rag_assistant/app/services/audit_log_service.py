@@ -9,19 +9,12 @@ from threading import Lock
 from typing import Any
 
 from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.services.sensitive_data import is_sensitive_field_name
 
 
 logger = logging.getLogger("ai_erp_rag_assistant.audit")
 _file_lock = Lock()
 
-_SECRET_KEYS = {
-    "authorization",
-    "cookie",
-    "password",
-    "refresh_token",
-    "secret",
-    "token",
-}
 _VALUE_CONTAINER_KEYS = {"fields", "form_data", "form_value", "submission_fields", "values"}
 
 
@@ -56,7 +49,7 @@ def sanitize_for_log(value: Any, *, parent_key: str = "") -> Any:
         result: dict[str, Any] = {}
         for key, item in value.items():
             normalized_key = str(key).lower()
-            if normalized_key in _SECRET_KEYS:
+            if is_sensitive_field_name(normalized_key):
                 result[str(key)] = "[REDACTED]"
             elif normalized_key == "body" and isinstance(item, dict):
                 result[str(key)] = summarize_request_body(item)

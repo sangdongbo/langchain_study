@@ -3,13 +3,13 @@ from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 
-from ai_erp_rag_assistant.app.api import (
+from ai_erp_rag_assistant.app.api.routes.sessions import (
     session_delete,
     session_list,
     session_messages,
     session_rename,
 )
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.api.schemas import (
     SessionDeleteRequest,
     SessionListRequest,
     SessionMessagesRequest,
@@ -30,7 +30,11 @@ def test_resumable_state_keeps_workflow_and_removes_credentials():
             "fields": {"reason": "就医"},
             "preview": {
                 "preview_id": "preview-1",
-                "nested": {"token": "secret-token"},
+                "nested": {
+                    "token": "secret-token",
+                    "access_token": "secret-access-token",
+                    "max_tokens": 2048,
+                },
             },
             "workflow_status": "preview_ready",
             "active_approval": True,
@@ -44,7 +48,7 @@ def test_resumable_state_keeps_workflow_and_removes_credentials():
 
     assert snapshot["template"]["template_id"] == "5904"
     assert snapshot["fields"] == {"reason": "就医"}
-    assert snapshot["preview"]["nested"] == {}
+    assert snapshot["preview"]["nested"] == {"max_tokens": 2048}
     assert snapshot["workflow_status"] == "preview_ready"
     assert "authorization" not in snapshot
     assert "user_context" not in snapshot
@@ -369,9 +373,9 @@ def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
             calls["delete"] = kwargs
             return True
 
-    monkeypatch.setattr("ai_erp_rag_assistant.app.api.session_repository", Repository())
+    monkeypatch.setattr("ai_erp_rag_assistant.app.api.routes.sessions.session_repository", Repository())
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.sessions.persistent_identity",
         lambda request, authorization, uid: (request, {}, "16", "verified-863"),
     )
 
@@ -428,11 +432,11 @@ def test_session_read_apis_use_verified_owner_and_pagination(monkeypatch):
 
 def test_session_read_api_reports_when_long_term_store_is_disabled(monkeypatch):
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api.session_repository",
+        "ai_erp_rag_assistant.app.api.routes.sessions.session_repository",
         SimpleNamespace(enabled=False),
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.sessions.persistent_identity",
         lambda request, authorization, uid: (request, {}, "16", "863"),
     )
 

@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from ai_erp_rag_assistant.app.api import execution_status
-from ai_erp_rag_assistant.app.schemas import ChatRequest, ExecutionStatusRequest
+from ai_erp_rag_assistant.app.api.routes.executions import execution_status
+from ai_erp_rag_assistant.app.api.schemas import ChatRequest, ExecutionStatusRequest
 from ai_erp_rag_assistant.app.services.execution_repository import (
     ExecutionRepository,
     ExecutionLeaseLostError,
@@ -18,6 +18,9 @@ from ai_erp_rag_assistant.app.services.execution_repository import (
 from ai_erp_rag_assistant.app.services.execution_runtime import (
     DurableExecutionContext,
     durable_node,
+)
+from ai_erp_rag_assistant.app.services.chat_execution_service import (
+    finalize_chat_execution,
 )
 
 
@@ -186,6 +189,45 @@ def test_durable_step_records_failure_before_propagating_error():
     ]
 
 
+def test_finalize_chat_execution_marks_durable_completion_failure():
+    """Run 完成写入失败时，JSON 和 SSE 共用逻辑必须返回可重试失败状态。"""
+
+    class Repository:
+        failed_state = None
+
+        @staticmethod
+        def complete_run(**kwargs):
+            raise RuntimeError("storage unavailable")
+
+        def fail_run(self, **kwargs):
+            self.failed_state = kwargs["state"]
+
+    repository = Repository()
+    context = DurableExecutionContext(
+        repository,
+        "r" * 32,
+        "o" * 32,
+        retry_count=2,
+    )
+
+    result = finalize_chat_execution(
+        {
+            "route": "approval_workflow",
+            "assistant_type": "approval",
+            "assistant_message": "已生成审批预览",
+        },
+        context,
+        None,
+    )
+
+    assert isinstance(result.error, RuntimeError)
+    assert result.state["execution_status"] == "failed"
+    assert result.state["execution_retry_count"] == 2
+    assert result.response.message == "执行失败，请稍后重试"
+    assert result.response.run_id == "r" * 32
+    assert repository.failed_state["execution_status"] == "failed"
+
+
 def test_durable_node_is_noop_without_execution_context():
     wrapped = durable_node("planner", lambda state: {"route": state["route"]})
 
@@ -201,15 +243,19 @@ def test_execution_checkpoint_removes_credentials_but_keeps_erp_result():
     snapshot = _execution_state(
         {
             "authorization": "Bearer secret",
-            "preview": {"preview_id": "p-1", "token": "secret"},
-            "erp_data": {"approval_id": "A-1"},
+            "preview": {
+                "preview_id": "p-1",
+                "token": "secret",
+                "client_secret": "secret-client-value",
+            },
+            "erp_data": {"approval_id": "A-1", "accessToken": "secret-access-token"},
             "user_context": {"raw_userinfo": {"mobile": "secret"}},
         }
     )
 
     assert "authorization" not in snapshot
     assert snapshot["preview"] == {"preview_id": "p-1"}
-    assert snapshot["erp_data"]["approval_id"] == "A-1"
+    assert snapshot["erp_data"] == {"approval_id": "A-1"}
     assert "user_context" not in snapshot
 
 
@@ -266,11 +312,11 @@ def test_execution_status_uses_verified_tenant_and_user(monkeypatch):
             }
 
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.executions.persistent_identity",
         lambda request, authorization, uid: (request, {}, "16", "verified-863"),
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.routes.executions.execution_repository",
+        "ai_erp_rag_assistant.app.api.routes.executions.execution_repository",
         Repository(),
     )
 
@@ -286,6 +332,7 @@ def test_execution_status_uses_verified_tenant_and_user(monkeypatch):
 
     assert response.status == "failed"
     assert response.recoverable is True
+    assert response.last_error_message == "ERP 服务暂时不可用，请稍后重试"
     assert captured == {
         "company_id": "16",
         "assistant_key": "approval-assistant",
@@ -299,7 +346,7 @@ def test_approval_chat_returns_durable_run_metadata_without_real_database(monkey
 
     from ai_erp_rag_assistant.app.database import get_optional_db_session
     from ai_erp_rag_assistant.app.main import app
-    from ai_erp_rag_assistant.app.routes import chat as chat_routes
+    from ai_erp_rag_assistant.app.api.routes import chat as chat_routes
 
     captured = {}
 
@@ -353,7 +400,7 @@ def test_approval_chat_returns_durable_run_metadata_without_real_database(monkey
             }
 
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.chat.persistent_identity",
         lambda request, authorization, uid: (
             request,
             {"company_id": "16", "uid": "863", "erp_mode": "remote"},
@@ -363,7 +410,12 @@ def test_approval_chat_returns_durable_run_metadata_without_real_database(monkey
     )
     monkeypatch.setattr(chat_routes, "session_repository", SessionRepository())
     monkeypatch.setattr(chat_routes, "execution_repository", ExecutionRepository())
-    monkeypatch.setattr(chat_routes, "stateless_workflow", Workflow())
+    workflow = Workflow()
+    monkeypatch.setattr(
+        chat_routes,
+        "_selected_workflows",
+        lambda *args, **kwargs: (workflow, workflow),
+    )
     app.dependency_overrides[get_optional_db_session] = lambda: None
     try:
         response = TestClient(app).post(

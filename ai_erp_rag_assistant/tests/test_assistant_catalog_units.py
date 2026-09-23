@@ -5,8 +5,8 @@ from ai_erp_rag_assistant.app.assistant_catalog import (
     assistant_type_for_key,
 )
 from ai_erp_rag_assistant.app.models import Assistant
-from ai_erp_rag_assistant.app.routes.assistants import assistant_list
-from ai_erp_rag_assistant.app.schemas import AssistantListRequest
+from ai_erp_rag_assistant.app.api.routes.assistants import assistant_list
+from ai_erp_rag_assistant.app.api.schemas import AssistantListRequest
 
 
 def test_assistant_type_is_derived_from_server_reserved_key():
@@ -16,7 +16,7 @@ def test_assistant_type_is_derived_from_server_reserved_key():
 
 def test_unified_assistant_list_merges_fixed_and_rag_assistants(monkeypatch):
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._persistent_identity",
+        "ai_erp_rag_assistant.app.api.routes.assistants.persistent_identity",
         lambda request, authorization, uid: (
             request,
             {"company_id": "16", "uid": "863"},

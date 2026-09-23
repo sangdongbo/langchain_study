@@ -239,7 +239,8 @@ class RagSearchRequest(BaseModel):
 class RagChatRequest(RagSearchRequest):
     """检索知识后调用 LLM 生成答案的请求。"""
 
-    system_context: str = Field(default="", max_length=4000)
+    # 仅兼容旧客户端；系统 Prompt 必须来自后台发布配置，路由不会使用该值。
+    system_context: str = Field(default="", max_length=4000, deprecated=True)
 
 
 class RagCitation(BaseModel):

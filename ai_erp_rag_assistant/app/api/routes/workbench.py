@@ -7,9 +7,8 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException
 
-# 统一 API 使用惰性代理，避免导入阶段与统一注册模块互相依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
-from ai_erp_rag_assistant.app.schemas import WorkbenchSummaryRequest, WorkbenchSummaryResponse
+from ai_erp_rag_assistant.app.api.dependencies import erp_user, with_header_identity
+from ai_erp_rag_assistant.app.api.schemas import WorkbenchSummaryRequest, WorkbenchSummaryResponse
 from ai_erp_rag_assistant.app.services.audit_log_service import write_audit_event
 from ai_erp_rag_assistant.app.tools.erp_tools import get_workbench_summary
 
@@ -24,9 +23,9 @@ def workbench_summary(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> WorkbenchSummaryResponse:
     """并行读取当前用户的布局、待办、审批、消息和今日考勤。"""
-    request = api_module._with_header_identity(request, authorization, uid)
+    request = with_header_identity(request, authorization, uid)
     try:
-        user = api_module._erp_user(request)
+        user = erp_user(request)
         data = get_workbench_summary(
             user=user,
             modules={item.strip().lower() for item in request.modules if item.strip()},

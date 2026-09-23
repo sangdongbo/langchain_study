@@ -25,8 +25,13 @@
 
 ```powershell
 cd D:\PythonProject\LearnOne\deep_agent_examples
+if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
 uv sync
+.\.venv\Scripts\Activate.ps1
 ```
+
+如果终端提示符仍是其他项目名，说明激活了错误的虚拟环境；执行上面的
+`deactivate` 和 `Activate.ps1` 后，提示符应显示 `(deep-agent-examples)`。
 
 真实演示需要先在 `.env` 中配置模型 API Key。只想确认代码是否正常时，直接运行表格中的离线测试命令；这些测试不调用真实模型，例如：
 

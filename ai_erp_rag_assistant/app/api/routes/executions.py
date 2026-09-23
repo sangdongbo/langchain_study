@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Header, HTTPException
 
-# 统一 API 使用惰性代理，避免 `app.api` 反向注册时读取到半初始化模块。
-from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.api.dependencies import persistent_identity
 from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
-from ai_erp_rag_assistant.app.schemas import (
+from ai_erp_rag_assistant.app.api.schemas import (
     ExecutionStatusRequest,
     ExecutionStatusResponse,
 )
@@ -27,7 +26,7 @@ def execution_status(
     uid: str | None = Header(default=None, alias="UID"),
 ) -> ExecutionStatusResponse:
     """查询当前登录用户的一次 ERP Agent 运行状态。"""
-    request, _, company_id, user_id = api_module._persistent_identity(
+    request, _, company_id, user_id = persistent_identity(
         request,
         authorization,
         uid,
@@ -52,4 +51,7 @@ def execution_status(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"读取 ERP Agent 运行失败：{exc}") from exc
+    if item.get("last_error_message"):
+        # 数据库存储详细原因用于运维，状态接口只返回稳定的用户可见提示。
+        item = {**item, "last_error_message": "ERP 服务暂时不可用，请稍后重试"}
     return ExecutionStatusResponse.model_validate(item)

@@ -4,12 +4,13 @@ from zipfile import ZipFile
 
 from starlette.requests import Request
 
-from ai_erp_rag_assistant.app.api import rag_ingest_document
+from ai_erp_rag_assistant.app.api.routes.rag import rag_ingest_document
 from ai_erp_rag_assistant.app.services.document_ingest_service import (
     build_chunk_rows,
     parse_document,
 )
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
+from ai_erp_rag_assistant.app.services.rag_ingest_service import run_ingest_pipeline
 
 
 def _request(body: bytes) -> Request:
@@ -115,7 +116,7 @@ def test_text_decoder_honors_utf16_bom_and_csv_quoted_newlines():
 
 def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monkeypatch):
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api.get_current_user",
+        "ai_erp_rag_assistant.app.api.routes.rag.get_current_user",
         lambda *args, **kwargs: {
             "company_id": "C001",
             "department": "研发部",
@@ -123,7 +124,7 @@ def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monk
         },
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._rag_runtime_config",
+        "ai_erp_rag_assistant.app.api.routes.rag.rag_runtime_config",
         lambda *args, **kwargs: type(
             "Runtime",
             (),
@@ -141,7 +142,8 @@ def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monk
         return len(rows)
 
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api.milvus_service.upsert_chunks", fake_upsert
+        "ai_erp_rag_assistant.app.services.rag_ingest_service.milvus_service.upsert_chunks",
+        fake_upsert,
     )
     response = asyncio.run(
         rag_ingest_document(
@@ -173,11 +175,11 @@ def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monk
 
 def test_document_ingest_uses_knowledge_base_chunk_defaults(monkeypatch):
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api.get_current_user",
+        "ai_erp_rag_assistant.app.api.routes.rag.get_current_user",
         lambda *args, **kwargs: {"company_id": "C001", "department": "研发部"},
     )
     monkeypatch.setattr(
-        "ai_erp_rag_assistant.app.api._rag_runtime_config",
+        "ai_erp_rag_assistant.app.api.routes.rag.rag_runtime_config",
         lambda *args, **kwargs: type(
             "Runtime",
             (),
@@ -196,8 +198,14 @@ def test_document_ingest_uses_knowledge_base_chunk_defaults(monkeypatch):
         captured["chunk_overlap"] = kwargs["chunk_overlap"]
         return ([{"text": "制度", "company_id": "C001"}], [])
 
-    monkeypatch.setattr("ai_erp_rag_assistant.app.api.build_chunk_rows", fake_build)
-    monkeypatch.setattr("ai_erp_rag_assistant.app.api.milvus_service.upsert_chunks", lambda rows, **kwargs: 1)
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.rag_ingest_service.build_chunk_rows",
+        fake_build,
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.rag_ingest_service.milvus_service.upsert_chunks",
+        lambda rows, **kwargs: 1,
+    )
 
     asyncio.run(
         rag_ingest_document(
@@ -209,6 +217,67 @@ def test_document_ingest_uses_knowledge_base_chunk_defaults(monkeypatch):
     )
 
     assert captured == {"chunk_size": 200, "chunk_overlap": 20}
+
+
+def test_ingest_pipeline_updates_stages_around_single_milvus_write(monkeypatch):
+    """应用服务统一维护阶段计数，路由不再重复编排写入流程。"""
+    stages = []
+
+    class Tracker:
+        @staticmethod
+        def stage(status, **values):
+            stages.append((status, values))
+
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.rag_ingest_service.build_chunk_rows",
+        lambda content, **kwargs: (
+            [
+                {"text": "第一页", "page": 1, "company_id": "C001"},
+                {"text": "第二页", "page": 2, "company_id": "C001"},
+            ],
+            [3],
+        ),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.rag_ingest_service.milvus_service.upsert_chunks",
+        lambda rows, **kwargs: len(rows),
+    )
+
+    result = asyncio.run(
+        run_ingest_pipeline(
+            b"document",
+            metadata={
+                "kind": "document",
+                "company_id": "C001",
+                "knowledge_base_key": "handbook",
+                "source": "policy.txt",
+                "chunk_size": 100,
+                "chunk_overlap": 10,
+            },
+            collection_name="c001_handbook",
+            tracker=Tracker(),
+        )
+    )
+
+    assert result.chunk_count == 2
+    assert result.inserted_count == 2
+    assert result.empty_pages == [3]
+    assert stages == [
+        ("parsing", {}),
+        (
+            "embedding",
+            {"total_pages": 3, "parsed_pages": 2, "chunk_count": 2},
+        ),
+        (
+            "completed",
+            {
+                "total_pages": 3,
+                "parsed_pages": 2,
+                "chunk_count": 2,
+                "inserted_chunk_count": 2,
+            },
+        ),
+    ]
 
 
 def test_milvus_upsert_embeds_rows_before_writing(monkeypatch):

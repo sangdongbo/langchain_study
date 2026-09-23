@@ -1,4 +1,5 @@
 import ai_erp_rag_assistant.app.config as config_module
+import ai_erp_rag_assistant.app.main as main_module
 
 
 def _clear_model_environment(monkeypatch):
@@ -77,6 +78,21 @@ def test_dashscope_endpoint_is_reused_for_embeddings(monkeypatch):
     assert settings.embedding_model == "text-embedding-v4"
 
 
+def test_explicit_embedding_dimension_overrides_provider_fallback(monkeypatch):
+    """通用变量是部署方的显式选择，不能被供应商兼容变量覆盖。"""
+    _clear_model_environment(monkeypatch)
+    monkeypatch.setattr(
+        config_module,
+        "dotenv_values",
+        lambda _path: {
+            "EMBEDDING_DIMENSIONS": "1536",
+            "DASHSCOPE_EMBEDDING_DIMENSIONS": "2048",
+        },
+    )
+
+    assert config_module.Settings.from_env().embedding_dimensions == 1536
+
+
 def test_openai_base_url_is_deepseek_fallback(monkeypatch):
     _clear_model_environment(monkeypatch)
     monkeypatch.setattr(
@@ -106,6 +122,62 @@ def test_process_environment_overrides_dotenv(monkeypatch):
     settings = config_module.Settings.from_env()
 
     assert settings.erp_base_url == "https://process.example"
+
+
+def test_public_health_does_not_expose_internal_resource_names(monkeypatch):
+    settings = config_module.Settings(
+        milvus_uri="http://milvus.internal:19530",
+        milvus_collection="private_collection",
+        langsmith_project="private-project",
+    )
+    monkeypatch.setattr(main_module, "get_settings", lambda: settings)
+
+    result = main_module.health()
+
+    assert result["milvus_configured"] == "true"
+    assert "milvus_uri" not in result
+    assert "milvus_collection" not in result
+    assert "langsmith_project" not in result
+
+
+def test_server_error_handler_hides_caused_exception_and_keeps_retry_fields(monkeypatch):
+    """底层异常不出现在 5xx 响应，导入补偿所需字段仍然保留。"""
+    from fastapi import FastAPI, HTTPException
+    from fastapi.testclient import TestClient
+    from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    test_app = FastAPI()
+    test_app.add_exception_handler(
+        StarletteHTTPException,
+        main_module.safe_http_exception_handler,
+    )
+    monkeypatch.setattr(main_module, "write_audit_event", lambda *args, **kwargs: None)
+
+    @test_app.get("/failed")
+    def failed():
+        try:
+            raise RuntimeError("Milvus channel=private-channel")
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "message": str(exc),
+                    "status": "failed",
+                    "retryable": True,
+                    "job_id": 7,
+                },
+            ) from exc
+
+    response = TestClient(test_app).get("/failed")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == {
+        "message": "服务暂时不可用，请稍后重试",
+        "status": "failed",
+        "retryable": True,
+        "job_id": 7,
+    }
+    assert "private-channel" not in response.text
 
 
 def test_langsmith_private_endpoint_and_workspace_are_loaded(monkeypatch):

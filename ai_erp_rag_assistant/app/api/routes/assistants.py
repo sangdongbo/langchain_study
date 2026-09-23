@@ -8,12 +8,11 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-# 统一 API 通过惰性代理解析，避免直接导入本模块时循环依赖。
-from ai_erp_rag_assistant.app.api_compat import api_module
+from ai_erp_rag_assistant.app.api.dependencies import persistent_identity
 from ai_erp_rag_assistant.app.assistant_catalog import approval_assistant_item
 from ai_erp_rag_assistant.app.database import get_optional_db_session
-from ai_erp_rag_assistant.app.rag_admin_repository import RagAdminRepository, row_dict
-from ai_erp_rag_assistant.app.schemas import AssistantListRequest
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagAdminRepository, row_dict
+from ai_erp_rag_assistant.app.api.schemas import AssistantListRequest
 
 
 router = APIRouter(tags=["Assistants"])
@@ -27,9 +26,7 @@ def assistant_list(
     db: Annotated[Session | None, Depends(get_optional_db_session)] = None,
 ) -> dict[str, Any]:
     """合并固定审批助手和当前公司的 RAG 助手。"""
-    _, _, company_id, _ = api_module._persistent_identity(
-        request, authorization, uid
-    )
+    _, _, company_id, _ = persistent_identity(request, authorization, uid)
     items: list[dict[str, Any]] = []
     if request.status in (None, "active"):
         items.append(approval_assistant_item())

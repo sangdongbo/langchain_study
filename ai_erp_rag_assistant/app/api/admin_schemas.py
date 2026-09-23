@@ -6,17 +6,16 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ai_erp_rag_assistant.app.services.sensitive_data import is_sensitive_field_name
+
 
 def _reject_inline_secrets(*values: Any) -> None:
     """递归阻止密码、Token 等凭据直接写入普通 JSON 配置。"""
-    forbidden = {"api_key", "authorization", "cookie", "password", "secret", "token"}
-
     def visit(value: Any) -> None:
         """递归检查嵌套字典和列表中的敏感键名。"""
         if isinstance(value, dict):
             for key, item in value.items():
-                normalized = str(key).lower().replace("-", "_")
-                if any(normalized == name or normalized.endswith(f"_{name}") for name in forbidden):
+                if is_sensitive_field_name(key):
                     raise ValueError(f"{key} 不得直接写入配置，请改用密钥引用")
                 visit(item)
         elif isinstance(value, list):

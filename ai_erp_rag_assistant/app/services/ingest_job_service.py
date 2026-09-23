@@ -14,7 +14,7 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from ai_erp_rag_assistant.app.config import get_settings
-from ai_erp_rag_assistant.app.rag_admin_repository import (
+from ai_erp_rag_assistant.app.repositories.rag_admin import (
     RagAdminRepository,
     row_dict,
 )

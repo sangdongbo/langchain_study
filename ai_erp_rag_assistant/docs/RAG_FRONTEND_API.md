@@ -113,8 +113,7 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
 ```json
 {
   "status": "ok",
-  "milvus_uri": "http://127.0.0.1:19530",
-  "milvus_collection": "erp_knowledge_chunks_v2",
+  "milvus_configured": "true",
   "erp_mode": "remote",
   "erp_read_mode": "remote",
   "erp_write_mode": "disabled",
@@ -123,19 +122,21 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
   "mysql_configured": "false",
   "langsmith_tracing": "false",
   "langsmith_configured": "false",
-  "langsmith_project": "ai-erp-rag-assistant",
   "langsmith_endpoint_configured": "false",
   "langsmith_workspace_configured": "false"
 }
 ```
 
-前端只需要关注 `status`、`llm_configured`、`embedding_configured`、`mysql_configured`。
-不要把响应中的内部地址或配置值展示给普通用户。
+健康检查不会返回 Milvus 内网地址、Collection 名、LangSmith 项目名或任何凭据。前端通常只需
+关注 `status`、`milvus_configured`、`llm_configured`、`embedding_configured` 和
+`mysql_configured`。
 
 ## 4. Assistant 管理接口
 
 管理接口统一前缀：`/api/rag/admin`。推荐只在请求头携带登录态；`company_id`、`user_id` 可选，
-服务端会从 ERP 已验证身份补齐公司并执行租户校验。兼容旧页面时仍可显式传入：
+服务端会从 ERP 已验证身份补齐公司并执行租户校验。调用用户还必须拥有
+`RAG_ADMIN_PERMISSION_TAGS` 配置的至少一个权限或角色标签，默认是 `knowledge:admin`；
+请求体不能自行声明管理权限。兼容旧页面时仍可显式传入：
 
 ```json
 {
@@ -986,7 +987,7 @@ Content-Type: application/pdf
 
 ### `POST /api/rag/chat`
 
-请求体与搜索基本相同，增加可选的 `system_context`：
+请求体与搜索接口相同：
 
 ```json
 {
@@ -996,14 +997,14 @@ Content-Type: application/pdf
   "assistant_key": "employee-rag",
   "search_scope": "company_enabled",
   "knowledge_base_keys": [],
-  "top_k": 5,
-  "system_context": "请用简洁、正式的中文回答。"
+  "top_k": 5
 }
 ```
 
 服务端先执行向量搜索，再将检索证据交给真实 LLM。已发布的
 `knowledge_answer/primary` Prompt 和 Assistant 模型配置会自动合并使用，Prompt 的模型
-参数优先于 Assistant 配置。
+参数优先于 Assistant 配置。旧客户端提交的 `system_context` 字段仍会被接受，但服务端不会
+把普通用户输入提升为 System Message；语气和格式要求应在后台 Prompt 中配置并发布。
 
 响应：
 
@@ -1236,7 +1237,7 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
   "state_version": 8,
   "retry_count": 0,
   "last_error_code": "step_failed",
-  "last_error_message": "ERP 服务暂时不可用",
+  "last_error_message": "ERP 服务暂时不可用，请稍后重试",
   "recoverable": true,
   "lease_expires_at": null,
   "started_at": "2026-09-08T10:00:00",
@@ -1459,6 +1460,11 @@ while (true) {
   "detail": "错误说明"
 }
 ```
+
+生产环境不会把 MySQL、Milvus、ERP 或模型供应商的底层异常返回给前端。由底层异常触发的
+`5xx` 统一返回 `服务暂时不可用，请稍后重试`；结构化导入错误仍保留任务 ID、阶段和
+`retryable` 等补偿字段，但 `message/error_message` 使用相同公开文案。`/api/chat` 的 JSON
+响应和 SSE `error/final` 事件使用 `执行失败，请稍后重试`，详细原因仅写入服务端脱敏审计日志。
 
 常见状态码：
 

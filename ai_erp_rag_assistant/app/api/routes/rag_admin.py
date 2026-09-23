@@ -9,14 +9,15 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from ai_erp_rag_assistant.app.api.dependencies import verified_access_tags
 from ai_erp_rag_assistant.app.config import get_settings
 from ai_erp_rag_assistant.app.database import DatabaseNotConfiguredError, get_db_session
-from ai_erp_rag_assistant.app.rag_admin_repository import (
+from ai_erp_rag_assistant.app.repositories.rag_admin import (
     AdminNotFoundError,
     RagAdminRepository,
     row_dict,
 )
-from ai_erp_rag_assistant.app.rag_admin_schemas import (
+from ai_erp_rag_assistant.app.api.admin_schemas import (
     AdminContext,
     AdminListRequest,
     AdminPublishRequest,
@@ -80,6 +81,10 @@ def _identity(
         request.company_id.strip() and company_id != request.company_id.strip()
     ):
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
+    required_tags = set(get_settings().rag_admin_permission_tags)
+    if required_tags and required_tags.isdisjoint(verified_access_tags(user)):
+        # 管理权限只取 ERP 已验证身份，不能由请求体或公司成员身份自动推导。
+        raise HTTPException(status_code=403, detail="当前用户没有 RAG 管理权限")
     actor = str(user.get("uid") or user.get("user_id") or request.uid or request.user_id).strip()
     return company_id, actor
 

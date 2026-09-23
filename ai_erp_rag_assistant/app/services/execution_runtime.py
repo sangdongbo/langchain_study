@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from langchain_core.runnables import RunnableConfig
 
-from ai_erp_rag_assistant.app.services.execution_repository import ExecutionRepository
+if TYPE_CHECKING:
+    from ai_erp_rag_assistant.app.services.execution_repository import ExecutionRepository
 
 
 @dataclass

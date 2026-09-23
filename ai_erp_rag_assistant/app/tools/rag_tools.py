@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ai_erp_rag_assistant.app.rag_admin_repository import RagRuntimeConfig
+from ai_erp_rag_assistant.app.repositories.rag_admin import RagRuntimeConfig
 from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 from ai_erp_rag_assistant.app.services.model_service import model_service
 from ai_erp_rag_assistant.app.config import get_settings

@@ -7,6 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from ai_erp_rag_assistant.app.config import get_settings
+from ai_erp_rag_assistant.app.services.sensitive_data import is_sensitive_field_name
 
 
 _STATE_KEYS = {
@@ -28,15 +29,6 @@ _STATE_KEYS = {
     "template_candidates",
     "template_selection_required",
     "workflow_status",
-}
-_SECRET_KEYS = {
-    "api_key",
-    "authorization",
-    "cookie",
-    "password",
-    "refresh_token",
-    "secret",
-    "token",
 }
 _CLOSED_STATUSES = {"submitted", "cancelled", "blocked"}
 
@@ -769,7 +761,7 @@ def _strip_secrets(value: Any) -> Any:
         return {
             str(key): _strip_secrets(item)
             for key, item in value.items()
-            if str(key).lower() not in _SECRET_KEYS and str(key).lower() != "raw_userinfo"
+            if not is_sensitive_field_name(key) and str(key).lower() != "raw_userinfo"
         }
     if isinstance(value, list):
         return [_strip_secrets(item) for item in value]
