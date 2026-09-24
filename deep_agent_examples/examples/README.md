@@ -18,6 +18,12 @@
 | [parallel_review](parallel_review/README.md) | 并行委派三个独立采购审查任务 | `uv run python examples/parallel_review/run.py` | `uv run python examples/parallel_review/test.py` |
 | [skill_versioning](skill_versioning/README.md) | 按 thread 隔离和切换 Skill 版本 | `uv run python examples/skill_versioning/run.py --version v2` | `uv run python examples/skill_versioning/test.py` |
 | [tool_failure_recovery](tool_failure_recovery/README.md) | 工具失败后的自动重试和降级 | `uv run python examples/tool_failure_recovery/run.py --failures 2` | `uv run python examples/tool_failure_recovery/test.py` |
+| [memory](memory/README.md) | AGENTS.md Memory、StoreBackend 与跨 thread 记忆 | `uv run python examples/memory/run.py` | `uv run python examples/memory/test.py` |
+| [planning](planning/README.md) | TodoListMiddleware 与复杂任务规划 | `uv run python examples/planning/run.py` | `uv run python examples/planning/test.py` |
+| [runtime_context](runtime_context/README.md) | context_schema、租户与角色运行时上下文 | `uv run python examples/runtime_context/run.py` | `uv run python examples/runtime_context/test.py` |
+| [streaming](streaming/README.md) | v2 事件流、updates/messages 与子图 namespace | `uv run python examples/streaming/run.py` | `uv run python examples/streaming/test.py` |
+| [composite_backend](composite_backend/README.md) | StateBackend 与 StoreBackend 按路径路由 | `uv run python examples/composite_backend/run.py` | `uv run python examples/composite_backend/test.py` |
+| [feishu_mcp](feishu_mcp/README.md) | 外部飞书 MCP 工具发现、只读白名单与 Agent 总结 | `uv run python examples/feishu_mcp/run.py` | `uv run python examples/feishu_mcp/test.py` |
 
 ## 怎么启动
 

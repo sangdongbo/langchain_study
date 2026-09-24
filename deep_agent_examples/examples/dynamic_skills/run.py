@@ -30,23 +30,27 @@ from deep_agent_examples.config import (
 )
 
 
+# 未传入 --prompt 时使用的默认问题，只描述“要做什么”，不决定 Skill 权限。
 DEFAULT_PROMPT = (
     "按本会话的采购评审技能，评审研发平台部采购 4 台 AI 推理服务器，"
     "单价 68000 元，供应商北辰智能硬件。"
 )
 
+# 每种 --task-type 对应的默认问题；传入 --prompt 时会覆盖这里的内容。
 TASK_PROMPTS = {
     "purchase": DEFAULT_PROMPT,
     "supplier-risk": "调查北辰智能硬件供应商和 AI 推理服务器库存风险。",
 }
 
-# 身份能使用哪些 Skill，由服务端可信角色决定。
+# 角色权限表：限制某个身份“最多能使用哪些 Skill”。
+# 生产环境中的 role 必须来自服务端认证结果，不能相信用户或模型自行声明的身份。
 ROLE_SKILLS = {
     "buyer": {"procurement-review"},
     "risk-reviewer": {"procurement-review", "supplier-research"},
 }
 
-# 当前业务任务允许哪些 Skill，防止角色权限被用于无关场景。
+# 任务权限表：限制当前业务场景“允许使用哪些 Skill”。
+# 即使角色拥有更多 Skill，执行某项任务时也只能使用该任务白名单中的 Skill。
 TASK_SKILLS = {
     "purchase": {"procurement-review"},
     "supplier-risk": {"supplier-research"},
@@ -61,7 +65,9 @@ class TrustedIdentity:
 
 def skill_files_for(identity: TrustedIdentity, task_type: str) -> dict:
     """Return only Skills allowed by both the trusted role and task policy."""
-    # 必须同时满足角色权限和任务策略；客户端文本不能直接指定任意 Skill。
+    # 最终可用 Skill = 角色允许的 Skill ∩ 当前任务允许的 Skill。
+    # 例如 risk-reviewer 执行 supplier-risk 时，最终只能加载 supplier-research；
+    # buyer 执行 supplier-risk 时交集为空，因此会在下方直接拒绝执行。
     selected = ROLE_SKILLS.get(identity.role, set()) & TASK_SKILLS.get(task_type, set())
     if not selected:
         raise PermissionError(

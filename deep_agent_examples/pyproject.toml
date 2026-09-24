@@ -13,6 +13,11 @@ dependencies = [
     "python-dotenv>=1.2.2,<2",
 ]
 
+[project.optional-dependencies]
+mcp = [
+    "langchain[mcp]>=1.3.18,<2",
+]
+
 [project.scripts]
 deep-agent-example = "deep_agent_examples.cli:main"
 

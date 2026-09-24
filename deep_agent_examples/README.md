@@ -1,6 +1,8 @@
 # Deep Agents 可运行示例
 
-这个目录把 Deep Agents 文档中的关键概念做成可启动的小示例。所有业务工具都使用内存 mock 数据，不连接 ERP、数据库或向量库。
+这个目录把 Deep Agents 文档中的关键概念做成可启动的小示例。除单独的飞书 MCP 专题
+外，业务工具都使用内存 mock 数据，不连接 ERP、数据库或向量库；飞书专题需要用户
+自行提供外部 MCP Server 地址。
 
 运行方式有两种：
 
@@ -21,6 +23,12 @@ examples/
 |-- hitl_decisions/       # approve、edit、reject 三种人工决策
 |-- lifecycle/            # README.md + run.py + test.py
 |-- parallel_review/      # 同一轮并行委派三个审查子 Agent
+|-- memory/               # AGENTS.md Memory 与跨 thread Store
+|-- planning/             # TodoListMiddleware 复杂任务规划
+|-- runtime_context/      # context_schema 与请求级租户上下文
+|-- streaming/            # v2 事件流与子图 namespace
+|-- composite_backend/    # StateBackend/StoreBackend 路径路由
+|-- feishu_mcp/           # 外部飞书 MCP 工具发现与只读白名单
 |-- skill_versioning/     # Skill 版本、metadata 缓存与 thread 隔离
 `-- tool_failure_recovery/ # 工具重试、耗尽和降级 ToolMessage
 ```
@@ -61,6 +69,47 @@ examples/
 - [工具失败恢复](examples/tool_failure_recovery/README.md)
 - [Skill 版本管理](examples/skill_versioning/README.md)
 - [HITL 多种审核决策](examples/hitl_decisions/README.md)
+- [Memory 与 AGENTS.md](examples/memory/README.md)
+- [Todo 任务规划](examples/planning/README.md)
+- [Runtime Context 与租户边界](examples/runtime_context/README.md)
+- [Streaming 与子 Agent 事件](examples/streaming/README.md)
+- [CompositeBackend 路由](examples/composite_backend/README.md)
+- [飞书 MCP 工具](examples/feishu_mcp/README.md)
+
+## 1.1 与官方 Deep Agents 能力对照
+
+官方文档的能力分类包括执行环境、上下文管理、任务委派、人工控制和流式输出。
+当前项目已经覆盖主要核心机制，但不是官方文档的全部 API 示例：
+
+| 官方能力 | 当前状态 | 对应位置或说明 |
+| --- | --- | --- |
+| 自定义 Tools | 已覆盖 | `tool_agent`、`deep_agent_examples/tools.py` |
+| 虚拟文件系统 | 已覆盖 | `backend_agent`、`dynamic_skill_agent` 使用 `StateBackend` |
+| 文件权限与人工审批 | 已覆盖 | `hitl_harness_agent` 的 `permissions` 和 `interrupt_on` |
+| 本地 Shell | 已覆盖（仅可信本机） | `local_shell_agent`；不是操作系统级沙箱 |
+| LangSmith / OpenSandbox 沙箱 | 已覆盖（可选） | `cloud_sandbox.py`、`optional_opensandbox/` |
+| Skills 与渐进式加载 | 已覆盖 | `skills/`、`examples/dynamic_skills/` |
+| SubAgent 委派 | 已覆盖 | isolated/fork、CompiledSubAgent、AsyncSubAgent |
+| Checkpoint 与恢复 | 已覆盖 | `examples/durable_resume/`、`examples/hitl_decisions/` |
+| 并行委派与工具重试 | 已覆盖 | `parallel_review`、`tool_failure_recovery` |
+| Summarization / context offloading | 框架默认存在，暂无专题 | `create_deep_agent` 默认安装摘要中间件；项目没有专门展示长上下文触发摘要的例子 |
+| 自定义 Middleware / Harness Profile | 已覆盖 | `lifecycle.py` 的 Middleware、`graphs.py` 的 `register_harness_profile` |
+| Prompt Caching | 框架已注册，当前模型通常不生效 | `create_deep_agent` 会注册 provider-specific caching；DeepSeek/OpenAI 兼容配置没有 Anthropic/Bedrock 缓存示例 |
+| Memory（`AGENTS.md`） | 已覆盖 | `examples/memory/` 展示 `MemoryMiddleware`、`StoreBackend` 和跨 thread 记忆 |
+| Task planning（`write_todos`） | 已覆盖 | `examples/planning/` 显式加入 `TodoListMiddleware` |
+| Streaming / `stream.subgraphs` | 已覆盖 | `examples/streaming/` 展示 v2 `updates/messages` 和子图 namespace |
+| MCP 工具 | 已覆盖（可选依赖） | `examples/feishu_mcp/` 使用 `langchain.mcp.MCPAdapter` 连接外部飞书 MCP Server；系统 Codex 的 `mcp__lark_mcp__...` 仅作为能力参考，不能从 Python 直接调用 |
+| Interpreter / `eval` | 当前版本不可直接照搬 | 官方新文档有 Interpreter；本项目锁定的 `deepagents 0.7.x` 没有对应 `interpreter` 参数 |
+| Filesystem、Store、Composite Backend | 已覆盖（核心组合） | `examples/memory/` 展示 Store，`examples/composite_backend/` 展示路径路由；FilesystemBackend 仍未单独演示 |
+| Structured output（`response_format`） | 未覆盖 | 当前示例只返回普通文本，没有验证 `structured_response` |
+| Runtime context（`context_schema`） | 已覆盖 | `examples/runtime_context/` 展示 `ToolRuntime.context` 读取租户、角色和功能开关 |
+
+因此，当前目录适合作为“核心机制学习和本地验证项目”，不能宣称已经覆盖 Deep Agents
+官方文档的全部能力。后续若要继续同步，建议按这个顺序补：
+
+1. Structured output：用 Pydantic schema 验证 `structured_response`，让模型输出可以被程序可靠消费。
+2. FilesystemBackend：补充直接映射本机目录的示例，并明确安全边界。
+3. Interpreter 与更多 Backend：等依赖版本与官方文档版本对齐后再实现，避免 API 版本错配。
 
 ## 2. 安装和配置
 
@@ -71,6 +120,15 @@ if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
 uv sync
 .\.venv\Scripts\Activate.ps1
 ```
+
+只有运行飞书 MCP 专题时才需要额外安装 FastMCP 客户端：
+
+```powershell
+uv sync --extra mcp
+```
+
+普通专题不需要这个可选依赖；飞书 MCP 的 URL、请求头和只读工具白名单见
+[飞书 MCP 工具](examples/feishu_mcp/README.md)。
 
 如果终端原来显示 `(ai-erp-rag-assistant)` 等其他项目环境，上面的
 `deactivate` 会先退出旧环境，再激活当前项目的 `deep-agent-examples` 环境，
@@ -311,6 +369,12 @@ uv run python examples/parallel_review/test.py
 uv run python examples/tool_failure_recovery/test.py
 uv run python examples/skill_versioning/test.py
 uv run python examples/hitl_decisions/test.py
+uv run python examples/memory/test.py
+uv run python examples/planning/test.py
+uv run python examples/runtime_context/test.py
+uv run python examples/streaming/test.py
+uv run python examples/composite_backend/test.py
+uv run python examples/feishu_mcp/test.py
 ```
 
-第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、三种 SubAgent、Checkpoint 恢复、并行委派、工具重试、Skill 版本缓存和 HITL 决策；全部不调用真实模型或 LangSmith。
+第一条验证 11 个 graph 都可导入、`langgraph.json` 注册一致、mock 工具结果正确、生命周期 reducer 和动态 Skill 文件存在。其余脚本使用 Fake Model、编译后的 StateGraph、内存 Store 或 Fake Agent Protocol client，分别验证 Dynamic Skills、生命周期、三种 SubAgent、Checkpoint 恢复、并行委派、工具重试、Skill 版本缓存、HITL、Memory、Todo 规划、Runtime Context、Streaming 和 CompositeBackend；全部不调用真实模型或 LangSmith。
