@@ -12,7 +12,7 @@ from typing import Any, Literal
 from sqlalchemy import func, inspect, or_, select, update
 from sqlalchemy.orm import Session
 
-from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
+from ai_erp_rag_assistant.app.assistant_catalog import SYSTEM_ASSISTANT_KEYS
 
 from ai_erp_rag_assistant.app.models import (
     Assistant,
@@ -196,8 +196,8 @@ class RagAdminRepository:
 
     def create_assistant(self, company_id: str, assistant_key: str, name: str, created_by: str) -> Assistant:
         """在指定公司内创建 Assistant。"""
-        if assistant_key.strip() == APPROVAL_ASSISTANT_KEY:
-            raise ValueError("该 assistant_key 为系统审批助手保留键")
+        if assistant_key.strip() in SYSTEM_ASSISTANT_KEYS:
+            raise ValueError("该 assistant_key 为系统助手保留键")
         return self._save(
             Assistant(
                 company_id=self._company(company_id),
@@ -211,7 +211,7 @@ class RagAdminRepository:
         """按公司列出未删除的 Assistant，可选状态过滤。"""
         statement = select(Assistant).where(
             Assistant.company_id == self._company(company_id),
-            Assistant.assistant_key != APPROVAL_ASSISTANT_KEY,
+            Assistant.assistant_key.notin_(SYSTEM_ASSISTANT_KEYS),
             Assistant.deleted_at.is_(None),
         )
         if status:

@@ -40,7 +40,13 @@ def test_root_workflow_composes_business_subgraphs():
 
     nodes = set(graph.get_graph().nodes)
 
-    assert {"rag_retrieval", "erp_status", "approval", "answer_with_llm"} <= nodes
+    assert {
+        "rag_retrieval",
+        "erp_status",
+        "customer_management",
+        "approval",
+        "answer_with_llm",
+    } <= nodes
     assert "validate_and_preview" not in nodes
 
 
@@ -549,6 +555,32 @@ def test_approval_assistant_keeps_draft_when_knowledge_route_is_blocked(monkeypa
     assert planned["active_approval"] is True
 
 
+def test_customer_assistant_only_allows_customer_route(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.model_service.plan",
+        lambda *args, **kwargs: AgentPlan(
+            route="customer_management",
+            query="本周客户跟进",
+        ),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.graph.workflow.write_audit_event",
+        lambda *args, **kwargs: None,
+    )
+
+    planned = agent_planner(
+        {
+            "assistant_type": "customer",
+            "user_message": "本周跟进了哪些客户",
+            "tool_calls": [],
+        },
+        {"configurable": {"rag_runtime": None}},
+    )
+
+    assert planned["route"] == "customer_management"
+    assert not planned["plan"].get("scope_blocked")
+
+
 def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
     from ai_erp_rag_assistant.app.database import get_optional_db_session
     from ai_erp_rag_assistant.app.main import app
@@ -619,6 +651,61 @@ def test_approval_assistant_skips_rag_runtime_and_mysql_sessions(monkeypatch):
     assert response.json()["assistant_type"] == "approval"
     assert calls["state"]["assistant_type"] == "approval"
     assert calls["config"]["configurable"]["rag_runtime"] is None
+
+
+def test_chat_maps_workflow_initialization_failure(monkeypatch):
+    """模型或编排器初始化失败时，聊天接口应返回稳定的 503。"""
+    from ai_erp_rag_assistant.app.api.routes import chat as chat_routes
+    from ai_erp_rag_assistant.app.api.schemas import ChatRequest
+    from ai_erp_rag_assistant.app.assistant_catalog import APPROVAL_ASSISTANT_KEY
+
+    monkeypatch.setattr(
+        chat_routes,
+        "get_settings",
+        lambda: SimpleNamespace(
+            assistant_key=APPROVAL_ASSISTANT_KEY,
+            orchestrator="deepagent",
+        ),
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "persistent_identity",
+        lambda request, authorization, uid: (
+            request,
+            {"company_id": "16", "uid": "863", "permissions": []},
+            "16",
+            "863",
+        ),
+    )
+    monkeypatch.setattr(
+        type(chat_routes.session_repository),
+        "enabled",
+        property(lambda self: False),
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "_selected_workflows",
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("model unavailable")),
+    )
+    monkeypatch.setattr(chat_routes, "write_audit_event", lambda *args, **kwargs: None)
+
+    try:
+        chat_routes.chat(
+            ChatRequest(
+                message="你好",
+                assistant_key=APPROVAL_ASSISTANT_KEY,
+                user_id="863",
+                session_id="init-error",
+            ),
+            None,
+            None,
+            None,
+        )
+    except Exception as exc:
+        assert getattr(exc, "status_code", None) == 503
+        assert getattr(exc, "detail", "") == "聊天工作流初始化失败"
+    else:
+        raise AssertionError("工作流初始化失败必须映射为 HTTP 503")
 
 
 def test_explicit_confirmation_skips_planner_for_frozen_preview():

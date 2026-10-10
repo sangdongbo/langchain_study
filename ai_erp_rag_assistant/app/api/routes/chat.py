@@ -62,10 +62,10 @@ def _deepagent_workflow(
     system_context: str = "",
 ) -> Any:
     """按助手类型惰性创建 Harness，未启用时不会初始化额外模型。"""
-    if assistant_type not in {"rag", "approval"}:
+    if assistant_type not in {"rag", "approval", "customer"}:
         raise ValueError(f"不支持的助手类型：{assistant_type}")
     return create_deepagent_workflow(
-        cast(Literal["rag", "approval"], assistant_type),
+        cast(Literal["rag", "approval", "customer"], assistant_type),
         model_overrides=json.loads(model_overrides_json),
         system_context=system_context,
         with_checkpointer=with_checkpointer,
@@ -372,7 +372,22 @@ def chat(
         durable_execution = claim.context
         if claim.completed_response is not None:
             # Run 已完成但聊天消息可能因上次进程退出尚未落库，先补写再返回。
-            completed_response = ChatResponse.model_validate(claim.completed_response)
+            try:
+                completed_response = ChatResponse.model_validate(claim.completed_response)
+            except Exception as exc:
+                write_audit_event(
+                    "execution.completed_response.invalid",
+                    {
+                        "company_id": resolved_company,
+                        "assistant_key": assistant_key,
+                        "request_id": request.request_id,
+                        "error_type": type(exc).__name__,
+                    },
+                )
+                raise HTTPException(
+                    status_code=503,
+                    detail="ERP Durable Execution 缓存响应无效",
+                ) from exc
             _save_exchange(
                 request,
                 assistant_key,
@@ -419,12 +434,29 @@ def chat(
     # RAG Assistant 的已发布 Prompt/模型配置要在创建 DeepAgent 前注入；
     # LangGraph 模式仍通过 RunnableConfig 使用同一份 runtime。缓存命中已经提前返回，
     # 因此无效请求不会因为初始化模型失败而遮蔽可直接返回的历史结果。
-    memory_workflow, persistent_workflow = _selected_workflows(
-        settings.orchestrator,
-        assistant_type,
-        model_overrides=rag_runtime.model_overrides if rag_runtime else None,
-        system_context=rag_runtime.system_context if rag_runtime else "",
-    )
+    try:
+        memory_workflow, persistent_workflow = _selected_workflows(
+            settings.orchestrator,
+            assistant_type,
+            model_overrides=rag_runtime.model_overrides if rag_runtime else None,
+            system_context=rag_runtime.system_context if rag_runtime else "",
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        # 初始化失败可能来自模型或 Checkpointer；详细原因只进入脱敏审计。
+        write_audit_event(
+            "chat.workflow.init_error",
+            {
+                "assistant_key": assistant_key,
+                "assistant_type": assistant_type,
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:300],
+            },
+        )
+        raise HTTPException(status_code=503, detail="聊天工作流初始化失败") from exc
     thread_id = _thread_id(request, assistant_key)
     config: RunnableConfig = {
         # 运行时对象仅在本次 Graph 调用中传递，避免把 Prompt 和模型参数写入会话存储。

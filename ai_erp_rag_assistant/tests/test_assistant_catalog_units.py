@@ -2,6 +2,7 @@ from types import SimpleNamespace
 
 from ai_erp_rag_assistant.app.assistant_catalog import (
     APPROVAL_ASSISTANT_KEY,
+    CUSTOMER_ASSISTANT_KEY,
     assistant_type_for_key,
 )
 from ai_erp_rag_assistant.app.models import Assistant
@@ -11,6 +12,7 @@ from ai_erp_rag_assistant.app.api.schemas import AssistantListRequest
 
 def test_assistant_type_is_derived_from_server_reserved_key():
     assert assistant_type_for_key(APPROVAL_ASSISTANT_KEY) == "approval"
+    assert assistant_type_for_key(CUSTOMER_ASSISTANT_KEY) == "customer"
     assert assistant_type_for_key("employee-rag") == "rag"
 
 
@@ -48,7 +50,7 @@ def test_unified_assistant_list_merges_fixed_and_rag_assistants(monkeypatch):
         db=FakeSession(),
     )
 
-    assert response["count"] == 2
+    assert response["count"] == 3
     assert response["items"][0] == {
         "id": None,
         "assistant_key": "approval-assistant",
@@ -57,5 +59,13 @@ def test_unified_assistant_list_merges_fixed_and_rag_assistants(monkeypatch):
         "is_system": True,
         "status": "active",
     }
-    assert response["items"][1]["assistant_type"] == "rag"
-    assert response["items"][1]["is_system"] is False
+    assert response["items"][1] == {
+        "id": None,
+        "assistant_key": "customer-assistant",
+        "name": "客户管理助手",
+        "assistant_type": "customer",
+        "is_system": True,
+        "status": "active",
+    }
+    assert response["items"][2]["assistant_type"] == "rag"
+    assert response["items"][2]["is_system"] is False

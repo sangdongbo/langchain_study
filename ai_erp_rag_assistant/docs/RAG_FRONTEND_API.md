@@ -20,6 +20,14 @@ const API_BASE_URL = import.meta.env.VITE_RAG_API_BASE_URL;
 FastAPI 自动生成的交互式接口页：`GET /docs`；原始 OpenAPI JSON：`GET /openapi.json`。
 本文档是面向页面开发的稳定使用说明，字段发生变化时以服务端 OpenAPI 为准。
 
+### 浏览器跨域预检
+
+服务端已统一注册 CORS 中间件，允许的前端来源可使用 `Authorization`、`UID`、`Content-Type`
+以及页面扩展请求头，
+浏览器会先发送 `OPTIONS` 预检请求，服务端会自动处理，不需要页面额外调用 `OPTIONS`。
+本地开发默认允许 `localhost` 和 `127.0.0.1` 的任意端口；生产环境由后端配置
+`AI_ERP_CORS_ORIGINS` 指定实际前端地址，前端只需继续使用正常的 `fetch` 请求。
+
 ### 认证请求头
 
 远程 ERP 模式推荐每次请求都带：
@@ -134,9 +142,10 @@ const health = await fetch(`${API_BASE_URL}/health`).then((r) => r.json());
 ## 4. Assistant 管理接口
 
 管理接口统一前缀：`/api/rag/admin`。推荐只在请求头携带登录态；`company_id`、`user_id` 可选，
-服务端会从 ERP 已验证身份补齐公司并执行租户校验。调用用户还必须拥有
-`RAG_ADMIN_PERMISSION_TAGS` 配置的至少一个权限或角色标签，默认是 `knowledge:admin`；
-请求体不能自行声明管理权限。兼容旧页面时仍可显式传入：
+服务端会从 ERP 已验证身份补齐公司并执行租户校验。默认情况下，调用用户还必须拥有
+`RAG_ADMIN_PERMISSION_TAGS` 配置的至少一个权限或角色标签，默认是 `knowledge:admin`。
+本地联调可设置 `RAG_ADMIN_PERMISSION_CHECK_ENABLED=false` 暂时跳过标签匹配，但 ERP 登录验证、
+`company_id` 隔离和审计操作人仍然保留；请求体不能自行声明管理权限。兼容旧页面时仍可显式传入：
 
 ```json
 {
@@ -1060,7 +1069,7 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 
 `POST /api/assistants/list`
 
-该接口给 AI 助手页面使用，会把服务端固定的审批助手和数据库中的 RAG 助手合并返回。
+该接口给 AI 助手页面使用，会把服务端固定的审批助手、客户管理助手和数据库中的 RAG 助手合并返回。
 `POST /api/rag/admin/assistants/list` 仍只返回管理端创建的 RAG 助手。
 
 请求：
@@ -1087,6 +1096,14 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
       "status": "active"
     },
     {
+      "id": null,
+      "assistant_key": "customer-assistant",
+      "name": "客户管理助手",
+      "assistant_type": "customer",
+      "is_system": true,
+      "status": "active"
+    },
+    {
       "id": 2,
       "assistant_key": "employee-rag",
       "name": "员工制度助手",
@@ -1095,11 +1112,11 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
       "status": "active"
     }
   ],
-  "count": 2
+  "count": 3
 }
 ```
 
-审批助手的 `assistant_key` 固定为 `approval-assistant`，不保存到
+系统助手的 `assistant_key` 固定为 `approval-assistant` 和 `customer-assistant`，不保存到
 `ai_erp_assistants`，也不能通过 RAG 管理接口创建同名助手。
 
 ### 统一聊天
@@ -1109,7 +1126,23 @@ LLM Rerank → 仅基于证据生成答案 → 服务端追加可信引用。LLM
 前端只传选中项的 `assistant_key`，不传 `assistant_type`。服务端只根据保留键判断真实类型：
 
 - `approval-assistant`：允许查询审批状态、发起审批和普通对话，不允许知识库检索。
+- `customer-assistant`：允许按今天、昨天、本周、本月或明确的 `YYYY-MM-DD` 日期范围查询当前用户可见的客户管理动态，不允许写入客户数据。
 - 其他 Key：按数据库中的 RAG Assistant 加载配置，允许知识问答和普通对话，不允许查询或发起审批。
+
+客户管理助手仍调用同一个聊天接口，例如：
+
+```json
+{
+  "message": "查询本周的客户跟进情况",
+  "session_id": "customer-001",
+  "user_id": "863",
+  "company_id": "",
+  "assistant_key": "customer-assistant"
+}
+```
+
+身份继续放在 `UID` 和 `Authorization` Header 中。返回 `route` 为
+`customer_management`，原始只读结果位于 `erp_data`，`message` 是仅基于该结果生成的中文摘要。
 
 ```json
 {
@@ -1451,7 +1484,22 @@ while (true) {
 删除都只能操作当前 ERP 用户拥有且尚未删除的会话；会话不存在、无权访问或已经删除时统一返回
 `404`，避免泄露其他用户的会话是否存在。
 
-## 12. 错误处理
+## 12. ERP 辅助接口
+
+这些接口与聊天接口使用相同的 `UID`、`Authorization` 请求头，并从 ERP 已验证身份解析
+公司和用户。审批页面可按需调用前三个接口；工作台页面调用聚合接口即可。
+
+| 接口 | 作用 |
+|---|---|
+| `POST /api/approval/templates` | 按关键字查询当前用户可用的审批模板 |
+| `POST /api/approval/form-schema` | 按 `template_id` 获取动态表单结构 |
+| `POST /api/approval/options` | 按模板和字段分页加载人员、部门或关联业务对象 |
+| `POST /api/workbench/summary` | 聚合当前用户的布局、待办、审批、消息和今日考勤 |
+
+工作台请求、响应字段和模块开关详见 [WORKBENCH_API.md](WORKBENCH_API.md)。审批接口的精确
+请求模型可在 `/docs` 查看；前端不要自行传入其他公司的 `company_id`。
+
+## 13. 错误处理
 
 统一错误响应通常为字符串；可重试导入失败时 `detail` 为上一节所示对象：
 
@@ -1476,9 +1524,10 @@ while (true) {
 | `409` | 业务标识或版本重复；相同 request_id 正在执行或业务输入不一致 | 不要并发提交；恢复时保持原 request_id 和参数 |
 | `415` | PDF 请求未使用 `application/pdf` | 修正上传 Content-Type |
 | `422` | 参数、文件格式或 Chunk 配置错误；selected 模式未选择知识库；ERP Durable Execution 缺少 request_id | 展示 `detail` 并要求补全或修正参数 |
+| `500` | 未分类的服务端错误，响应同时返回 `request_id` | 展示通用错误并把 `request_id` 提供给运维排查 |
 | `503` | MySQL、Embedding、Milvus、Collection 或 LLM 当前不可用 | 展示稍后重试，不要自动无限重试 |
 
-## 13. 前端状态建议
+## 14. 前端状态建议
 
 文档导入按钮至少维护以下状态：
 
@@ -1505,7 +1554,7 @@ citations
 
 `company_id`、`UID`、`Authorization` 来自当前 ERP 登录态，不要让用户在普通页面手工编辑。
 
-## 14. 页面改造清单（公司级全库模式）
+## 15. 页面改造清单（公司级全库模式）
 
 - Assistant 配置页：保留一套 Prompt、模型和检索默认参数；检索范围选择“公司全部启用库”或
   “指定知识库”。选择后者时必须显示知识库多选框并至少选择一个；配置版本必须发布后才生效。
@@ -1522,7 +1571,7 @@ citations
 - 不要把请求体中的 `company_id`、`uid`、`authorization` 当作可编辑表单项；身份必须来自 ERP
   登录态和请求头。
 
-## 15. 当前限制
+## 16. 当前限制
 
 - 不支持扫描 PDF OCR。
 - 配置 MySQL 且指定知识库时，同步导入会写文档和任务状态；未配置时不提供状态查询与服务端重试。

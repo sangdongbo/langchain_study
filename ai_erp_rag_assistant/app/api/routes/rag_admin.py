@@ -35,6 +35,7 @@ from ai_erp_rag_assistant.app.api.admin_schemas import (
     PromptCreateRequest,
     PromptListRequest,
 )
+from ai_erp_rag_assistant.app.services.erp_client import ErpTransportError
 from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 from ai_erp_rag_assistant.app.tools.erp_tools import get_current_user
 
@@ -73,6 +74,8 @@ def _identity(
             company_id=request.company_id,
             department=request.department,
         )
+    except ErpTransportError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
@@ -81,8 +84,13 @@ def _identity(
         request.company_id.strip() and company_id != request.company_id.strip()
     ):
         raise HTTPException(status_code=403, detail="company_id 与当前登录用户所属公司不一致")
-    required_tags = set(get_settings().rag_admin_permission_tags)
-    if required_tags and required_tags.isdisjoint(verified_access_tags(user)):
+    settings = get_settings()
+    required_tags = set(settings.rag_admin_permission_tags)
+    if (
+        settings.rag_admin_permission_check_enabled
+        and required_tags
+        and required_tags.isdisjoint(verified_access_tags(user))
+    ):
         # 管理权限只取 ERP 已验证身份，不能由请求体或公司成员身份自动推导。
         raise HTTPException(status_code=403, detail="当前用户没有 RAG 管理权限")
     actor = str(user.get("uid") or user.get("user_id") or request.uid or request.user_id).strip()

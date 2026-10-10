@@ -124,7 +124,7 @@ def _structured_state_updates(
     if isinstance(status, str) and status:
         if current_route == "knowledge" and "retrieval_status" in _ERP_STATE_KEYS:
             updates["retrieval_status"] = status
-        elif current_route in {"approval_workflow", "erp_status"}:
+        elif current_route in {"approval_workflow", "erp_status", "customer_management"}:
             updates["workflow_status"] = status
     if "message" in payload and "assistant_message" not in updates:
         updates["assistant_message"] = str(payload["message"] or "")
@@ -219,6 +219,12 @@ class DeepAgentWorkflowAdapter:
                 route="knowledge",
                 evidence=[],
             )
+        elif route == "customer_management" and not merged.get("erp_data", {}).get("items"):
+            merged["assistant_message"] = model_service.answer(
+                state.get("user_message", ""),
+                route="customer_management",
+                erp_data=merged.get("erp_data", {}),
+            )
         # 审批提示来自确定性子图，不能被父 Agent 改写确认语义或提交结果。
         elif route != "approval_workflow" or not deterministic_message:
             merged["assistant_message"] = generated_message or deterministic_message
@@ -310,7 +316,7 @@ class DeepAgentWorkflowAdapter:
 
 
 def create_deepagent_workflow(
-    assistant_type: Literal["rag", "approval"],
+    assistant_type: Literal["rag", "approval", "customer"],
     *,
     model_overrides: dict[str, Any] | None = None,
     system_context: str = "",

@@ -4,7 +4,11 @@ from zipfile import ZipFile
 
 from starlette.requests import Request
 
-from ai_erp_rag_assistant.app.api.routes.rag import rag_ingest_document
+from ai_erp_rag_assistant.app.api.routes.rag import (
+    rag_ingest_document,
+    rag_ingest_job_status,
+)
+from ai_erp_rag_assistant.app.api.schemas import RagIngestJobRequest
 from ai_erp_rag_assistant.app.services.document_ingest_service import (
     build_chunk_rows,
     parse_document,
@@ -171,6 +175,48 @@ def test_document_ingest_api_runs_parse_embedding_and_milvus_in_one_request(monk
     }
     assert calls["rows"][0]["department"] == "研发部"
     assert calls["rows"][0]["permission_tags"] == ["研发", "manager"]
+
+
+def test_ingest_job_status_maps_invalid_repository_payload(monkeypatch):
+    """损坏的任务记录不能绕过路由错误契约变成裸响应校验异常。"""
+    class FakeRuntime:
+        @staticmethod
+        def require_access(**kwargs):
+            return None
+
+    class FakeSession:
+        @staticmethod
+        def rollback():
+            return None
+
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.routes.rag._resolve_ingest_identity",
+        lambda *args, **kwargs: ("C001", "研发部", []),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.routes.rag.rag_runtime_config",
+        lambda *args, **kwargs: FakeRuntime(),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.routes.rag.ingest_job_status",
+        lambda *args, **kwargs: {},
+    )
+
+    try:
+        rag_ingest_job_status(
+            RagIngestJobRequest(
+                company_id="C001",
+                user_id="863",
+                knowledge_base_key="handbook",
+                job_id=1,
+            ),
+            FakeSession(),
+        )
+    except Exception as exc:
+        assert getattr(exc, "status_code", None) == 503
+        assert getattr(exc, "detail", "") == "导入任务状态响应无效"
+    else:
+        raise AssertionError("损坏的导入任务状态必须映射为 HTTP 503")
 
 
 def test_document_ingest_uses_knowledge_base_chunk_defaults(monkeypatch):

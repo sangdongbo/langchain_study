@@ -16,6 +16,7 @@ from langgraph.graph import END, START, MessagesState, StateGraph
 
 from ai_erp_rag_assistant.app.graph.subgraphs import (
     create_approval_subgraph,
+    create_customer_management_subgraph,
     create_erp_status_subgraph,
     create_rag_retrieval_subgraph,
 )
@@ -79,6 +80,19 @@ class ErpStatusCompiledState(MessagesState, total=False):
     """ERP 状态子代理内部状态。"""
 
     user_id: str
+    user_context: dict[str, Any]
+    erp_data: dict[str, Any]
+    workflow_status: str
+    tool_calls: list[dict[str, Any]]
+    route: str
+    structured_response: NotRequired[dict[str, Any]]
+
+
+class CustomerCompiledState(MessagesState, total=False):
+    """客户管理子代理内部状态，只保留只读查询输入和结果。"""
+
+    query: str
+    user_message: str
     user_context: dict[str, Any]
     erp_data: dict[str, Any]
     workflow_status: str
@@ -171,6 +185,15 @@ def _finish_erp_status(state: ErpStatusCompiledState) -> dict[str, Any]:
     }
 
 
+def _finish_customer(state: CustomerCompiledState) -> dict[str, Any]:
+    data = dict(state.get("erp_data", {}))
+    return {
+        "messages": [AIMessage(content="ERP 客户动态查询完成。")],
+        "route": "customer_management",
+        "structured_response": {"status": "completed", "erp_data": data},
+    }
+
+
 def _finish_approval(state: ApprovalCompiledState) -> dict[str, Any]:
     workflow_status = str(state.get("workflow_status") or "idle")
     message = str(
@@ -229,6 +252,7 @@ def create_domain_compiled_subagents(
     approval_load_node: Node,
     approval_validate_node: Node,
     approval_submit_node: Node,
+    customer_query_node: Node | None = None,
 ) -> list[CompiledSubAgent]:
     """基于现有确定性节点创建 RAG、ERP 状态和审批子代理。"""
     rag_graph = create_rag_retrieval_subgraph(rag_retrieve_node)
@@ -238,7 +262,7 @@ def create_domain_compiled_subagents(
         approval_validate_node,
         approval_submit_node,
     )
-    return [
+    subagents: list[CompiledSubAgent] = [
         {
             "name": "rag-retrieval",
             "description": "检索当前租户允许访问的企业知识库并返回带来源的证据。",
@@ -268,3 +292,18 @@ def create_domain_compiled_subagents(
             ),
         },
     ]
+    if customer_query_node is not None:
+        customer_graph = create_customer_management_subgraph(customer_query_node)
+        subagents.append(
+            {
+                "name": "customer-management",
+                "description": "查询当前用户可见的 ERP 客户管理动态，只执行只读操作。",
+                "runnable": _wrap_domain_graph(
+                    CustomerCompiledState,
+                    customer_graph,
+                    _finish_customer,
+                    task_message_as_query=True,
+                ),
+            }
+        )
+    return subagents

@@ -21,42 +21,10 @@ for import_root in (REPOSITORY_ROOT, PROJECT_ROOT):
         sys.path.insert(0, str(import_root))
 
 from ai_erp_rag_assistant.app.config import get_settings
-
-
-HEADING_PATTERN = re.compile(r"第[一二三四五六七八九十百零〇0-9]+[章节条]\s*[^。；]{0,50}")
-
-
-def split_text(text: str, size: int, overlap: int) -> list[str]:
-    """优先在标题或中文标点处切分文本，并保留指定重叠。"""
-    normalized = re.sub(r"\s+", " ", text).strip()
-    if not normalized:
-        return []
-    chunks: list[str] = []
-    start = 0
-    while start < len(normalized):
-        end = min(start + size, len(normalized))
-        if end < len(normalized):
-            window = normalized[start:end]
-            minimum_break = max(int(size * 0.6), 1)
-            punctuation_break = max(window.rfind(mark) for mark in ("。", "！", "？", "；")) + 1
-            heading_breaks = [match.start() for match in HEADING_PATTERN.finditer(window)]
-            heading_break = heading_breaks[-1] if heading_breaks else -1
-            preferred_break = max(punctuation_break, heading_break)
-            if preferred_break >= minimum_break:
-                end = start + preferred_break
-        chunks.append(normalized[start:end])
-        if end == len(normalized):
-            break
-        start = max(end - overlap, start + 1)
-    return chunks
-
-
-def infer_title(text: str, fallback: str) -> str:
-    """从 Chunk 中提取章节标题，未找到时使用文件名。"""
-    match = HEADING_PATTERN.search(text)
-    if match:
-        return match.group(0).strip()
-    return fallback
+from ai_erp_rag_assistant.app.services.document_ingest_service import (
+    infer_title,
+    split_text,
+)
 
 
 def document_metadata(pdf_path: Path, text: str, settings) -> dict[str, object]:

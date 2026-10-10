@@ -13,7 +13,10 @@ __pycache__/
 .idea/
 .claude/
 .codex/
+.codex_tmp
 .codex_ppt_work/
+.codex_docx_work/
+/.codex-pytest-error-contract-*/
 .agents
 
 streamlit/.cache/

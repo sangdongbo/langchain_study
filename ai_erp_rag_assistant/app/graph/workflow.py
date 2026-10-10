@@ -39,6 +39,9 @@ from ai_erp_rag_assistant.app.tools.erp_tools import (
 from ai_erp_rag_assistant.app.tools.erp.state_tools import (
     query_approval_status_from_state,
 )
+from ai_erp_rag_assistant.app.tools.customer.state_tools import (
+    query_customer_activity_from_state,
+)
 from ai_erp_rag_assistant.app.tools.rag.retrieve import retrieve_from_state
 from ai_erp_rag_assistant.app.tools.rag_tools import search_knowledge
 
@@ -351,6 +354,7 @@ def agent_planner(
     assistant_type = state.get("assistant_type", "")
     allowed_routes = {
         "approval": {"erp_status", "approval_workflow", "general_chat"},
+        "customer": {"customer_management", "general_chat"},
         "rag": {"knowledge", "general_chat"},
     }
     if assistant_type in allowed_routes and plan.route not in allowed_routes[assistant_type]:
@@ -374,11 +378,11 @@ def agent_planner(
 def reject_out_of_scope(state: ErpRagState) -> ErpRagState:
     """拒绝当前助手职责之外的意图，避免调用不应开放的工具。"""
     assistant_type = state.get("assistant_type", "rag")
-    message = (
-        "审批助手不提供知识库检索，请切换到 RAG 助手查询制度或文档。"
-        if assistant_type == "approval"
-        else "RAG 助手仅提供知识库问答，请切换到审批助手查询审批状态或发起审批。"
-    )
+    message = {
+        "approval": "审批助手不提供知识库或客户查询，请切换到对应助手。",
+        "customer": "客户管理助手仅提供客户动态查询，请切换到 RAG 或审批助手处理其他业务。",
+        "rag": "RAG 助手仅提供知识库问答，请切换到审批助手或客户管理助手处理 ERP 业务。",
+    }.get(assistant_type, "当前助手不支持该业务，请切换到对应助手。")
     return {
         "assistant_message": message,
         "workflow_status": "blocked",
@@ -478,6 +482,22 @@ def query_erp_status_node(state: ErpRagState) -> ErpRagState:
     return {
         "erp_data": data,
         "tool_calls": _record(state, "erp.approval_status", mode=data.get("erp_mode"), result_keys=list(data.keys())),
+    }
+
+
+def query_customer_activity_node(state: ErpRagState) -> ErpRagState:
+    """查询当前 ERP 用户可见的客户管理动态。"""
+    data = query_customer_activity_from_state(state)
+    return {
+        "erp_data": data,
+        "workflow_status": "completed",
+        "tool_calls": _record(
+            state,
+            "erp.customer_activity",
+            mode=data.get("erp_mode"),
+            result_count=data.get("count", 0),
+            date_range=data.get("date_range", []),
+        ),
     }
 
 
@@ -1036,6 +1056,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     """构建根编排图；业务细节由 RAG、ERP 和审批子图分别负责。"""
     from ai_erp_rag_assistant.app.graph.subgraphs import (
         create_approval_subgraph,
+        create_customer_management_subgraph,
         create_erp_status_subgraph,
         create_rag_retrieval_subgraph,
     )
@@ -1045,6 +1066,9 @@ def create_workflow(*, with_checkpointer: bool = True):
     )
     erp_status_subgraph = create_erp_status_subgraph(
         durable_node("erp.query_status", query_erp_status_node)
+    )
+    customer_management_subgraph = create_customer_management_subgraph(
+        durable_node("erp.query_customer_activity", query_customer_activity_node)
     )
     approval_subgraph = create_approval_subgraph(
         durable_node("approval.load_template", load_approval_template),
@@ -1073,6 +1097,7 @@ def create_workflow(*, with_checkpointer: bool = True):
     )
     builder.add_node("rag_retrieval", rag_retrieval_subgraph)
     builder.add_node("erp_status", erp_status_subgraph)
+    builder.add_node("customer_management", customer_management_subgraph)
     builder.add_node("approval", approval_subgraph)
     builder.add_node(
         "answer_with_llm",
@@ -1096,6 +1121,7 @@ def create_workflow(*, with_checkpointer: bool = True):
             "scope_blocked": "reject_out_of_scope",
             "knowledge": "load_erp_context",
             "erp_status": "load_erp_context",
+            "customer_management": "load_erp_context",
             "approval_workflow": "load_erp_context",
             "general_chat": "answer_with_llm",
         },
@@ -1107,12 +1133,14 @@ def create_workflow(*, with_checkpointer: bool = True):
         {
             "knowledge": "rag_retrieval",
             "erp_status": "erp_status",
+            "customer_management": "customer_management",
             "approval_workflow": "approval",
             "approval_submit": "approval",
         },
     )
     builder.add_edge("rag_retrieval", "answer_with_llm")
     builder.add_edge("erp_status", "answer_with_llm")
+    builder.add_edge("customer_management", "answer_with_llm")
     builder.add_edge("approval", END)
     builder.add_edge("answer_with_llm", END)
     # MySQL 长期会话模式会传 False，避免状态同时写入内存 Checkpointer。

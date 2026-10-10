@@ -1,5 +1,8 @@
+import httpx
+
 from ai_erp_rag_assistant.app.services.erp_client import (
     ErpClient,
+    ErpTransportError,
     _approval_items,
     _list_values,
     _normalize_fields,
@@ -11,6 +14,27 @@ from ai_erp_rag_assistant.app.services.approval_form_service import (
     normalize_erp_fields,
 )
 from ai_erp_rag_assistant.app.services.audit_log_service import sanitize_for_log
+
+
+def test_erp_timeout_is_converted_at_client_boundary(monkeypatch):
+    """ERP 网络异常不能以 httpx 裸异常穿透到所有上层接口。"""
+    client = ErpClient()
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.services.erp_client.write_audit_event",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(httpx.ReadTimeout("timed out")),
+    )
+
+    try:
+        client._post("/api/User/userinfo", {}, {"uid": "863"})
+    except ErpTransportError as exc:
+        assert str(exc) == "ERP 服务响应超时"
+    else:
+        raise AssertionError("ERP 超时必须转换为 ErpTransportError")
 
 
 def test_normalize_fields_uses_real_erp_field_contract():

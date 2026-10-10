@@ -36,12 +36,16 @@ D:\PythonProject\LearnOne\docker\milvus-embed\volumes\milvus
   -> /var/lib/milvus
 ```
 
-因此 Milvus 数据不依赖容器可写层，容器重启后仍可保留。当前容器：
+因此 Milvus 数据不依赖容器可写层，容器重启后仍可保留。容器启动后提供：
 
-- `milvus-standalone`：`127.0.0.1:19530`，healthy
+- `milvus-standalone`：`127.0.0.1:19530`，健康状态应为 `healthy`
 - `attu`：`127.0.0.1:3000`
 
 不要删除或清空上述目录。项目配置默认连接现有 Milvus，不会自动重建、删除或清空 collection。
+Milvus 使用 `docker\milvus-embed\docker-compose.yml` 启动独立 etcd，并直接挂载原
+`volumes\milvus\etcd` 元数据；只有 etcd 健康后才启动 Milvus，避免 `v3.0-beta` 在内嵌
+etcd 选主期间初始化 Session 并退出。`standalone_embed.bat` 提供 `start/restart/stop/status/logs`，
+等待超过 180 秒仍未健康时会退出并显示最近日志。脚本不会自动删除旧容器或清理数据卷。
 写入和检索前会校验已有 Collection 的 `dense` 向量维度；当前 Embedding 为 2048 维时，
 如果 Collection 使用其他维度，接口会直接返回配置不匹配错误。
 检索遇到 QueryNode Channel 临时 503 时，会使用新连接重新加载 Collection 并重试一次；
@@ -129,6 +133,11 @@ LANGSMITH_WORKSPACE_ID=
 
 知识检索会从 ERP 已验证身份解析 `company_id`（请求体显式传入时只作一致性校验），并应用
 部门、有效状态、最低相关度以及 ERP 已验证的 `permissions/roles` 过滤；请求体中的权限标签不会作为可信 ACL。
+
+浏览器前端跨域由应用统一处理，开发环境默认允许 `localhost` 和 `127.0.0.1` 的任意端口，
+因此前端使用 3000、5173 或 8080 端口都可以完成 `OPTIONS` 预检。生产环境通过
+`AI_ERP_CORS_ORIGINS` 以逗号分隔填写实际前端来源；允许的来源可携带页面实际需要的请求头，
+避免聊天页新增租户、助手或会话 Header 后出现 `OPTIONS /api/chat 400`。
 
 ## RAG API
 
@@ -346,11 +355,9 @@ ERP Agent 启用 Durable Execution 后，`/api/chat` 的 `request_id` 必填。�
 
 ## LangGraph Studio
 
-双击 `start_studio.bat` 即可同步开发依赖、启动本地 LangGraph API，并自动打开
+从 PowerShell 启动后会同步开发依赖、启动本地 LangGraph API，并自动打开
 LangGraph Studio。Studio API 默认使用 `http://127.0.0.1:2024`，与普通 FastAPI
-服务的 `http://127.0.0.1:8021` 相互独立。
-
-也可以从 PowerShell 启动：
+服务的 `http://127.0.0.1:8021` 相互独立：
 
 ```powershell
 .\start_studio.ps1

@@ -4,6 +4,7 @@ from datetime import datetime
 from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 
 from ai_erp_rag_assistant.app.api.routes.executions import execution_status
 from ai_erp_rag_assistant.app.api.schemas import ChatRequest, ExecutionStatusRequest
@@ -339,6 +340,32 @@ def test_execution_status_uses_verified_tenant_and_user(monkeypatch):
         "user_id": "verified-863",
         "run_key": "r" * 32,
     }
+
+
+def test_execution_status_maps_invalid_repository_payload(monkeypatch):
+    """仓储返回结构损坏时也必须遵守接口 503 错误契约。"""
+    repository = SimpleNamespace(enabled=True, get_status=lambda **kwargs: {})
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.routes.executions.persistent_identity",
+        lambda request, authorization, uid: (request, {}, "16", "863"),
+    )
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.routes.executions.execution_repository",
+        repository,
+    )
+
+    with pytest.raises(HTTPException) as error:
+        execution_status(
+            ExecutionStatusRequest(
+                user_id="863",
+                assistant_key="approval-assistant",
+                run_id="r" * 32,
+            ),
+            "Bearer local-test",
+            "863",
+        )
+
+    assert error.value.status_code == 503
 
 
 def test_approval_chat_returns_durable_run_metadata_without_real_database(monkeypatch):

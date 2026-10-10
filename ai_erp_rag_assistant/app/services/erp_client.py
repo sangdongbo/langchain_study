@@ -28,6 +28,10 @@ from ai_erp_rag_assistant.app.services.audit_log_service import (
 logger = logging.getLogger("ai_erp_rag_assistant.erp")
 
 
+class ErpTransportError(RuntimeError):
+    """表示 ERP 上游连接、超时或 HTTP 协议故障。"""
+
+
 # “病假”等表单值表示请假子类型，而不是审批模板名称；将这组词汇放在适配器边界，
 # 确保所有调用方都按一致的业务语义搜索 ERP 动态目录。
 _APPROVAL_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
@@ -136,6 +140,11 @@ class ErpClient:
                     "error": str(exc)[:300],
                 },
             )
+            # 远程故障在适配器边界转换为稳定异常，避免 httpx 细节穿透到 HTTP 接口。
+            if isinstance(exc, httpx.TimeoutException):
+                raise ErpTransportError("ERP 服务响应超时") from exc
+            if isinstance(exc, httpx.HTTPError):
+                raise ErpTransportError("ERP 服务暂时不可用") from exc
             raise
         finally:
             # 无论成功或失败都记录耗时，不在日志中回显请求凭据。
@@ -203,6 +212,10 @@ class ErpClient:
                     "error": str(exc)[:300],
                 },
             )
+            if isinstance(exc, httpx.TimeoutException):
+                raise ErpTransportError("ERP 服务响应超时") from exc
+            if isinstance(exc, httpx.HTTPError):
+                raise ErpTransportError("ERP 服务暂时不可用") from exc
             raise
         finally:
             write_audit_event(
@@ -831,6 +844,46 @@ class ErpClient:
             "page_size": page_size,
             "total": total,
             "has_more": bool(total is not None and page * page_size < total),
+        }
+
+    def get_customer_activity(
+        self,
+        query: str,
+        date_range: list[str],
+        *,
+        user: dict[str, Any],
+    ) -> dict[str, Any]:
+        """读取当前用户可见的客户管理动态，不执行任何 ERP 写入。"""
+        if self.read_mode == "mock":
+            return {
+                "query": query,
+                "date_range": date_range,
+                "items": [],
+                "count": 0,
+                "truncated": False,
+                "erp_mode": "mock",
+                "erp_write_mode": self.write_mode,
+            }
+        payload = self._post(
+            self.settings.erp_customer_activity_path,
+            {
+                "daily_report_type": 1,
+                "sync_type": ["customer_manage"],
+                "date_range": date_range,
+            },
+            user,
+        )
+        _require_success(payload, "客户动态")
+        items = _list_values(payload.get("data"))
+        # ponytail: 首版只向模型传前 50 条；数据量确实超过上下文预算时再加分页接口。
+        return {
+            "query": query,
+            "date_range": date_range,
+            "items": items[:50],
+            "count": len(items),
+            "truncated": len(items) > 50,
+            "erp_mode": "remote",
+            "erp_write_mode": self.write_mode,
         }
 
     def get_related_list(

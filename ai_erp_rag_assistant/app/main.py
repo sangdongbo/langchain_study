@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import Response
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse, Response
 
 from ai_erp_rag_assistant.app.api import router
 from ai_erp_rag_assistant.app.config import get_settings
@@ -21,6 +23,21 @@ PUBLIC_SERVER_ERROR = "服务暂时不可用，请稍后重试"
 app = FastAPI(
     title="AI ERP RAG Assistant",
     description="Enterprise RAG, ERP tools and LangGraph approval workflows.",
+)
+# 统一处理浏览器跨域预检；业务路由不需要重复声明 OPTIONS。
+# 生产环境通过 AI_ERP_CORS_ORIGINS 指定前端域名，不能依赖通配符放开来源。
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().cors_origins,
+    # 本地联调前端端口经常变化；仅放开回环地址，外部域名仍必须列入配置。
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    # Header 名由前端网关和不同助手能力共同扩展。来源仍受上面的白名单约束，
+    # 因此这里回显浏览器声明的请求头，避免 /api/chat 因新增 Header 预检失败。
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
+    max_age=600,
 )
 app.include_router(router)
 
@@ -65,6 +82,31 @@ async def safe_http_exception_handler(
         headers=exc.headers,
     )
     return await http_exception_handler(request, public_exception)
+
+
+@app.exception_handler(Exception)
+async def safe_unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """把未处理异常转换为可追踪且不泄露内部细节的 JSON 响应。"""
+    request_id = uuid4().hex
+    try:
+        write_audit_event(
+            "http.unhandled_error",
+            {
+                "request_id": request_id,
+                "method": request.method,
+                "path": request.url.path,
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:300],
+            },
+        )
+    except Exception:
+        # 审计存储故障不能覆盖原始错误响应。
+        pass
+    return JSONResponse(
+        status_code=500,
+        content={"detail": PUBLIC_SERVER_ERROR, "request_id": request_id},
+        headers={"X-Request-ID": request_id},
+    )
 
 
 @app.get("/health")

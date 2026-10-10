@@ -29,6 +29,7 @@ from ai_erp_rag_assistant.app.api.schemas import (
 from ai_erp_rag_assistant.app.services.document_ingest_service import (
     DocumentParseError,
 )
+from ai_erp_rag_assistant.app.services.erp_client import ErpTransportError
 from ai_erp_rag_assistant.app.services.ingest_job_service import (
     IngestJobTracker,
     ingest_job_status,
@@ -384,6 +385,8 @@ def _resolve_ingest_identity(
             company_id=company_id,
             department=department,
         )
+    except ErpTransportError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     resolved_company = str(user.get("company_id") or "").strip()
@@ -717,6 +720,14 @@ def rag_ingest_job_status(
             department=department, permission_tags=access_tags, action="write"
         )
         item = ingest_job_status(db, company_id=company_id, job_id=request.job_id)
+        if not isinstance(item, dict) or "knowledge_base_key" not in item:
+            raise TypeError("导入任务状态缺少 knowledge_base_key")
+        # 请求知识库与任务必须一致，避免用一个有权限的知识库探测同公司其他任务。
+        if item["knowledge_base_key"] != knowledge_base_key:
+            raise HTTPException(status_code=404, detail="导入任务不存在")
+        return RagIngestJobResponse.model_validate(item)
+    except HTTPException:
+        raise
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except LookupError as exc:
@@ -724,10 +735,8 @@ def rag_ingest_job_status(
     except SQLAlchemyError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="MySQL 查询导入任务失败") from exc
-    # 请求知识库与任务必须一致，避免用一个有权限的知识库探测同公司其他任务。
-    if item["knowledge_base_key"] != knowledge_base_key:
-        raise HTTPException(status_code=404, detail="导入任务不存在")
-    return RagIngestJobResponse.model_validate(item)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="导入任务状态响应无效") from exc
 
 
 @router.post("/rag/ingest/jobs/retry", response_model=RagIngestResponse)

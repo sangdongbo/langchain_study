@@ -48,8 +48,15 @@ class ChatResponse(BaseModel):
     """聊天工作流响应以及检索、ERP、表单和预览结果。"""
 
     message: str
-    route: Literal["knowledge", "erp_status", "approval_workflow", "general_chat", "unknown"]
-    assistant_type: Literal["approval", "rag"] = "rag"
+    route: Literal[
+        "knowledge",
+        "erp_status",
+        "approval_workflow",
+        "customer_management",
+        "general_chat",
+        "unknown",
+    ]
+    assistant_type: Literal["approval", "customer", "rag"] = "rag"
     plan: dict[str, Any] = Field(default_factory=dict)
     tool_calls: list[dict[str, Any]] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)

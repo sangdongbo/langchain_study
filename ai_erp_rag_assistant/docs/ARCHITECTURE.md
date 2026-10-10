@@ -8,9 +8,11 @@ flowchart LR
     H --> CR[RAG CompiledSubAgent]
     H --> CS[ERP Status CompiledSubAgent]
     H --> CA[Approval CompiledSubAgent]
+    H --> CC[Customer Management CompiledSubAgent]
     CR --> R
     CS --> S
     CA --> A
+    CC --> CM[Customer Management Subgraph]
     G --> I[ERP Identity]
     I --> R[RAG Retrieval Subgraph]
     I --> S[ERP Status Subgraph]
@@ -36,11 +38,11 @@ flowchart LR
 ## 工作流边界
 
 - Root Orchestrator 只负责身份前置、能力路由、统一回答和错误出口，不承载具体业务规则。
-- `rag_retrieval`、`erp_status`、`approval` 是独立子图；现有 HTTP 根图继续通过共享
+- `rag_retrieval`、`erp_status`、`approval`、`customer_management` 是独立子图；现有 HTTP 根图继续通过共享
   `ErpRagState` 调用它们，接口契约不变。
 - 工具适配层分别使用 `RagState`、`ErpStatusState` 和 `ApprovalState`。RAG 与 ERP 状态节点已经
   接入 State 工具；旧 `rag_tools.py`、`erp_tools.py` 入口继续保留，兼容既有路由和测试。
-- 三个业务子图同时封装为 `rag-retrieval`、`erp-status`、`approval-workflow`
+- 业务子图同时封装为 `rag-retrieval`、`erp-status`、`approval-workflow`、`customer-management`
   `CompiledSubAgent`。子代理只返回有界证据或业务结果，不向父 Agent 返回认证上下文。
 - `create_erp_agent_harness()` 提供 DeepAgent 装配入口。Harness 只做任务理解、领域委派和结果汇总，
   文件系统能力被拒绝；`/api/chat` 默认使用原 LangGraph Supervisor，配置
@@ -58,6 +60,7 @@ flowchart LR
   `CompiledSubAgent` 只将其作为检索 query，租户与 ACL 仍来自已验证 State。SSE 只释放已确认的最后一轮父 Agent 回答 Chunk；父 Agent 工具规划、Planner
   和子代理内部消息不会进入前端 Token 流，审批提示仍由确定性子图提供。
 - RAG 子图可以并行运行多个只读检索 Worker，Worker 只能返回证据，不能写 ERP 或 MySQL 业务表。
+- Customer 子图通过 ERP 日报同步接口的 `customer_manage` 类型读取当前登录用户可见的客户动态；首版不提供客户写入。
 - Approval 子图是确定性状态机：模板、字段、节点和审批人必须经过服务端校验，再生成带版本和哈希的冻结预览。
 - ERP 写入只能从冻结预览的确认分支进入，并携带幂等键；任何字段修订都必须生成新预览并重新确认。
 - `thread_id` 负责会话身份，`run_id` 负责单次请求执行生命周期；ERP Agent 节点通过

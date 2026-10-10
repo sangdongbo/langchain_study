@@ -8,10 +8,12 @@ from typing import Any
 
 from starlette.concurrency import run_in_threadpool
 
-from ai_erp_rag_assistant.app.services.document_ingest_service import build_chunk_rows
+from ai_erp_rag_assistant.app.services.document_ingest_service import (
+    build_chunk_rows,
+    split_text,
+)
 from ai_erp_rag_assistant.app.services.ingest_job_service import IngestJobTracker
 from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
-from ai_erp_rag_assistant.scripts.ingest_pdf import split_text
 
 
 @dataclass(frozen=True)

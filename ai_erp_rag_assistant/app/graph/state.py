@@ -61,6 +61,17 @@ class ErpStatusState(TypedDict, total=False):
     workflow_status: str
 
 
+class CustomerState(TypedDict, total=False):
+    """客户管理子代理使用的最小只读状态。"""
+
+    user_message: str
+    query: str
+    user_context: dict[str, Any]
+    plan: dict[str, Any]
+    erp_data: dict[str, Any]
+    workflow_status: str
+
+
 class ErpRagState(TypedDict, total=False):
     """一次会话中路由、检索、审批草稿和审计信息的统一状态。"""
 

@@ -33,7 +33,7 @@ def build_chat_response(result: ErpRagState) -> ChatResponse:
     """把内部工作流状态转换为稳定的前端响应。"""
     erp_data = result.get("erp_data", {})
     assistant_type = result.get("assistant_type", "rag")
-    if assistant_type not in {"approval", "rag"}:
+    if assistant_type not in {"approval", "customer", "rag"}:
         assistant_type = "rag"
     tool_calls = result.get("tool_calls", [])
     failed = (

@@ -140,6 +140,76 @@ def test_public_health_does_not_expose_internal_resource_names(monkeypatch):
     assert "langsmith_project" not in result
 
 
+def test_browser_preflight_is_handled_by_cors_middleware():
+    """前端带 Authorization/UID 调用业务接口时，预检不能落到业务路由返回 405。"""
+    from fastapi.testclient import TestClient
+
+    response = TestClient(main_module.app).options(
+        "/api/assistants/list",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type,uid",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5173"
+    assert "POST" in response.headers["access-control-allow-methods"]
+    assert response.headers["access-control-allow-credentials"] == "true"
+
+
+def test_chat_preflight_accepts_frontend_extension_headers():
+    """聊天页增加租户、助手或会话 Header 时不应再次触发 CORS 400。"""
+    from fastapi.testclient import TestClient
+
+    requested_headers = (
+        "authorization,content-type,uid,"
+        "x-company-id,x-assistant-key,x-session-id"
+    )
+    response = TestClient(main_module.app).options(
+        "/api/chat",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": requested_headers,
+        },
+    )
+
+    assert response.status_code == 200
+    allowed_headers = response.headers["access-control-allow-headers"].lower()
+    for header in requested_headers.split(","):
+        assert header in allowed_headers
+
+
+def test_local_frontend_preflight_accepts_any_development_port():
+    """本地前端换端口时仍可联调，但不扩大到任意外部来源。"""
+    from fastapi.testclient import TestClient
+
+    client = TestClient(main_module.app)
+    response = client.options(
+        "/api/assistants/list",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type,uid",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:8080"
+
+    rejected = client.options(
+        "/api/assistants/list",
+        headers={
+            "Origin": "https://frontend.example.com",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type,uid",
+        },
+    )
+    assert rejected.status_code == 400
+
+
 def test_server_error_handler_hides_caused_exception_and_keeps_retry_fields(monkeypatch):
     """底层异常不出现在 5xx 响应，导入补偿所需字段仍然保留。"""
     from fastapi import FastAPI, HTTPException
@@ -178,6 +248,27 @@ def test_server_error_handler_hides_caused_exception_and_keeps_retry_fields(monk
         "job_id": 7,
     }
     assert "private-channel" not in response.text
+
+
+def test_unhandled_error_returns_safe_json_with_request_id(monkeypatch):
+    """最后兜底必须返回可追踪 JSON，不能把异常或 HTML 堆栈暴露给前端。"""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    test_app = FastAPI()
+    test_app.add_exception_handler(Exception, main_module.safe_unhandled_exception_handler)
+    monkeypatch.setattr(main_module, "write_audit_event", lambda *args, **kwargs: None)
+
+    @test_app.get("/failed")
+    def failed():
+        raise LookupError("private internal detail")
+
+    response = TestClient(test_app, raise_server_exceptions=False).get("/failed")
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "服务暂时不可用，请稍后重试"
+    assert response.json()["request_id"] == response.headers["X-Request-ID"]
+    assert "private internal detail" not in response.text
 
 
 def test_langsmith_private_endpoint_and_workspace_are_loaded(monkeypatch):

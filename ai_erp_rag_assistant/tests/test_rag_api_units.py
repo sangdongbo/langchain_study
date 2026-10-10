@@ -15,6 +15,7 @@ from ai_erp_rag_assistant.app.api.schemas import (
     SessionListRequest,
 )
 from ai_erp_rag_assistant.app.services.document_ingest_service import build_chunk_rows
+from ai_erp_rag_assistant.app.services.erp_client import ErpTransportError
 from ai_erp_rag_assistant.app.services.milvus_service import MilvusService
 from ai_erp_rag_assistant.app.services.model_service import ModelService
 from ai_erp_rag_assistant.app.services.ingest_job_service import IngestJobTracker
@@ -322,6 +323,18 @@ def test_rag_identity_uses_verified_company_when_body_company_is_empty(monkeypat
 
     assert company_id == "C001"
     assert department == "研发部"
+
+
+def test_rag_identity_maps_erp_transport_failure_to_service_unavailable(monkeypatch):
+    monkeypatch.setattr(
+        "ai_erp_rag_assistant.app.api.dependencies.erp_user",
+        lambda request: (_ for _ in ()).throw(ErpTransportError("ERP 服务响应超时")),
+    )
+
+    with pytest.raises(HTTPException) as error:
+        _rag_identity(RagSearchRequest(query="制度"), None, None)
+
+    assert error.value.status_code == 503
 
 
 def test_runtime_source_fields_hide_knowledge_bases_without_read_permission():

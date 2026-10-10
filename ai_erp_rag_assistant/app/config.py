@@ -19,6 +19,7 @@ SUPPORTED_ENV_KEYS = frozenset(
         "AI_ERP_RAG_HOST",
         "AI_ERP_RAG_PORT",
         "AI_ERP_ORCHESTRATOR",
+        "AI_ERP_CORS_ORIGINS",
         "MILVUS_URI",
         "MILVUS_TOKEN",
         "MILVUS_COLLECTION",
@@ -33,6 +34,7 @@ SUPPORTED_ENV_KEYS = frozenset(
         "RAG_COMPANY_ID",
         "RAG_DEPARTMENT",
         "RAG_PERMISSION_TAGS",
+        "RAG_ADMIN_PERMISSION_CHECK_ENABLED",
         "RAG_ADMIN_PERMISSION_TAGS",
         "ERP_MODE",
         "ERP_READ_MODE",
@@ -54,6 +56,7 @@ SUPPORTED_ENV_KEYS = frozenset(
         "ERP_USER_LIST_PATH",
         "ERP_USERINFO_PATH",
         "ERP_APPROVAL_STATUS_PATH",
+        "ERP_CUSTOMER_ACTIVITY_PATH",
         "LLM_API_KEY",
         "LLM_BASE_URL",
         "LLM_MODEL",
@@ -112,6 +115,15 @@ class Settings(BaseModel):
     host: str = "127.0.0.1"
     port: int = 8021
     orchestrator: Literal["langgraph", "deepagent"] = "langgraph"
+    # 允许浏览器前端发起预检请求；生产环境应通过 AI_ERP_CORS_ORIGINS 收紧来源。
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+    )
     milvus_uri: str = "http://127.0.0.1:19530"
     milvus_token: str = ""
     milvus_collection: str = "erp_knowledge_chunks"
@@ -126,7 +138,9 @@ class Settings(BaseModel):
     rag_company_id: str = "lanjing"
     rag_department: str = "公共制度"
     rag_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:employee_handbook"])
-    # 管理接口要求命中任一标签；标签只从 ERP 已验证身份读取。
+    # 关闭时仍验证 ERP 登录身份和 company_id，只跳过管理员标签匹配。
+    rag_admin_permission_check_enabled: bool = True
+    # 启用管理权限检查时要求命中任一标签；标签只从 ERP 已验证身份读取。
     rag_admin_permission_tags: list[str] = Field(default_factory=lambda: ["knowledge:admin"])
     erp_mode: str = "remote"
     erp_read_mode: str = "remote"
@@ -143,6 +157,7 @@ class Settings(BaseModel):
     erp_user_list_path: str = "/api/User/getList"
     erp_userinfo_path: str = "/api/User/userinfo"
     erp_approval_status_path: str = "/api/approval/myList"
+    erp_customer_activity_path: str = "/api/oa/dailyReport/syncData"
     erp_uid: str = ""
     erp_authorization: str = ""
     erp_demo_company_id: str = ""
@@ -232,6 +247,14 @@ class Settings(BaseModel):
             host=values.get("AI_ERP_RAG_HOST") or "127.0.0.1",
             port=int(values.get("AI_ERP_RAG_PORT") or 8021),
             orchestrator=(values.get("AI_ERP_ORCHESTRATOR") or "langgraph").lower(),
+            cors_origins=[
+                origin.strip().rstrip("/")
+                for origin in (
+                    values.get("AI_ERP_CORS_ORIGINS")
+                    or "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173"
+                ).split(",")
+                if origin.strip()
+            ],
             milvus_uri=values.get("MILVUS_URI") or "http://127.0.0.1:19530",
             milvus_token=values.get("MILVUS_TOKEN") or "",
             milvus_collection=values.get("MILVUS_COLLECTION") or "erp_knowledge_chunks",
@@ -250,6 +273,9 @@ class Settings(BaseModel):
                 for item in (values.get("RAG_PERMISSION_TAGS") or "knowledge:employee_handbook").split(",")
                 if item.strip()
             ],
+            rag_admin_permission_check_enabled=_bool_from_env(
+                values.get("RAG_ADMIN_PERMISSION_CHECK_ENABLED"), True
+            ),
             rag_admin_permission_tags=[
                 item.strip()
                 for item in (values.get("RAG_ADMIN_PERMISSION_TAGS") or "knowledge:admin").split(",")
@@ -277,6 +303,7 @@ class Settings(BaseModel):
             erp_user_list_path=values.get("ERP_USER_LIST_PATH") or "/api/User/getList",
             erp_userinfo_path=values.get("ERP_USERINFO_PATH") or "/api/User/userinfo",
             erp_approval_status_path=values.get("ERP_APPROVAL_STATUS_PATH") or "/api/approval/myList",
+            erp_customer_activity_path=values.get("ERP_CUSTOMER_ACTIVITY_PATH") or "/api/oa/dailyReport/syncData",
             erp_uid=values.get("ERP_UID") or "",
             erp_authorization=values.get("ERP_AUTHORIZATION") or "",
             erp_demo_company_id=values.get("ERP_DEMO_COMPANY_ID") or "",

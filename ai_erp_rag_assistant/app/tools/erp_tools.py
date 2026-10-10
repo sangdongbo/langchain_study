@@ -117,6 +117,16 @@ def get_workbench_summary(
     )
 
 
+def get_customer_activity(
+    query: str,
+    date_range: list[str],
+    *,
+    user: dict[str, Any],
+) -> dict[str, Any]:
+    """读取当前用户在指定日期范围内可见的客户管理动态。"""
+    return erp_client.get_customer_activity(query, date_range, user=user)
+
+
 def submit_approval(preview: dict[str, Any], *, user: dict[str, Any] | None = None) -> dict[str, Any]:
     """将已经确认的审批预览提交给 ERP 适配器。"""
     return erp_client.submit_approval(preview, user=user or {})

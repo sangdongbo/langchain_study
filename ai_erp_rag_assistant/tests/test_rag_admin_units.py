@@ -30,7 +30,10 @@ def test_admin_identity_requires_permission_from_verified_erp_user(monkeypatch):
     monkeypatch.setattr(
         rag_admin_routes,
         "get_settings",
-        lambda: SimpleNamespace(rag_admin_permission_tags=["knowledge:admin"]),
+        lambda: SimpleNamespace(
+            rag_admin_permission_check_enabled=True,
+            rag_admin_permission_tags=["knowledge:admin"],
+        ),
     )
     request = AdminContext(company_id="C001", user_id="863")
 
@@ -43,6 +46,26 @@ def test_admin_identity_requires_permission_from_verified_erp_user(monkeypatch):
         "C001",
         "863",
     )
+
+
+def test_admin_identity_can_skip_permission_tag_check(monkeypatch):
+    """联调关闭标签检查后仍使用 ERP 身份确定公司和操作人。"""
+    user = {"company_id": "C001", "uid": "863", "permissions": ["employee"]}
+    monkeypatch.setattr(rag_admin_routes, "get_current_user", lambda *args, **kwargs: user)
+    monkeypatch.setattr(
+        rag_admin_routes,
+        "get_settings",
+        lambda: SimpleNamespace(
+            rag_admin_permission_check_enabled=False,
+            rag_admin_permission_tags=["knowledge:admin"],
+        ),
+    )
+
+    assert rag_admin_routes._identity(
+        AdminContext(company_id="C001", user_id="863"),
+        "Bearer test",
+        "863",
+    ) == ("C001", "863")
 
 
 def test_rag_models_are_company_scoped_without_schema_side_effects():
@@ -227,6 +250,47 @@ def test_runtime_config_does_not_require_mysql_when_unconfigured():
     assert config.model_overrides is None
     assert config.chunk_size == 800
     assert config.chunk_overlap == 120
+
+
+def test_runtime_config_rejects_conflicting_scope_without_database():
+    with pytest.raises(HTTPException) as error:
+        _rag_runtime_config(
+            None,
+            company_id="C001",
+            knowledge_base_key="handbook",
+            assistant_key="erp-rag",
+            search_scope="company_enabled",
+        )
+
+    assert error.value.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("repository_error", "status_code"),
+    [(PermissionError("无权限"), 403), (ValueError("配置错误"), 422)],
+)
+def test_runtime_config_maps_repository_business_errors(
+    monkeypatch, repository_error, status_code
+):
+    class FakeSession:
+        @staticmethod
+        def rollback():
+            raise AssertionError("业务异常不应回滚数据库连接")
+
+    def fail(*args, **kwargs):
+        raise repository_error
+
+    monkeypatch.setattr(RagAdminRepository, "runtime_config", fail)
+
+    with pytest.raises(HTTPException) as error:
+        _rag_runtime_config(
+            FakeSession(),
+            company_id="C001",
+            knowledge_base_key="handbook",
+            assistant_key="erp-rag",
+        )
+
+    assert error.value.status_code == status_code
 
 
 def test_runtime_config_defaults_to_all_company_enabled_knowledge_bases():

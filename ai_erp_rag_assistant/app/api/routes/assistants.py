@@ -9,7 +9,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ai_erp_rag_assistant.app.api.dependencies import persistent_identity
-from ai_erp_rag_assistant.app.assistant_catalog import approval_assistant_item
+from ai_erp_rag_assistant.app.assistant_catalog import (
+    approval_assistant_item,
+    customer_assistant_item,
+)
 from ai_erp_rag_assistant.app.database import get_optional_db_session
 from ai_erp_rag_assistant.app.repositories.rag_admin import RagAdminRepository, row_dict
 from ai_erp_rag_assistant.app.api.schemas import AssistantListRequest
@@ -25,11 +28,12 @@ def assistant_list(
     uid: str | None = Header(default=None, alias="UID"),
     db: Annotated[Session | None, Depends(get_optional_db_session)] = None,
 ) -> dict[str, Any]:
-    """合并固定审批助手和当前公司的 RAG 助手。"""
+    """合并固定业务助手和当前公司的 RAG 助手。"""
     _, _, company_id, _ = persistent_identity(request, authorization, uid)
     items: list[dict[str, Any]] = []
     if request.status in (None, "active"):
         items.append(approval_assistant_item())
+        items.append(customer_assistant_item())
     if db is not None:
         try:
             rows = RagAdminRepository(db).list_assistants(company_id, request.status)

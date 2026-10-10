@@ -46,12 +46,12 @@ def execution_status(
             user_id=user_id,
             run_key=request.run_id,
         )
+        if item.get("last_error_message"):
+            # 数据库存储详细原因用于运维，状态接口只返回稳定的用户可见提示。
+            item = {**item, "last_error_message": "ERP 服务暂时不可用，请稍后重试"}
+        return ExecutionStatusResponse.model_validate(item)
     except ExecutionNotFoundError as exc:
         # 无权限与不存在统一返回 404，避免泄露其他租户或用户的运行标识。
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"读取 ERP Agent 运行失败：{exc}") from exc
-    if item.get("last_error_message"):
-        # 数据库存储详细原因用于运维，状态接口只返回稳定的用户可见提示。
-        item = {**item, "last_error_message": "ERP 服务暂时不可用，请稍后重试"}
-    return ExecutionStatusResponse.model_validate(item)

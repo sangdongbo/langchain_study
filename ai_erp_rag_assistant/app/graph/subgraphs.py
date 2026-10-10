@@ -34,6 +34,15 @@ def create_erp_status_subgraph(query_node: Node) -> Any:
     return builder.compile()
 
 
+def create_customer_management_subgraph(query_node: Node) -> Any:
+    """封装客户动态只读查询，禁止在该子图中增加写入节点。"""
+    builder = StateGraph(ErpRagState)
+    builder.add_node("query_customer_activity", query_node)
+    builder.add_edge(START, "query_customer_activity")
+    builder.add_edge("query_customer_activity", END)
+    return builder.compile()
+
+
 def create_approval_subgraph(
     load_template_node: Node,
     validate_node: Node,

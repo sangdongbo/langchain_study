@@ -15,6 +15,7 @@ from ai_erp_rag_assistant.app.repositories.rag_admin import (
     RagKnowledgeBaseTarget,
     RagRuntimeConfig,
 )
+from ai_erp_rag_assistant.app.services.erp_client import ErpTransportError
 from ai_erp_rag_assistant.app.services.milvus_service import milvus_service
 from ai_erp_rag_assistant.app.tools.erp_tools import get_current_user
 
@@ -87,6 +88,8 @@ def persistent_identity(
     request = with_header_identity(request, authorization, uid)
     try:
         user = erp_user(request)
+    except ErpTransportError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
@@ -110,6 +113,8 @@ def rag_identity(
     request = with_header_identity(request, authorization, uid)
     try:
         user = erp_user(request)
+    except ErpTransportError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     company_id = str(user.get("company_id") or "").strip()
@@ -148,9 +153,15 @@ def rag_runtime_config(
             requested_keys.append(key)
             seen_keys.add(key)
     if search_scope == "company_enabled" and requested_keys:
-        raise ValueError("search_scope=company_enabled 时不能同时指定知识库")
+        raise HTTPException(
+            status_code=422,
+            detail="search_scope=company_enabled 时不能同时指定知识库",
+        )
     if search_scope == "selected" and not requested_keys:
-        raise ValueError("search_scope=selected 时至少指定一个 knowledge_base_key")
+        raise HTTPException(
+            status_code=422,
+            detail="search_scope=selected 时至少指定一个 knowledge_base_key",
+        )
     fallback_targets = tuple(
         RagKnowledgeBaseTarget(
             knowledge_base_key=key,
@@ -212,6 +223,10 @@ def rag_runtime_config(
         )
     except AdminNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except SQLAlchemyError as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="MySQL 读取 RAG 配置失败") from exc
