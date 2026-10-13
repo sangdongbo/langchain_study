@@ -29,6 +29,27 @@ Agents 或仓库主项目的环境。使用 `pydantic-ai-slim[openai]`，只安�
 
 共享包的职责、配置加载细节与离线检查方式见 [pydantic_examples 说明](pydantic_examples/README.md)。
 
+### 在 PyCharm 中运行
+
+解释器需要选择本目录的 `.venv/Scripts/python.exe`。把目录标为 Sources Root 只让 IDE
+找到 `pydantic_examples` 源码，不会安装 PydanticAI，也不会切换 Python 解释器。
+
+从 `LearnOne` 打开多个独立示例时，每个模块需要绑定各自的环境。当前机器已为本套
+配置独立的 `pydantic_ai_examples` 模块及以下运行入口（本地 `.idea` 不提交 Git）：
+
+- `PydanticAI - Offline checks`：先验证全部离线专题，无需 Key。
+- `PydanticAI - 01 Basic`：运行第一课真实模型演示。
+
+修改 IDE 配置后重新载入项目并等待索引，选择以上入口运行。其他课可复制基础入口，
+只改 Script path，保持解释器与 Working directory 指向本示例项目。
+新机器也可以直接在新窗口打开本目录，添加 Existing environment 解释器：
+
+```text
+D:\PythonProject\LearnOne\docs\pydantic_ai_examples\.venv\Scripts\python.exe
+```
+
+使用其他项目的 `.venv` 会导致 `pydantic_ai` 标红或 `ModuleNotFoundError`。
+
 ## 2. 使用已经存在的 .env
 
 无需为了本例复制已有密钥。`build_model()` 加载以下文件，同名变量先到先得：

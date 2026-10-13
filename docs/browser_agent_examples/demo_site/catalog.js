@@ -1,11 +1,15 @@
 // 本地演示目录与详情页使用同一份数据。
+// 固定数据让筛选和事实验收可重复；这里没有后端接口或数据库。
+// id 用于详情页 URL；price 是人民币整数；specs 和 details 分别供目录及详情展示。
 window.DEMO_PRODUCTS = [
+  // 三件计算设备覆盖“超预算”“符合预算且含关键词”“符合预算但不含关键词”。
   { id: 'workstation', name: 'AI 推理工作站', category: '计算设备', price: 6800,
     specs: 'RTX 5070 · 32GB 内存', details: '适合本地模型推理；不含显示器。' },
   { id: 'laptop', name: '数据分析笔记本', category: '计算设备', price: 5999,
     specs: '32GB 内存 · 1TB SSD', details: '便携机型，适合移动办公与数据分析。' },
   { id: 'mini', name: '开发者迷你主机', category: '计算设备', price: 4299,
     specs: '24GB 内存 · 512GB SSD', details: '桌面机型，适合固定工位；不含显示器。' },
+  // 其他分类用来验证不能只看价格，还必须满足分类筛选条件。
   { id: 'monitor', name: '4K 显示器', category: '办公外设', price: 2399,
     specs: '27 英寸 · USB-C', details: '用于扩展工作区，支持 USB-C 连接。' },
   { id: 'keyboard', name: '机械键盘', category: '办公外设', price: 699,

@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Browser Agent 演示商城</title>
+  <!-- 使用内嵌样式和本地脚本，运行示例无需下载前端资源或执行构建。 -->
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; color: #1f2937; background: #f7f7f5; }
     header, main { max-width: 960px; margin: auto; padding: 20px; }
@@ -15,6 +16,7 @@
     #products { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
     .product { background: white; border: 1px solid #d1d5db; border-radius: 6px; padding: 16px; }
     .price { color: #b42318; font-weight: 700; }
+    /* 筛选只切换 hidden；确保隐藏卡片不会被布局样式重新显示。 */
     [hidden] { display: none !important; }
     @media (max-width: 680px) { .filters { grid-template-columns: 1fr; } }
   </style>
@@ -27,6 +29,7 @@
   <main>
     <h1>设备目录</h1>
     <p>这是本地静态演示页，不会提交订单或连接真实商城。</p>
+    <!-- data-testid 供 Playwright 稳定定位，aria-label 提供控件的可访问名称。 -->
     <section class="filters" aria-label="商品筛选">
       <input data-testid="keyword" aria-label="关键词" placeholder="搜索名称或标签">
       <select data-testid="category" aria-label="分类">
@@ -38,30 +41,38 @@
       <input data-testid="max-price" aria-label="最高价格" type="number" min="0" placeholder="最高价格">
       <button data-testid="apply-filter" type="button">应用筛选</button>
     </section>
+    <!-- 筛选完成标记：自动化代码应等待文字变化，不用固定延时猜测是否完成。 -->
     <p data-testid="result-status" role="status">共 6 件商品</p>
     <section id="products" aria-label="商品列表"></section>
   </main>
+  <!-- 先加载共享商品数据，再生成卡片；详情页也读取这份数据。 -->
   <script src="/catalog.js"></script>
   <script>
+    // 根据固定数据生成语义化卡片，Agent 可以读取商品标题和详情链接。
     for (const product of window.DEMO_PRODUCTS) {
       const card = document.createElement('article');
       card.className = 'product';
+      // dataset 保存筛选所需的原始字段，避免从“¥5999”等展示文本反推数值。
       card.dataset.name = product.name;
       card.dataset.category = product.category;
       card.dataset.price = product.price;
       for (const [tag, text] of [['h2', product.name], ['p', product.specs], ['p', `¥${product.price}`]]) {
         const element = document.createElement(tag);
+        // textContent 按纯文本插入，不把商品内容当作 HTML 执行。
         element.textContent = text;
         card.append(element);
       }
       const link = document.createElement('a');
+      // 固定 id 把目录与详情页关联，05 用该链接练习跨页面取证。
       link.href = `/detail.html?id=${product.id}`;
       link.textContent = `查看${product.name}详情`;
       card.append(link);
       document.querySelector('#products').append(card);
     }
+    // 筛选隐藏而不删除卡片，因此能反复更换条件，不必重新生成列表。
     const cards = [...document.querySelectorAll('.product')];
     document.querySelector('[data-testid="apply-filter"]').addEventListener('click', () => {
+      // 去掉关键词首尾空格并忽略大小写；空分类或空价格代表不加该项限制。
       const keyword = document.querySelector('[data-testid="keyword"]').value.trim().toLowerCase();
       const category = document.querySelector('[data-testid="category"]').value;
       const maxPrice = Number(document.querySelector('[data-testid="max-price"]').value || Infinity);
@@ -70,12 +81,15 @@
       setTimeout(() => {
         let visible = 0;
         for (const card of cards) {
+          // 三项条件以 AND 组合：卡片文本匹配、分类一致、价格不超过上限。
           const matches = (!keyword || card.textContent.toLowerCase().includes(keyword))
             && (!category || card.dataset.category === category)
             && Number(card.dataset.price) <= maxPrice;
+          // 未匹配卡片仍在 DOM 中；示例读取结果时必须排除隐藏元素。
           card.hidden = !matches;
           visible += Number(matches);
         }
+        // 所有卡片更新完后才写最终状态，供 Playwright expect 或观察器等待。
         document.querySelector('[data-testid="result-status"]').textContent = `找到 ${visible} 件商品`;
       }, 300);
     });

@@ -7,11 +7,16 @@
 </head>
 <body>
   <h1>演示控制台</h1>
+  <!-- 03 以欢迎文字验证新浏览器会话已恢复状态，不需要再填登录表单。 -->
   <p data-testid="welcome"></p>
   <a href="/index.html">查看商品目录</a>
   <script>
+    // 与 login.html 使用相同的 localStorage 键，状态仅属于当前协议、主机和端口。
     const user = localStorage.getItem('browser-agent-demo-user');
+    // shortcut: 前端跳转不是安全访问控制；真实受保护页面必须由服务端校验权限。
+    // replace 不把无状态的控制台页面保留在浏览器后退历史中。
     if (!user) location.replace('/login.html');
+    // 按文本显示用户名，避免将存储内容作为 HTML 解析。
     else document.querySelector('[data-testid="welcome"]').textContent = `欢迎，${user}`;
   </script>
 </body>

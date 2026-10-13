@@ -14,6 +14,7 @@
   <a href="/index.html">返回商品目录</a>
   <h1>演示登录</h1>
   <p>账号 <code>learner</code>，密码 <code>demo123</code>。</p>
+  <!-- 固定账号仅用于学习状态保存，不连接真实登录服务。 -->
   <form data-testid="login-form">
     <label>账号 <input data-testid="username" autocomplete="username"></label>
     <label>密码 <input data-testid="password" type="password" autocomplete="current-password"></label>
@@ -21,14 +22,19 @@
   </form>
   <p id="error" role="alert"></p>
   <script>
+    // shortcut: 仅演示前端登录状态；接入真实账号时必须改用服务端认证与授权。
     document.querySelector('form').addEventListener('submit', event => {
+      // 阻止表单默认提交，否则静态服务器无法处理登录请求。
       event.preventDefault();
       const username = document.querySelector('[data-testid="username"]').value;
       const password = document.querySelector('[data-testid="password"]').value;
+      // 这是公开的练习账号，不能照搬到生产环境验证用户身份。
       if (username === 'learner' && password === 'demo123') {
+        // localStorage 按源保存且可以被用户修改；03 用它展示 storage_state 恢复。
         localStorage.setItem('browser-agent-demo-user', username);
         location.href = '/dashboard.html';
       } else {
+        // 用纯文本展示错误，role="alert" 让辅助技术能感知提示。
         document.querySelector('#error').textContent = '账号或密码错误';
       }
     });
