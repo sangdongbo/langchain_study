@@ -1,0 +1,18 @@
+[project]
+name = "browser-agent-examples"
+version = "0.1.0"
+description = "Progressive Playwright and browser-use examples"
+requires-python = ">=3.11,<4"
+dependencies = [
+    "browser-use==0.13.11",
+    "playwright==1.63.0",
+    "pydantic==2.13.5",
+    "python-dotenv==1.2.2",
+]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["browser_examples"]

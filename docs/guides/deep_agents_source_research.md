@@ -170,13 +170,13 @@ wrap_model_call
 - `allowed-tools` 是否只是提示 metadata，而非强制工具权限。
 - 子 Agent 是否因为 `skills_metadata` 的私有属性而重新建立自己的 Skill 索引。
 
-完整实验说明和可运行入口见：[基于 State 的动态 Skills](../../deep_agent_examples/examples/dynamic_skills/README.md)。
+完整实验说明和可运行入口见：[基于 State 的动态 Skills](../deep_agent_examples/examples/dynamic_skills/README.md)。
 
 SubAgent 研究也应拆开验证，不要把同步嵌套 runnable 和远程任务状态机混为一谈：
 
-- [声明式 SubAgent：isolated、fork 与 State 传播](../../deep_agent_examples/examples/declarative_subagent/README.md)
-- [CompiledSubAgent：复用现成 Agent 与 StateGraph](../../deep_agent_examples/examples/compiled_subagent/README.md)
-- [AsyncSubAgent：远程 thread、run 与后台任务状态机](../../deep_agent_examples/examples/async_subagent/README.md)
+- [声明式 SubAgent：isolated、fork 与 State 传播](../deep_agent_examples/examples/declarative_subagent/README.md)
+- [CompiledSubAgent：复用现成 Agent 与 StateGraph](../deep_agent_examples/examples/compiled_subagent/README.md)
+- [AsyncSubAgent：远程 thread、run 与后台任务状态机](../deep_agent_examples/examples/async_subagent/README.md)
 
 ## 5. BackendProtocol 契约研究
 
@@ -521,7 +521,7 @@ print(signature(create_deep_agent))
 
 ## 18. 继续阅读
 
-- [Deep Agents 可运行示例：Studio、LangSmith 与 Sandbox](../../deep_agent_examples/README.md)
+- [Deep Agents 可运行示例：Studio、LangSmith 与 Sandbox](../deep_agent_examples/README.md)
 - [Deep Agents 进阶学习路线](./deep_agents_advanced_learning.md)
 - [Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)
 - [LangChain Deep Agents](https://docs.langchain.com/oss/python/deepagents/overview)

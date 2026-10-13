@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browser Agent 演示商城</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; color: #1f2937; background: #f7f7f5; }
+    header, main { max-width: 960px; margin: auto; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; }
+    nav a { margin-left: 16px; }
+    .filters { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin: 18px 0; }
+    input, select, button { min-height: 40px; padding: 0 10px; font: inherit; }
+    button { cursor: pointer; background: #166534; color: white; border: 0; border-radius: 4px; }
+    #products { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .product { background: white; border: 1px solid #d1d5db; border-radius: 6px; padding: 16px; }
+    .price { color: #b42318; font-weight: 700; }
+    [hidden] { display: none !important; }
+    @media (max-width: 680px) { .filters { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>研习商城</strong>
+    <nav><a href="/index.html">商品</a><a href="/login.html">演示登录</a></nav>
+  </header>
+  <main>
+    <h1>设备目录</h1>
+    <p>这是本地静态演示页，不会提交订单或连接真实商城。</p>
+    <section class="filters" aria-label="商品筛选">
+      <input data-testid="keyword" aria-label="关键词" placeholder="搜索名称或标签">
+      <select data-testid="category" aria-label="分类">
+        <option value="">全部分类</option>
+        <option value="计算设备">计算设备</option>
+        <option value="办公外设">办公外设</option>
+        <option value="课程">课程</option>
+      </select>
+      <input data-testid="max-price" aria-label="最高价格" type="number" min="0" placeholder="最高价格">
+      <button data-testid="apply-filter" type="button">应用筛选</button>
+    </section>
+    <p data-testid="result-status" role="status">共 6 件商品</p>
+    <section id="products" aria-label="商品列表"></section>
+  </main>
+  <script src="/catalog.js"></script>
+  <script>
+    for (const product of window.DEMO_PRODUCTS) {
+      const card = document.createElement('article');
+      card.className = 'product';
+      card.dataset.name = product.name;
+      card.dataset.category = product.category;
+      card.dataset.price = product.price;
+      for (const [tag, text] of [['h2', product.name], ['p', product.specs], ['p', `¥${product.price}`]]) {
+        const element = document.createElement(tag);
+        element.textContent = text;
+        card.append(element);
+      }
+      const link = document.createElement('a');
+      link.href = `/detail.html?id=${product.id}`;
+      link.textContent = `查看${product.name}详情`;
+      card.append(link);
+      document.querySelector('#products').append(card);
+    }
+    const cards = [...document.querySelectorAll('.product')];
+    document.querySelector('[data-testid="apply-filter"]').addEventListener('click', () => {
+      const keyword = document.querySelector('[data-testid="keyword"]').value.trim().toLowerCase();
+      const category = document.querySelector('[data-testid="category"]').value;
+      const maxPrice = Number(document.querySelector('[data-testid="max-price"]').value || Infinity);
+      document.querySelector('[data-testid="result-status"]').textContent = '正在筛选…';
+      // 模拟异步更新，让示例展示等待状态而不是固定 sleep。
+      setTimeout(() => {
+        let visible = 0;
+        for (const card of cards) {
+          const matches = (!keyword || card.textContent.toLowerCase().includes(keyword))
+            && (!category || card.dataset.category === category)
+            && Number(card.dataset.price) <= maxPrice;
+          card.hidden = !matches;
+          visible += Number(matches);
+        }
+        document.querySelector('[data-testid="result-status"]').textContent = `找到 ${visible} 件商品`;
+      }, 300);
+    });
+  </script>
+</body>
+</html>

@@ -101,8 +101,8 @@ ai_erp_rag_assistant/
 ├─ data/knowledge/            # 本地原始知识文件与可审查中间结果
 ├─ docs/                      # 架构、接口、数据库和评估文档
 ├─ docs/database/             # 仅供人工审核执行的 SQL
-├─ evals/                     # RAG 业务评估集
-├─ scripts/                   # 文档导入和 RAG 评估脚本
+├─ evals/                     # RAG/Agent 评估集及独立工作流评估执行器
+├─ scripts/                   # 文档导入、RAG 和 Agent 评估脚本
 ├─ tests/                     # 单元与契约测试
 ├─ langgraph.json             # Studio 图注册
 ├─ .env.example               # 完整配置模板
@@ -263,11 +263,51 @@ Studio 注册三个图：
 
 所有可用参数及默认值以 [.env.example](.env.example) 为准。
 
-## 9. 详细文档
+## 9. Agent Evals：检查业务效果和改动回归
+
+Agent Evals 用固定业务对话和明确的验收标准检查助手是否按预期完成任务。修改
+Prompt、切换模型、新增工具或调整工作流后，运行同一组案例，就能发现以前正确的
+行为是否变差，并从报告中定位失败的轮次和指标。例如，请假审批应先补齐字段、生成
+预览、等待确认后再提交；旧预览确认必须被拒绝，已完成步骤重放不能重复调用提交工具。
+
+当前示例集包含 15 个场景、21 轮对话，覆盖以下检查：
+
+- 路由和能力边界：制度问题进入 RAG，客户查询进入客户助手，越界请求被阻断。
+- 工具调用：名称、顺序、次数和指定参数正确，公司和用户身份沿用服务端可信上下文。
+- 回答质量：满足关键词和禁词要求，无依据时明确拒答，引用来源和页码对应检索证据。
+- 审批流程：字段追问、预览、确认、取消、禁止写入和 Durable Execution 步骤重放正确。
+
+| 评估方式 | 检查什么 | 外部服务 |
+|---|---|---|
+| Agent Evals 默认离线模式 | 预设模型输出下，真实 LangGraph 工作流是否出现回归 | 使用模拟模型和业务数据，禁止外部连接 |
+| Agent Evals `--with-llm` | 真实模型的路由、字段提取、回答，以及后续工作流表现 | 调用配置的 LLM，ERP、数据库和 Milvus 仍使用保护桩或模拟数据 |
+| 现有 RAG 评估 | 知识检索 Recall@K、Rerank 排序、拒答和引用落地 | 按 RAG 评估脚本及配置执行，见 [RAG_EVALUATION.md](docs/RAG_EVALUATION.md) |
+
+在项目根目录执行：
+
+```powershell
+# 默认离线回归，不需要启动 API、数据库、ERP 或 Milvus
+.\.venv\Scripts\python.exe scripts/evaluate_agent.py --json
+
+# 真实模型评估：读取现有 LLM 配置，会产生模型调用费用
+.\.venv\Scripts\python.exe scripts/evaluate_agent.py --with-llm --json
+```
+
+报告输出逐轮失败项、各指标通过数和比例；全部通过退出码为 `0`，存在失败为 `1`，
+评估配置无效为 `2`，可用于本地回归或 CI 检查。业务案例维护在
+`evals/agent_cases.example.jsonl`，更详细的字段说明见
+[AGENT_EVALUATION.md](docs/AGENT_EVALUATION.md)。
+
+离线全部通过仅说明这些案例中的工作流行为符合预期，不能代表真实模型准确率或真实
+检索质量。示例数据应逐步补充为脱敏后的实际业务问题，并人工复核模型答案。当前
+执行器覆盖 LangGraph 编排，DeepAgent 父代理委派、HTTP/SSE 和真实服务恢复需单独验证。
+
+## 10. 详细文档
 
 - [完整运行和部署说明](docs/README.md)
 - [架构与安全边界](docs/ARCHITECTURE.md)
 - [前端接口文档](docs/RAG_FRONTEND_API.md)
 - [数据库设计与执行顺序](docs/database/README.md)
 - [RAG 评估说明](docs/RAG_EVALUATION.md)
+- [Agent Evals：工作流回归和模型评估](docs/AGENT_EVALUATION.md)
 - [代码逻辑详解](docs/CODE_LOGIC.md)

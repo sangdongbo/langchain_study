@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>商品详情</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 48px auto; padding: 20px; }
+    dt { font-weight: 700; margin-top: 12px; } dd { margin-left: 0; }
+  </style>
+</head>
+<body>
+  <a href="/index.html">返回商品目录</a>
+  <h1 data-testid="product-name"></h1>
+  <dl>
+    <dt>分类</dt><dd data-testid="product-category"></dd>
+    <dt>价格（人民币元）</dt><dd data-testid="product-price"></dd>
+    <dt>规格</dt><dd data-testid="product-specs"></dd>
+    <dt>使用说明</dt><dd data-testid="product-details"></dd>
+  </dl>
+  <script src="/catalog.js"></script>
+  <script>
+    const id = new URLSearchParams(location.search).get('id');
+    const product = window.DEMO_PRODUCTS.find(product => product.id === id);
+    if (!product) document.querySelector('h1').textContent = '商品不存在';
+    else {
+      for (const key of ['name', 'category', 'price', 'specs', 'details']) {
+        document.querySelector(`[data-testid="product-${key}"]`).textContent = product[key];
+      }
+      document.title = `${product.name} - 商品详情`;
+    }
+  </script>
+</body>
+</html>

@@ -708,5 +708,5 @@ pprint(inspect_agent_result(report_result, {"run_procurement_review"}), width=12
 
 准备继续研究框架内部机制时，阅读：[Deep Agents 源码研究与实验手册](../guides/deep_agents_source_research.md)。
 
-想直接在 LangGraph Studio 启动并通过 LangSmith 观察轨迹，使用：[Deep Agents 可运行示例](../../deep_agent_examples/README.md)。
+想直接在 LangGraph Studio 启动并通过 LangSmith 观察轨迹，使用：[Deep Agents 可运行示例](../deep_agent_examples/README.md)。
 

@@ -52,29 +52,29 @@ examples/
 
 `OpenSandbox` 在 `optional_opensandbox/` 中单独运行，因为目前唯一的 `langchain-opensandbox 0.1.0` 明确要求 `deepagents >=0.6.12,<0.7`，不能装进本项目的 `deepagents 0.7.x` 环境。
 
-普通 Agent、同步子 Agent、`CompiledSubAgent` 与 `AsyncSubAgent` 的创建、执行、checkpoint、interrupt 和结束语义见 [生命周期专题](examples/lifecycle/README.md)。
+普通 Agent、同步子 Agent、`CompiledSubAgent` 与 `AsyncSubAgent` 的创建、执行、checkpoint、interrupt 和结束语义见 [生命周期专题](docs/deep_agent_examples/examples/lifecycle/README.md)。
 
-固定目录 Skill、基于 `StateBackend.files` 的动态 Skill、metadata 缓存、可信路由和权限边界见 [动态 Skills 专题](examples/dynamic_skills/README.md)。
+固定目录 Skill、基于 `StateBackend.files` 的动态 Skill、metadata 缓存、可信路由和权限边界见 [动态 Skills 专题](docs/deep_agent_examples/examples/dynamic_skills/README.md)。
 
 三种子 Agent 已分成独立专题和独立代码：
 
-- [声明式 SubAgent：isolated、fork 与 State 传播](examples/declarative_subagent/README.md)
-- [CompiledSubAgent：复用现成 Agent 与 StateGraph](examples/compiled_subagent/README.md)
-- [AsyncSubAgent：远程 thread、run 与后台任务状态机](examples/async_subagent/README.md)
+- [声明式 SubAgent：isolated、fork 与 State 传播](docs/deep_agent_examples/examples/declarative_subagent/README.md)
+- [CompiledSubAgent：复用现成 Agent 与 StateGraph](docs/deep_agent_examples/examples/compiled_subagent/README.md)
+- [AsyncSubAgent：远程 thread、run 与后台任务状态机](docs/deep_agent_examples/examples/async_subagent/README.md)
 
 生产可靠性相关机制也各自保持为可独立运行的小示例：
 
-- [Checkpoint 中断与恢复](examples/durable_resume/README.md)
-- [并行采购审查](examples/parallel_review/README.md)
-- [工具失败恢复](examples/tool_failure_recovery/README.md)
-- [Skill 版本管理](examples/skill_versioning/README.md)
-- [HITL 多种审核决策](examples/hitl_decisions/README.md)
-- [Memory 与 AGENTS.md](examples/memory/README.md)
-- [Todo 任务规划](examples/planning/README.md)
-- [Runtime Context 与租户边界](examples/runtime_context/README.md)
-- [Streaming 与子 Agent 事件](examples/streaming/README.md)
-- [CompositeBackend 路由](examples/composite_backend/README.md)
-- [飞书 MCP 工具](examples/feishu_mcp/README.md)
+- [Checkpoint 中断与恢复](docs/deep_agent_examples/examples/durable_resume/README.md)
+- [并行采购审查](docs/deep_agent_examples/examples/parallel_review/README.md)
+- [工具失败恢复](docs/deep_agent_examples/examples/tool_failure_recovery/README.md)
+- [Skill 版本管理](docs/deep_agent_examples/examples/skill_versioning/README.md)
+- [HITL 多种审核决策](docs/deep_agent_examples/examples/hitl_decisions/README.md)
+- [Memory 与 AGENTS.md](docs/deep_agent_examples/examples/memory/README.md)
+- [Todo 任务规划](docs/deep_agent_examples/examples/planning/README.md)
+- [Runtime Context 与租户边界](docs/deep_agent_examples/examples/runtime_context/README.md)
+- [Streaming 与子 Agent 事件](docs/deep_agent_examples/examples/streaming/README.md)
+- [CompositeBackend 路由](docs/deep_agent_examples/examples/composite_backend/README.md)
+- [飞书 MCP 工具](docs/deep_agent_examples/examples/feishu_mcp/README.md)
 
 ## 1.1 与官方 Deep Agents 能力对照
 
@@ -128,7 +128,7 @@ uv sync --extra mcp
 ```
 
 普通专题不需要这个可选依赖；飞书 MCP 的 URL、请求头和只读工具白名单见
-[飞书 MCP 工具](examples/feishu_mcp/README.md)。
+[飞书 MCP 工具](docs/deep_agent_examples/examples/feishu_mcp/README.md)。
 
 如果终端原来显示 `(ai-erp-rag-assistant)` 等其他项目环境，上面的
 `deactivate` 会先退出旧环境，再激活当前项目的 `deep-agent-examples` 环境，
@@ -203,7 +203,7 @@ uv run langgraph dev --host 127.0.0.1 --port 2024
 
 真实执行顺序是：`files` 进入 State → `SkillsMiddleware.before_agent` 扫描 frontmatter → metadata 进入 system prompt → 模型调用 `read_file` 读取完整正文 → 按 Skill 调用业务工具。固定目录 Skill 和 State Skill 都使用这种 progressive disclosure，不会默认把全部正文塞进 prompt。
 
-同一 checkpointed thread 会缓存 `skills_metadata`，即使首次结果为空也不会自动重扫。更换 Skill 集合时新建 thread。Skill 只是说明书；`allowed-tools` 也不是强制 ACL，实际权限必须由工具、Middleware、HITL 和 Sandbox 实施。完整机制与排错表见 [动态 Skills 专题](examples/dynamic_skills/README.md)。
+同一 checkpointed thread 会缓存 `skills_metadata`，即使首次结果为空也不会自动重扫。更换 Skill 集合时新建 thread。Skill 只是说明书；`allowed-tools` 也不是强制 ACL，实际权限必须由工具、Middleware、HITL 和 Sandbox 实施。完整机制与排错表见 [动态 Skills 专题](docs/deep_agent_examples/examples/dynamic_skills/README.md)。
 
 对应的可执行 Python 文件：
 

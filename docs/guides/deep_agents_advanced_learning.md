@@ -256,9 +256,9 @@ agent = create_deep_agent(
 
 动态 Skill 的 State 只应该决定“本轮暴露哪些技能”，不要让模型自行伪造身份字段来获得更高权限。技能选择可动态，授权判断必须来自可信 Context。
 
-还要区分“文件来源动态”和“每轮自动换能力”：`StateBackend` 允许应用为每个新 thread 注入不同的 Skill 文件，但内置 `SkillsMiddleware` 会在首次扫描后缓存 `skills_metadata`。固定目录 Skill 与 State Skill 都只把 metadata 索引放进 system prompt，完整正文仍由模型按需 `read_file`；它们都不会自动挂载工具或实施权限。完整执行链路、缓存失效和可运行示例见：[基于 State 的动态 Skills](../../deep_agent_examples/examples/dynamic_skills/README.md)。
+还要区分“文件来源动态”和“每轮自动换能力”：`StateBackend` 允许应用为每个新 thread 注入不同的 Skill 文件，但内置 `SkillsMiddleware` 会在首次扫描后缓存 `skills_metadata`。固定目录 Skill 与 State Skill 都只把 metadata 索引放进 system prompt，完整正文仍由模型按需 `read_file`；它们都不会自动挂载工具或实施权限。完整执行链路、缓存失效和可运行示例见：[基于 State 的动态 Skills](../deep_agent_examples/examples/dynamic_skills/README.md)。
 
-三种子 Agent 不要只用一张对比表学习，分别运行：[声明式 SubAgent](../../deep_agent_examples/examples/declarative_subagent/README.md)、[CompiledSubAgent](../../deep_agent_examples/examples/compiled_subagent/README.md) 和 [AsyncSubAgent](../../deep_agent_examples/examples/async_subagent/README.md)。三份专题各自包含真实 LangSmith 示例与无 Key 确定性测试。
+三种子 Agent 不要只用一张对比表学习，分别运行：[声明式 SubAgent](../deep_agent_examples/examples/declarative_subagent/README.md)、[CompiledSubAgent](../deep_agent_examples/examples/compiled_subagent/README.md) 和 [AsyncSubAgent](../deep_agent_examples/examples/async_subagent/README.md)。三份专题各自包含真实 LangSmith 示例与无 Key 确定性测试。
 
 ## 7. Structured Output 与模型兼容性
 
@@ -507,7 +507,7 @@ result = agent.invoke(
 7. [Streaming 与评测](../examples/deep-agents/deep_agent3_streaming_and_evaluation.ipynb)
 8. [Harness Engineering：从模型能力到可靠 Agent 系统](./harness_engineering.md)
 9. [Deep Agents 源码研究与实验手册](./deep_agents_source_research.md)
-10. [Deep Agents 可运行示例](../../deep_agent_examples/README.md)
+10. [Deep Agents 可运行示例](../deep_agent_examples/README.md)
 11. 回到本文完成毕业项目。
 
 外部文档以当前安装版本对应的官方文档为准：

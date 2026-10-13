@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>演示登录</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 440px; margin: 48px auto; padding: 20px; }
+    form { display: grid; gap: 12px; } input, button { min-height: 42px; padding: 0 10px; font: inherit; }
+    button { background: #166534; color: white; border: 0; border-radius: 4px; }
+    #error { color: #b42318; }
+  </style>
+</head>
+<body>
+  <a href="/index.html">返回商品目录</a>
+  <h1>演示登录</h1>
+  <p>账号 <code>learner</code>，密码 <code>demo123</code>。</p>
+  <form data-testid="login-form">
+    <label>账号 <input data-testid="username" autocomplete="username"></label>
+    <label>密码 <input data-testid="password" type="password" autocomplete="current-password"></label>
+    <button data-testid="login" type="submit">登录</button>
+  </form>
+  <p id="error" role="alert"></p>
+  <script>
+    document.querySelector('form').addEventListener('submit', event => {
+      event.preventDefault();
+      const username = document.querySelector('[data-testid="username"]').value;
+      const password = document.querySelector('[data-testid="password"]').value;
+      if (username === 'learner' && password === 'demo123') {
+        localStorage.setItem('browser-agent-demo-user', username);
+        location.href = '/dashboard.html';
+      } else {
+        document.querySelector('#error').textContent = '账号或密码错误';
+      }
+    });
+  </script>
+</body>
+</html>

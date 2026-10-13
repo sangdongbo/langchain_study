@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>演示控制台</title>
+  <style>body { font-family: system-ui, sans-serif; max-width: 720px; margin: 48px auto; padding: 20px; }</style>
+</head>
+<body>
+  <h1>演示控制台</h1>
+  <p data-testid="welcome"></p>
+  <a href="/index.html">查看商品目录</a>
+  <script>
+    const user = localStorage.getItem('browser-agent-demo-user');
+    if (!user) location.replace('/login.html');
+    else document.querySelector('[data-testid="welcome"]').textContent = `欢迎，${user}`;
+  </script>
+</body>
+</html>

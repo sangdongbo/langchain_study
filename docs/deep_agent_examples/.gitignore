@@ -1,4 +1,4 @@
-.env
+docs/deep_agent_examples/.env
 .venv/
 .langgraph_api/
 __pycache__/

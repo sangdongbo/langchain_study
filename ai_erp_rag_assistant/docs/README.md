@@ -68,6 +68,13 @@ RAG 不负责实时审批状态，ERP Tool 不替代制度知识，真实写入�
 Recall@K、Rerank Top-1、无答案拒答率和引用落地准确率，不写数据库或修改 Milvus。
 完整字段说明和运行方式见 [RAG_EVALUATION.md](RAG_EVALUATION.md)。
 
+## Agent Evals
+
+执行 `uv run python scripts/evaluate_agent.py` 可离线评估真实 LangGraph 的路由、工具参数、
+身份隔离、引用、审批确认和步骤重放，默认不连接数据库、ERP、Milvus 或模型服务。
+显式增加 `--with-llm` 可评估真实模型，其他业务边界仍使用模拟数据。失败会返回非零
+退出码；案例格式、指标和使用限制见 [AGENT_EVALUATION.md](AGENT_EVALUATION.md)。
+
 ## 启动
 
 ### API 目录结构

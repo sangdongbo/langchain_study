@@ -21,7 +21,7 @@ PUBLIC_SERVER_ERROR = "服务暂时不可用，请稍后重试"
 
 
 app = FastAPI(
-    title="AI ERP RAG Assistant",
+    title="ERP的AI助手",
     description="Enterprise RAG, ERP tools and LangGraph approval workflows.",
 )
 # 统一处理浏览器跨域预检；业务路由不需要重复声明 OPTIONS。
