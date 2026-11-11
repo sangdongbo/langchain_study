@@ -16,6 +16,7 @@
 | [03 会话](examples/03_session_state/README.md) | 登录后关闭旧上下文，新上下文直接进入控制台 | `storage_state`、localStorage、上下文隔离 |
 | [04 Agent](examples/04_browser_use_agent/README.md) | 给模型一个筛选目标，由它选择网页动作 | 观察 → 决策 → 动作 → 再观察 |
 | [05 研究](examples/05_structured_research/README.md) | 跨商品详情页读取信息，输出并验收 JSON | 输出 schema、来源、事实与轨迹校验 |
+| [真实 ERP 案例](real_site_examples/README.md) | 单入口登录接续、Agent 逐步搜索/点击/核对、与固定脚本对照 | 验证码人机接续、受限网页动作、运行指标与模型边界 |
 
 从 [examples/README.md](examples/README.md) 按 01–05 顺序运行。页面使用同一份固定商品
 数据，无需准备真实网站、账号或数据库。脚本自动在 `127.0.0.1` 的随机端口启动静态
@@ -43,7 +44,8 @@ uv run python examples/03_session_state/run.py --pause
 
 ## 配置模型并运行 Agent
 
-仅 04–05 的 `run.py` 会调用真实模型。首次配置时复制模板，已有 `.env` 时直接编辑：
+本地课程仅 04–05 的 `run.py` 会调用真实模型；真实站 `agent.py` 需另行确认业务数据
+可发送到模型服务，详见[真实 ERP 案例](real_site_examples/README.md)。首次配置时复制模板，已有 `.env` 时直接编辑：
 
 ```powershell
 Copy-Item .env.example .env
@@ -77,7 +79,7 @@ uv run python examples/05_structured_research/run.py --headless --max-steps 20
 的网页操作与 JSON 输出能力，具体效果需要用自己的模型实测。
 
 browser-use 负责启动 Playwright 下载的 Chromium 并通过 CDP 控制它；它没有调用第 02
-节的固定脚本。浏览器导航限定在 `127.0.0.1`，Agent 限制最大步骤和连续失败次数。
+节的固定脚本。本地 01–05 的浏览器导航限定在 `127.0.0.1`，Agent 限制最大步骤和连续失败次数。
 模型服务仍需网络连接，且按服务商规则计费。
 
 ## 结果与回看

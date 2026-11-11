@@ -22,7 +22,8 @@ class TestIdParser(HTMLParser):
 
 def main() -> None:
     # ast.parse 只检查语法，不导入示例，也不启动浏览器或请求模型。
-    for directory in (PROJECT_DIR / "browser_examples", PROJECT_DIR / "examples"):
+    for directory in (PROJECT_DIR / "browser_examples", PROJECT_DIR / "examples",
+                      PROJECT_DIR / "real_site_examples"):
         for path in directory.rglob("*.py"):
             ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     # 检查 02 使用的定位标记，提前发现页面与示例代码之间的命名不一致。
@@ -38,7 +39,11 @@ def main() -> None:
         assert len(matches) == 1
         for filename in ("README.md", "run.py", "test.py"):
             assert (matches[0] / filename).is_file()
-    print("PASS：5 个专题的 Python 语法解析通过，示例页面和入口文件完整")
+    # 真实站示例与本地商城分开存放，共享环境但不共享站点权限。
+    for filename in ("README.md", "auth.py", "login.py", "erp.py", "run.py", "agent.py", "reporting.py",
+                     "compare.py", "test.py", "fixture.html", "login_fixture.html"):
+        assert (PROJECT_DIR / "real_site_examples" / filename).is_file()
+    print("PASS：5 个本地专题与真实站示例的 Python 语法、教学入口文件完整")
 
 
 if __name__ == "__main__":

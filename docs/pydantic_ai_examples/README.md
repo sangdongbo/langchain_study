@@ -7,6 +7,110 @@
 业务数据使用内存字典，发布使用内存列表；没有数据库访问、文件删除、采购 API 或后台
 服务。真实演示只向配置的模型接口发送请求，离线检查使用官方测试模型。
 
+## 0. 从零认识 Pydantic 与 PydanticAI
+
+不需要先学 Deep Agents。只要能读懂 Python 的函数、类、字典和基本类型，就可以按
+01 → 08 学习；`async`、装饰器和类型参数会在第一次用到时解释。
+
+### 两个名字分别是什么
+
+**Pydantic 是 Python 数据校验库。** 你声明数据有哪些字段、字段是什么类型、有哪些
+约束，它负责把输入变成可用的 Python 对象，或者指出哪里不符合要求。例如采购数量
+必须是正整数，`4` 合法，`0` 就应该被拒绝。即使完全不使用 AI，也能使用 Pydantic。
+
+**PydanticAI 是构建 AI Agent 的 Python 框架。** 它连接模型服务，组织指令和消息，
+处理模型提出的工具调用，并能借助 Pydantic 校验模型返回的结构化结果。它提供这些
+通用流程，让你集中编写业务工具和规则。本套教程主要学习 PydanticAI。
+
+框架本身不提供一个训练好的大模型。示例中生成回答的是配置的 DeepSeek 等模型；
+切换 `LLM_MODEL` 是换模型配置，安装或升级 PydanticAI 是换组织这些调用的程序库。
+
+| 名称 | 在本项目中的作用 | 代码中从哪里认出来 |
+| --- | --- | --- |
+| Pydantic | 检查字段类型和约束 | `from pydantic import BaseModel, Field` |
+| PydanticAI | 组织 Agent 运行、工具调用和结果校验 | `from pydantic_ai import Agent` |
+| 大语言模型（LLM） | 理解文字、生成回答或工具调用请求 | `.env` 中的模型名称及服务地址 |
+| `Model` | PydanticAI 对模型调用接口的抽象，可换成真实或测试模型 | `from pydantic_ai.models import Model` |
+| `BaseModel` | Pydantic 定义数据结构的基类，与上面的 LLM 接口用途不同 | 第 02 课的 `class Purchase(BaseModel)` |
+| `pydantic_examples` | 本教程自己的共享配置包 | `from pydantic_examples.config import build_model` |
+
+依赖文件中安装的是 `pydantic-ai-slim[openai]`，Python 中使用 `import pydantic_ai`。
+安装包名和导入名不完全相同。这里的 `openai` 依赖支持兼容的 Chat Completions 接口，
+也用于本项目中的 DeepSeek 配置，不要求一定使用 OpenAI 模型。
+
+### 先看一个不需要 AI 的数据校验例子
+
+以下代码可以在已配置好的示例解释器的 Python Console 中单独执行，无需 Key：
+
+```python
+from pydantic import BaseModel, Field, ValidationError
+
+
+class PurchaseInput(BaseModel):
+    # 数量规则写在数据定义中，后面每次创建对象时都会校验。
+    quantity: int = Field(gt=0, description="采购数量")
+
+
+purchase = PurchaseInput(quantity=4)
+print(purchase.quantity)  # 输出 4；程序可以直接使用这个整数。
+
+try:
+    PurchaseInput(quantity=0)
+except ValidationError:
+    print("数量必须大于 0")  # 校验失败时不会得到一个合法的采购对象。
+```
+
+`quantity: int` 声明字段类型，`Field(gt=0)` 表示值必须大于 0。普通 Python 函数的
+类型注解通常不自动检查传入值；继承 `BaseModel` 才让这里的对象构造执行 Pydantic
+校验。Pydantic 默认还会尝试部分类型转换，例如把数字字符串 `"4"` 变成整数；需要
+严格拒绝转换时要另设严格模式，本教程暂不展开。
+
+这类字段定义也能生成 **schema（结构说明）**，描述字段名称、类型、是否必填和约束。
+第 02 课把这份结构交给模型，引导它填写采购信息；模型填写后，程序再实际校验。
+`description` 帮助模型理解含义，`gt=0` 才是可执行的数值约束。
+
+### Agent 比直接问模型多了哪些工作
+
+这里的 **Agent** 是一份可重复使用的助手配置，以及执行这份配置的入口。它包含使用
+哪个模型、遵守什么指令、可以调用哪些工具、最终应该返回什么类型。调用
+`agent.run_sync(...)` 才开始一次任务；创建 `Agent(...)` 尚未请求模型。
+
+以第 03 课为例，一次任务会经历：
+
+1. 你的程序把用户问题、指令和可用工具说明交给 Agent。
+2. Agent 请求模型，模型提出调用 `calculate_total` 并给出数量、单价。
+3. 框架校验参数，在本地执行你注册的 Python 函数，把计算结果传回模型。
+4. 模型再提出预算查询，框架执行预算工具并返回结果。
+5. 模型生成汇总，Agent 把最终结果放进 `result.output`。
+
+工具是你提供的函数；模型只提出函数名和参数，不会因此获得执行任意 Python 代码的
+能力。工具的权限检查、金额计算和实际副作用仍由 Python 代码负责。指令能引导模型，
+需要强制执行的业务规则还要写进工具或校验函数。
+
+### 阅读后续代码时先认识这些词
+
+| 词 | 直观含义 | 第一次重点使用 |
+| --- | --- | --- |
+| `instructions` | 助手长期遵循的行为要求，例如“用中文回答” | 01 |
+| prompt | 这一次用户提出的问题，即 `run_sync(...)` 的输入 | 01 |
+| run / request | 一次任务 / 一次向模型发出的请求；一次任务可能包含多个请求 | 01、03 |
+| `output_type` | 最终结果应是什么类型，例如 `str` 或 `Purchase` | 02 |
+| tool | 模型可以申请调用的 Python 函数 | 03 |
+| `deps` | 程序为本次运行提供的业务数据或服务，例如租户预算 | 03 |
+| validator / retry | 接受结果前检查规则 / 把可修正错误反馈给模型再尝试 | 04 |
+| `message_history` | 提供给下一轮的历史消息，包含用户、模型和工具片段 | 05 |
+| token / usage | 模型处理文本的计量单位 / 本次运行累计的用量 | 01、07 |
+
+Token 不是固定的“一个汉字”或“一个单词”；同一句话在不同模型下可能有不同计数。
+`usage.requests` 统计请求次数；离线测试模型也会增加这个计数，不意味着访问了网络。
+
+### 从哪里开始看
+
+先读[第 01 课](examples/01_basic_agent/README.md)，运行它的 `test.py`，再阅读同目录
+`run.py`。离线测试替换的是模型的响应，Agent 和工具仍执行实际 Python 代码；这样
+可以先看懂流程，再观察真实模型可能变化的选择。安装与运行步骤继续看下面第 1 节。
+每课都有“先理解什么、代码怎么走、运行结果怎么看”，完整路线见[专题索引](examples/README.md)。
+
 ## 1. 安装并先跑离线演示
 
 ```powershell
@@ -34,21 +138,55 @@ Agents 或仓库主项目的环境。使用 `pydantic-ai-slim[openai]`，只安�
 解释器需要选择本目录的 `.venv/Scripts/python.exe`。把目录标为 Sources Root 只让 IDE
 找到 `pydantic_examples` 源码，不会安装 PydanticAI，也不会切换 Python 解释器。
 
-从 `LearnOne` 打开多个独立示例时，每个模块需要绑定各自的环境。当前机器已为本套
-配置独立的 `pydantic_ai_examples` 模块及以下运行入口（本地 `.idea` 不提交 Git）：
+从 `LearnOne` 打开多个独立示例时，运行入口需要选择对应示例的环境。当前机器的以下
+运行入口已在配置文件中指定本示例解释器的名称和绝对路径，不继承 ERP 项目的环境
+（本地 `.idea` 不提交 Git）：
 
 - `PydanticAI - Offline checks`：先验证全部离线专题，无需 Key。
 - `PydanticAI - 01 Basic`：运行第一课真实模型演示。
 
-修改 IDE 配置后重新载入项目并等待索引，选择以上入口运行。其他课可复制基础入口，
-只改 Script path，保持解释器与 Working directory 指向本示例项目。
-新机器也可以直接在新窗口打开本目录，添加 Existing environment 解释器：
+外部修改的解释器表和运行配置不保证被已打开的 IDE 同时载入。保存当前工作，完全退出
+并重新启动 PyCharm，再选择 `PydanticAI - Offline checks`；看到 `ALL PASS` 才能确认
+IDE 的运行入口生效。命令行检查通过只证明环境可用，不代表 IDE 已载入新配置。
+
+如果仍显示 `Cannot find Python interpreter for this run configuration`，在
+Settings → Python → Interpreter 中选择 Add Interpreter → Add Local Interpreter，
+使用 Existing environment 添加下面的 Python。然后在 Run → Edit Configurations
+中给上述两个入口明确选择该解释器，不选择项目默认解释器。Working directory 使用
+`D:\PythonProject\LearnOne\docs\pydantic_ai_examples`。
+其他课可复制基础入口，只改 Script path。也可以在新窗口直接打开本示例目录：
 
 ```text
 D:\PythonProject\LearnOne\docs\pydantic_ai_examples\.venv\Scripts\python.exe
 ```
 
 使用其他项目的 `.venv` 会导致 `pydantic_ai` 标红或 `ModuleNotFoundError`。
+
+### PyCharm Terminal 仍显示 ERP 环境时
+
+运行配置中的解释器与已打开终端的环境是两回事。`cd` 到本示例不会切换 Python；
+终端仍显示 `(ai-erp-rag-assistant)` 时，直接执行 `python run.py` 会使用 ERP 的环境。
+下面的命令明确指定示例 Python，不依赖当前目录或终端已激活的环境：
+
+```powershell
+& 'D:\PythonProject\LearnOne\docs\pydantic_ai_examples\.venv\Scripts\python.exe' -X utf8 'D:\PythonProject\LearnOne\docs\pydantic_ai_examples\scripts_smoke.py'
+```
+
+离线检查通过后，运行第一课真实模型演示：
+
+```powershell
+& 'D:\PythonProject\LearnOne\docs\pydantic_ai_examples\.venv\Scripts\python.exe' -X utf8 'D:\PythonProject\LearnOne\docs\pydantic_ai_examples\examples\01_basic_agent\run.py'
+```
+
+如果希望使用简短的 `python` 命令，在当前终端切换环境后再运行：
+
+```powershell
+if (Get-Command deactivate -ErrorAction SilentlyContinue) { deactivate }
+& 'D:\PythonProject\LearnOne\docs\pydantic_ai_examples\.venv\Scripts\Activate.ps1'
+python -c "import sys; print(sys.executable)"
+```
+
+输出应是上面的示例解释器路径。这只切换当前终端；新终端可能再次自动激活项目默认环境。
 
 ## 2. 使用已经存在的 .env
 

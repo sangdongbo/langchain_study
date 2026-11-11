@@ -4,6 +4,27 @@
 方便按课独立阅读。安装项目后，各课通过 `from pydantic_examples.config import build_model`
 复用同一套配置。
 
+## 初学时怎样理解这个包
+
+`pydantic_examples` 是本教程自己写的包，不是 Pydantic 或 PydanticAI 的官方模块。
+Python 包可以理解为放在一起、供其他文件导入的一组代码；本项目把重复的模型配置
+放在这里，各课就不用再写一遍服务地址和环境变量加载逻辑。
+
+`build_model()` 返回的是 PydanticAI 的模型接口对象，不是最终回答，不是 Agent，
+也不是 Pydantic 的 `BaseModel` 数据对象。以第一课为例，调用关系是：
+
+1. `build_model()`：读取配置，创建连接模型服务的客户端。
+2. `build_agent(model)`：把模型接口和助手指令组成 Agent。
+3. `agent.run_sync(prompt)`：真正开始任务并发出模型请求。
+4. `result.output`：取得任务的最终输出。
+
+`OpenAIProvider` 处理访问地址、认证和客户端；`OpenAIChatModel` 使用兼容的
+Chat Completions 模型接口。本例也通过它调用 DeepSeek，类名不代表一定使用
+OpenAI 模型。`LLM_*` 等变量名是本教程选择的配置约定，不是框架要求的唯一写法。
+
+前两课先把 `build_model()` 理解为“取得配置好的模型接口”即可。看懂 Agent 的运行
+方式后，再阅读下面的配置优先级，不需要一开始就掌握所有配置实现。
+
 ## 文件与职责
 
 | 文件 | 职责 |

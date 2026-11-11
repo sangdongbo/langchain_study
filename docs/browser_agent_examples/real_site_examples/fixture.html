@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>虚构订单测试页</title>
+<!-- 编号容器负责点击；子文本不独立接收指针，防止旧版只点 span 的定位也能通过。 -->
+<style>.order_num span { pointer-events: none; }</style>
+<body>
+<!-- 仅模拟已观察到的表格结构，数据全部虚构，不连接真实 ERP 或数据库。 -->
+<!-- 定位标记刻意与 OrderReader 一致，让同一份生产适配器无需改写就能接受离线验证。 -->
+<!-- 复现真实站保留其他页签搜索框的情况，且故意放在可用输入框前面。 -->
+<div hidden><input id="inactive-other-search" placeholder="请输入您想搜索的内容" value="inactive-other"></div>
+<div id="pane-order">
+  <!-- 同一区域内也放一个隐藏副本，要求定位同时检查业务区域与可见性。 -->
+  <div hidden><input id="inactive-order-search" placeholder="请输入您想搜索的内容" value="inactive-order"></div>
+  <input id="order-keyword" placeholder="请输入您想搜索的内容">
+  <!-- 写入/导出诱饵只更新本地计数；测试要求这些入口从未被点击。 -->
+  <button onclick="forbiddenAction()">新建订单</button>
+  <button onclick="forbiddenAction()">订单导出</button>
+  <div id="tables"></div>
+  <span class="el-pagination__total">共 1 条</span>
+</div>
+<section id="detail" hidden>
+  <!-- 列表与详情通过 hidden 切换可见性；标题和金额行用于验证读到的是实际打开的订单。 -->
+  <h2></h2><div id="pane-detail"><p></p></div>
+  <button onclick="forbiddenAction()">新建回款</button>
+  <button onclick="forbiddenAction()">新建开票</button>
+</section>
+<output id="write-attempts">0</output>
+<script>
+// 所有危险操作都只增加计数，不做业务写入；测试最终检查计数仍为零。
+function forbiddenAction() {
+  const counter = document.querySelector('#write-attempts');
+  counter.textContent = String(Number(counter.textContent) + 1);
+}
+// 金额特意包含小数，用于发现浮点累加和重名列覆盖问题。
+// 最大待回款放第二条，避免“永远点第一条”也能通过测试。
+const orders = [
+  {number: 'DD-DEMO-001', total: '200.20', paid: '100.10', due: '100.10'},
+  {number: 'DD-DEMO-002', total: '1,000.10', paid: '0.00', due: '1,000.10'},
+];
+const titles = ['关联客户', '订单总金额(元)', '累计回款金额(元)', '待回款金额(元)', '发货状态', '订单总金额(元)'];
+
+// items 是本次虚构搜索匹配到的订单，render 同步更新主表、固定列和匹配总数。
+function render(items) {
+  // 主表和固定列共享 rowid；固定列故意倒序，验证不是按行下标盲拼。
+  const main = items.map((item, index) => `<tr rowid="r${index}">${
+    ['虚构客户', item.total, item.paid, item.due, '无需发货', item.total].map(
+      (value, col) => `<td colid="c${col}">${value}</td>`).join('')}</tr>`).join('');
+  // 反转的是固定列展示顺序，不是 rowid 对应关系，用于发现按行序号盲拼的错误。
+  const fixed = items.map((item, index) => ({item, index})).reverse().map(({item, index}) =>
+    `<tr rowid="r${index}"><td colid="number"><div class="order_num"><span>${item.number}</span></div></td></tr>`).join('');
+  // c0/c1 等是稳定列 ID；两个“订单总金额”拥有不同 colid，生产解析器必须检查值相同。
+  document.querySelector('#tables').innerHTML = `
+    <div class="vxe-table--header-wrapper"><table><tr>${titles.map(
+      (title, i) => `<th colid="c${i}">${title}</th>`).join('')}</tr></table></div>
+    <div class="vxe-table--body-wrapper"><table>${main}</table></div>
+    <div class="fixed-left--wrapper">
+      <div class="vxe-table--header-wrapper"><table><tr><th colid="number">订单编号</th></tr></table></div>
+      <div class="vxe-table--body-wrapper"><table>${fixed}</table></div>
+    </div>`;
+  document.querySelector('.el-pagination__total').textContent = `共 ${items.length} 条`;
+  for (const element of document.querySelectorAll('.order_num')) {
+    // 重绘会替换 DOM，因此每次 render 后重新给新生成的订单编号绑定详情入口。
+    element.onclick = () => {
+      const item = items.find(item => item.number === element.innerText);
+      // synthetic 不是数据库 ID；测试只模拟真实路由形状，不依赖任何真实业务记录。
+      location.hash = '/order_detail?order_id=synthetic&name=' + item.number;
+      document.querySelector('#pane-order').hidden = true;
+      document.querySelector('#detail').hidden = false;
+      document.querySelector('h2').textContent = item.number;
+      // 模拟详情异步加载，检查脚本是否等待真实金额行。
+      setTimeout(() => document.querySelector('#pane-detail p').textContent =
+        '订单总金额(元)：' + item.total, 150);
+    };
+  }
+}
+
+// 初始表格故意展示旧订单；测试要求搜索完成后再读取，不能把初始页面当本轮结果。
+render([{number: 'DD-STALE-000', total: '9.00', paid: '0.00', due: '9.00'}]);
+// 模拟 SPA 路由返回列表；goto 仅改变 hash 时不会重新加载 HTML。
+window.addEventListener('hashchange', () => {
+  if (location.hash !== '#/order') return;
+  document.querySelector('#pane-order').hidden = false;
+  document.querySelector('#detail').hidden = true;
+  document.querySelector('#pane-detail p').textContent = '';
+});
+document.querySelector('#order-keyword').onkeydown = event => {
+  // 与生产入口一致：只有按 Enter 才提交搜索，fill 本身不会改变结果。
+  if (event.key !== 'Enter') return;
+  const keyword = event.target.value;
+  // 请求由浏览器 UI 发起，由 test.py 在本地拦截；不需要任何后端或数据库。
+  setTimeout(async () => {
+    // encodeURIComponent 模拟关键词编码；请求由 test.py fulfil，响应正文不提供订单数据。
+    const response = await fetch('/search?q=' + encodeURIComponent(keyword));
+    if (response.ok) render(orders.filter(item => item.number.includes(keyword)));
+  }, 100);
+};
+</script>
+</body>
+</html>

@@ -1,16 +1,50 @@
 # 05 · 多轮对话与消息历史
 
+## 为什么复用 Agent 还需要传历史
+
 第一轮记录数量与单价，第二轮只说「数量改成 6 台，单价不变」。模型需要看到第一轮
 才能知道原来的单价。PydanticAI 支持显式 `message_history`，本课展示这种基础方式。
+
+Agent 对象保存的是模型、指令和工具等配置。本例第二次调用 `run_sync()` 时，上一轮
+对话不会因为“用了同一个 Agent”就自动加入请求，必须由程序传入历史。
+这里的“记住”表示下一轮请求仍提供这些消息，不表示重新训练模型。
+
+## 消息历史里装的是什么
+
+历史由框架消息对象组成，内容可以包含用户输入、模型回答、工具请求及工具返回。
+一个消息还可能包含多个片段，所以“消息条数”“用户说了几句话”和“模型请求次数”
+不是同一个计量。保留消息对象的类型，才能让框架识别谁说了什么、哪个工具返回了结果。
+
+| API | 返回什么 | 本课用途 |
+| --- | --- | --- |
+| `all_messages()` | 包含传入历史的完整消息列表 | 在内存中直接传给下一轮 |
+| `all_messages_json()` | 完整历史的 JSON bytes | 展示历史可以序列化 |
+| `ModelMessagesTypeAdapter.validate_json(...)` | 从 JSON 恢复出的消息对象列表 | 给下一轮 `message_history` 使用 |
+| `new_messages()` | 本次运行新产生的消息列表 | 区分第二轮新增内容与完整会话 |
+
+“序列化”就是把对象转换成便于传输或保存的格式；本课是 JSON。“恢复”是按框架
+定义的类型把 JSON 读回对象，不能只用普通字符串代替整段历史。这里生成的是 bytes，
+尚未写入磁盘，程序退出后不会自动保留。
+
+## 对照 run.py 看执行过程
+
+1. 第一轮发送完整采购信息，模型确认 `4` 台、单价 `68000` 元。
+2. `first.all_messages_json()` 编码第一轮完整历史。
+3. `ModelMessagesTypeAdapter.validate_json(...)` 恢复历史对象。
+4. 第二轮把新问题与 `message_history=history` 一起交给 Agent。
+5. 模型看到原单价和新数量，回答 `6 × 68000 = 408000` 元。
+
+代码特意做了一次 JSON 往返，是为了展示恢复方式。如果仅在同一个进程立即继续聊天，
+也可以直接传 `message_history=first.all_messages()`，不必先转换成 JSON。
+
+## 怎样运行
 
 ```powershell
 uv run python examples/05_message_history/test.py
 uv run python examples/05_message_history/run.py
 ```
 
-`first.all_messages()` 返回当前会话完整历史；`first.all_messages_json()` 把历史编码
-为 bytes；`ModelMessagesTypeAdapter.validate_json(...)` 恢复为框架消息对象。
-第二轮使用 `agent.run_sync(..., message_history=history)`，不把历史拼成一个长字符串。
+## 运行结果怎么看
 
 第二轮结果应包含 `6 × 68000 = 408000 元`。打印的 `new_messages()` 只属于第二轮，
 `all_messages()` 包含传入的第一轮历史。测试另外在同一个 Agent 上不传历史发起运行，
@@ -23,4 +57,15 @@ JSON 往返仅在内存中进行。本课展示的是对话上下文，不包含
 总价在这课由模型回答，用于说明上下文传递；需要程序保证金额正确时，结合第 03 课的
 计算工具。离线模型只检查传入消息，因此能够明确区分「有历史」与「无历史」。
 
+`test.py` 的控制场景不传第一轮历史，预设模型会回答“缺少单价信息”，最后显示
+`05 PASS`。这是验证历史是否真的进入模型输入，不是验证某个真实模型的长期记忆。
+
+## 会话边界要注意什么
+
+`deps` 是本次任务的业务依赖，`message_history` 是提供给模型的对话记录，二者不能
+互相替代。历史也不会自动保存租户身份、内存列表或请求预算，需要程序分别管理。
+历史越长，发送给模型的上下文通常越多，也可能增加输入 token 用量；本课暂不做摘要
+或截断。两轮没有共用 `RunUsage`，各自的 `request_limit=3` 分别限制各自运行。
+
+上一课：[04 · 校验与重试](../04_validation_retry/README.md)。
 下一步：[06 · 流式输出](../06_streaming/README.md)。

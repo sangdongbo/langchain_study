@@ -26,7 +26,7 @@ class PurchaseDeps:
 
 
 def build_agent(model: Model) -> Agent[PurchaseDeps, str]:
-    # deps_type 声明依赖类型，实际值由 run_sync 的 deps 参数传入。
+    # deps_type 声明依赖类型，实际值w由 run_sync 的 deps 参数传入。
     agent = Agent(
         model, deps_type=PurchaseDeps,
         instructions="必须先调用 calculate_total，再用所得金额调用 check_budget。中文报告金额与缺口。",
